@@ -17,6 +17,7 @@ class BaytulmalReportScreen extends StatefulWidget {
 class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
   bool _isSaving = false;
   bool _isExporting = false;
+  bool _isLocked = true;
   BaytulmalReportEntry? _currentEntry;
 
   // Branch info
@@ -103,6 +104,7 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
       final entry = await ReportStorageService.getBaytulmalEntry(widget.year, widget.month);
       if (entry != null && mounted) {
         setState(() {
+          _isLocked = true;
           _currentEntry = entry;
           _branchCtrl.text = entry.branchName;
           _execMemberCountCtrl.text = entry.executiveMemberAyanat;
@@ -129,6 +131,11 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
           _appayanTakaCtrl.text = entry.appayanTaka;
           _sovaTakaCtrl.text = entry.sovaTaka;
           _remarksCtrl.text = entry.remarks;
+        });
+      } else {
+        setState(() {
+          _isLocked = false;
+          _currentEntry = null;
         });
       }
     } catch (_) {}
@@ -171,7 +178,10 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
     final entry = _buildEntry();
     await ReportStorageService.saveBaytulmalEntry(entry);
     await _loadCurrentReport();
-    setState(() => _isSaving = false);
+    setState(() {
+      _isSaving = false;
+      _isLocked = true;
+    });
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -212,10 +222,17 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
       appBar: AppBar(
         title: const Text('শাখা বায়তুলমাল রিপোর্ট',
             style: TextStyle(color: _textLight, fontWeight: FontWeight.bold, fontSize: 17)),
+        centerTitle: true,
         backgroundColor: _cardBg,
         iconTheme: const IconThemeData(color: _textLight),
         elevation: 0,
         actions: [
+          if (_currentEntry != null && _isLocked)
+            TextButton.icon(
+              icon: const Icon(Icons.edit, color: _accentGreen, size: 16),
+              label: const Text('এডিট করুন', style: TextStyle(color: _accentGreen, fontSize: 13, fontWeight: FontWeight.bold)),
+              onPressed: () => setState(() => _isLocked = false),
+            ),
           IconButton(
             icon: _isExporting
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
@@ -280,23 +297,25 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
                 const SizedBox(height: 24),
 
                 // Save button
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton.icon(
-                    onPressed: _isSaving ? null : _save,
-                    icon: _isSaving
-                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : const Icon(Icons.save, color: Colors.white),
-                    label: Text(_isSaving ? 'সেভ হচ্ছে...' : 'রিপোর্ট সেভ করুন',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0EA5E9),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                if (!_isLocked) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton.icon(
+                      onPressed: _isSaving ? null : _save,
+                      icon: _isSaving
+                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          : const Icon(Icons.save, color: Colors.white),
+                      label: Text(_isSaving ? 'সেভ হচ্ছে...' : 'রিপোর্ট সেভ করুন',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0EA5E9),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
+                ],
               ],
             ),
           ),
@@ -419,6 +438,7 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
           TextField(
             controller: ctrl,
             maxLines: maxLines,
+            enabled: !_isLocked,
             style: const TextStyle(color: _textLight, fontSize: 14),
             decoration: InputDecoration(
               hintText: hint,
@@ -430,6 +450,10 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: const BorderSide(color: Color(0xFF0EA5E9), width: 1.5),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: _borderColor.withValues(alpha: 0.5)),
               ),
               filled: true,
               fillColor: const Color(0xFF0A1628),
@@ -502,6 +526,7 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
     return TextField(
       controller: ctrl,
       keyboardType: keyboardType,
+      enabled: !_isLocked,
       style: const TextStyle(fontSize: 13, color: _textLight),
       decoration: InputDecoration(
         hintText: hint,
@@ -513,6 +538,10 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: Color(0xFF0EA5E9)),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: _borderColor.withValues(alpha: 0.4)),
         ),
         filled: true,
         fillColor: const Color(0xFF0A1628),

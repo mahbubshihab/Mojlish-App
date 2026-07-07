@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/services/report_storage_service.dart';
 import 'report_book_screen.dart';
 import 'baytulmal_report_book_screen.dart';
+import 'sanghotonik_report_book_screen.dart';
 
 /// রিপোর্টসমূহ — মূল হাব স্ক্রিন, সব রিপোর্টের কার্ড দেখায়
 class ReportSelectionScreen extends StatefulWidget {
@@ -57,36 +58,35 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _darkBg,
+      appBar: AppBar(
+        backgroundColor: _cardBg,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: _textLight, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'রিপোর্টসমূহ',
+              style: TextStyle(color: _accentGreen, fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              '${_monthNames[_now.month - 1]} ${_bn(_now.year)}',
+              style: const TextStyle(color: _textMuted, fontSize: 11),
+            ),
+          ],
+        ),
+      ),
       body: Stack(
         children: [
           Positioned.fill(child: CustomPaint(painter: _HubBgPainter())),
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'রিপোর্টসমূহ',
-                        style: TextStyle(
-                          color: _accentGreen,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${_monthNames[_now.month - 1]} ${_bn(_now.year)}',
-                        style: const TextStyle(color: _textMuted, fontSize: 13),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 16),
                 // Cards list
                 Expanded(
                   child: ListView(
@@ -125,12 +125,12 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                       _buildReportCard(
                         title: 'শাখা সাংগঠনিক রিপোর্ট',
                         subtitle: 'মাসিক সাংগঠনিক রিপোর্ট',
-                        badge: 'শীঘ্রই আসছে',
-                        badgeColor: const Color(0xFF6B7280),
+                        badge: 'মাসিক',
+                        badgeColor: Colors.orange,
                         icon: Icons.group_work_outlined,
                         color: Colors.orange,
-                        disabled: true,
-                        onTap: () => _showComingSoon('সাংগঠনিক রিপোর্ট'),
+                        onTap: () => Navigator.push(context,
+                            MaterialPageRoute(builder: (_) => const SanghotonikReportBookScreen())),
                       ),
                       const SizedBox(height: 12),
 
@@ -155,7 +155,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                 ),
               ],
             ),
-          ),
         ],
       ),
     );

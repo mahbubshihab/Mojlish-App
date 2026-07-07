@@ -1,17 +1,17 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../data/services/report_storage_service.dart';
-import 'baytulmal_report_screen.dart';
+import 'sanghotonik_report_screen.dart';
 
-/// বায়তুলমাল রিপোর্ট বই — বছর/মাস নেভিগেশন, মাস সিলেক্ট করলে monthly form খোলে
-class BaytulmalReportBookScreen extends StatefulWidget {
-  const BaytulmalReportBookScreen({super.key});
+/// শাখা সাংগঠনিক রিপোর্ট বই — বছর/মাস নেভিগেশন
+class SanghotonikReportBookScreen extends StatefulWidget {
+  const SanghotonikReportBookScreen({super.key});
 
   @override
-  State<BaytulmalReportBookScreen> createState() => _BaytulmalReportBookScreenState();
+  State<SanghotonikReportBookScreen> createState() => _SanghotonikReportBookScreenState();
 }
 
-class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
+class _SanghotonikReportBookScreenState extends State<SanghotonikReportBookScreen> {
   final _now = DateTime.now();
   late int _selectedYear;
   late int _selectedMonth;
@@ -20,7 +20,7 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
   static const _darkBg = Color(0xFF0D1B2A);
   static const _cardBg = Color(0xFF162032);
   static const _borderColor = Color(0xFF2A3F58);
-  static const _accentBlue = Color(0xFF0EA5E9);
+  static const _accentOrange = Colors.orange;
   static const _textLight = Color(0xFFE2E8F0);
   static const _textMuted = Color(0xFF94A3B8);
 
@@ -40,7 +40,7 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
   Future<void> _loadSavedMonths() async {
     final Map<int, bool> saved = {};
     for (int m = 1; m <= 12; m++) {
-      final entry = await ReportStorageService.getBaytulmalEntry(_selectedYear, m);
+      final entry = await ReportStorageService.getSanghotonikEntry(_selectedYear, m);
       saved[m] = entry != null;
     }
     if (mounted) {
@@ -59,7 +59,7 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => BaytulmalReportScreen(year: _selectedYear, month: month),
+        builder: (_) => SanghotonikReportScreen(year: _selectedYear, month: month),
       ),
     );
     setState(() => _selectedMonth = month);
@@ -79,8 +79,8 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'বায়তুলমাল রিপোর্ট বই',
-          style: TextStyle(color: _accentBlue, fontSize: 18, fontWeight: FontWeight.bold),
+          'সাংগঠনিক রিপোর্ট বই',
+          style: TextStyle(color: _accentOrange, fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),
       body: Stack(
@@ -120,11 +120,11 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: _accentBlue.withValues(alpha: 0.15),
+              color: _accentOrange.withValues(alpha: 0.15),
               shape: BoxShape.circle,
-              border: Border.all(color: _accentBlue.withValues(alpha: 0.4), width: 2),
+              border: Border.all(color: _accentOrange.withValues(alpha: 0.4), width: 2),
             ),
-            child: const Icon(Icons.account_balance_wallet, color: _accentBlue, size: 26),
+            child: const Icon(Icons.group_work, color: _accentOrange, size: 26),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -132,13 +132,13 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '[_selectedYear সালের শাখা বায়তুলমাল রিপোর্ট]',
+                  '[_selectedYear সালের শাখা সাংগঠনিক রিপোর্ট]',
                   style: TextStyle(color: _textLight.withValues(alpha: 0.8), fontSize: 14),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   '১২ মাসের মধ্যে $count মাসের রিপোর্ট সেভ করা আছে',
-                  style: const TextStyle(color: _accentBlue, fontSize: 13, fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: _accentOrange, fontSize: 13, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -215,13 +215,13 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: isSelected
-              ? _accentBlue.withValues(alpha: 0.15)
+              ? _accentOrange.withValues(alpha: 0.15)
               : isFuture
                   ? const Color(0xFF0A1220)
                   : _cardBg,
           border: Border.all(
             color: isSelected
-                ? _accentBlue
+                ? _accentOrange
                 : isSaved
                     ? const Color(0xFF10B981)
                     : _borderColor,
@@ -236,7 +236,7 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
               _monthShort[month - 1],
               style: TextStyle(
                 color: isSelected
-                    ? _accentBlue
+                    ? _accentOrange
                     : isFuture
                         ? _textMuted.withValues(alpha: 0.4)
                         : _textLight,
@@ -258,11 +258,11 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
 class _BgPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final fill = Paint()..color = const Color(0xFF0EA5E9).withValues(alpha: 0.025)..style = PaintingStyle.fill;
+    final fill = Paint()..color = Colors.orange.withValues(alpha: 0.025)..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.08), 120, fill);
     canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.45), 90, fill);
 
-    final grid = Paint()..color = const Color(0xFF0EA5E9).withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+    final grid = Paint()..color = Colors.orange.withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
     for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
     for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
 

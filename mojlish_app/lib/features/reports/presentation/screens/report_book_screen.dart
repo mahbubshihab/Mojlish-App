@@ -82,56 +82,19 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _darkBg,
-      body: Stack(
-        children: [
-          Positioned.fill(child: CustomPaint(painter: _BgPainter())),
-          SafeArea(
-            child: Column(
-              children: [
-                _buildTitleBar(context),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 12),
-                        _buildReportBookCard(),
-                        const SizedBox(height: 16),
-                        _buildYearSelector(),
-                        const SizedBox(height: 16),
-                        _buildMonthGrid(),
-                        const SizedBox(height: 16),
-                        _buildTodayButton(),
-                        const SizedBox(height: 16),
-                        _buildBottomCards(),
-                        const SizedBox(height: 24),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTitleBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 8, 8, 0),
-      child: Row(
-        children: [
-          // Back button
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: _textLight, size: 20),
-            onPressed: () => Navigator.pop(context),
-          ),
-          const Text(
-            'রিপোর্ট বই',
-            style: TextStyle(color: _accentGreen, fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-          const Spacer(),
+      appBar: AppBar(
+        backgroundColor: _cardBg,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: _textLight, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'রিপোর্ট বই',
+          style: TextStyle(color: _accentGreen, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: _textLight),
             color: _cardBg,
@@ -151,6 +114,29 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
                 );
               }
             },
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          Positioned.fill(child: CustomPaint(painter: _BgPainter())),
+          SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                const SizedBox(height: 12),
+                _buildReportBookCard(),
+                const SizedBox(height: 16),
+                _buildYearSelector(),
+                const SizedBox(height: 16),
+                _buildMonthGrid(),
+                const SizedBox(height: 16),
+                _buildTodayButton(),
+                const SizedBox(height: 16),
+                _buildBottomCards(),
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ],
       ),

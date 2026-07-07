@@ -3,11 +3,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/daily_personal_entry.dart';
 import '../models/baytulmal_report_entry.dart';
 import '../models/monthly_comment.dart';
+import '../models/sanghotonik_report_entry.dart';
 
 /// লোকাল স্টোরেজ সার্ভিস — SharedPreferences দিয়ে রিপোর্ট সেভ ও লোড করে
 class ReportStorageService {
   static const String _personalReportKey = 'personal_reports';
   static const String _baytulmalReportKey = 'baytulmal_reports';
+  static const String _sanghotonikReportKey = 'sanghotonik_reports';
   static const String _commentsKey = 'monthly_comments';
 
   // ===========================
@@ -90,6 +92,35 @@ class ReportStorageService {
 
   static Future<BaytulmalReportEntry?> getBaytulmalEntry(int year, int month) async {
     final all = await getAllBaytulmalEntries();
+    final key = '$year-${month.toString().padLeft(2, '0')}';
+    return all[key];
+  }
+
+  // ===========================
+  // সাংগঠনিক রিপোর্ট — CRUD
+  // ===========================
+
+  static Future<void> saveSanghotonikEntry(SanghotonikReportEntry entry) async {
+    final prefs = await SharedPreferences.getInstance();
+    final allData = await getAllSanghotonikEntries();
+    final key = '${entry.year}-${entry.month}';
+    allData[key] = entry;
+    final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
+    await prefs.setString(_sanghotonikReportKey, jsonEncode(encoded));
+  }
+
+  static Future<Map<String, SanghotonikReportEntry>> getAllSanghotonikEntries() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_sanghotonikReportKey);
+    if (raw == null) return {};
+    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    return decoded.map(
+      (k, v) => MapEntry(k, SanghotonikReportEntry.fromJson(v as Map<String, dynamic>)),
+    );
+  }
+
+  static Future<SanghotonikReportEntry?> getSanghotonikEntry(int year, int month) async {
+    final all = await getAllSanghotonikEntries();
     final key = '$year-${month.toString().padLeft(2, '0')}';
     return all[key];
   }

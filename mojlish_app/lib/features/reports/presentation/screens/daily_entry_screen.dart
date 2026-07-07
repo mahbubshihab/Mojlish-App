@@ -38,6 +38,8 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
 
   bool _isSaving = false;
   bool _isLoading = true;
+  bool _isLocked = true;
+  bool _entryExists = false;
 
   static const _darkBg = Color(0xFF0D1B2A);
   static const _cardBg = Color(0xFF162032);
@@ -71,6 +73,8 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
       final entry = await ReportStorageService.getPersonalEntry(_dateKey);
       if (entry != null && mounted) {
         setState(() {
+          _entryExists = true;
+          _isLocked = true;
           _quranSuraCtrl.text = entry.quranSura.isNotEmpty ? entry.quranSura : entry.quranStudy;
           _quranAyahCtrl.text = entry.quranAyah;
           _hadithCtrl.text = entry.hadithStudy;
@@ -83,6 +87,11 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
           _dawahCtrl.text = entry.dawah;
           _timeServiceCtrl.text = entry.timeService.isNotEmpty ? entry.timeService : entry.volunteering;
           _socialServiceCtrl.text = entry.socialService;
+        });
+      } else {
+        setState(() {
+          _entryExists = false;
+          _isLocked = false;
         });
       }
     } catch (e) {
@@ -112,7 +121,11 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
       socialService: _socialServiceCtrl.text.trim(),
     );
     await ReportStorageService.savePersonalEntry(entry);
-    setState(() => _isSaving = false);
+    setState(() {
+      _isSaving = false;
+      _isLocked = true;
+      _entryExists = true;
+    });
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -146,15 +159,24 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
       appBar: AppBar(
         backgroundColor: _cardBg,
         iconTheme: const IconThemeData(color: _textLight),
+        centerTitle: true,
         title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(_formattedDate,
-                style: const TextStyle(color: _textLight, fontSize: 14, fontWeight: FontWeight.bold)),
+                style: const TextStyle(color: _textLight, fontSize: 13, fontWeight: FontWeight.bold)),
             Text('দৈনিক রিপোর্ট এন্ট্রি',
-                style: const TextStyle(color: _textMuted, fontSize: 11)),
+                style: const TextStyle(color: _textMuted, fontSize: 10)),
           ],
         ),
+        actions: [
+          if (_entryExists && _isLocked)
+            TextButton.icon(
+              icon: const Icon(Icons.edit, color: _accentGreen, size: 16),
+              label: const Text('এডিট করুন', style: TextStyle(color: _accentGreen, fontSize: 13, fontWeight: FontWeight.bold)),
+              onPressed: () => setState(() => _isLocked = false),
+            ),
+        ],
         elevation: 0,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
@@ -219,27 +241,29 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
                       ]),
 
                       const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton.icon(
-                          onPressed: _isSaving ? null : _save,
-                          icon: _isSaving
-                              ? const SizedBox(
-                                  width: 18, height: 18,
-                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                              : const Icon(Icons.save, color: Colors.white),
-                          label: Text(
-                            _isSaving ? 'সেভ হচ্ছে...' : 'সেভ করুন',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _accentGreen,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      if (!_isLocked) ...[
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton.icon(
+                            onPressed: _isSaving ? null : _save,
+                            icon: _isSaving
+                                ? const SizedBox(
+                                    width: 18, height: 18,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                : const Icon(Icons.save, color: Colors.white),
+                            label: Text(
+                              _isSaving ? 'সেভ হচ্ছে...' : 'সেভ করুন',
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _accentGreen,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
+                      ],
                     ],
                   ),
                 ),
@@ -313,6 +337,7 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
             controller: ctrl,
             keyboardType: numeric ? TextInputType.number : TextInputType.text,
             maxLines: maxLines,
+            enabled: !_isLocked,
             style: const TextStyle(color: _textLight, fontSize: 14),
             decoration: InputDecoration(
               hintText: hint,
@@ -324,6 +349,10 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: _accentGreen, width: 1.5),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: _borderColor.withValues(alpha: 0.5)),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               filled: true,
