@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_theme.dart';
+import '../join/join_organization_screen.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -44,6 +45,37 @@ class AboutScreen extends StatelessWidget {
               'দলটি তাদের লক্ষ্য অর্জনে বিভিন্ন সাংগঠনিক ও দাওয়াতি কার্যক্রম পরিচালনা করে, যার মধ্যে রয়েছে দাওয়াত, সংগঠন তৈরি, সাধারণ মানুষকে ঐক্যবদ্ধ করা এবং আদর্শিক, নৈতিক ও কর্মদক্ষ নেতৃত্ব প্রতিষ্ঠা করা।',
             ),
             const SizedBox(height: 40),
+            Center(
+              child: SizedBox(
+                width: 220,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const JoinOrganizationScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryColor,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                    elevation: 2,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.group_add, color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        'সংগঠনে যুক্ত হোন',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
