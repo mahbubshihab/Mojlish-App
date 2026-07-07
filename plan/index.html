@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>মজলিস অ্যাপ - পূর্ণাঙ্গ প্রজেক্ট প্ল্যান ও প্রোটোটাইপ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="light-theme">
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-placeholder" style="background: transparent; box-shadow: none;">
+                    <img src="assets/logo.png" alt="Mojlish Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <h2>মজলিস অ্যাপ</h2>
+            </div>
+            
+            <div class="wing-selector">
+                <label for="wing-select">সংগঠন নির্বাচন:</label>
+                <select id="wing-select">
+                    <option value="khelafat">খেলাফত মজলিস (মূল)</option>
+                    <option value="chatra">ছাত্র সংগঠন</option>
+                    <option value="jubo">যুব সংগঠন</option>
+                    <option value="mohila">মহিলা সংগঠন</option>
+                    <option value="sromik">শ্রমিক সংগঠন</option>
+                </select>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="#overview" class="nav-item active" data-tab="overview">
+                    <i class="fa-solid fa-chart-pie"></i> সংক্ষিপ্ত বিবরণ (Overview)
+                </a>
+                <a href="#voice-analysis" class="nav-item" data-tab="voice-analysis">
+                    <i class="fa-solid fa-microphone-lines"></i> ভয়েস নোট এনালাইসিস
+                </a>
+                <a href="#image-analysis" class="nav-item" data-tab="image-analysis">
+                    <i class="fa-solid fa-images"></i> ডায়েরী ইমেজ এনালাইসিস
+                </a>
+                <a href="#firebase-schema" class="nav-item" data-tab="firebase-schema">
+                    <i class="fa-solid fa-fire-flame-curved"></i> ফায়ারবেস ও ডাটাবেস স্কিমা
+                </a>
+                <a href="#architecture" class="nav-item" data-tab="architecture">
+                    <i class="fa-solid fa-sitemap"></i> টেকনিক্যাল আর্কিটেকচার
+                </a>
+                <a href="#personal-report" class="nav-item" data-tab="personal-report">
+                    <i class="fa-solid fa-user-check"></i> ব্যক্তিগত তৎপরতা
+                </a>
+                <a href="ui_mockup.html" class="nav-item">
+                    <i class="fa-solid fa-desktop"></i> ইউআই ডিজাইন মকআপ
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <p>পদ্ধতি: ফ্লাটার ও নেক্সট জেএস</p>
+                <p>ডাটাবেস: ফায়ারস্টোর (Firestore)</p>
+                <p class="footer-version">ভার্সন ৪.১ (আপডেটেড)</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="header-title">
+                    <h1 id="page-title">সংক্ষিপ্ত বিবরণ (Overview)</h1>
+                    <p>খেলাফত মজলিস অ্যাপের ডিজাইন ও তথ্য পরিকল্পনা</p>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                    <div class="profile-info">
+                        <span class="user-name">মিজানুর রহমান</span>
+                        <span class="user-role">কর্মী, ঢাকা মহানগরী</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- TAB 1: Overview -->
+            <section id="tab-overview" class="tab-content active">
+                <div class="welcome-banner">
+                    <div class="banner-text">
+                        <h2>আসসালামু আলাইকুম!</h2>
+                        <p>ব্যাকএন্ড ডাটাবেস হিসেবে **Firebase (Firestore)** এবং অ্যাডমিন ওয়েব অ্যাপের জন্য **Firebase Static Hosting** যুক্ত করে আমাদের প্রজেক্ট প্ল্যানটি আপডেট করা হয়েছে। এটি আমাদের লাইভ ইন্টারফেস রোডম্যাপ।</p>
+                    </div>
+                    <div class="banner-stats">
+                        <div class="stat-badge"><i class="fa-solid fa-fire-flame-curved"></i> Firebase & Firestore</div>
+                        <div class="stat-badge"><i class="fa-solid fa-globe"></i> Firebase Static Hosting</div>
+                    </div>
+                </div>
+
+                <div class="requirements-summary">
+                    <div class="analysis-box">
+                        <h3><i class="fa-solid fa-star"></i> প্রজেক্টের মূল চালিকাশক্তি</h3>
+                        <p style="font-size: 15px; line-height: 1.6; margin-bottom: 16px;">
+                            সংগঠনের ম্যানুয়াল ডায়েরি রিপোর্টিং ব্যবস্থাকে ডিজিটাল ড্যাশবোর্ডে রূপান্তর করাই এই প্রজেক্টের লক্ষ্য। এখানে ব্যবহারকারীরা কেবল তাদের ব্যক্তিগত রিপোর্ট সাবমিট করতে পারবেন। ফান্ড সংক্রান্ত লেনদেন বা অন্যান্য ফর্ম সাবমিট করার কোনো অপশন থাকবে না।
+                        </p>
+                    </div>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="card-icon" style="background-color: rgba(226, 136, 12, 0.1); color: #e2880c;"><i class="fa-solid fa-fire-flame-curved"></i></div>
+                        <h3>Firebase Firestore</h3>
+                        <p>রিয়েল-টাইম ক্লাউড ফায়ারস্টোর ডাটাবেসের মাধ্যমে লাইভ সিংক্রোনাইজেশন এবং অত্যন্ত দ্রুত কুয়েরি নিশ্চিত করা হবে।</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="card-icon" style="background-color: #e6fffa; color: #319795;"><i class="fa-solid fa-folder-tree"></i></div>
+                        <h3>Clean Architecture</h3>
+                        <p>ফ্লাটার অ্যাপ্লিকেশনে ডেটা, ডোমেইন এবং প্রেজেন্টেশন লেয়ার আলাদা রেখে ক্লিন আর্কিটেকচার নিশ্চিত করা হবে।</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="card-icon" style="background-color: #ebf8ff; color: #3182ce;"><i class="fa-solid fa-cubes"></i></div>
+                        <h3>BLoC State Management</h3>
+                        <p>প্রেজেন্টেশন লেয়ারের সমস্ত স্টেট রিয়াক্টিভ উপায়ে ম্যানেজ করার জন্য BLoC ব্যবহার হবে।</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="card-icon" style="background-color: #fffaf0; color: #dd6b20;"><i class="fa-solid fa-globe"></i></div>
+                        <h3>Next.js Static Hosting</h3>
+                        <p>অ্যাডমিন ও দায়িত্বশীলদের জন্য Next.js ওয়েব প্যানেলটি Firebase Static Hosting-এ লাইটওয়েট উপায়ে হোস্ট করা হবে।</p>
+                    </div>
+                </div>
+
+                <div class="analysis-section">
+                    <h2>রিকোয়ারমেন্ট ও সলিউশন ম্যাপিং</h2>
+                    <div class="analysis-table-wrapper">
+                        <table class="analysis-table">
+                            <thead>
+                                <tr>
+                                    <th>বিষয়বস্তু</th>
+                                    <th>ম্যানুয়াল উৎস (ডায়েরীর পৃষ্ঠা)</th>
+                                    <th>অ্যাপে ডিজিটাল সমাধান</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>ব্যক্তিগত তৎপরতা</strong></td>
+                                    <td>ইमेज ৬ (৩১ দিনের দৈনিক গ্রিড)</td>
+                                    <td>সহজ দৈনিক চেকলিস্ট এবং ড্রপডাউন ইনপুট সিস্টেম</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: Voice Note Analysis -->
+            <section id="tab-voice-analysis" class="tab-content">
+                <div class="section-desc">
+                    <p><i class="fa-solid fa-circle-info"></i> আপনার পাঠানো মূল ট্রান্সক্রিপ্ট এবং আমাদের ডিজাইন টিমের করা বিশ্লেষণ নিচে সুবিন্যস্ত করা হলো:</p>
+                </div>
+
+                <!-- Voice 1 Analysis -->
+                <div class="voice-card">
+                    <div class="voice-card-header">
+                        <h4><i class="fa-solid fa-microphone"></i> ভয়েস নোট ১: অ্যাপের কাঠামো ও সংগঠন (মূল ট্রান্সক্রিপ্ট ও বিশ্লেষণ)</h4>
+                    </div>
+                    <div class="voice-card-body">
+                        <div class="analysis-grid">
+                            <div class="said-box">
+                                <h5><i class="fa-solid fa-quote-left"></i> যা বলা হয়েছে:</h5>
+                                <ul>
+                                    <li>অ্যাপের নাম 'মজলিস অ্যাপ'। এতে ছাত্র, যুব, মহিলা ও শ্রমিক সংগঠনের সমন্বয়ে গঠিত হবে।</li>
+                                    <li>রাজনৈতিক দলের দলীয় কাঠামোর মত কাঠামোবদ্ধ অ্যাপ হবে।</li>
+                                    <li>ইউজার তার নির্ধারিত সংগঠনের সেকশনে ক্লিক করে নির্দিষ্ট সেকশনে প্রবেশ করবে।</li>
+                                    <li>প্রতিটি কর্মী/সদস্যের ব্যক্তিগত রিপোর্ট (নামাজ পড়া, সাংগঠনিক কার্যক্রম) ট্র্যাকিংয়ের সেকশন থাকবে।</li>
+                                    <li>পরিচিতি মূলক লিফলেট, বই পড়া যাবে।</li>
+                                </ul>
+                            </div>
+                            <div class="unsaid-box">
+                                <h5><i class="fa-solid fa-lightbulb"></i> যা বলা হয়নি কিন্তু অত্যন্ত প্রয়োজনীয়:</h5>
+                                <ul>
+                                    <li><strong>সংগঠন ভিত্তিক রোল ম্যানেজমেন্ট:</strong> একজন ইউজার একই সাথে একাধিক সংগঠনয়ের অংশ হতে পারবে না। তাই রেজিস্ট্রেশনের সময় সংগঠন ফিক্স করে দিতে হবে।</li>
+                                    <li><strong>শাখার হায়ারার্কি:</strong> শাখাগুলো শুধুমাত্র জেলা ভিত্তিক নয়, বরং ওয়ার্ড, ইউনিয়ন, থানা, জেলা/মহানগর এবং কেন্দ্রীয় ধাপে বিভক্ত হতে হবে।</li>
+                                    <li><strong>রিপোর্ট জমা দেওয়ার সময়সীমা:</strong> শাখাগুলোর কাজের রিপোর্ট সাধারণত মাসের শেষে নির্দিষ্ট সময়ের মধ্যে (যেমন ৫ তারিখের মধ্যে) সাবমিট করার ডেডলাইন সিস্টেম থাকতে হবে।</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="transcript-box" style="margin-top: 20px; padding: 16px; background-color: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px;">
+                            <h5 style="color: var(--accent-color); font-size: 14px; margin-bottom: 8px;"><i class="fa-solid fa-file-lines"></i> আপনার পাঠানো মূল ট্রান্সক্রিপ্ট:</h5>
+                            <p style="font-size: 13.5px; line-height: 1.6; color: #cbd5e1; text-align: justify;">
+                                "আমাদের সংগঠন খেলাফত মজলিসের জন্য একটি অ্যাপ তৈরি করতে চাচ্ছি। এই অ্যাপটি মূলত ছাত্র সংগঠন, যুব সংগঠন, মহিলা সংগঠন এবং শ্রমিক সংগঠনের সমন্বয়ে গঠিত হবে। মূলত রাজনৈতিক দলের যে ধরনের কাঠামো থাকে, এটিও সে রকম একটি কাঠামোবদ্ধ অ্যাপ হবে। অ্যাপটির একটি সদস্য তালিকা থাকবে। নাম দেওয়া যেতে পারে 'মজলিস অ্যাপ'। এই অ্যাপের মাধ্যমে যে যে সংগঠনের সাথে যুক্ত, তিনি সেখানে ক্লিক করে নির্দিষ্ট সেকশনে যেতে পারবেন। যেমন কেউ যদি যুব সংগঠনের সদস্য হন, তিনি সে যুব সংগঠনের সেকশনে ক্লিক করবেন। একেকটি সংগঠনের আবার অনেকগুলো শাখা থাকবে। আমরা যেমনটা আগে বিভিন্ন রাজনৈতিক দলের ক্ষেত্রে দেখেছি, যেমন আওয়ামী লীগ বা যুবলীগ, তাদের যে দলীয় কাঠামো বা যে স্তরগুলো থাকতো, ঠিক সেভাবেই আমরা এই অ্যাপটিকে সাজাতে চাই। এই অ্যাপটিতে প্রতিটি সদস্য বা কর্মীীর একটি ব্যক্তিগত রিপোর্ট বা প্রোফাইল থাকবে। যেমন- তিনি নামাজ পড়েন কি না, দলের সাংগঠনিক কার্যক্রমে অংশগ্রহণ করছেন কি না, এসব তথ্যের জন্য একটি পৃথক সেকশন থাকবে। এছাড়া সংগঠনের বিভিন্ন শাখা যেমন- নারায়ণগঞ্জ শাখা, ঢাকা শাখা, কুমিল্লা শাখা, এমন প্রতিটি শাখার জন্য আলাদা সেকশন থাকবে। ঐ শাখার অন্তর্ভুক্ত যে কমিটি থাকবে, তারা তাদের কাজের রিপোর্ট বা প্রগ্রেস রিপোর্ট এই অ্যাপে জমা দেবেন। যেমন- ওই মাসে কতজন কর্মী কাজ করেছেন, কতটি প্রোগ্রাম হয়েছে, আয়ের উৎস কী এবং ব্যয়ের খাত কী—এই সবকিছুর একটি পূর্ণাঙ্গ রিপোর্ট থাকবে। আবার আমাদের বিভিন্ন পরিচিতি মূলক লিফলেট বা বই থাকে। সেগুলোও এই অ্যাপের মাধ্যমে পাওয়া যাবে। কেউ যদি আমাদের সংগঠনের সদস্য হতে চায়, তার জন্য প্রয়োজনীয় ফর্ম বা আবেদন করার সুযোগ থাকবে। এককথায়, আমরা একটি পূর্ণাঙ্গ অ্যাপ তৈরি করতে চাই, যা আমাদের সংগঠনের যাবতীয় সাংগঠনিক কাজের রেকর্ড রাখা এবং স্বচ্ছতা নিশ্চিত করার জন্য সহায়ক হবে। আপনি নিশ্চয়ই আমার প্রস্তাবিত এই অ্যাপের মূল উদ্দেশ্য বা কাঠামোটি বুঝতে পেরেছেন।"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voice 2 Analysis -->
+                <div class="voice-card">
+                    <div class="voice-card-header">
+                        <h4><i class="fa-solid fa-microphone"></i> ভয়েস নোট ২: অটোমেশন, গোপনীয়তা ও প্রিন্ট (মূল ট্রান্সক্রিপ্ট ও বিশ্লেষণ)</h4>
+                    </div>
+                    <div class="voice-card-body">
+                        <div class="analysis-grid">
+                            <div class="said-box">
+                                <h5><i class="fa-solid fa-quote-left"></i> যা বলা হয়েছে:</h5>
+                                <ul>
+                                    <li>ম্যানুয়ালি কাগজে কলমে না লিখে অ্যাপের মাধ্যমে দৈনন্দিন ব্যক্তিগত রিপোর্ট অটোমেটিক্যালি সাবমিট হবে।</li>
+                                    <li>এই ডেটা বা ইনফরমেশনগুলো সাধারণ কেউ দেখতে পারবে না (ডেটা সিকিউরিটি ও প্রাইভেসি)।</li>
+                                    <li>রিপোর্ট পিডিএফ (PDF) আকারে ডাউনলোড এবং জেপিজি (JPG) ফাইল হিসেবে মোবাইলে সেভ করা যাবে।</li>
+                                    <li>ফাইলগুলো প্রিন্ট করে সরাসরি সাবমিট করার ব্যবস্থা থাকবে, যাতে হাতে লিখতে না হয়।</li>
+                                    <li>শাখার দৈনিক প্রগ্রেস রিপোর্ট ডিজিটাল ফরম্যাটে অ্যাপের মাধ্যমে জমা হবে।</li>
+                                </ul>
+                            </div>
+                            <div class="unsaid-box">
+                                <h5><i class="fa-solid fa-lightbulb"></i> যা বলা হয়নি কিন্তু অত্যন্ত প্রয়োজনীয়:</h5>
+                                <ul>
+                                    <li><strong>রোল-বেসড অ্যাক্সেস কন্ট্রোল (RBAC):</strong> দায়িত্বশীলরা শুধুমাত্র তাদের অধীনস্থ শাখার সমষ্টিগত (Aggregated) রিপোর্ট দেখতে পাবেন, কিন্তু কোনো কর্মীর ব্যক্তিগত ইবাদতের বিস্তারিত বিবরণ দেখতে পাবেন না (যাতে প্রাইভেসি ১০০% বজায় থাকে)।</li>
+                                    <li><strong>লোকাল পিডিএফ জেনারেশন:</strong> ইন্টারনেট সংযোগ না থাকলেও অফলাইনে ডিভাইস লেভেলে পিডিএফ ও জেপিজি এক্সপোর্ট ইঞ্জিন থাকা দরকার।</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="transcript-box" style="margin-top: 20px; padding: 16px; background-color: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px;">
+                            <h5 style="color: var(--accent-color); font-size: 14px; margin-bottom: 8px;"><i class="fa-solid fa-file-lines"></i> আপনার পাঠানো মূল ট্রান্সক্রিপ্ট:</h5>
+                            <p style="font-size: 13.5px; line-height: 1.6; color: #cbd5e1; text-align: justify;">
+                                "প্রত্যেক কর্মীকে তার দৈনন্দিন কাজের পার্সোনাল রিপোর্ট জমা দিতে হয়। এখন এই রিপোর্টটি ম্যানুয়ালি না লিখে, কাগজে কলমে না লিখে বা অন্য কোনো জটিল পদ্ধতিতে না করে, যদি একটি অ্যাপের মাধ্যমে রিপোর্ট জমা দেয়ার ব্যবস্থা থাকতো, তাহলে বিষয়টি অনেক সহজ হয়ে যেত। এই অ্যাপের মাধ্যমে অটোমেটিক্যালি তথ্যগুলো সেভ হয়ে যাবে। তবে এই তথ্যগুলো সাধারণ কেউ দেখতে পারবে না। এরপর চাইলে সেই রিপোর্টটি পিডিএফ আকারে ডাউনলোড করা যাবে বা কোনো জেপিজি ফাইল হিসেবেও সেভ করা যাবে। এছাড়া চাইলে এই ফাইলগুলো প্রিন্ট করে সরাসরি সাবমিট করার ব্যবস্থা থাকবে, যাতে করে কাউকে আর খাতায় হাতে হাতে রিপোর্ট লিখে জমা দিতে না হয়। প্রতিটি শাখায় প্রতিদিন কী কী কাজ সম্পন্ন হয়েছে, সেই সংক্রান্ত সকল তথ্য এখন থেকে খুব সহজেই অ্যাপের মাধ্যমে ডিজিটাল ফরম্যাটে জমা দেয়া যাবে। এই বিষয়টি বাস্তবায়িত হলে পুরো প্রক্রিয়ায় অনেক স্বচ্ছতা এবং গতি আসবে।"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voice 3 Analysis -->
+                <div class="voice-card">
+                    <div class="voice-card-header">
+                        <h4><i class="fa-solid fa-microphone"></i> ভয়েস নোট ৩: অনলাইন-অফলাইন ও ইউজার ইন্টারফেস (মূল ট্রান্সক্রিপ্ট ও বিশ্লেষণ)</h4>
+                    </div>
+                    <div class="voice-card-body">
+                        <div class="analysis-grid">
+                            <div class="said-box">
+                                <h5><i class="fa-solid fa-quote-left"></i> যা বলা হয়েছে:</h5>
+                                <ul>
+                                    <li>অ্যাপটিতে অনলাইন এবং অফলাইন—উভয় মোডে কাজ করা অত্যন্ত জরুরী।</li>
+                                    <li>একটি চমৎকার ও ইউজার-ফ্রেন্ডলি ইন্টারফেস থাকতে হবে।</li>
+                                    <li>ইউআই (UI) দেখতে খুব সুন্দর ও আধুনিক হতে হবে।</li>
+                                </ul>
+                            </div>
+                            <div class="unsaid-box">
+                                <h5><i class="fa-solid fa-lightbulb"></i> যা বলা হয়নি কিন্তু অত্যন্ত প্রয়োজনীয়:</h5>
+                                <ul>
+                                    <li><strong>লোকাল ক্যাশিং ডাটাবেস (Hive/Isar):</strong> ডেটা অফলাইনে সেভ করে রাখার জন্য লোকাল ডাটাবেস ক্যাশিং এবং কানেক্টিভিটি চেকার মেকানিজম লাগবে।</li>
+                                    <li><strong>অফলাইন ফাইল রিসোর্স:</strong> পরিচিতিমূলক বই বা লিফলেটগুলো অ্যাপে একবার ভিউ করা হলে তা ক্যাশ হয়ে যাবে যাতে অফলাইনেও ওপেন করা যায়।</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="transcript-box" style="margin-top: 20px; padding: 16px; background-color: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px;">
+                            <h5 style="color: var(--accent-color); font-size: 14px; margin-bottom: 8px;"><i class="fa-solid fa-file-lines"></i> আপনার পাঠানো মূল ট্রান্সক্রিপ্ট:</h5>
+                            <p style="font-size: 13.5px; line-height: 1.6; color: #cbd5e1; text-align: justify;">
+                                "যে পেপারগুলো এখানে জরুরি আর কি, যে অনলাইন-অফলাইন বোথ ইউজ করাটা জরুরি। আর একটি ইউজার-ফ্রেন্ডলি ইন্টারফেস, তারপর ইউআইটা যেন খুব সুন্দর হয়।"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: Image Analysis -->
+            <section id="tab-image-analysis" class="tab-content">
+                <div class="section-desc">
+                    <p><i class="fa-solid fa-circle-info"></i> ৬টি ডায়েরীর পাতার ছবি বিশ্লেষণ করে প্রয়োজনীয় টেবিল ও ফিল্ডগুলো নিচে সুবিন্যস্ত করা হলো:</p>
+                </div>
+
+                <div class="images-analysis-grid">
+                    <!-- Image 6 Analysis -->
+                    <div class="image-anal-card">
+                        <div class="card-header">
+                            <h4><i class="fa-solid fa-user-check"></i> ইমেজ ৬: ব্যক্তিগত তৎপরতার রিপোর্ট (৩১ দিনের দৈনিক গ্রিড)</h4>
+                        </div>
+                        <div class="card-body">
+                            <p class="anal-desc">এটি কর্মীদের দৈনিক আমল ট্র্যাকিংয়ের মূল পাতা। এতে ৩১ দিনের একটি সুনির্দিষ্ট গ্রিড রয়েছে।</p>
+                            <table class="field-table">
+                                <thead>
+                                    <tr>
+                                        <th>কলম/ফিল্ডের নাম</th>
+                                        <th>ডাটা টাইপ</th>
+                                        <th>ইউজার ইন্টারফেস সমাধান (UI Input)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>১. কুরআন অধ্যয়ন (সূরা, আয়াত)</td>
+                                        <td>String, Integer</td>
+                                        <td>টেক্সট ফিল্ড এবং সংখ্যা ইনপুট</td>
+                                    </tr>
+                                    <tr>
+                                        <td>২. হাদীস অধ্যয়ন (সংখ্যা, বিষয়)</td>
+                                        <td>Integer, String</td>
+                                        <td>সংখ্যা কাউন্টার ও ছোট টেক্সট ফিল্ড</td>
+                                    </tr>
+                                    <tr>
+                                        <td>৩. ইসলামী সাহিত্য পাঠ (বইয়ের নাম, পৃষ্ঠা)</td>
+                                        <td>String, Integer</td>
+                                        <td>সার্চ ড্রপডাউন এবং পৃষ্ঠা নম্বর ইনপুট</td>
+                                    </tr>
+                                    <tr>
+                                        <td>৪. জামায়াতে নামাজ (ওয়াক্ত সংখ্যা)</td>
+                                        <td>Integer (0-5)</td>
+                                        <td>১-৫ ওয়াক্ত নির্বাচনের রেডিও বা ড্রপডাউন</td>
+                                    </tr>
+                                    <tr>
+                                        <td>৫. যোগাযোগ (ব্যক্তি সংখ্যা)</td>
+                                        <td>Integer</td>
+                                        <td>কাউন্টার বোতাম (+ / -)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>৬. দাওয়াত দান (ব্যক্তি সংখ্যা)</td>
+                                        <td>Integer</td>
+                                        <td>কাউন্টার বোতাম (+ / -)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>৭. সময় দান (ঘণ্টা)</td>
+                                        <td>Double (Hours)</td>
+                                        <td>স্লাইডার বা হাফ-আওয়ার ডেসিমাল ইনপুট (উদা: ২.৫ ঘণ্টা)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>৮. সমাজ সেবা (ধরণ)</td>
+                                        <td>String</td>
+                                        <td>কুইক ট্যাগ সিলেকশন বা কাস্টম টেক্সট</td>
+                                    </tr>
+                                    <tr>
+                                        <td>৯. আত্ম-সমালোচনা (হ্যাঁ/না)</td>
+                                        <td>Boolean</td>
+                                        <td>সুইচ বা চেক বক্স</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Image 1 Analysis -->
+                    <div class="image-anal-card">
+                        <div class="card-header">
+                            <h4><i class="fa-solid fa-wallet"></i> ইমেজ ১: শাখা বায়তুলমাল রিপোর্ট ফরম (মাসিক আয়-ব্যয়)</h4>
+                        </div>
+                        <div class="card-body">
+                            <p class="anal-desc">এটি শাখার মাসিক আয়ের উৎস ও ব্যয়ের খাতের আর্থিক হিসাব।</p>
+                            <div class="anal-split">
+                                <div class="split-side">
+                                    <h5>আয়ের অংশ:</h5>
+                                    <ul>
+                                        <li>নির্বাহী সদস্যদের এয়ানত (সদস্য সংখ্যা, টাকা, পয়সা)</li>
+                                        <li>অধস্তন শাখা এয়ানত (শাখা সংখ্যা, টাকা, পয়সা)</li>
+                                        <li>সুধী/শুভাকাঙ্ক্ষী এয়ানত (সংখ্যা, টাকা, পয়সা)</li>
+                                        <li>সফর ও অন্যান্য উৎস</li>
+                                        <li>প্রকাশনা বিক্রি</li>
+                                        <li>বিগত মাসের উদ্বৃত্ত</li>
+                                    </ul>
+                                </div>
+                                <div class="split-side">
+                                    <h5>ব্যয়ের অংশ:</h5>
+                                    <ul>
+                                        <li>উর্ধ্বতন এয়ানত পরিশোধ (মাসিক ধার্যকৃত)</li>
+                                        <li>অফিস ভাড়া ও বিদ্যুৎ বিল</li>
+                                        <li>অফিস খরচ ও যাতায়াত</li>
+                                        <li>প্রচার ও প্রকাশনা ব্যয়</li>
+                                        <li>মেহমানদারি ও সভা সমাবেশ ব্যয়</li>
+                                        <li>নিট উদ্বৃত্ত বা ঘাটতি (অটো হিসাব)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image 2 & 3 Analysis -->
+                    <div class="image-anal-card">
+                        <div class="card-header">
+                            <h4><i class="fa-solid fa-users-gear"></i> ইমেজ ২ ও ৩: শাখা সাংগঠনিক রিপোর্ট ফরম</h4>
+                        </div>
+                        <div class="card-body">
+                            <p class="anal-desc">শাখার সামগ্রিক সাংগঠনিক রিপোর্ট ফরম যা দায়িত্বশীলরা পূরণ করবেন।</p>
+                            <ul class="nested-list">
+                                <li><strong>জনশক্তি স্থিতি:</strong> সদস্য, সদস্য প্রার্থী, কর্মী এবং প্রাথমিক সদস্যদের পূর্বের সংখ্যা, বৃদ্ধি, ঘাটতি এবং বর্তমান সংখ্যা (অটোমেটিক ক্যালকুলেশন)।</li>
+                                <li><strong>দাওয়াত ও গণসংযোগ:</strong> ব্যক্তিগত দাওয়াত, গ্রুপ দাওয়াত, লিফলেট বিতরণ সংখ্যা, আলোচনা সভা ও মিছিল।</li>
+                                <li><strong>সভা ও প্রশিক্ষণ:</strong> শাখা কমিটির বৈঠক, কর্মী সভা, তরবিয়তী মজলিস ও কুরআন শিক্ষা ক্লাস (সংখ্যা ও গড় উপস্থিতি সহ)।</li>
+                                <li><strong>সমাজকল্যাণ ও পাঠাগার:</strong> পাঠাগারে বইয়ের সংখ্যা, পঠিত বইয়ের সংখ্যা, চিকিৎসা সেবা ও ত্রাণ সহায়তার পরিমাণ।</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: Firebase Firestore Schema -->
+            <section id="tab-firebase-schema" class="tab-content">
+                <div class="section-desc">
+                    <p><i class="fa-solid fa-fire-flame-curved"></i> ফায়ারবেস ব্যাকএন্ডের জন্য **Cloud Firestore** ডাটাবেস ডিজাইন এবং **Security Rules** পরিকল্পনা নিচে দেওয়া হলো:</p>
+                </div>
+
+                <div class="firebase-layout">
+                    <!-- Collection 1: Users -->
+                    <div class="firebase-card-item">
+                        <div class="card-header" style="background-color: rgba(226, 136, 12, 0.05); border-bottom: 2px solid var(--accent-color);">
+                            <h4><i class="fa-solid fa-user-shield"></i> users Collection (ব্যবহারকারী প্রোফাইল)</h4>
+                        </div>
+                        <div class="card-body">
+                            <pre class="json-code">
+{
+  "uid": "String (Authentication UID)",
+  "name": "String (মিজানুর রহমান)",
+  "wing": "String (khelafat | chatra | jubo | mohila)",
+  "role": "String (member | worker | secretary | admin)",
+  "branchId": "String (dhaka_khilgaon_05)",
+  "phone": "String (01712345678)",
+  "status": "String (active | pending)",
+  "createdAt": "Timestamp"
+}
+                            </pre>
+                        </div>
+                    </div>
+
+                    <!-- Collection 2: Personal Reports -->
+                    <div class="firebase-card-item">
+                        <div class="card-header" style="background-color: rgba(226, 136, 12, 0.05); border-bottom: 2px solid var(--accent-color);">
+                            <h4><i class="fa-solid fa-list-check"></i> personal_reports Collection (কর্মীদের দৈনিক আমল)</h4>
+                        </div>
+                        <div class="card-body">
+                            <pre class="json-code">
+{
+  "reportId": "String (userId_dateString)",
+  "userId": "String (Foreign Key to users)",
+  "reportType": "String (daily | range | monthly)",
+  "date": "Timestamp (For single day)",
+  "startDate": "Timestamp (For range/monthly)",
+  "endDate": "Timestamp (For range/monthly)",
+  "quran": {
+    "surah": "String (বাকারাহ)",
+    "ayat": "Integer (15)"
+  },
+  "hadithCount": "Integer (2)",
+  "book": {
+    "name": "String (ইসলামের রাষ্ট্রব্যবস্থা)",
+    "pages": "Integer (12)"
+  },
+  "congregationalPrayers": "Integer (5)",
+  "contactsCount": "Integer (3)",
+  "dawahCount": "Integer (2)",
+  "timeSpentHours": "Double (2.5)",
+  "socialServiceType": "String (রক্তদান)",
+  "completedSelfCritique": "Boolean (true)",
+  "isSynced": "Boolean (true)",
+  "syncedAt": "Timestamp"
+}
+                            </pre>
+                        </div>
+                    </div>
+
+
+
+                    
+                    <!-- Collection 3: Branch Baytulmal Reports -->
+                    <div class="firebase-card-item">
+                        <div class="card-header" style="background-color: rgba(226, 136, 12, 0.05); border-bottom: 2px solid var(--accent-color);">
+                            <h4><i class="fa-solid fa-wallet"></i> branch_baytulmal_reports Collection (আয়-ব্যয়)</h4>
+                        </div>
+                        <div class="card-body">
+                            <pre class="json-code">
+{
+  "reportId": "String",
+  "branchId": "String",
+  "month": "String (July 2026)",
+  "income": {
+    "memberEanot": "Number",
+    "sudhiEanot": "Number",
+    "total": "Number"
+  },
+  "expense": {
+    "officeRent": "Number",
+    "publication": "Number",
+    "total": "Number"
+  },
+  "surplus": "Number",
+  "submittedBy": "String (userId)",
+  "createdAt": "Timestamp"
+}
+                            </pre>
+                        </div>
+                    </div>
+
+                    <!-- Collection 4: Branch Organizational Reports -->
+                    <div class="firebase-card-item">
+                        <div class="card-header" style="background-color: rgba(226, 136, 12, 0.05); border-bottom: 2px solid var(--accent-color);">
+                            <h4><i class="fa-solid fa-users-gear"></i> branch_org_reports Collection (জনশক্তি)</h4>
+                        </div>
+                        <div class="card-body">
+                            <pre class="json-code">
+{
+  "reportId": "String",
+  "branchId": "String",
+  "month": "String",
+  "manpower": {
+    "membersCount": "Integer",
+    "workersCount": "Integer"
+  },
+  "programs": {
+    "meetings": "Integer",
+    "dawah": "Integer"
+  },
+  "submittedBy": "String (userId)",
+  "createdAt": "Timestamp"
+}
+                            </pre>
+                        </div>
+                    </div>
+
+                    <!-- Collection 5: Zonal Reports -->
+                    <div class="firebase-card-item">
+                        <div class="card-header" style="background-color: rgba(226, 136, 12, 0.05); border-bottom: 2px solid var(--accent-color);">
+                            <h4><i class="fa-solid fa-map-location-dot"></i> zonal_reports Collection</h4>
+                        </div>
+                        <div class="card-body">
+                            <pre class="json-code">
+{
+  "reportId": "String",
+  "zoneId": "String",
+  "month": "String",
+  "zonalManpower": "Map",
+  "zonalActivities": "Map",
+  "submittedBy": "String (userId)",
+  "createdAt": "Timestamp"
+}
+                            </pre>
+                        </div>
+                    </div>
+
+                    <!-- Collection 6: Commissioner/Chairman Reports -->
+                    <div class="firebase-card-item">
+                        <div class="card-header" style="background-color: rgba(226, 136, 12, 0.05); border-bottom: 2px solid var(--accent-color);">
+                            <h4><i class="fa-solid fa-user-tie"></i> commissioner_reports Collection</h4>
+                        </div>
+                        <div class="card-body">
+                            <pre class="json-code">
+{
+  "reportId": "String",
+  "userId": "String",
+  "month": "String",
+  "dailyDiary": [
+    {
+      "date": "Timestamp",
+      "place": "String",
+      "discussionTopic": "String",
+      "result": "String"
+    }
+  ],
+  "createdAt": "Timestamp"
+}
+                            </pre>
+                        </div>
+                    </div>
+
+
+                    <!-- Firestore Security Rules -->
+                    <div class="firebase-card-item" style="grid-column: span 2;">
+                        <div class="card-header" style="background-color: rgba(226, 136, 12, 0.05); border-bottom: 2px solid var(--accent-color);">
+                            <h4><i class="fa-solid fa-shield-halved"></i> Firestore Security Rules (গোপনীয়তা নিশ্চিতকরণ রুলস)</h4>
+                        </div>
+                        <div class="card-body">
+                            <pre class="json-code">
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ১. ইউজার প্রোফাইল রুলস: নিজে দেখতে ও এডিট করতে পারবে, এডমিন সব পারবে
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // ২. ব্যক্তিগত আমল রুলস: শুধুমাত্র কর্মী নিজের ডেটা দেখতে ও লিখতে পারবে। অন্য কেউ পারবে না।
+    match /personal_reports/{reportId} {
+      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    
+    // ৩. শাখা রিপোর্ট রুলস: শাখার দায়িত্বশীল এবং এডমিনরাই কেবল রিড-রাইট করতে পারবে
+    match /branch_reports/{reportId} {
+      allow read, write: if request.auth != null && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'secretary' ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+  }
+}
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: Technical Architecture -->
+            <section id="tab-architecture" class="tab-content">
+                <div class="section-desc">
+                    <p><i class="fa-solid fa-code"></i> প্রজেক্টের মেইন ডিরেক্টরিতে দুটি প্রধান সাব-ফোল্ডার থাকবে: <strong>mojlish_app (Flutter)</strong> এবং <strong>admin_web (Next.js)</strong>।</p>
+                </div>
+
+                <div class="architecture-grid">
+                    <!-- Flutter Clean Architecture -->
+                    <div class="arch-card">
+                        <div class="arch-card-header">
+                            <h3><i class="fa-mobile-screen-button"></i> Flutter App: Clean Architecture (Feature-Based)</h3>
+                        </div>
+                        <div class="arch-card-body">
+                            <p class="arch-desc">আমাদের ফ্লাটার অ্যাপ্লিকেশনটি ফিচার-বেসড ক্লিন আর্কিটেকচার মেনে তৈরি হবে। প্রতিটি ফিচারের ৩টি প্রধান লেয়ার থাকবে:</p>
+                            
+                            <div class="folder-structure">
+                                <h4>ফোল্ডার বিন্যাস:</h4>
+                                <pre>
+mojlish_app/
+├── android/
+├── ios/
+├── lib/
+│   ├── core/                  # শেয়ার্ড কোড (Network, Local DB, Theme, Errors)
+│   │   ├── database/          # Hive / Isar database (Offline cache)
+│   │   └── theme/             # Design Tokens & Styles
+│   ├── features/              # ফিচার ভিত্তিক মডিউল
+│   │   ├── personal_report/   # ব্যক্তিগত তৎপরতা ফিচার
+│   │   │   ├── data/          # Models, Datasources, Repositories Impl
+│   │   │   ├── domain/        # Entities, Use Cases, Repositories Interface
+│   │   │   └── presentation/  # UI Pages, Widgets, BLoC (State, Event, Bloc)
+│   │   ├── branch_report/     # শাখা রিপোর্ট ফিচার
+│   │   ├── baytulmal/         # বায়তুলমাল রিপোর্ট ফিচার
+│   │   └── member_auth/       # ইউজার লগইন ও রেজিস্ট্রেশন
+│   └── main.dart
+└── pubspec.yaml
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Next.js Admin Web -->
+                    <div class="arch-card">
+                        <div class="arch-card-header">
+                            <h3><i class="fa-globe"></i> Admin Web: Next.js (App Router)</h3>
+                        </div>
+                        <div class="arch-card-body">
+                            <p class="arch-desc">অ্যাডমিন ওয়েব প্যানেলটি Next.js এবং রিঅ্যাক্ট ব্যবহার করে ডেভেলপ করা হবে। এটি দিয়ে সংগঠনের কেন্দ্রীয় এডমিন ও দায়িত্বশীলরা বিভিন্ন শাখার ডেটা পর্যবেক্ষণ ও নিয়ন্ত্রণ করবেন।</p>
+                            
+                            <div class="folder-structure">
+                                <h4>ফোল্ডার বিন্যাস:</h4>
+                                <pre>
+admin_web/
+├── public/
+├── src/
+│   ├── app/                   # Next.js App Router (Pages, Layouts)
+│   │   ├── dashboard/         # এডমিন মেইন ড্যাশবোর্ড
+│   │   ├── branches/          # সকল শাখার তালিকা ও রিপোর্ট ভিউ
+│   │   ├── members/           # নতুন সদস্য আবেদন অনুমোদন
+│   │   └── settings/          # গ্লোবাল কনফিগারেশন
+│   ├── components/            # রিইউজেবল ইউআই কম্পোনেন্টস (Charts, Tables)
+│   ├── hooks/                 # কাস্টম হুকস (Auth, Fetch)
+│   ├── services/              # API সার্ভিসের আদান-প্রদান
+│   └── lib/                   # ইউটিলিটি ফাংশন ও কন্সট্যান্টস
+├── package.json
+└── tailwind.config.js
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Offline Synchronization Logic Section -->
+                <div class="offline-sync-card">
+                    <h3><i class="fa-solid fa-arrows-rotate"></i> অনলাইন-অফলাইন ডাটা সিংক্রোনাইজেশন ফ্লো</h3>
+                    <div class="sync-steps">
+                        <div class="sync-step">
+                            <span class="step-num">১</span>
+                            <h5>লোকাল স্টোরেজ (Offline)</h5>
+                            <p>ইন্টারনেট না থাকলে অ্যাপে এন্ট্রি করা ডেটা সরাসরি **Hive/Isar লোকাল ডাটাবেসে** সেভ হবে এবং ডাটা সিঙ্ক পেন্ডিং হিসেবে কিউ (Queue) তে জমা থাকবে।</p>
+                        </div>
+                        <div class="sync-step">
+                            <span class="step-num">২</span>
+                            <h5>নেটওয়ার্ক ডিটেক্টর</h5>
+                            <p>অ্যাপটি ব্যাকগ্রাউন্ডে **Connectivity API** ব্যবহার করে সার্বক্ষণিক ইন্টারনেট সংযোগ নিরীক্ষণ করবে।</p>
+                        </div>
+                        <div class="sync-step">
+                            <span class="step-num">৩</span>
+                            <h5>অটো সিঙ্ক (Online)</h5>
+                            <p>ইন্টারনেট সংযোগ পাওয়া মাত্রই পেন্ডিং কিউ (Queue) থেকে সমস্ত ডেটা এক এক করে ব্যাকগ্রাউন্ড প্রসেসরের মাধ্যমে সেন্ট্রাল সার্ভারে আপলোড হবে।</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 6: Personal Report -->
+            <section id="tab-personal-report" class="tab-content">
+                <div class="section-desc">
+                    <p><i class="fa-solid fa-circle-info"></i> ডায়েরীর <strong>"ব্যক্তিগত তৎপরতার রিপোর্ট"</strong> (ইমেজ ৬) অনুযায়ী এই দৈনিক ট্র্যাকারটি ডিজাইন করা হয়েছে।</p>
+                </div>
+                
+                <div class="report-tracker-layout">
+                    <!-- Daily Input Form -->
+                    <div class="tracker-form-card">
+                        <div class="card-header">
+                            <h3><i class="fa-regular fa-calendar-plus"></i> আজকের দৈনিক ডাটা এন্ট্রি</h3>
+                            <span class="date-badge">তারিখ: ০৫ জুলাই, ২০২৬</span>
+                        </div>
+                        <form id="daily-tracker-form">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>কুরআন অধ্যয়ন (সূরা ও আয়াত)</label>
+                                    <div class="dual-input">
+                                        <input type="text" placeholder="সূরা" id="quran-surah">
+                                        <input type="number" placeholder="আয়াত সংখ্যা" id="quran-ayat">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>হাদীস অধ্যয়ন (সংখ্যা/বিষয়)</label>
+                                    <input type="text" placeholder="উদা: ২ টি হাদীস" id="hadith-count">
+                                </div>
+                                <div class="form-group">
+                                    <label>ইসলামী সাহিত্য পাঠ (নাম ও পৃষ্ঠা)</label>
+                                    <div class="dual-input">
+                                        <input type="text" placeholder="বইয়ের নাম" id="book-name">
+                                        <input type="number" placeholder="পৃষ্ঠা" id="book-pages">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>জামায়াতে নামায (কত ওয়াক্ত)</label>
+                                    <select id="namaz-cong">
+                                        <option value="5">৫ ওয়াক্ত</option>
+                                        <option value="4">৪ ওয়াক্ত</option>
+                                        <option value="3">৩ ওয়াক্ত</option>
+                                        <option value="2">২ ওয়াক্ত</option>
+                                        <option value="1">১ ওয়াক্ত</option>
+                                        <option value="0">০ ওয়াক্ত</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>যোগাযোগ (ব্যক্তি সংখ্যা)</label>
+                                    <input type="number" value="0" min="0" id="contact-count">
+                                </div>
+                                <div class="form-group">
+                                    <label>দাওয়াত দান (ব্যক্তি সংখ্যা)</label>
+                                    <input type="number" value="0" min="0" id="dawah-count">
+                                </div>
+                                <div class="form-group">
+                                    <label>সময় দান (ঘণ্টা)</label>
+                                    <input type="number" step="0.5" value="0" min="0" id="time-spent">
+                                </div>
+                                <div class="form-group">
+                                    <label>সমাজ সেবা (ধরণ)</label>
+                                    <input type="text" placeholder="উদা: রক্তদান, সাহায্য" id="social-service">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="self-critique">
+                                        <span>आत्म-সমালোচনা করা হয়েছে?</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="alert('ডেটা সফলভাবে সেভ করা হয়েছে!')"><i class="fa-solid fa-floppy-disk"></i> ডাটা সংরক্ষণ করুন</button>
+                        </form>
+                    </div>
+
+                    <!-- Monthly Grid View Mockup -->
+                    <div class="tracker-grid-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-table-cells"></i> মাসিক বিবরণী গ্রিড (জুলাই ২০২৬)</h3>
+                            <button class="btn btn-secondary btn-sm"><i class="fa-solid fa-file-pdf"></i> PDF এক্সপোর্ট</button>
+                        </div>
+                        <div class="grid-table-wrapper">
+                            <table class="grid-table">
+                                <thead>
+                                    <tr>
+                                        <th>তারিখ</th>
+                                        <th>কুরআন</th>
+                                        <th>হাদীস</th>
+                                        <th>সাহিত্য</th>
+                                        <th>জামায়াত</th>
+                                        <th>দাওয়াত</th>
+                                        <th>সময় (ঘণ্টা)</th>
+                                        <th>आत्मসমালোচনা</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="highlight-row">
+                                        <td>০১ জুল</td>
+                                        <td>বাকারাহ (১-১০)</td>
+                                        <td>১টি</td>
+                                        <td>খেলাফত রাষ্ট্রব্যবস্থা (১০পৃ.)</td>
+                                        <td>৫ ওয়াক্ত</td>
+                                        <td>৩ জন</td>
+                                        <td>২ ঘণ্টা</td>
+                                        <td><span class="badge badge-success">হ্যাঁ</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>০২ জুল</td>
+                                        <td>বাকারাহ (১১-২০)</td>
+                                        <td>২টি</td>
+                                        <td>খেলাফত রাষ্ট্রব্যবস্থা (১২পৃ.)</td>
+                                        <td>৪ ওয়াক্ত</td>
+                                        <td>১ জন</td>
+                                        <td>১.৫ ঘণ্টা</td>
+                                        <td><span class="badge badge-success">হ্যাঁ</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>০৩ জুল</td>
+                                        <td>বাকারাহ (২১-৩০)</td>
+                                        <td>০টি</td>
+                                        <td>-</td>
+                                        <td>৫ ওয়াক্ত</td>
+                                        <td>২ জন</td>
+                                        <td>৩ ঘণ্টা</td>
+                                        <td><span class="badge badge-danger">না</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>০৪ জুল</td>
+                                        <td>আলে-ইমরান (১-৫)</td>
+                                        <td>১টি</td>
+                                        <td>ইসলামী আন্দোলন (৫পৃ.)</td>
+                                        <td>৫ ওয়াক্ত</td>
+                                        <td>৪ জন</td>
+                                        <td>২.৫ ঘণ্টা</td>
+                                        <td><span class="badge badge-success">হ্যাঁ</span></td>
+                                    </tr>
+                                    <tr class="empty-row">
+                                        <td colspan="8">অবশিষ্ট দিনগুলোর ডাটা এন্ট্রি সাপেক্ষে এখানে লাইভ যুক্ত হবে...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Tab Switching Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const pageTitle = document.getElementById('page-title');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    // Check if this is an external link (like ui_mockup.html)
+                    const href = this.getAttribute('href');
+                    if (href && !href.startsWith('#')) {
+                        return; // Let default navigation happen
+                    }
+                    
+                    e.preventDefault();
+                    
+                    // Remove active from all items
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    // Add active to clicked item
+                    this.classList.add('active');
+
+                    // Hide all tabs
+                    tabContents.forEach(tab => tab.classList.remove('active'));
+                    
+                    // Show clicked tab
+                    const tabId = 'tab-' + this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+
+                    // Update title
+                    pageTitle.textContent = this.textContent.trim();
+                });
+            });
+
+            // Handle wing change visualization
+            const wingSelect = document.getElementById('wing-select');
+            wingSelect.addEventListener('change', function() {
+                alert(this.options[this.selectedIndex].text + ' এর ইন্টারফেস লোড হচ্ছে...');
+            });
+        });
+    </script>
+</body>
+</html>
