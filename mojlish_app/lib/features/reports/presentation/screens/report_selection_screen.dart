@@ -146,11 +146,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                         onTap: () => Navigator.push(context,
                             MaterialPageRoute(builder: (_) => const ZonalReportBookScreen())),
                       ),
-                      const SizedBox(height: 24),
 
-                      // Info notice
-                      _buildInfoNotice(),
-                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
@@ -246,37 +242,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
     );
   }
 
-  Widget _buildInfoNotice() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: _cardBg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.notifications_active_outlined, color: Color(0xFFF59E0B), size: 20),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('প্রতিদিন রিপোর্ট আপডেট করুন',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: _textLight)),
-                const SizedBox(height: 3),
-                Text(
-                  'ব্যক্তিগত রিপোর্ট প্রতিদিন আপডেট করুন। যেদিন আপডেট করা হবে না, সেদিন "মিসিং" হিসেবে চিহ্নিত হবে।',
-                  style: const TextStyle(color: _textMuted, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 }
 
 class _HubBgPainter extends CustomPainter {
