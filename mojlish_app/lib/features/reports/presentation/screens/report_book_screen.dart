@@ -132,8 +132,6 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
                 _buildMonthGrid(),
                 const SizedBox(height: 16),
                 _buildTodayButton(),
-                const SizedBox(height: 16),
-                _buildBottomCards(),
                 const SizedBox(height: 24),
               ],
             ),
@@ -296,32 +294,7 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
     );
   }
 
-  Widget _buildBottomCards() {
-    return Container(
-      decoration: BoxDecoration(
-        color: _cardBg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _borderColor),
-      ),
-      child: Row(children: [
-        Expanded(child: _navCard(Icons.chevron_left, 'মাসিক গড়', left: true)),
-        Container(width: 1, height: 48, color: _borderColor),
-        Expanded(child: _navCard(Icons.chevron_right, 'মাসিক পরিকল্পনা', left: false)),
-      ]),
-    );
-  }
 
-  Widget _navCard(IconData icon, String label, {required bool left}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      child: Row(
-        mainAxisAlignment: left ? MainAxisAlignment.start : MainAxisAlignment.end,
-        children: left
-            ? [Icon(icon, color: _textMuted, size: 18), const SizedBox(width: 6), Text(label, style: const TextStyle(color: _textLight, fontSize: 13))]
-            : [Text(label, style: const TextStyle(color: _textLight, fontSize: 13)), const SizedBox(width: 6), Icon(icon, color: _textMuted, size: 18)],
-      ),
-    );
-  }
 }
 
 class _BgPainter extends CustomPainter {
