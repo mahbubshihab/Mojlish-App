@@ -296,30 +296,42 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
     int maxLines = 1,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: TextField(
-        controller: ctrl,
-        keyboardType: numeric ? TextInputType.number : TextInputType.text,
-        maxLines: maxLines,
-        style: const TextStyle(color: _textLight, fontSize: 14),
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: hint,
-          labelStyle: const TextStyle(color: _textMuted, fontSize: 12),
-          hintStyle: const TextStyle(color: Color(0xFF4A5568), fontSize: 12),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: _borderColor),
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: _textMuted,
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: _accentGreen, width: 1.5),
+          const SizedBox(height: 6),
+          TextField(
+            controller: ctrl,
+            keyboardType: numeric ? TextInputType.number : TextInputType.text,
+            maxLines: maxLines,
+            style: const TextStyle(color: _textLight, fontSize: 14),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: const TextStyle(color: Color(0xFF4A5568), fontSize: 12),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: _borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: _accentGreen, width: 1.5),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              filled: true,
+              fillColor: const Color(0xFF0A1628),
+              isDense: true,
+            ),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          filled: true,
-          fillColor: const Color(0xFF0A1628),
-          isDense: true,
-        ),
+        ],
       ),
     );
   }
