@@ -5,14 +5,16 @@ import '../../data/services/report_storage_service.dart';
 import '../../data/services/pdf_generator_service.dart';
 
 class BaytulmalReportScreen extends StatefulWidget {
-  const BaytulmalReportScreen({super.key});
+  final int year;
+  final int month;
+
+  const BaytulmalReportScreen({super.key, required this.year, required this.month});
 
   @override
   State<BaytulmalReportScreen> createState() => _BaytulmalReportScreenState();
 }
 
 class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
-  final _now = DateTime.now();
   bool _isSaving = false;
   bool _isExporting = false;
   BaytulmalReportEntry? _currentEntry;
@@ -97,43 +99,45 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
   }
 
   Future<void> _loadCurrentReport() async {
-    final entry = await ReportStorageService.getBaytulmalEntry(_now.year, _now.month);
-    if (entry != null && mounted) {
-      setState(() {
-        _currentEntry = entry;
-        _branchCtrl.text = entry.branchName;
-        _execMemberCountCtrl.text = entry.executiveMemberAyanat;
-        _execMemberTakaCtrl.text = entry.executiveMemberAyanatTaka;
-        _subBranchCountCtrl.text = entry.subBranchAyanat;
-        _subBranchTakaCtrl.text = entry.subBranchAyanatTaka;
-        _suhridCountCtrl.text = entry.suhridAyanat;
-        _suhridTakaCtrl.text = entry.suhridAyanatTaka;
-        _safarIncomeTakaCtrl.text = entry.safarIncomeTaka;
-        _prokashnaIncomeTakaCtrl.text = entry.prokashnaIncomeTaka;
-        _onetimeIncomeTakaCtrl.text = entry.onetimeIncomeTaka;
-        _previousBalanceCtrl.text = entry.previousBalance;
-        _upwardAyanatCtrl.text = entry.upwardAyanat;
-        _upwardAyanatTakaCtrl.text = entry.upwardAyanatTaka;
-        _officeRentTakaCtrl.text = entry.officeRentTaka;
-        _officeCostTakaCtrl.text = entry.officeCostTaka;
-        _safarExpenseTakaCtrl.text = entry.safarExpenseTaka;
-        _transportTakaCtrl.text = entry.transportTaka;
-        _communicationTakaCtrl.text = entry.communicationTaka;
-        _procharTakaCtrl.text = entry.procharTaka;
-        _prokashnaExpenseTakaCtrl.text = entry.prokashnaExpenseTaka;
-        _dibosNameCtrl.text = entry.dibosPalan;
-        _dibosTakaCtrl.text = entry.dibosPatanTaka;
-        _appayanTakaCtrl.text = entry.appayanTaka;
-        _sovaTakaCtrl.text = entry.sovaTaka;
-        _remarksCtrl.text = entry.remarks;
-      });
-    }
+    try {
+      final entry = await ReportStorageService.getBaytulmalEntry(widget.year, widget.month);
+      if (entry != null && mounted) {
+        setState(() {
+          _currentEntry = entry;
+          _branchCtrl.text = entry.branchName;
+          _execMemberCountCtrl.text = entry.executiveMemberAyanat;
+          _execMemberTakaCtrl.text = entry.executiveMemberAyanatTaka;
+          _subBranchCountCtrl.text = entry.subBranchAyanat;
+          _subBranchTakaCtrl.text = entry.subBranchAyanatTaka;
+          _suhridCountCtrl.text = entry.suhridAyanat;
+          _suhridTakaCtrl.text = entry.suhridAyanatTaka;
+          _safarIncomeTakaCtrl.text = entry.safarIncomeTaka;
+          _prokashnaIncomeTakaCtrl.text = entry.prokashnaIncomeTaka;
+          _onetimeIncomeTakaCtrl.text = entry.onetimeIncomeTaka;
+          _previousBalanceCtrl.text = entry.previousBalance;
+          _upwardAyanatCtrl.text = entry.upwardAyanat;
+          _upwardAyanatTakaCtrl.text = entry.upwardAyanatTaka;
+          _officeRentTakaCtrl.text = entry.officeRentTaka;
+          _officeCostTakaCtrl.text = entry.officeCostTaka;
+          _safarExpenseTakaCtrl.text = entry.safarExpenseTaka;
+          _transportTakaCtrl.text = entry.transportTaka;
+          _communicationTakaCtrl.text = entry.communicationTaka;
+          _procharTakaCtrl.text = entry.procharTaka;
+          _prokashnaExpenseTakaCtrl.text = entry.prokashnaExpenseTaka;
+          _dibosNameCtrl.text = entry.dibosPalan;
+          _dibosTakaCtrl.text = entry.dibosPatanTaka;
+          _appayanTakaCtrl.text = entry.appayanTaka;
+          _sovaTakaCtrl.text = entry.sovaTaka;
+          _remarksCtrl.text = entry.remarks;
+        });
+      }
+    } catch (_) {}
   }
 
   BaytulmalReportEntry _buildEntry() {
     return BaytulmalReportEntry(
-      month: _now.month.toString().padLeft(2, '0'),
-      year: _now.year.toString(),
+      month: widget.month.toString().padLeft(2, '0'),
+      year: widget.year.toString(),
       branchName: _branchCtrl.text.trim(),
       executiveMemberAyanat: _execMemberCountCtrl.text.trim(),
       executiveMemberAyanatTaka: _execMemberTakaCtrl.text.trim(),
@@ -196,6 +200,11 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
     }
   }
 
+  String _bn(int n) {
+    const digits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+    return n.toString().split('').map((c) => digits[int.parse(c)]).join();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -238,7 +247,7 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('${_monthNames[_now.month - 1]} ${_now.year} মাসের রিপোর্ট',
+                        Text('${_monthNames[widget.month - 1]} ${_bn(widget.year)} মাসের রিপোর্ট',
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF38BDF8))),
                         Text(_currentEntry != null ? 'সর্বশেষ সেভ করা আছে' : 'এখনো সেভ করা হয়নি',
                             style: TextStyle(fontSize: 12, color: _currentEntry != null ? const Color(0xFF10B981) : const Color(0xFFF59E0B))),
@@ -310,7 +319,7 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
           const SizedBox(width: 10),
           const Text('আয়', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: _accentGreen)),
         ]),
-        const SizedBox(height: 14),
+        const SizedBox(height: 16),
         _twoColRow('নির্বাহী সদস্যের এয়ানত (জন)', _execMemberCountCtrl, 'টাকা', _execMemberTakaCtrl),
         _twoColRow('অধতন শাখা এয়ানত (শাখা টি)', _subBranchCountCtrl, 'টাকা', _subBranchTakaCtrl),
         _twoColRow('সুহৃদ/ভক্তাক্ষী এয়ানত (জন)', _suhridCountCtrl, 'টাকা', _suhridTakaCtrl),
@@ -336,7 +345,7 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
           const SizedBox(width: 10),
           const Text('ব্যয়', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFFEF4444))),
         ]),
-        const SizedBox(height: 14),
+        const SizedBox(height: 16),
         _twoColRow('উর্ধতন এয়ানত পরিশোধ (ধার্যকৃত: ৳)', _upwardAyanatCtrl, 'টাকা', _upwardAyanatTakaCtrl),
         _oneTakaRow('অফিস ভাড়া ও বিল', _officeRentTakaCtrl),
         _oneTakaRow('অফিস খরচ', _officeCostTakaCtrl),
@@ -402,64 +411,101 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
   Widget _field(String label, String hint, TextEditingController ctrl, {int maxLines = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: TextField(
-        controller: ctrl,
-        maxLines: maxLines,
-        style: const TextStyle(color: _textLight, fontSize: 14),
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: hint,
-          labelStyle: const TextStyle(color: _textMuted, fontSize: 12),
-          hintStyle: const TextStyle(color: Color(0xFF4A5568)),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _borderColor),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 6),
+          TextField(
+            controller: ctrl,
+            maxLines: maxLines,
+            style: const TextStyle(color: _textLight, fontSize: 14),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: const TextStyle(color: Color(0xFF4A5568), fontSize: 13),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: _borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFF0EA5E9), width: 1.5),
+              ),
+              filled: true,
+              fillColor: const Color(0xFF0A1628),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            ),
           ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFF0EA5E9), width: 1.5),
-          ),
-          filled: true,
-          fillColor: const Color(0xFF0A1628),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        ),
+        ],
       ),
     );
   }
 
   Widget _twoColRow(String label1, TextEditingController ctrl1, String label2, TextEditingController ctrl2) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(children: [
-        Expanded(child: _miniField(label1, ctrl1)),
-        const SizedBox(width: 8),
-        SizedBox(width: 100, child: _miniField(label2, ctrl2, keyboardType: TextInputType.number)),
-      ]),
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label1, style: const TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 6),
+                _miniField(ctrl1),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 110,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label2, style: const TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 6),
+                _miniField(ctrl2, keyboardType: TextInputType.number),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _oneTakaRow(String label, TextEditingController takaCtrl) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(children: [
-        Expanded(child: Text(label, style: const TextStyle(fontSize: 13, color: Color(0xFFCBD5E1)))),
-        const SizedBox(width: 8),
-        SizedBox(
-          width: 120,
-          child: _miniField('৳ টাকা', takaCtrl, keyboardType: TextInputType.number),
-        ),
-      ]),
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(label, style: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 13, fontWeight: FontWeight.bold)),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 120,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('টাকা', style: TextStyle(color: _textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                _miniField(takaCtrl, keyboardType: TextInputType.number),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _miniField(String label, TextEditingController ctrl, {TextInputType keyboardType = TextInputType.text}) {
+  Widget _miniField(TextEditingController ctrl, {TextInputType keyboardType = TextInputType.text, String hint = ''}) {
     return TextField(
       controller: ctrl,
       keyboardType: keyboardType,
       style: const TextStyle(fontSize: 13, color: _textLight),
       decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(fontSize: 12, color: _textMuted),
+        hintText: hint,
+        hintStyle: const TextStyle(color: Color(0xFF4A5568), fontSize: 12),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: _borderColor),

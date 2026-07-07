@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../data/services/report_storage_service.dart';
 import 'report_book_screen.dart';
-import 'baytulmal_report_screen.dart';
+import 'baytulmal_report_book_screen.dart';
 
 /// রিপোর্টসমূহ — মূল হাব স্ক্রিন, সব রিপোর্টের কার্ড দেখায়
 class ReportSelectionScreen extends StatefulWidget {
@@ -117,7 +117,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                         icon: Icons.account_balance_wallet_outlined,
                         color: const Color(0xFF0EA5E9),
                         onTap: () => Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => const BaytulmalReportScreen())),
+                            MaterialPageRoute(builder: (_) => const BaytulmalReportBookScreen())),
                       ),
                       const SizedBox(height: 12),
 
