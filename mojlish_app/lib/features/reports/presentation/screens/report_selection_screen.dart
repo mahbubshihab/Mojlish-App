@@ -4,6 +4,7 @@ import '../../data/services/report_storage_service.dart';
 import 'report_book_screen.dart';
 import 'baytulmal_report_book_screen.dart';
 import 'sanghotonik_report_book_screen.dart';
+import 'zonal_report_book_screen.dart';
 
 /// রিপোর্টসমূহ — মূল হাব স্ক্রিন, সব রিপোর্টের কার্ড দেখায়
 class ReportSelectionScreen extends StatefulWidget {
@@ -138,12 +139,12 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                       _buildReportCard(
                         title: 'জোনাল রিপোর্ট',
                         subtitle: 'জোনাল পর্যায়ের রিপোর্ট',
-                        badge: 'শীঘ্রই আসছে',
-                        badgeColor: const Color(0xFF6B7280),
+                        badge: 'মাসিক',
+                        badgeColor: Colors.purple,
                         icon: Icons.map_outlined,
                         color: Colors.purple,
-                        disabled: true,
-                        onTap: () => _showComingSoon('জোনাল রিপোর্ট'),
+                        onTap: () => Navigator.push(context,
+                            MaterialPageRoute(builder: (_) => const ZonalReportBookScreen())),
                       ),
                       const SizedBox(height: 24),
 
@@ -160,14 +161,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
     );
   }
 
-  void _showComingSoon(String name) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('$name শীঘ্রই যুক্ত হবে'),
-      backgroundColor: _cardBg,
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-    ));
-  }
+
 
   Widget _buildReportCard({
     required String title,
