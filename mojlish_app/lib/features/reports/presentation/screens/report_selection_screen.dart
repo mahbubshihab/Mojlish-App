@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:mojlish_app/core/theme/theme_manager.dart';
 import '../../data/services/report_storage_service.dart';
 import 'report_book_screen.dart';
 import 'baytulmal_report_book_screen.dart';
@@ -18,13 +19,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
   int _personalFilledDays = 0;
   int _daysInMonth = 30;
   final _now = DateTime.now();
-
-  static const _darkBg = Color(0xFF0D1B2A);
-  static const _cardBg = Color(0xFF162032);
-  static const _borderColor = Color(0xFF2A3F58);
-  static const _accentGreen = Color(0xFF10B981);
-  static const _textLight = Color(0xFFE2E8F0);
-  static const _textMuted = Color(0xFF94A3B8);
 
   static const _monthNames = [
     'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
@@ -57,107 +51,148 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _darkBg,
-      appBar: AppBar(
-        backgroundColor: _cardBg,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: _textLight, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'রিপোর্টসমূহ',
-              style: TextStyle(color: _accentGreen, fontSize: 18, fontWeight: FontWeight.bold),
+    return AnimatedBuilder(
+      animation: themeManager,
+      builder: (context, _) {
+        final isDark = themeManager.isDarkMode;
+
+        // Theme colors
+        final bg = isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF8FAFC);
+        final appBarBg = isDark ? const Color(0xFF162032) : Colors.white;
+        final cardBg = isDark ? const Color(0xFF162032) : Colors.white;
+        final borderColor = isDark ? const Color(0xFF2A3F58) : const Color(0xFFE2E8F0);
+        final textLight = isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
+        final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+        const accentGreen = Color(0xFF10B981);
+
+        return Scaffold(
+          backgroundColor: bg,
+          appBar: AppBar(
+            backgroundColor: appBarBg,
+            elevation: 0,
+            centerTitle: true,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios_new, color: textLight, size: 20),
+              onPressed: () => Navigator.pop(context),
             ),
-            Text(
-              '${_monthNames[_now.month - 1]} ${_bn(_now.year)}',
-              style: const TextStyle(color: _textMuted, fontSize: 11),
-            ),
-          ],
-        ),
-      ),
-      body: Stack(
-        children: [
-          Positioned.fill(child: CustomPaint(painter: _HubBgPainter())),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-                // Cards list
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    children: [
-                      // ব্যক্তিগত রিপোর্ট
-                      _buildReportCard(
-                        title: 'ব্যক্তিগত তৎপরতার রিপোর্ট',
-                        subtitle: '${_monthNames[_now.month - 1]} ${_bn(_now.year)} মাস',
-                        badge: '$_personalFilledDays/$_daysInMonth দিন আপডেট',
-                        badgeColor: _personalFilledDays >= _now.day ? const Color(0xFF059669) : const Color(0xFFF59E0B),
-                        icon: Icons.person_outline,
-                        color: const Color(0xFF10B981),
-                        onTap: () async {
-                          await Navigator.push(context,
-                              MaterialPageRoute(builder: (_) => const ReportBookScreen()));
-                          _loadStats();
-                        },
-                      ),
-                      const SizedBox(height: 12),
-
-                      // বায়তুলমাল রিপোর্ট
-                      _buildReportCard(
-                        title: 'শাখা বায়তুলমাল রিপোর্ট',
-                        subtitle: 'মাসিক আয়-ব্যয় রিপোর্ট',
-                        badge: 'মাসিক',
-                        badgeColor: const Color(0xFF0EA5E9),
-                        icon: Icons.account_balance_wallet_outlined,
-                        color: const Color(0xFF0EA5E9),
-                        onTap: () => Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => const BaytulmalReportBookScreen())),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // সাংগঠনিক রিপোর্ট
-                      _buildReportCard(
-                        title: 'শাখা সাংগঠনিক রিপোর্ট',
-                        subtitle: 'মাসিক সাংগঠনিক রিপোর্ট',
-                        badge: 'মাসিক',
-                        badgeColor: Colors.orange,
-                        icon: Icons.group_work_outlined,
-                        color: Colors.orange,
-                        onTap: () => Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => const SanghotonikReportBookScreen())),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // জোনাল রিপোর্ট
-                      _buildReportCard(
-                        title: 'জোনাল রিপোর্ট',
-                        subtitle: 'জোনাল পর্যায়ের রিপোর্ট',
-                        badge: 'মাসিক',
-                        badgeColor: Colors.purple,
-                        icon: Icons.map_outlined,
-                        color: Colors.purple,
-                        onTap: () => Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => const ZonalReportBookScreen())),
-                      ),
-
-                    ],
-                  ),
+            title: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'রিপোর্টসমূহ',
+                  style: TextStyle(color: accentGreen, fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  '${_monthNames[_now.month - 1]} ${_bn(_now.year)}',
+                  style: TextStyle(color: textMuted, fontSize: 11),
                 ),
               ],
             ),
-        ],
-      ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  isDark ? Icons.wb_sunny : Icons.nightlight_round,
+                  color: isDark ? Colors.yellow : Colors.black87,
+                ),
+                onPressed: () {
+                  themeManager.toggleTheme();
+                },
+              ),
+            ],
+          ),
+          body: Stack(
+            children: [
+              Positioned.fill(child: CustomPaint(painter: _HubBgPainter(isDark: isDark))),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+                  // Cards list
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      children: [
+                        // ব্যক্তিগত রিপোর্ট
+                        _buildReportCard(
+                          title: 'ব্যক্তিগত তৎপরতার রিপোর্ট',
+                          subtitle: '${_monthNames[_now.month - 1]} ${_bn(_now.year)} মাস',
+                          badge: '$_personalFilledDays/$_daysInMonth দিন আপডেট',
+                          badgeColor: _personalFilledDays >= _now.day ? const Color(0xFF059669) : const Color(0xFFF59E0B),
+                          icon: Icons.person_outline,
+                          color: const Color(0xFF10B981),
+                          cardBg: cardBg,
+                          borderColor: borderColor,
+                          textLight: textLight,
+                          textMuted: textMuted,
+                          onTap: () async {
+                            await Navigator.push(context,
+                                MaterialPageRoute(builder: (_) => const ReportBookScreen()));
+                            _loadStats();
+                          },
+                        ),
+                        const SizedBox(height: 12),
+
+                        // বায়তুলমাল রিপোর্ট
+                        _buildReportCard(
+                          title: 'শাখা বায়তুলমাল রিপোর্ট',
+                          subtitle: 'মাসিক আয়-ব্যয় রিপোর্ট',
+                          badge: 'মাসিক',
+                          badgeColor: const Color(0xFF0EA5E9),
+                          icon: Icons.account_balance_wallet_outlined,
+                          color: const Color(0xFF0EA5E9),
+                          cardBg: cardBg,
+                          borderColor: borderColor,
+                          textLight: textLight,
+                          textMuted: textMuted,
+                          onTap: () => Navigator.push(context,
+                              MaterialPageRoute(builder: (_) => const BaytulmalReportBookScreen())),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // সাংগঠনিক রিপোর্ট
+                        _buildReportCard(
+                          title: 'শাখা সাংগঠনিক রিপোর্ট',
+                          subtitle: 'মাসিক সাংগঠনিক রিপোর্ট',
+                          badge: 'মাসিক',
+                          badgeColor: Colors.orange,
+                          icon: Icons.group_work_outlined,
+                          color: Colors.orange,
+                          cardBg: cardBg,
+                          borderColor: borderColor,
+                          textLight: textLight,
+                          textMuted: textMuted,
+                          onTap: () => Navigator.push(context,
+                              MaterialPageRoute(builder: (_) => const SanghotonikReportBookScreen())),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // জোনাল রিপোর্ট
+                        _buildReportCard(
+                          title: 'জোনাল রিপোর্ট',
+                          subtitle: 'জোনাল পর্যায়ের রিপোর্ট',
+                          badge: 'মাসিক',
+                          badgeColor: Colors.purple,
+                          icon: Icons.map_outlined,
+                          color: Colors.purple,
+                          cardBg: cardBg,
+                          borderColor: borderColor,
+                          textLight: textLight,
+                          textMuted: textMuted,
+                          onTap: () => Navigator.push(context,
+                              MaterialPageRoute(builder: (_) => const ZonalReportBookScreen())),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
-
-
 
   Widget _buildReportCard({
     required String title,
@@ -166,6 +201,10 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
     required Color badgeColor,
     required IconData icon,
     required Color color,
+    required Color cardBg,
+    required Color borderColor,
+    required Color textLight,
+    required Color textMuted,
     required VoidCallback onTap,
     bool disabled = false,
   }) {
@@ -173,10 +212,10 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: disabled ? _cardBg.withValues(alpha: 0.5) : _cardBg,
+          color: disabled ? cardBg.withValues(alpha: 0.5) : cardBg,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: disabled ? _borderColor.withValues(alpha: 0.5) : _borderColor,
+            color: disabled ? borderColor.withValues(alpha: 0.5) : borderColor,
           ),
           boxShadow: disabled ? [] : [
             BoxShadow(
@@ -209,13 +248,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                   Text(
                     title,
                     style: TextStyle(
-                      color: disabled ? _textMuted : _textLight,
+                      color: disabled ? textMuted : textLight,
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                     ),
                   ),
                   const SizedBox(height: 3),
-                  Text(subtitle, style: const TextStyle(color: _textMuted, fontSize: 12)),
+                  Text(subtitle, style: TextStyle(color: textMuted, fontSize: 12)),
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -234,20 +273,29 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
             Icon(
               Icons.arrow_forward_ios,
               size: 14,
-              color: disabled ? _borderColor : _textMuted,
+              color: disabled ? borderColor : textMuted,
             ),
           ],
         ),
       ),
     );
   }
-
-
 }
 
 class _HubBgPainter extends CustomPainter {
+  final bool isDark;
+  _HubBgPainter({required this.isDark});
+
   @override
   void paint(Canvas canvas, Size size) {
+    if (!isDark) {
+      // Light background grid
+      final grid = Paint()..color = Colors.grey.withValues(alpha: 0.05)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+      for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
+      for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+      return;
+    }
+
     final fill = Paint()..color = const Color(0xFF10B981).withValues(alpha: 0.025)..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.05), 130, fill);
     canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.5), 100, fill);

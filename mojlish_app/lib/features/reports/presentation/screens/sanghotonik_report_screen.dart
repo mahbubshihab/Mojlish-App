@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:mojlish_app/core/theme/theme_manager.dart';
 import '../../data/models/sanghotonik_report_entry.dart';
 import '../../data/services/report_storage_service.dart';
 
@@ -71,15 +72,15 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
   final _socialWelfareTakaCtrl = TextEditingController();
   final _remarksCtrl = TextEditingController();
 
-  static const _darkBg = Color(0xFF0D1B2A);
-  static const _cardBg = Color(0xFF162032);
-  static const _borderColor = Color(0xFF2A3F58);
-  static const _accentOrange = Colors.orange;
-  static const _accentGreen = Color(0xFF10B981);
-  static const _textLight = Color(0xFFE2E8F0);
-  static const _textMuted = Color(0xFF94A3B8);
-
-
+  bool get _isDark => themeManager.isDarkMode;
+  Color get _darkBg => _isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF8FAFC);
+  Color get _cardBg => _isDark ? const Color(0xFF162032) : Colors.white;
+  Color get _borderColor => _isDark ? const Color(0xFF2A3F58) : const Color(0xFFCBD5E1);
+  Color get _accentOrange => Colors.orange;
+  Color get _accentGreen => const Color(0xFF10B981);
+  Color get _textLight => _isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
+  Color get _textMuted => _isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+  Color get _inputFill => _isDark ? const Color(0xFF0A1628) : const Color(0xFFF1F5F9);
 
   @override
   void initState() {
@@ -237,111 +238,117 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
       'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
       'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর',
     ];
-    return Scaffold(
-      backgroundColor: _darkBg,
-      appBar: AppBar(
-        title: const Text('শাখা সাংগঠনিক রিপোর্ট',
-            style: TextStyle(color: _textLight, fontWeight: FontWeight.bold, fontSize: 17)),
-        centerTitle: true,
-        backgroundColor: _cardBg,
-        iconTheme: const IconThemeData(color: _textLight),
-        elevation: 0,
-        actions: [
-          if (_currentEntry != null && _isLocked)
-            TextButton.icon(
-              icon: const Icon(Icons.edit, color: _accentOrange, size: 16),
-              label: const Text('এডিট করুন', style: TextStyle(color: _accentOrange, fontSize: 13, fontWeight: FontWeight.bold)),
-              onPressed: () => setState(() => _isLocked = false),
-            ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          Positioned.fill(child: CustomPaint(painter: _BgPainter())),
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Banner
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: _accentOrange.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _accentOrange.withValues(alpha: 0.3)),
-                  ),
-                  child: Row(children: [
-                    const Icon(Icons.group_work, color: _accentOrange, size: 22),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('${monthNames[widget.month - 1]} ${_bn(widget.year)} মাসের রিপোর্ট',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: _accentOrange)),
-                        Text(_currentEntry != null ? 'সর্বশেষ সেভ করা আছে' : 'এখনো সেভ করা হয়নি',
-                            style: TextStyle(fontSize: 12, color: _currentEntry != null ? const Color(0xFF10B981) : const Color(0xFFF59E0B))),
+
+    return AnimatedBuilder(
+      animation: themeManager,
+      builder: (context, _) {
+        return Scaffold(
+          backgroundColor: _darkBg,
+          appBar: AppBar(
+            title: const Text('শাখা সাংগঠনিক রিপোর্ট',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+            centerTitle: true,
+            backgroundColor: _cardBg,
+            iconTheme: IconThemeData(color: _textLight),
+            elevation: 0,
+            actions: [
+              if (_currentEntry != null && _isLocked)
+                TextButton.icon(
+                  icon: Icon(Icons.edit, color: _accentOrange, size: 16),
+                  label: Text('এডিট করুন', style: TextStyle(color: _accentOrange, fontSize: 13, fontWeight: FontWeight.bold)),
+                  onPressed: () => setState(() => _isLocked = false),
+                ),
+            ],
+          ),
+          body: Stack(
+            children: [
+              Positioned.fill(child: CustomPaint(painter: _BgPainter(isDark: _isDark))),
+              SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Banner
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: _accentOrange.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: _accentOrange.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(children: [
+                        Icon(Icons.group_work, color: _accentOrange, size: 22),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text('${monthNames[widget.month - 1]} ${_bn(widget.year)} মাসের রিপোর্ট',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: _accentOrange)),
+                            Text(_currentEntry != null ? 'সর্বশেষ সেভ করা আছে' : 'এখনো সেভ করা হয়নি',
+                                style: TextStyle(fontSize: 12, color: _currentEntry != null ? const Color(0xFF10B981) : const Color(0xFFF59E0B))),
+                          ]),
+                        ),
                       ]),
                     ),
-                  ]),
-                ),
-                const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                // Branch
-                _sectionHeader('শাখার তথ্য'),
-                _field('শাখার নাম', 'শাখার নাম লিখুন', _branchCtrl),
-                const SizedBox(height: 20),
+                    // Branch
+                    _sectionHeader('শাখার তথ্য'),
+                    _field('শাখার নাম', 'শাখার নাম লিখুন', _branchCtrl),
+                    const SizedBox(height: 20),
 
-                // জনশক্তি (Manpower)
-                _manpowerSection(),
-                const SizedBox(height: 20),
+                    // জনশক্তি (Manpower)
+                    _manpowerSection(),
+                    const SizedBox(height: 20),
 
-                // দাওয়াত
-                _dawahSection(),
-                const SizedBox(height: 20),
+                    // দাওয়াত
+                    _dawahSection(),
+                    const SizedBox(height: 20),
 
-                // সংগঠন
-                _organizationSection(),
-                const SizedBox(height: 20),
+                    // সংগঠন
+                    _organizationSection(),
+                    const SizedBox(height: 20),
 
-                // সভাসমূহ
-                _meetingsSection(),
-                const SizedBox(height: 20),
+                    // সভাসমূহ
+                    _meetingsSection(),
+                    const SizedBox(height: 20),
 
-                // অন্যান্য
-                _miscSection(),
-                const SizedBox(height: 20),
+                    // অন্যান্য
+                    _miscSection(),
+                    const SizedBox(height: 20),
 
-                // মন্তব্য
-                _sectionHeader('মন্তব্য'),
-                _field('মন্তব্য (সমস্যা ও সম্ভাবনা)', 'কোনো বিশেষ তথ্য...', _remarksCtrl, maxLines: 3),
-                const SizedBox(height: 24),
+                    // মন্তব্য
+                    _sectionHeader('মন্তব্য'),
+                    _field('মন্তব্য (সমস্যা ও সম্ভাবনা)', 'কোনো বিশেষ তথ্য...', _remarksCtrl, maxLines: 3),
+                    const SizedBox(height: 24),
 
-                // Save button
-                if (!_isLocked) ...[
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton.icon(
-                      onPressed: _isSaving ? null : _save,
-                      icon: _isSaving
-                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                          : const Icon(Icons.save, color: Colors.white),
-                      label: Text(_isSaving ? 'সেভ হচ্ছে...' : 'রিপোর্ট সেভ করুন',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _accentOrange,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    // Save button
+                    if (!_isLocked) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton.icon(
+                          onPressed: _isSaving ? null : _save,
+                          icon: _isSaving
+                              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : const Icon(Icons.save, color: Colors.white),
+                          label: Text(_isSaving ? 'সেভ হচ্ছে...' : 'রিপোর্ট সেভ করুন',
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _accentOrange,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ],
-            ),
+                      const SizedBox(height: 20),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -350,7 +357,7 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
       decoration: BoxDecoration(color: _cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: _borderColor)),
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('জনশক্তি', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentOrange)),
+        Text('জনশক্তি', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentOrange)),
         const SizedBox(height: 14),
         _threeColRow('সদস্য সংখ্যা', _sodossoCountCtrl, 'বৃদ্ধি', _sodossoBridhiCtrl, 'ঘাটতি', _sodossoGhattiCtrl),
         _threeColRow('সদস্য প্রার্থী', _sodossoPrarthiCountCtrl, 'বৃদ্ধি', _sodossoPrarthiBridhiCtrl, 'ঘাটতি', _sodossoPrarthiGhattiCtrl),
@@ -366,7 +373,7 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
       decoration: BoxDecoration(color: _cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: _borderColor)),
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('দাওয়াত ও গণসংযোগ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentOrange)),
+        Text('দাওয়াত ও গণসংযোগ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentOrange)),
         const SizedBox(height: 14),
         _twoColRow('ব্যক্তিগত দাওয়াত দান (সংখ্যা)', _dawahPersonalCountCtrl, 'উপস্থিতি (গড়)', _dawahPersonalPresCtrl),
         _twoColRow('গ্রুপ দাওয়াত (সংখ্যা)', _dawahGroupCountCtrl, 'উপস্থিতি (গড়)', _dawahGroupPresCtrl),
@@ -381,7 +388,7 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
       decoration: BoxDecoration(color: _cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: _borderColor)),
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('সংগঠন', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentOrange)),
+        Text('সংগঠন', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentOrange)),
         const SizedBox(height: 14),
         _twoColRow('প্রশাসনিক ইউনিট (সংখ্যা)', _adminUnitCountCtrl, 'সংগঠন বা নাম', _adminUnitNameCtrl),
         _field('মসজিদ ভিত্তিক সংগঠন (সংখ্যা)', 'সংখ্যা', _mosqueOrgCountCtrl),
@@ -394,7 +401,7 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
       decoration: BoxDecoration(color: _cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: _borderColor)),
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('সভাসমূহ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentOrange)),
+        Text('সভাসহ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentOrange)),
         const SizedBox(height: 14),
         _twoColRow('সাধারণ সভা (সংখ্যা)', _generalMeetingCountCtrl, 'উপস্থিতি (গড়)', _generalMeetingPresCtrl),
         _twoColRow('কর্মী সভা / সমাবেশ', _kormiMeetingCountCtrl, 'উপস্থিতি (গড়)', _kormiMeetingPresCtrl),
@@ -407,7 +414,7 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
       decoration: BoxDecoration(color: _cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: _borderColor)),
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('বায়তুলমাল, প্রচার ও লাইব্রেরি', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentOrange)),
+        Text('বায়তুলমাল, প্রচার ও লাইব্রেরি', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentOrange)),
         const SizedBox(height: 14),
         _twoColRow('বায়তুলমাল মোট আয় (৳)', _totalIncomeCtrl, 'মোট ব্যয় (৳)', _totalExpenseCtrl),
         _twoColRow('সংবাদ বিজ্ঞপ্তি (সংখ্যা)', _newsReleaseCountCtrl, 'পোস্টার প্রকাশিত', _posterPublishedCtrl),
@@ -434,30 +441,30 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
+          Text(label, style: TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
           const SizedBox(height: 6),
           TextField(
             controller: ctrl,
             maxLines: maxLines,
             enabled: !_isLocked,
-            style: const TextStyle(color: _textLight, fontSize: 14),
+            style: TextStyle(color: _textLight, fontSize: 14),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: const TextStyle(color: Color(0xFF4A5568), fontSize: 13),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: _borderColor),
+                borderSide: BorderSide(color: _borderColor),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: _accentOrange, width: 1.5),
+                borderSide: BorderSide(color: _accentOrange, width: 1.5),
               ),
               disabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(color: _borderColor.withValues(alpha: 0.5)),
               ),
               filled: true,
-              fillColor: const Color(0xFF0A1628),
+              fillColor: _inputFill,
               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             ),
           ),
@@ -475,7 +482,7 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label1, style: const TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
+                Text(label1, style: TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
                 _miniField(ctrl1),
               ],
@@ -486,7 +493,7 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label2, style: const TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
+                Text(label2, style: TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
                 _miniField(ctrl2),
               ],
@@ -511,7 +518,7 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('সংখ্যা', style: TextStyle(color: _textMuted, fontSize: 11)),
+                    const Text('সংখ্যা', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11)),
                     const SizedBox(height: 4),
                     _miniField(ctrl1),
                   ],
@@ -522,7 +529,7 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(label2, style: const TextStyle(color: _textMuted, fontSize: 11)),
+                    Text(label2, style: TextStyle(color: _textMuted, fontSize: 11)),
                     const SizedBox(height: 4),
                     _miniField(ctrl2),
                   ],
@@ -533,7 +540,7 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(label3, style: const TextStyle(color: _textMuted, fontSize: 11)),
+                    Text(label3, style: TextStyle(color: _textMuted, fontSize: 11)),
                     const SizedBox(height: 4),
                     _miniField(ctrl3),
                   ],
@@ -550,22 +557,22 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
     return TextField(
       controller: ctrl,
       enabled: !_isLocked,
-      style: const TextStyle(fontSize: 13, color: _textLight),
+      style: TextStyle(fontSize: 13, color: _textLight),
       decoration: InputDecoration(
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _borderColor),
+          borderSide: BorderSide(color: _borderColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _accentOrange),
+          borderSide: BorderSide(color: _accentOrange),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: _borderColor.withValues(alpha: 0.4)),
         ),
         filled: true,
-        fillColor: const Color(0xFF0A1628),
+        fillColor: _inputFill,
         contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         isDense: true,
       ),
@@ -574,8 +581,18 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
 }
 
 class _BgPainter extends CustomPainter {
+  final bool isDark;
+  _BgPainter({required this.isDark});
+
   @override
   void paint(Canvas canvas, Size size) {
+    if (!isDark) {
+      final grid = Paint()..color = Colors.grey.withValues(alpha: 0.05)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+      for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
+      for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+      return;
+    }
+
     final fill = Paint()..color = Colors.orange.withValues(alpha: 0.025)..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.05), 130, fill);
     canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.5), 100, fill);

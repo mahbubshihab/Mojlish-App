@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:mojlish_app/core/theme/theme_manager.dart';
 import '../../data/models/daily_personal_entry.dart';
 import '../../data/services/report_storage_service.dart';
 
@@ -17,56 +18,79 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
   // কুরআন
   final _quranSuraCtrl = TextEditingController();
   final _quranAyahCtrl = TextEditingController();
+
   // হাদিস
-  final _hadithCtrl = TextEditingController();
+  final _hadithCountCtrl = TextEditingController();
+  final _hadithTopicCtrl = TextEditingController();
+
   // সাহিত্য
-  final _islamicLitCtrl = TextEditingController();
-  final _otherLitCtrl = TextEditingController();
+  final _islamicLitPagesCtrl = TextEditingController();
+  final _islamicLitBookCtrl = TextEditingController();
+
   // পাঠ্যপুস্তক
   final _textbookCtrl = TextEditingController();
-  // জামায়াতে নামাজ
+
+  // জামায়াতে নামাজ এবং আত্মবিচার
   final _jamaatCtrl = TextEditingController();
-  // যোগাযোগ
-  final _contactNameCtrl = TextEditingController();
+  bool _selfAnalysisVal = false;
+
+  // দাওয়াত ও জনসংযোগ
   final _contactCountCtrl = TextEditingController();
-  // দাওয়াত
-  final _dawahCtrl = TextEditingController();
-  // সময় দান
-  final _timeServiceCtrl = TextEditingController();
-  // সমাজ সেবা
-  final _socialServiceCtrl = TextEditingController();
+  final _contactNameCtrl = TextEditingController();
+  final _dawahMaterialsCtrl = TextEditingController();
+
+  // সাংগঠনিক কাজ
+  final _meetingNameCtrl = TextEditingController();
+  final _orgTimeCtrl = TextEditingController();
+  final _memberContactCountCtrl = TextEditingController();
+  final _memberContactNameCtrl = TextEditingController();
+
+  // বিবিধ
+  final _newspaperTimeCtrl = TextEditingController();
+  final _physicalExerciseTimeCtrl = TextEditingController();
+  final _familyWelfareTimeCtrl = TextEditingController();
 
   bool _isSaving = false;
   bool _isLoading = true;
   bool _isLocked = true;
   bool _entryExists = false;
 
-  static const _darkBg = Color(0xFF0D1B2A);
-  static const _cardBg = Color(0xFF162032);
-  static const _borderColor = Color(0xFF2A3F58);
-  static const _accentGreen = Color(0xFF10B981);
-  static const _textLight = Color(0xFFE2E8F0);
-  static const _textMuted = Color(0xFF94A3B8);
+  late String _dateKey;
 
   @override
   void initState() {
     super.initState();
+    final d = widget.date;
+    _dateKey = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
     _loadExistingEntry();
   }
 
   @override
   void dispose() {
-    for (final c in [
-      _quranSuraCtrl, _quranAyahCtrl, _hadithCtrl, _islamicLitCtrl,
-      _otherLitCtrl, _textbookCtrl, _jamaatCtrl, _contactNameCtrl,
-      _contactCountCtrl, _dawahCtrl, _timeServiceCtrl, _socialServiceCtrl,
+    for (final ctrl in [
+      _quranSuraCtrl,
+      _quranAyahCtrl,
+      _hadithCountCtrl,
+      _hadithTopicCtrl,
+      _islamicLitPagesCtrl,
+      _islamicLitBookCtrl,
+      _textbookCtrl,
+      _jamaatCtrl,
+      _contactCountCtrl,
+      _contactNameCtrl,
+      _dawahMaterialsCtrl,
+      _meetingNameCtrl,
+      _orgTimeCtrl,
+      _memberContactCountCtrl,
+      _memberContactNameCtrl,
+      _newspaperTimeCtrl,
+      _physicalExerciseTimeCtrl,
+      _familyWelfareTimeCtrl
     ]) {
-      c.dispose();
+      ctrl.dispose();
     }
     super.dispose();
   }
-
-  String get _dateKey => ReportStorageService.dateKey(widget.date);
 
   Future<void> _loadExistingEntry() async {
     try {
@@ -75,18 +99,25 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
         setState(() {
           _entryExists = true;
           _isLocked = true;
-          _quranSuraCtrl.text = entry.quranSura.isNotEmpty ? entry.quranSura : entry.quranStudy;
+          _quranSuraCtrl.text = entry.quranSura;
           _quranAyahCtrl.text = entry.quranAyah;
-          _hadithCtrl.text = entry.hadithStudy;
-          _islamicLitCtrl.text = entry.islamicLiterature;
-          _otherLitCtrl.text = entry.otherLiterature;
-          _textbookCtrl.text = entry.textbookStudy;
+          _hadithCountCtrl.text = entry.hadithCount.isEmpty ? entry.hadithStudy : entry.hadithCount;
+          _hadithTopicCtrl.text = entry.hadithTopic;
+          _islamicLitPagesCtrl.text = entry.islamicLitPages.isEmpty ? entry.islamicLiterature : entry.islamicLitPages;
+          _islamicLitBookCtrl.text = entry.islamicLitBook;
+          _textbookCtrl.text = entry.textbookHours.isEmpty ? entry.textbookStudy : entry.textbookHours;
           _jamaatCtrl.text = entry.jamaatPrayer;
-          _contactNameCtrl.text = entry.contactName.isNotEmpty ? entry.contactName : entry.contact;
+          _selfAnalysisVal = (entry.selfAnalysis == 'হ্যাঁ' || entry.selfAnalysis == 'yes' || entry.selfAnalysis == '1');
           _contactCountCtrl.text = entry.contactCount;
-          _dawahCtrl.text = entry.dawah;
-          _timeServiceCtrl.text = entry.timeService.isNotEmpty ? entry.timeService : entry.volunteering;
-          _socialServiceCtrl.text = entry.socialService;
+          _contactNameCtrl.text = entry.contactName;
+          _dawahMaterialsCtrl.text = entry.dawahMaterials.isEmpty ? entry.dawah : entry.dawahMaterials;
+          _meetingNameCtrl.text = entry.meetingName;
+          _orgTimeCtrl.text = entry.orgTime.isEmpty ? entry.timeService : entry.orgTime;
+          _memberContactCountCtrl.text = entry.memberContactCount;
+          _memberContactNameCtrl.text = entry.memberContactName;
+          _newspaperTimeCtrl.text = entry.newspaperTime;
+          _physicalExerciseTimeCtrl.text = entry.physicalExerciseTime;
+          _familyWelfareTimeCtrl.text = entry.familyWelfareTime;
         });
       } else {
         setState(() {
@@ -94,9 +125,7 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
           _isLocked = false;
         });
       }
-    } catch (e) {
-      debugPrint('Error loading existing entry: $e');
-    } finally {
+    } catch (_) {} finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -109,16 +138,23 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
       date: _dateKey,
       quranSura: _quranSuraCtrl.text.trim(),
       quranAyah: _quranAyahCtrl.text.trim(),
-      hadithStudy: _hadithCtrl.text.trim(),
-      islamicLiterature: _islamicLitCtrl.text.trim(),
-      otherLiterature: _otherLitCtrl.text.trim(),
-      textbookStudy: _textbookCtrl.text.trim(),
+      hadithCount: _hadithCountCtrl.text.trim(),
+      hadithTopic: _hadithTopicCtrl.text.trim(),
+      islamicLitPages: _islamicLitPagesCtrl.text.trim(),
+      islamicLitBook: _islamicLitBookCtrl.text.trim(),
+      textbookHours: _textbookCtrl.text.trim(),
       jamaatPrayer: _jamaatCtrl.text.trim(),
-      contactName: _contactNameCtrl.text.trim(),
+      selfAnalysis: _selfAnalysisVal ? 'হ্যাঁ' : 'না',
       contactCount: _contactCountCtrl.text.trim(),
-      dawah: _dawahCtrl.text.trim(),
-      timeService: _timeServiceCtrl.text.trim(),
-      socialService: _socialServiceCtrl.text.trim(),
+      contactName: _contactNameCtrl.text.trim(),
+      dawahMaterials: _dawahMaterialsCtrl.text.trim(),
+      meetingName: _meetingNameCtrl.text.trim(),
+      orgTime: _orgTimeCtrl.text.trim(),
+      memberContactCount: _memberContactCountCtrl.text.trim(),
+      memberContactName: _memberContactNameCtrl.text.trim(),
+      newspaperTime: _newspaperTimeCtrl.text.trim(),
+      physicalExerciseTime: _physicalExerciseTimeCtrl.text.trim(),
+      familyWelfareTime: _familyWelfareTimeCtrl.text.trim(),
     );
     await ReportStorageService.savePersonalEntry(entry);
     setState(() {
@@ -129,8 +165,8 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('রিপোর্ট সেভ করা হয়েছে ✓'),
-          backgroundColor: _accentGreen,
+          content: const Text('রিপোর্ট সেভ করা হয়েছে ✓', style: TextStyle(fontWeight: FontWeight.bold)),
+          backgroundColor: const Color(0xFF10B981),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
@@ -154,168 +190,185 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _darkBg,
-      appBar: AppBar(
-        backgroundColor: _cardBg,
-        iconTheme: const IconThemeData(color: _textLight),
-        centerTitle: true,
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(_formattedDate,
-                style: const TextStyle(color: _textLight, fontSize: 13, fontWeight: FontWeight.bold)),
-            Text('দৈনিক রিপোর্ট এন্ট্রি',
-                style: const TextStyle(color: _textMuted, fontSize: 10)),
-          ],
-        ),
-        actions: [
-          if (_entryExists && _isLocked)
-            TextButton.icon(
-              icon: const Icon(Icons.edit, color: _accentGreen, size: 16),
-              label: const Text('এডিট করুন', style: TextStyle(color: _accentGreen, fontSize: 13, fontWeight: FontWeight.bold)),
-              onPressed: () => setState(() => _isLocked = false),
+    return AnimatedBuilder(
+      animation: themeManager,
+      builder: (context, _) {
+        final isDark = themeManager.isDarkMode;
+
+        // Theme colors
+        final bg = isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF8FAFC);
+        final appBarBg = isDark ? const Color(0xFF162032) : Colors.white;
+        final cardBg = isDark ? const Color(0xFF162032) : Colors.white;
+        final borderColor = isDark ? const Color(0xFF2A3F58) : const Color(0xFFE2E8F0);
+        final textLight = isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
+        final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+        final inputFill = isDark ? const Color(0xFF0A1628) : const Color(0xFFF1F5F9);
+        const accentGreen = Color(0xFF10B981);
+
+        return Scaffold(
+          backgroundColor: bg,
+          appBar: AppBar(
+            backgroundColor: appBarBg,
+            iconTheme: IconThemeData(color: textLight),
+            centerTitle: true,
+            title: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(_formattedDate,
+                    style: TextStyle(color: textLight, fontSize: 13, fontWeight: FontWeight.bold)),
+                Text('দৈনিক রিপোর্ট এন্ট্রি',
+                    style: TextStyle(color: textMuted, fontSize: 10)),
+              ],
             ),
-        ],
-        elevation: 0,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(color: _borderColor, height: 1),
-        ),
-      ),
-      body: Stack(
-        children: [
-          Positioned.fill(child: CustomPaint(painter: _DailyBgPainter())),
-          _isLoading
-              ? const Center(child: CircularProgressIndicator(color: _accentGreen))
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      _buildSection('কুরআন অধ্যয়ন', Icons.menu_book, const Color(0xFF10B981), [
-                        _buildRow([
-                          _buildField('সূরা (পড়া)', _quranSuraCtrl, hint: 'সূরার নাম/নম্বর'),
-                          _buildField('আয়াত', _quranAyahCtrl, hint: 'আয়াত সংখ্যা', numeric: true),
-                        ]),
-                      ]),
-
-                      _buildSection('হাদিস অধ্যয়ন', Icons.book, const Color(0xFF0EA5E9), [
-                        _buildField('বিষয় ও সংখ্যা', _hadithCtrl, hint: 'যা পড়েছেন তার বিস্তারিত'),
-                      ]),
-
-                      _buildSection('সাহিত্য অধ্যয়ন', Icons.library_books, const Color(0xFF8B5CF6), [
-                        _buildRow([
-                          _buildField('ইসলামি', _islamicLitCtrl, hint: 'ইসলামি সাহিত্য'),
-                          _buildField('অন্যান্য', _otherLitCtrl, hint: 'অন্যান্য'),
-                        ]),
-                      ]),
-
-                      _buildSection('পাঠ্যপুস্তক অধ্যয়ন', Icons.school, const Color(0xFFF59E0B), [
-                        _buildField('বিষয় ও বিস্তারিত', _textbookCtrl, hint: 'কোন বই, কত পৃষ্ঠা'),
-                      ]),
-
-                      _buildSection('জামায়াতে নামাজ', Icons.mosque, const Color(0xFFEC4899), [
-                        _buildField('কত ওয়াক্ত (সর্বোচ্চ ৫)', _jamaatCtrl,
-                            hint: '০ থেকে ৫', numeric: true),
-                      ]),
-
-                      _buildSection('যোগাযোগ', Icons.phone, const Color(0xFF10B981), [
-                        _buildRow([
-                          _buildField('নাম / বিস্তারিত', _contactNameCtrl, hint: 'যার সাথে যোগাযোগ'),
-                          _buildField('সংখ্যা', _contactCountCtrl, hint: 'মোট জন', numeric: true),
-                        ]),
-                      ]),
-
-                      _buildSection('দাওয়াত', Icons.people, const Color(0xFFEF4444), [
-                        _buildField('কত জনকে দাওয়াত', _dawahCtrl,
-                            hint: 'সংখ্যা লিখুন', numeric: true),
-                      ]),
-
-                      _buildSection('সময় দান', Icons.volunteer_activism, const Color(0xFF0EA5E9), [
-                        _buildField('কত ঘণ্টা / কি কাজে', _timeServiceCtrl, hint: 'বিস্তারিত'),
-                      ]),
-
-                      _buildSection('সমাজ সেবা', Icons.handshake, const Color(0xFF059669), [
-                        _buildField('কি কাজ করা হয়েছে', _socialServiceCtrl,
-                            hint: 'বিস্তারিত বিবরণ', maxLines: 2),
-                      ]),
-
-                      const SizedBox(height: 24),
-                      if (!_isLocked) ...[
-                        SizedBox(
-                          width: double.infinity,
-                          height: 52,
-                          child: ElevatedButton.icon(
-                            onPressed: _isSaving ? null : _save,
-                            icon: _isSaving
-                                ? const SizedBox(
-                                    width: 18, height: 18,
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                                : const Icon(Icons.save, color: Colors.white),
-                            label: Text(
-                              _isSaving ? 'সেভ হচ্ছে...' : 'সেভ করুন',
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _accentGreen,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-                    ],
-                  ),
+            actions: [
+              if (_entryExists && _isLocked)
+                TextButton.icon(
+                  icon: const Icon(Icons.edit, color: accentGreen, size: 16),
+                  label: const Text('এডিট করুন', style: TextStyle(color: accentGreen, fontSize: 13, fontWeight: FontWeight.bold)),
+                  onPressed: () => setState(() => _isLocked = false),
                 ),
-        ],
-      ),
+            ],
+            elevation: 0,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(1),
+              child: Container(color: borderColor, height: 1),
+            ),
+          ),
+          body: Stack(
+            children: [
+              Positioned.fill(child: CustomPaint(painter: _DailyBgPainter(isDark: isDark))),
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator(color: accentGreen))
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          // ১. অধ্যয়ন
+                          _sectionHeader('১. অধ্যয়ন (Study)', accentGreen),
+                          _field('কুরআন: সূরা', 'সূরা লিখুন', _quranSuraCtrl, inputFill, borderColor, textLight, textMuted, accentGreen),
+                          _field('কুরআন: আয়াত সংখ্যা', 'আয়াত সংখ্যা', _quranAyahCtrl, inputFill, borderColor, textLight, textMuted, accentGreen, numeric: true),
+                          const Divider(height: 24),
+                          _field('হাদিস: হাদিস সংখ্যা', 'সংখ্যা', _hadithCountCtrl, inputFill, borderColor, textLight, textMuted, accentGreen, numeric: true),
+                          _field('হাদিস: বিষয়/গ্রন্থ', 'বিষয় বা গ্রন্থ নাম', _hadithTopicCtrl, inputFill, borderColor, textLight, textMuted, accentGreen),
+                          const Divider(height: 24),
+                          _field('ইসলামী সাহিত্য: পৃষ্ঠা সংখ্যা', 'পৃষ্ঠা সংখ্যা', _islamicLitPagesCtrl, inputFill, borderColor, textLight, textMuted, accentGreen, numeric: true),
+                          _field('ইসলামী সাহিত্য: বইয়ের নাম', 'বইয়ের নাম', _islamicLitBookCtrl, inputFill, borderColor, textLight, textMuted, accentGreen),
+                          const Divider(height: 24),
+                          _field('পাঠ্যপুস্তক/ক্লাস অধ্যয়ন (ঘণ্টা)', 'ঘণ্টা', _textbookCtrl, inputFill, borderColor, textLight, textMuted, accentGreen, numeric: true),
+                          const SizedBox(height: 16),
+
+                          // ২. ইবাদত
+                          _sectionHeader('২. ইবাদত (Worship)', accentGreen),
+                          _field('জামাআতে নামায (ওয়াক্ত)', 'ওয়াক্ত সংখ্যা', _jamaatCtrl, inputFill, borderColor, textLight, textMuted, accentGreen, numeric: true),
+                          _switchField('আত্মবিচার আদায় করেছেন?', textLight, textMuted, accentGreen),
+                          const SizedBox(height: 16),
+
+                          // ৩. দাওয়াতি কাজ
+                          _sectionHeader('৩. দাওয়াতি কাজ (Dawah)', accentGreen),
+                          _field('দাওয়াতি যোগাযোগ (সংখ্যা)', 'কতজনের সাথে যোগাযোগ', _contactCountCtrl, inputFill, borderColor, textLight, textMuted, accentGreen, numeric: true),
+                          _field('যোগাযোগকৃত ব্যক্তির নাম', 'নাম লিখুন (কমা দিয়ে আলাদা করুন)', _contactNameCtrl, inputFill, borderColor, textLight, textMuted, accentGreen),
+                          _field('দাওয়াতি উপকরণ বিতরণ (লিফলেট/বই)', 'পরিমাণ সংখ্যা', _dawahMaterialsCtrl, inputFill, borderColor, textLight, textMuted, accentGreen, numeric: true),
+                          const SizedBox(height: 16),
+
+                          // ৪. সাংগঠনিক কাজ
+                          _sectionHeader('৪. সাংগঠনিক কাজ (Organization)', accentGreen),
+                          _field('সভায় যোগদান (সভার নাম)', 'যে সভায় অংশ নিয়েছেন', _meetingNameCtrl, inputFill, borderColor, textLight, textMuted, accentGreen),
+                          _field('সাংগঠনিক কাজে সময়দান (ঘণ্টা)', 'সময় ঘণ্টা', _orgTimeCtrl, inputFill, borderColor, textLight, textMuted, accentGreen, numeric: true),
+                          _field('কর্মী যোগাযোগ (সংখ্যা)', 'কতজন কর্মীর সাথে যোগাযোগ', _memberContactCountCtrl, inputFill, borderColor, textLight, textMuted, accentGreen, numeric: true),
+                          _field('যোগাযোগকৃত কর্মীর নাম', 'নাম লিখুন (কমা দিয়ে আলাদা করুন)', _memberContactNameCtrl, inputFill, borderColor, textLight, textMuted, accentGreen),
+                          const SizedBox(height: 16),
+
+                          // ৫. বিবিধ
+                          _sectionHeader('৫. বিবিধ (Miscellaneous)', accentGreen),
+                          _field('দৈনিক পত্রিকা পাঠ (সময় - মিনিট)', 'মিনিট', _newspaperTimeCtrl, inputFill, borderColor, textLight, textMuted, accentGreen, numeric: true),
+                          _field('শরীরচর্চা/কারিগরি শিক্ষা (সময় - মিনিট)', 'মিনিট', _physicalExerciseTimeCtrl, inputFill, borderColor, textLight, textMuted, accentGreen, numeric: true),
+                          _field('পারিবারিক/সামাজিক খেদমত (সময় - মিনিট)', 'মিনিট', _familyWelfareTimeCtrl, inputFill, borderColor, textLight, textMuted, accentGreen, numeric: true),
+                          const SizedBox(height: 28),
+
+                          if (!_isLocked)
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: ElevatedButton.icon(
+                                onPressed: _isSaving ? null : _save,
+                                icon: _isSaving
+                                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                    : const Icon(Icons.save, color: Colors.white),
+                                label: Text(
+                                  _isSaving ? 'সংরক্ষণ হচ্ছে...' : 'রিপোর্ট সংরক্ষণ করুন',
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: accentGreen,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  elevation: 2,
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: 30),
+                        ],
+                      ),
+                    ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildSection(String title, IconData icon, Color color, List<Widget> children) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      decoration: BoxDecoration(
-        color: _cardBg,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _borderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _sectionHeader(String title, Color accentGreen) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12, top: 8),
+      child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
-            child: Row(children: [
-              Container(
-                padding: const EdgeInsets.all(7),
-                decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
-                child: Icon(icon, color: color, size: 18),
-              ),
-              const SizedBox(width: 10),
-              Text(title, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14)),
-            ]),
+          Container(
+            width: 4,
+            height: 18,
+            decoration: BoxDecoration(color: accentGreen, borderRadius: BorderRadius.circular(2)),
           ),
-          Divider(color: _borderColor, height: 1),
-          Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(children: children),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: const TextStyle(color: Color(0xFF34D399), fontSize: 15, fontWeight: FontWeight.bold),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildRow(List<Widget> children) {
-    return Row(
-      children: children
-          .expand((w) => [Expanded(child: w), const SizedBox(width: 10)])
-          .take(children.length * 2 - 1)
-          .toList(),
+  Widget _switchField(String label, Color textLight, Color textMuted, Color accentGreen) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(color: textMuted, fontSize: 13, fontWeight: FontWeight.bold),
+          ),
+          Switch(
+            value: _selfAnalysisVal,
+            onChanged: _isLocked
+                ? null
+                : (val) {
+                    setState(() => _selfAnalysisVal = val);
+                  },
+            activeColor: accentGreen,
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildField(String label, TextEditingController ctrl, {
-    String hint = '',
+  Widget _field(
+    String label,
+    String hint,
+    TextEditingController ctrl,
+    Color inputFill,
+    Color borderColor,
+    Color textLight,
+    Color textMuted,
+    Color accentGreen, {
     bool numeric = false,
     int maxLines = 1,
   }) {
@@ -326,8 +379,8 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              color: _textMuted,
+            style: TextStyle(
+              color: textMuted,
               fontSize: 13,
               fontWeight: FontWeight.bold,
             ),
@@ -338,25 +391,25 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
             keyboardType: numeric ? TextInputType.number : TextInputType.text,
             maxLines: maxLines,
             enabled: !_isLocked,
-            style: const TextStyle(color: _textLight, fontSize: 14),
+            style: TextStyle(color: textLight, fontSize: 14),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: const TextStyle(color: Color(0xFF4A5568), fontSize: 12),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: _borderColor),
+                borderSide: BorderSide(color: borderColor),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: _accentGreen, width: 1.5),
+                borderSide: BorderSide(color: accentGreen, width: 1.5),
               ),
               disabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: _borderColor.withValues(alpha: 0.5)),
+                borderSide: BorderSide(color: borderColor.withValues(alpha: 0.5)),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               filled: true,
-              fillColor: const Color(0xFF0A1628),
+              fillColor: inputFill,
               isDense: true,
             ),
           ),
@@ -367,8 +420,18 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
 }
 
 class _DailyBgPainter extends CustomPainter {
+  final bool isDark;
+  _DailyBgPainter({required this.isDark});
+
   @override
   void paint(Canvas canvas, Size size) {
+    if (!isDark) {
+      final grid = Paint()..color = Colors.grey.withValues(alpha: 0.05)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+      for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
+      for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+      return;
+    }
+
     final fill = Paint()..color = const Color(0xFF10B981).withValues(alpha: 0.025)..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.05), 130, fill);
     canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.5), 100, fill);

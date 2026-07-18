@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:mojlish_app/core/theme/theme_manager.dart';
 import '../../data/models/baytulmal_report_entry.dart';
 import '../../data/services/report_storage_service.dart';
 import '../../data/services/pdf_generator_service.dart';
@@ -51,12 +52,14 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
   final _sovaTakaCtrl = TextEditingController();
   final _remarksCtrl = TextEditingController();
 
-  static const _darkBg = Color(0xFF0D1B2A);
-  static const _cardBg = Color(0xFF162032);
-  static const _borderColor = Color(0xFF2A3F58);
-  static const _accentGreen = Color(0xFF10B981);
-  static const _textLight = Color(0xFFE2E8F0);
-  static const _textMuted = Color(0xFF94A3B8);
+  bool get _isDark => themeManager.isDarkMode;
+  Color get _darkBg => _isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF8FAFC);
+  Color get _cardBg => _isDark ? const Color(0xFF162032) : Colors.white;
+  Color get _borderColor => _isDark ? const Color(0xFF2A3F58) : const Color(0xFFCBD5E1);
+  Color get _accentGreen => const Color(0xFF10B981);
+  Color get _textLight => _isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
+  Color get _textMuted => _isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+  Color get _inputFill => _isDark ? const Color(0xFF0A1628) : const Color(0xFFF1F5F9);
 
   static const _monthNames = [
     'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
@@ -217,110 +220,115 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _darkBg,
-      appBar: AppBar(
-        title: const Text('শাখা বায়তুলমাল রিপোর্ট',
-            style: TextStyle(color: _textLight, fontWeight: FontWeight.bold, fontSize: 17)),
-        centerTitle: true,
-        backgroundColor: _cardBg,
-        iconTheme: const IconThemeData(color: _textLight),
-        elevation: 0,
-        actions: [
-          if (_currentEntry != null && _isLocked)
-            TextButton.icon(
-              icon: const Icon(Icons.edit, color: _accentGreen, size: 16),
-              label: const Text('এডিট করুন', style: TextStyle(color: _accentGreen, fontSize: 13, fontWeight: FontWeight.bold)),
-              onPressed: () => setState(() => _isLocked = false),
-            ),
-          IconButton(
-            icon: _isExporting
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Icon(Icons.picture_as_pdf, color: Color(0xFFEF4444)),
-            tooltip: 'PDF এক্সপোর্ট',
-            onPressed: _isExporting ? null : _exportPdf,
+    return AnimatedBuilder(
+      animation: themeManager,
+      builder: (context, _) {
+        return Scaffold(
+          backgroundColor: _darkBg,
+          appBar: AppBar(
+            title: const Text('শাখা বায়তুলমাল রিপোর্ট',
+                style: TextStyle(color: Color(0xFF0EA5E9), fontWeight: FontWeight.bold, fontSize: 17)),
+            centerTitle: true,
+            backgroundColor: _cardBg,
+            iconTheme: IconThemeData(color: _textLight),
+            elevation: 0,
+            actions: [
+              if (_currentEntry != null && _isLocked)
+                TextButton.icon(
+                  icon: const Icon(Icons.edit, color: Color(0xFF0EA5E9), size: 16),
+                  label: const Text('এডিট করুন', style: TextStyle(color: Color(0xFF0EA5E9), fontSize: 13, fontWeight: FontWeight.bold)),
+                  onPressed: () => setState(() => _isLocked = false),
+                ),
+              IconButton(
+                icon: _isExporting
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.picture_as_pdf, color: Color(0xFFEF4444)),
+                tooltip: 'PDF এক্সপোর্ট',
+                onPressed: _isExporting ? null : _exportPdf,
+              ),
+            ],
           ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          Positioned.fill(child: CustomPaint(painter: _BaytulmalBgPainter())),
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Month banner
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0EA5E9).withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF0EA5E9).withValues(alpha: 0.3)),
-                  ),
-                  child: Row(children: [
-                    const Icon(Icons.account_balance_wallet, color: Color(0xFF0EA5E9), size: 22),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('${_monthNames[widget.month - 1]} ${_bn(widget.year)} মাসের রিপোর্ট',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF38BDF8))),
-                        Text(_currentEntry != null ? 'সর্বশেষ সেভ করা আছে' : 'এখনো সেভ করা হয়নি',
-                            style: TextStyle(fontSize: 12, color: _currentEntry != null ? const Color(0xFF10B981) : const Color(0xFFF59E0B))),
+          body: Stack(
+            children: [
+              Positioned.fill(child: CustomPaint(painter: _BaytulmalBgPainter(isDark: _isDark))),
+              SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Month banner
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0EA5E9).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFF0EA5E9).withValues(alpha: 0.3)),
+                      ),
+                      child: Row(children: [
+                        const Icon(Icons.account_balance_wallet, color: Color(0xFF0EA5E9), size: 22),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text('${_monthNames[widget.month - 1]} ${_bn(widget.year)} মাসের রিপোর্ট',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF38BDF8))),
+                            Text(_currentEntry != null ? 'সর্বশেষ সেভ করা আছে' : 'এখনো সেভ করা হয়নি',
+                                style: TextStyle(fontSize: 12, color: _currentEntry != null ? const Color(0xFF10B981) : const Color(0xFFF59E0B))),
+                          ]),
+                        ),
                       ]),
                     ),
-                  ]),
-                ),
-                const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                // Branch name
-                _sectionHeader('শাখার তথ্য'),
-                _field('শাখার নাম', 'শাখার নাম লিখুন', _branchCtrl),
-                const SizedBox(height: 20),
+                    // Branch name
+                    _sectionHeader('শাখার তথ্য'),
+                    _field('শাখার নাম', 'শাখার নাম লিখুন', _branchCtrl),
+                    const SizedBox(height: 20),
 
-                // আয় সেকশন
-                _incomeSection(),
-                const SizedBox(height: 20),
+                    // আয় সেকশন
+                    _incomeSection(),
+                    const SizedBox(height: 20),
 
-                // ব্যয় সেকশন
-                _expenseSection(),
-                const SizedBox(height: 20),
+                    // ব্যয় সেকশন
+                    _expenseSection(),
+                    const SizedBox(height: 20),
 
-                // Summary
-                if (_currentEntry != null || true) _buildSummary(),
-                const SizedBox(height: 12),
+                    // Summary
+                    if (_currentEntry != null || true) _buildSummary(),
+                    const SizedBox(height: 12),
 
-                // মন্তব্য
-                _sectionHeader('মন্তব্য'),
-                _field('মন্তব্য', 'কোনো বিশেষ তথ্য বা মন্তব্য...', _remarksCtrl, maxLines: 3),
-                const SizedBox(height: 24),
+                    // মন্তব্য
+                    _sectionHeader('মন্তব্য'),
+                    _field('মন্তব্য', 'কোনো বিশেষ তথ্য বা মন্তব্য...', _remarksCtrl, maxLines: 3),
+                    const SizedBox(height: 24),
 
-                // Save button
-                if (!_isLocked) ...[
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton.icon(
-                      onPressed: _isSaving ? null : _save,
-                      icon: _isSaving
-                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                          : const Icon(Icons.save, color: Colors.white),
-                      label: Text(_isSaving ? 'সেভ হচ্ছে...' : 'রিপোর্ট সেভ করুন',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0EA5E9),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    // Save button
+                    if (!_isLocked) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton.icon(
+                          onPressed: _isSaving ? null : _save,
+                          icon: _isSaving
+                              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : const Icon(Icons.save, color: Colors.white),
+                          label: Text(_isSaving ? 'সেভ হচ্ছে...' : 'রিপোর্ট সেভ করুন',
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0EA5E9),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ],
-            ),
+                      const SizedBox(height: 20),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -336,7 +344,7 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
         Row(children: [
           Container(width: 4, height: 20, decoration: BoxDecoration(color: _accentGreen, borderRadius: BorderRadius.circular(2))),
           const SizedBox(width: 10),
-          const Text('আয়', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: _accentGreen)),
+          Text('আয়', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: _accentGreen)),
         ]),
         const SizedBox(height: 16),
         _twoColRow('নির্বাহী সদস্যের এয়ানত (জন)', _execMemberCountCtrl, 'টাকা', _execMemberTakaCtrl),
@@ -433,19 +441,19 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
+          Text(label, style: TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
           const SizedBox(height: 6),
           TextField(
             controller: ctrl,
             maxLines: maxLines,
             enabled: !_isLocked,
-            style: const TextStyle(color: _textLight, fontSize: 14),
+            style: TextStyle(color: _textLight, fontSize: 14),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: const TextStyle(color: Color(0xFF4A5568), fontSize: 13),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: _borderColor),
+                borderSide: BorderSide(color: _borderColor),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -456,7 +464,7 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
                 borderSide: BorderSide(color: _borderColor.withValues(alpha: 0.5)),
               ),
               filled: true,
-              fillColor: const Color(0xFF0A1628),
+              fillColor: _inputFill,
               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             ),
           ),
@@ -474,7 +482,7 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label1, style: const TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
+                Text(label1, style: TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
                 _miniField(ctrl1),
               ],
@@ -486,7 +494,7 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label2, style: const TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
+                Text(label2, style: TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
                 _miniField(ctrl2, keyboardType: TextInputType.number),
               ],
@@ -503,7 +511,7 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
       child: Row(
         children: [
           Expanded(
-            child: Text(label, style: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 13, fontWeight: FontWeight.bold)),
+            child: Text(label, style: TextStyle(color: _isDark ? const Color(0xFFCBD5E1) : const Color(0xFF0F172A), fontSize: 13, fontWeight: FontWeight.bold)),
           ),
           const SizedBox(width: 12),
           SizedBox(
@@ -511,7 +519,7 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('টাকা', style: TextStyle(color: _textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
+                Text('টাকা', style: TextStyle(color: _textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 _miniField(takaCtrl, keyboardType: TextInputType.number),
               ],
@@ -527,13 +535,13 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
       controller: ctrl,
       keyboardType: keyboardType,
       enabled: !_isLocked,
-      style: const TextStyle(fontSize: 13, color: _textLight),
+      style: TextStyle(fontSize: 13, color: _textLight),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Color(0xFF4A5568), fontSize: 12),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _borderColor),
+          borderSide: BorderSide(color: _borderColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -544,7 +552,7 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
           borderSide: BorderSide(color: _borderColor.withValues(alpha: 0.4)),
         ),
         filled: true,
-        fillColor: const Color(0xFF0A1628),
+        fillColor: _inputFill,
         contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         isDense: true,
       ),
@@ -553,8 +561,18 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
 }
 
 class _BaytulmalBgPainter extends CustomPainter {
+  final bool isDark;
+  _BaytulmalBgPainter({required this.isDark});
+
   @override
   void paint(Canvas canvas, Size size) {
+    if (!isDark) {
+      final grid = Paint()..color = Colors.grey.withValues(alpha: 0.05)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+      for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
+      for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+      return;
+    }
+
     final fill = Paint()..color = const Color(0xFF10B981).withValues(alpha: 0.025)..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.05), 130, fill);
     canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.5), 100, fill);

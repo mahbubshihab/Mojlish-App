@@ -6,6 +6,8 @@ import '../models/monthly_comment.dart';
 import '../models/sanghotonik_report_entry.dart';
 import '../models/zonal_report_entry.dart';
 
+import '../models/monthly_plan.dart';
+
 /// লোকাল স্টোরেজ সার্ভিস — SharedPreferences দিয়ে রিপোর্ট সেভ ও লোড করে
 class ReportStorageService {
   static const String _personalReportKey = 'personal_reports';
@@ -13,6 +15,36 @@ class ReportStorageService {
   static const String _sanghotonikReportKey = 'sanghotonik_reports';
   static const String _zonalReportKey = 'zonal_reports';
   static const String _commentsKey = 'monthly_comments';
+  static const String _personalPlanKey = 'personal_plans';
+
+  // ===========================
+  // ব্যক্তিগত মাসিক পরিকল্পনা (Porikolpona) — CRUD
+  // ===========================
+
+  static Future<void> saveMonthlyPlan(MonthlyPlan plan) async {
+    final prefs = await SharedPreferences.getInstance();
+    final allData = await _getAllMonthlyPlans();
+    final key = '${plan.year}-${plan.month}';
+    allData[key] = plan;
+    final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
+    await prefs.setString(_personalPlanKey, jsonEncode(encoded));
+  }
+
+  static Future<MonthlyPlan?> getMonthlyPlan(int year, int month) async {
+    final all = await _getAllMonthlyPlans();
+    final key = '$year-$month';
+    return all[key];
+  }
+
+  static Future<Map<String, MonthlyPlan>> _getAllMonthlyPlans() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_personalPlanKey);
+    if (raw == null) return {};
+    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    return decoded.map(
+      (k, v) => MapEntry(k, MonthlyPlan.fromJson(v as Map<String, dynamic>)),
+    );
+  }
 
   // ===========================
   // ব্যক্তিগত রিপোর্ট — CRUD

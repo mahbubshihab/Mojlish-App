@@ -5,54 +5,80 @@ class DailyPersonalEntry {
 
   // কুরআন অধ্যয়ন
   final String quranSura;  // সূরা (পড়া)
-  final String quranAyah; // আয়াত
-
-  // পুরনো ফিল্ড (backward compatibility)
-  final String quranStudy;
+  final String quranAyah;  // আয়াত
 
   // হাদিস অধ্যয়ন
-  final String hadithStudy;
+  final String hadithCount; // হাদিস সংখ্যা
+  final String hadithTopic; // হাদিস বিষয়
 
   // সাহিত্য অধ্যয়ন
-  final String islamicLiterature; // ইসলামি সাহিত্য
-  final String otherLiterature;   // অন্যান্য সাহিত্য
+  final String islamicLitPages; // ইসলামি সাহিত্য পৃষ্ঠা
+  final String islamicLitBook;  // বইয়ের নাম
 
   // পাঠ্যপুস্তক অধ্যয়ন
-  final String textbookStudy;
+  final String textbookHours; // পাঠ্যপুস্তক/ক্লাস সময় (ঘণ্টা)
 
   // জামায়াতে নামাজ
-  final String jamaatPrayer;
+  final String jamaatPrayer;  // জামাআতে নামায (ওয়াক্ত)
+  final String selfAnalysis;  // আত্মবিচার (হ্যাঁ/না)
 
-  // যোগাযোগ
-  final String contactName;  // নাম
-  final String contactCount; // সংখ্যা
-  final String contact;      // backward compat
+  // দাওয়াতি কাজ
+  final String contactCount;   // বন্ধু/সদস্য যোগাযোগ সংখ্যা
+  final String contactName;    // যোগাযোগের নাম
+  final String dawahMaterials; // দাওয়াতি উপকরণ বিতরণ (পরিমাণ)
 
-  // দাওয়াত
+  // সাংগঠনিক কাজ
+  final String meetingName;        // সভায় যোগদান (নাম)
+  final String orgTime;            // সাংগঠনিক কাজে সময়দান (ঘণ্টা)
+  final String memberContactCount; // কর্মী যোগাযোগ সংখ্যা
+  final String memberContactName;  // কর্মী যোগাযোগের নাম
+
+  // বিবিধ
+  final String newspaperTime;        // দৈনিক পত্রিকা পাঠ সময় (মিনিট)
+  final String physicalExerciseTime; // শরীরচর্চা সময় (মিনিট)
+  final String familyWelfareTime;   // পারিবারিক/সামাজিক খেদমত সময় (মিনিট)
+
+  // পুরনো ফিল্ডসমূহ (backward compatibility)
+  final String quranStudy;
+  final String hadithStudy;
+  final String islamicLiterature;
+  final String otherLiterature;
+  final String textbookStudy;
+  final String contact;
   final String dawah;
-
-  // সময় দান
   final String timeService;
-  final String volunteering; // backward compat
-
-  // সমাজ সেবা
+  final String volunteering;
   final String socialService;
-
-  // মন্তব্য
   final String remarks;
 
   const DailyPersonalEntry({
     required this.date,
     this.quranSura = '',
     this.quranAyah = '',
+    this.hadithCount = '',
+    this.hadithTopic = '',
+    this.islamicLitPages = '',
+    this.islamicLitBook = '',
+    this.textbookHours = '',
+    this.jamaatPrayer = '',
+    this.selfAnalysis = '',
+    this.contactCount = '',
+    this.contactName = '',
+    this.dawahMaterials = '',
+    this.meetingName = '',
+    this.orgTime = '',
+    this.memberContactCount = '',
+    this.memberContactName = '',
+    this.newspaperTime = '',
+    this.physicalExerciseTime = '',
+    this.familyWelfareTime = '',
+    
+    // Default compatibility values
     this.quranStudy = '',
     this.hadithStudy = '',
     this.islamicLiterature = '',
     this.otherLiterature = '',
     this.textbookStudy = '',
-    this.jamaatPrayer = '',
-    this.contactName = '',
-    this.contactCount = '',
     this.contact = '',
     this.dawah = '',
     this.timeService = '',
@@ -65,14 +91,29 @@ class DailyPersonalEntry {
     'date': date,
     'quranSura': quranSura,
     'quranAyah': quranAyah,
+    'hadithCount': hadithCount,
+    'hadithTopic': hadithTopic,
+    'islamicLitPages': islamicLitPages,
+    'islamicLitBook': islamicLitBook,
+    'textbookHours': textbookHours,
+    'jamaatPrayer': jamaatPrayer,
+    'selfAnalysis': selfAnalysis,
+    'contactCount': contactCount,
+    'contactName': contactName,
+    'dawahMaterials': dawahMaterials,
+    'meetingName': meetingName,
+    'orgTime': orgTime,
+    'memberContactCount': memberContactCount,
+    'memberContactName': memberContactName,
+    'newspaperTime': newspaperTime,
+    'physicalExerciseTime': physicalExerciseTime,
+    'familyWelfareTime': familyWelfareTime,
+    
     'quranStudy': quranStudy,
     'hadithStudy': hadithStudy,
     'islamicLiterature': islamicLiterature,
     'otherLiterature': otherLiterature,
     'textbookStudy': textbookStudy,
-    'jamaatPrayer': jamaatPrayer,
-    'contactName': contactName,
-    'contactCount': contactCount,
     'contact': contact,
     'dawah': dawah,
     'timeService': timeService,
@@ -86,14 +127,30 @@ class DailyPersonalEntry {
       date: json['date'] ?? '',
       quranSura: json['quranSura'] ?? '',
       quranAyah: json['quranAyah'] ?? '',
+      hadithCount: json['hadithCount'] ?? '',
+      hadithTopic: json['hadithTopic'] ?? '',
+      islamicLitPages: json['islamicLitPages'] ?? '',
+      islamicLitBook: json['islamicLitBook'] ?? '',
+      textbookHours: json['textbookHours'] ?? '',
+      jamaatPrayer: json['jamaatPrayer'] ?? '',
+      selfAnalysis: json['selfAnalysis'] ?? '',
+      contactCount: json['contactCount'] ?? '',
+      contactName: json['contactName'] ?? '',
+      dawahMaterials: json['dawahMaterials'] ?? '',
+      meetingName: json['meetingName'] ?? '',
+      orgTime: json['orgTime'] ?? '',
+      memberContactCount: json['memberContactCount'] ?? '',
+      memberContactName: json['memberContactName'] ?? '',
+      newspaperTime: json['newspaperTime'] ?? '',
+      physicalExerciseTime: json['physicalExerciseTime'] ?? '',
+      familyWelfareTime: json['familyWelfareTime'] ?? '',
+      
+      // Compatibility mapping (fallback to old keys if new keys are empty)
       quranStudy: json['quranStudy'] ?? '',
       hadithStudy: json['hadithStudy'] ?? '',
       islamicLiterature: json['islamicLiterature'] ?? '',
       otherLiterature: json['otherLiterature'] ?? '',
       textbookStudy: json['textbookStudy'] ?? '',
-      jamaatPrayer: json['jamaatPrayer'] ?? '',
-      contactName: json['contactName'] ?? '',
-      contactCount: json['contactCount'] ?? '',
       contact: json['contact'] ?? '',
       dawah: json['dawah'] ?? '',
       timeService: json['timeService'] ?? '',
@@ -106,12 +163,21 @@ class DailyPersonalEntry {
   bool get isEmpty =>
       quranSura.isEmpty &&
       quranAyah.isEmpty &&
-      quranStudy.isEmpty &&
-      hadithStudy.isEmpty &&
-      islamicLiterature.isEmpty &&
+      hadithCount.isEmpty &&
+      hadithTopic.isEmpty &&
+      islamicLitPages.isEmpty &&
+      islamicLitBook.isEmpty &&
+      textbookHours.isEmpty &&
       jamaatPrayer.isEmpty &&
-      dawah.isEmpty &&
-      timeService.isEmpty &&
-      volunteering.isEmpty &&
-      socialService.isEmpty;
+      selfAnalysis.isEmpty &&
+      contactCount.isEmpty &&
+      contactName.isEmpty &&
+      dawahMaterials.isEmpty &&
+      meetingName.isEmpty &&
+      orgTime.isEmpty &&
+      memberContactCount.isEmpty &&
+      memberContactName.isEmpty &&
+      newspaperTime.isEmpty &&
+      physicalExerciseTime.isEmpty &&
+      familyWelfareTime.isEmpty;
 }

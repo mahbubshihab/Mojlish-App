@@ -2,10 +2,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../data/models/daily_personal_entry.dart';
 import '../../data/models/monthly_comment.dart';
+import '../../data/models/monthly_plan.dart';
 import '../../data/services/report_storage_service.dart';
 import 'daily_entry_screen.dart';
+import 'package:mojlish_app/core/theme/theme_manager.dart';
 
-/// মাসিক রিপোর্ট স্ক্রিন — কাগজের ফরম অনুযায়ী কলামসমূহ
+/// মাসিক রিপোর্ট স্ক্রিন — কাগজের ফরম অনুযায়ী কলামসমূহ এবং পরিকল্পনা ও মন্তব্য
 class PersonalReportScreen extends StatefulWidget {
   final int year;
   final int month;
@@ -36,14 +38,70 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
   final _commentCtrl = TextEditingController();
   final _signatureCtrl = TextEditingController();
 
-  static const _darkBg = Color(0xFF0D1B2A);
-  static const _cardBg = Color(0xFF162032);
-  static const _borderColor = Color(0xFF2A3F58);
-  static const _accentGreen = Color(0xFF10B981);
-  static const _headerBg = Color(0xFF1A2E44);
-  static const _textLight = Color(0xFFE2E8F0);
-  static const _textMuted = Color(0xFF94A3B8);
-  static const _missingRed = Color(0xFF7F1D1D);
+  // Monthly Plan controllers
+  final _quranAyahCountCtrl = TextEditingController();
+  final _quranSuraParaCtrl = TextEditingController();
+  final _quranDarsCountCtrl = TextEditingController();
+  final _quranDarsTopicCtrl = TextEditingController();
+  final _quranMemorizeAyahCtrl = TextEditingController();
+
+  final _hadithCountCtrl = TextEditingController();
+  final _hadithTopicCtrl = TextEditingController();
+  final _hadithDarsCountCtrl = TextEditingController();
+  final _hadithDarsTopicCtrl = TextEditingController();
+  final _hadithMemorizeCountCtrl = TextEditingController();
+  final _hadithMemorizeTopicCtrl = TextEditingController();
+
+  final _litPagesCtrl = TextEditingController();
+  final _litBookCtrl = TextEditingController();
+  final _litNotesCtrl = TextEditingController();
+
+  final _academicHoursCtrl = TextEditingController();
+
+  final _jamaatPrayerWaqtCtrl = TextEditingController();
+  final _selfAnalysisDaysCtrl = TextEditingController();
+  final _naflPrayerCtrl = TextEditingController();
+
+  final _friendTargetCountCtrl = TextEditingController();
+  final _friendTargetNamesCtrl = TextEditingController();
+  final _primaryMemberTargetCountCtrl = TextEditingController();
+  final _primaryMemberTargetNamesCtrl = TextEditingController();
+  final _dawahBookletCountCtrl = TextEditingController();
+  final _studentReviewCountCtrl = TextEditingController();
+  final _supporterTargetCountCtrl = TextEditingController();
+  final _supporterTargetNamesCtrl = TextEditingController();
+  final _giftSmsCountCtrl = TextEditingController();
+  final _groupDawahCountCtrl = TextEditingController();
+  final _otherDawahMaterialsCtrl = TextEditingController();
+
+  final _upgradeWorkerCountCtrl = TextEditingController();
+  final _upgradeWorkerNamesCtrl = TextEditingController();
+  final _meetingsCountCtrl = TextEditingController();
+  final _orgHoursCtrl = TextEditingController();
+  final _baytulmalAmountCtrl = TextEditingController();
+  final _workerContactsCountCtrl = TextEditingController();
+  final _workerContactsNamesCtrl = TextEditingController();
+
+  final _newspaperMinutesCtrl = TextEditingController();
+  final _physicalExerciseDaysCtrl = TextEditingController();
+  final _technicalSkillHoursCtrl = TextEditingController();
+  final _familyTimeHoursCtrl = TextEditingController();
+  final _otherNotesCtrl = TextEditingController();
+
+  final _memberUpgradeTargetCountCtrl = TextEditingController();
+  final _memberUpgradeTargetNamesCtrl = TextEditingController();
+  final _associateUpgradeTargetCountCtrl = TextEditingController();
+  final _associateUpgradeTargetNamesCtrl = TextEditingController();
+
+  bool get _isDark => themeManager.isDarkMode;
+  Color get _darkBg => _isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF8FAFC);
+  Color get _cardBg => _isDark ? const Color(0xFF162032) : Colors.white;
+  Color get _borderColor => _isDark ? const Color(0xFF2A3F58) : const Color(0xFFCBD5E1);
+  Color get _accentGreen => const Color(0xFF10B981);
+  Color get _headerBg => _isDark ? const Color(0xFF1A2E44) : const Color(0xFFE2E8F0);
+  Color get _textLight => _isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
+  Color get _textMuted => _isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+  Color get _missingRed => _isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFEE2E2);
 
   // Column widths & heights matching the printed form format
   static const double _dateColW = 38.0;
@@ -54,7 +112,7 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
 
     _dateVerController = ScrollController();
     _dataVerController = ScrollController();
@@ -120,6 +178,57 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
     _footerHorController.dispose();
     _commentCtrl.dispose();
     _signatureCtrl.dispose();
+
+    // Dispose planning controllers
+    for (final ctrl in [
+      _quranAyahCountCtrl,
+      _quranSuraParaCtrl,
+      _quranDarsCountCtrl,
+      _quranDarsTopicCtrl,
+      _quranMemorizeAyahCtrl,
+      _hadithCountCtrl,
+      _hadithTopicCtrl,
+      _hadithDarsCountCtrl,
+      _hadithDarsTopicCtrl,
+      _hadithMemorizeCountCtrl,
+      _hadithMemorizeTopicCtrl,
+      _litPagesCtrl,
+      _litBookCtrl,
+      _litNotesCtrl,
+      _academicHoursCtrl,
+      _jamaatPrayerWaqtCtrl,
+      _selfAnalysisDaysCtrl,
+      _naflPrayerCtrl,
+      _friendTargetCountCtrl,
+      _friendTargetNamesCtrl,
+      _primaryMemberTargetCountCtrl,
+      _primaryMemberTargetNamesCtrl,
+      _dawahBookletCountCtrl,
+      _studentReviewCountCtrl,
+      _supporterTargetCountCtrl,
+      _supporterTargetNamesCtrl,
+      _giftSmsCountCtrl,
+      _groupDawahCountCtrl,
+      _otherDawahMaterialsCtrl,
+      _upgradeWorkerCountCtrl,
+      _upgradeWorkerNamesCtrl,
+      _meetingsCountCtrl,
+      _orgHoursCtrl,
+      _baytulmalAmountCtrl,
+      _workerContactsCountCtrl,
+      _workerContactsNamesCtrl,
+      _newspaperMinutesCtrl,
+      _physicalExerciseDaysCtrl,
+      _technicalSkillHoursCtrl,
+      _familyTimeHoursCtrl,
+      _otherNotesCtrl,
+      _memberUpgradeTargetCountCtrl,
+      _memberUpgradeTargetNamesCtrl,
+      _associateUpgradeTargetCountCtrl,
+      _associateUpgradeTargetNamesCtrl,
+    ]) {
+      ctrl.dispose();
+    }
     super.dispose();
   }
 
@@ -136,13 +245,127 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
         } catch (_) {}
       }
       final comments = await ReportStorageService.getCommentsForMonth(widget.year, widget.month);
+      final plan = await ReportStorageService.getMonthlyPlan(widget.year, widget.month);
+
       if (mounted) {
         setState(() {
           _entries = filtered;
           _comments = comments;
+
+          // Populate planning values
+          if (plan != null) {
+            _quranAyahCountCtrl.text = plan.quranAyahCount;
+            _quranSuraParaCtrl.text = plan.quranSuraPara;
+            _quranDarsCountCtrl.text = plan.quranDarsCount;
+            _quranDarsTopicCtrl.text = plan.quranDarsTopic;
+            _quranMemorizeAyahCtrl.text = plan.quranMemorizeAyah;
+            _hadithCountCtrl.text = plan.hadithCount;
+            _hadithTopicCtrl.text = plan.hadithTopic;
+            _hadithDarsCountCtrl.text = plan.hadithDarsCount;
+            _hadithDarsTopicCtrl.text = plan.hadithDarsTopic;
+            _hadithMemorizeCountCtrl.text = plan.hadithMemorizeCount;
+            _hadithMemorizeTopicCtrl.text = plan.hadithMemorizeTopic;
+            _litPagesCtrl.text = plan.litPages;
+            _litBookCtrl.text = plan.litBook;
+            _litNotesCtrl.text = plan.litNotes;
+            _academicHoursCtrl.text = plan.academicHours;
+            _jamaatPrayerWaqtCtrl.text = plan.jamaatPrayerWaqt;
+            _selfAnalysisDaysCtrl.text = plan.selfAnalysisDays;
+            _naflPrayerCtrl.text = plan.naflPrayer;
+            _friendTargetCountCtrl.text = plan.friendTargetCount;
+            _friendTargetNamesCtrl.text = plan.friendTargetNames;
+            _primaryMemberTargetCountCtrl.text = plan.primaryMemberTargetCount;
+            _primaryMemberTargetNamesCtrl.text = plan.primaryMemberTargetNames;
+            _dawahBookletCountCtrl.text = plan.dawahBookletCount;
+            _studentReviewCountCtrl.text = plan.studentReviewCount;
+            _supporterTargetCountCtrl.text = plan.supporterTargetCount;
+            _supporterTargetNamesCtrl.text = plan.supporterTargetNames;
+            _giftSmsCountCtrl.text = plan.giftSmsCount;
+            _groupDawahCountCtrl.text = plan.groupDawahCount;
+            _otherDawahMaterialsCtrl.text = plan.otherDawahMaterials;
+            _upgradeWorkerCountCtrl.text = plan.upgradeWorkerCount;
+            _upgradeWorkerNamesCtrl.text = plan.upgradeWorkerNames;
+            _meetingsCountCtrl.text = plan.meetingsCount;
+            _orgHoursCtrl.text = plan.orgHours;
+            _baytulmalAmountCtrl.text = plan.baytulmalAmount;
+            _workerContactsCountCtrl.text = plan.workerContactsCount;
+            _workerContactsNamesCtrl.text = plan.workerContactsNames;
+            _newspaperMinutesCtrl.text = plan.newspaperMinutes;
+            _physicalExerciseDaysCtrl.text = plan.physicalExerciseDays;
+            _technicalSkillHoursCtrl.text = plan.technicalSkillHours;
+            _familyTimeHoursCtrl.text = plan.familyTimeHours;
+            _otherNotesCtrl.text = plan.otherNotes;
+            _memberUpgradeTargetCountCtrl.text = plan.memberUpgradeTargetCount;
+            _memberUpgradeTargetNamesCtrl.text = plan.memberUpgradeTargetNames;
+            _associateUpgradeTargetCountCtrl.text = plan.associateUpgradeTargetCount;
+            _associateUpgradeTargetNamesCtrl.text = plan.associateUpgradeTargetNames;
+          }
         });
       }
     } catch (_) {}
+  }
+
+  Future<void> _savePlan() async {
+    final plan = MonthlyPlan(
+      year: widget.year,
+      month: widget.month,
+      quranAyahCount: _quranAyahCountCtrl.text.trim(),
+      quranSuraPara: _quranSuraParaCtrl.text.trim(),
+      quranDarsCount: _quranDarsCountCtrl.text.trim(),
+      quranDarsTopic: _quranDarsTopicCtrl.text.trim(),
+      quranMemorizeAyah: _quranMemorizeAyahCtrl.text.trim(),
+      hadithCount: _hadithCountCtrl.text.trim(),
+      hadithTopic: _hadithTopicCtrl.text.trim(),
+      hadithDarsCount: _hadithDarsCountCtrl.text.trim(),
+      hadithDarsTopic: _hadithDarsTopicCtrl.text.trim(),
+      hadithMemorizeCount: _hadithMemorizeCountCtrl.text.trim(),
+      hadithMemorizeTopic: _hadithMemorizeTopicCtrl.text.trim(),
+      litPages: _litPagesCtrl.text.trim(),
+      litBook: _litBookCtrl.text.trim(),
+      litNotes: _litNotesCtrl.text.trim(),
+      academicHours: _academicHoursCtrl.text.trim(),
+      jamaatPrayerWaqt: _jamaatPrayerWaqtCtrl.text.trim(),
+      selfAnalysisDays: _selfAnalysisDaysCtrl.text.trim(),
+      naflPrayer: _naflPrayerCtrl.text.trim(),
+      friendTargetCount: _friendTargetCountCtrl.text.trim(),
+      friendTargetNames: _friendTargetNamesCtrl.text.trim(),
+      primaryMemberTargetCount: _primaryMemberTargetCountCtrl.text.trim(),
+      primaryMemberTargetNames: _primaryMemberTargetNamesCtrl.text.trim(),
+      dawahBookletCount: _dawahBookletCountCtrl.text.trim(),
+      studentReviewCount: _studentReviewCountCtrl.text.trim(),
+      supporterTargetCount: _supporterTargetCountCtrl.text.trim(),
+      supporterTargetNames: _supporterTargetNamesCtrl.text.trim(),
+      giftSmsCount: _giftSmsCountCtrl.text.trim(),
+      groupDawahCount: _groupDawahCountCtrl.text.trim(),
+      otherDawahMaterials: _otherDawahMaterialsCtrl.text.trim(),
+      upgradeWorkerCount: _upgradeWorkerCountCtrl.text.trim(),
+      upgradeWorkerNames: _upgradeWorkerNamesCtrl.text.trim(),
+      meetingsCount: _meetingsCountCtrl.text.trim(),
+      orgHours: _orgHoursCtrl.text.trim(),
+      baytulmalAmount: _baytulmalAmountCtrl.text.trim(),
+      workerContactsCount: _workerContactsCountCtrl.text.trim(),
+      workerContactsNames: _workerContactsNamesCtrl.text.trim(),
+      newspaperMinutes: _newspaperMinutesCtrl.text.trim(),
+      physicalExerciseDays: _physicalExerciseDaysCtrl.text.trim(),
+      technicalSkillHours: _technicalSkillHoursCtrl.text.trim(),
+      familyTimeHours: _familyTimeHoursCtrl.text.trim(),
+      otherNotes: _otherNotesCtrl.text.trim(),
+      memberUpgradeTargetCount: _memberUpgradeTargetCountCtrl.text.trim(),
+      memberUpgradeTargetNames: _memberUpgradeTargetNamesCtrl.text.trim(),
+      associateUpgradeTargetCount: _associateUpgradeTargetCountCtrl.text.trim(),
+      associateUpgradeTargetNames: _associateUpgradeTargetNamesCtrl.text.trim(),
+    );
+    await ReportStorageService.saveMonthlyPlan(plan);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('মাসিক পরিকল্পনা সংরক্ষণ করা হয়েছে ✓', style: TextStyle(fontWeight: FontWeight.bold)),
+          backgroundColor: const Color(0xFF10B981),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
   }
 
   int get _daysInMonth => DateTime(widget.year, widget.month + 1, 0).day;
@@ -156,6 +379,19 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
   String _bn(int n) {
     const digits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
     return n.toString().split('').map((c) => digits[int.parse(c)]).join();
+  }
+
+  String _bnDouble(double n) {
+    if (n == 0) return '০';
+    final str = n.toStringAsFixed(1);
+    if (str.endsWith('.0')) {
+      return _bn(n.toInt());
+    }
+    return str.split('').map((c) {
+      if (c == '.') return '.';
+      const digits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+      return digits[int.parse(c)];
+    }).join();
   }
 
   static const _monthNames = [
@@ -176,100 +412,160 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
     if (result == true) _loadData();
   }
 
-  Future<void> _saveComment() async {
-    final txt = _commentCtrl.text.trim();
-    final sig = _signatureCtrl.text.trim();
-    if (txt.isEmpty) return;
-
-    final comment = MonthlyComment(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      yearMonth: _monthKey,
-      comment: txt,
-      signature: sig,
-      timestamp: DateTime.now().millisecondsSinceEpoch,
-    );
-    await ReportStorageService.saveComment(comment);
-    _commentCtrl.clear();
-    _signatureCtrl.clear();
-    await _loadData();
-  }
-
-  Future<void> _deleteComment(String id) async {
-    await ReportStorageService.deleteComment(id);
-    await _loadData();
-  }
-
-  // ৯টি মূল কলাম কাগজের ফরম অনুযায়ী
+  // কলামসমূহ কাগজের ফরমের ৩১-দিন গ্রিড অনুযায়ী
   List<_ColGroup> _getColGroups() {
     return [
-      _ColGroup('কোরআন অধ্যয়ন\nসুরা, আয়াত', (DailyPersonalEntry e) {
-        if (e.quranStudy.isNotEmpty) return e.quranStudy;
+      _ColGroup('কুরআন অধ্যয়ন\nসূরা (আয়াত)', (DailyPersonalEntry e) {
         if (e.quranSura.isNotEmpty || e.quranAyah.isNotEmpty) {
           return '${e.quranSura} (${e.quranAyah})';
         }
-        return '';
+        return e.quranStudy;
       }),
-      _ColGroup('হাদীস অধ্যয়ন\nসংখ্যা, বিষয়', (DailyPersonalEntry e) => e.hadithStudy),
-      _ColGroup('ইসলামী সাহিত্য পাঠ\nনাম, পৃষ্ঠা', (DailyPersonalEntry e) {
-        if (e.islamicLiterature.isNotEmpty) return e.islamicLiterature;
-        return e.otherLiterature;
+      _ColGroup('হাদীস অধ্যয়ন\nসংখ্যা (বিষয়)', (DailyPersonalEntry e) {
+        if (e.hadithCount.isNotEmpty || e.hadithTopic.isNotEmpty) {
+          return '${e.hadithCount} (${e.hadithTopic})';
+        }
+        return e.hadithStudy;
       }),
-      _ColGroup('জামায়াতে নামাজ\nকত ওয়াক্ত', (DailyPersonalEntry e) => e.jamaatPrayer),
-      _ColGroup('যোগাযোগ\nসংখ্যা, নাম', (DailyPersonalEntry e) {
-        if (e.contact.isNotEmpty) return e.contact;
-        if (e.contactName.isNotEmpty || e.contactCount.isNotEmpty) {
-          return '${e.contactName} (${e.contactCount})';
+      _ColGroup('ইসলামী সাহিত্য\nপৃষ্ঠা (বই)', (DailyPersonalEntry e) {
+        if (e.islamicLitPages.isNotEmpty || e.islamicLitBook.isNotEmpty) {
+          return '${e.islamicLitPages} (${e.islamicLitBook})';
+        }
+        return e.islamicLiterature;
+      }),
+      _ColGroup('পাঠ্যপুস্তক\nসময় (ঘণ্টা)', (DailyPersonalEntry e) {
+        return e.textbookHours.isNotEmpty ? e.textbookHours : e.textbookStudy;
+      }),
+      _ColGroup('জামাআতে নামায\nওয়াক্ত', (DailyPersonalEntry e) => e.jamaatPrayer),
+      _ColGroup('আত্মবিচার\nহ্যাঁ/না', (DailyPersonalEntry e) => e.selfAnalysis),
+      _ColGroup('দাওয়াতি যোগাযোগ\nসংখ্যা (নাম)', (DailyPersonalEntry e) {
+        if (e.contactCount.isNotEmpty || e.contactName.isNotEmpty) {
+          return '${e.contactCount} (${e.contactName})';
+        }
+        return e.contact;
+      }),
+      _ColGroup('উপকরণ বিতরণ\nপরিমাণ', (DailyPersonalEntry e) {
+        return e.dawahMaterials.isNotEmpty ? e.dawahMaterials : e.dawah;
+      }),
+      _ColGroup('সভায় যোগদান\nসভার নাম', (DailyPersonalEntry e) => e.meetingName),
+      _ColGroup('সাংগঠনিক সময়\nঘণ্টা', (DailyPersonalEntry e) {
+        return e.orgTime.isNotEmpty ? e.orgTime : e.timeService;
+      }),
+      _ColGroup('কর্মী যোগাযোগ\nসংখ্যা (নাম)', (DailyPersonalEntry e) {
+        if (e.memberContactCount.isNotEmpty || e.memberContactName.isNotEmpty) {
+          return '${e.memberContactCount} (${e.memberContactName})';
         }
         return '';
       }),
-      _ColGroup('দাওয়াত কত জন\nনাম', (DailyPersonalEntry e) => e.dawah),
-      _ColGroup('সময় দান\nকত ঘণ্টা', (DailyPersonalEntry e) {
-        if (e.timeService.isNotEmpty) return e.timeService;
-        return e.volunteering;
+      _ColGroup('বিবিধ\nপত্রিকা/শরীরচর্চা/খেদমত', (DailyPersonalEntry e) {
+        final list = <String>[];
+        if (e.newspaperTime.isNotEmpty) list.add('প:${e.newspaperTime}মি');
+        if (e.physicalExerciseTime.isNotEmpty) list.add('শ:${e.physicalExerciseTime}মি');
+        if (e.familyWelfareTime.isNotEmpty) list.add('খ:${e.familyWelfareTime}মি');
+        return list.join(', ');
       }),
-      _ColGroup('সমাজ সেবা\nকি ধরনের', (DailyPersonalEntry e) => e.socialService),
-      _ColGroup('আত্ম-সমালোচনা\nহ্যাঁ/না', (DailyPersonalEntry e) => e.remarks),
     ];
+  }
+
+  // মাসিক এগ্রিগেশন বা সামারি হিসাব (মোট রো-এর জন্য)
+  String _calculateTotalForGroup(int index) {
+    int sumInt = 0;
+    double sumDouble = 0.0;
+    bool isDouble = false;
+    bool hasValue = false;
+
+    for (final entry in _entries.values) {
+      if (entry.isEmpty) continue;
+      hasValue = true;
+      try {
+        switch (index) {
+          case 0: // কুরআন আয়াত
+            sumInt += int.parse(entry.quranAyah.replaceAll(RegExp(r'[^0-9]'), ''));
+            break;
+          case 1: // হাদিস সংখ্যা
+            sumInt += int.parse(entry.hadithCount.isEmpty ? entry.hadithStudy.replaceAll(RegExp(r'[^0-9]'), '') : entry.hadithCount.replaceAll(RegExp(r'[^0-9]'), ''));
+            break;
+          case 2: // সাহিত্য পৃষ্ঠা
+            sumInt += int.parse(entry.islamicLitPages.isEmpty ? entry.islamicLiterature.replaceAll(RegExp(r'[^0-9]'), '') : entry.islamicLitPages.replaceAll(RegExp(r'[^0-9]'), ''));
+            break;
+          case 3: // পাঠ্যপুস্তক ঘণ্টা
+            isDouble = true;
+            sumDouble += double.parse(entry.textbookHours.isEmpty ? entry.textbookStudy.replaceAll(RegExp(r'[^0-9.]'), '') : entry.textbookHours.replaceAll(RegExp(r'[^0-9.]'), ''));
+            break;
+          case 4: // জামায়াত ওয়াক্ত
+            sumInt += int.parse(entry.jamaatPrayer.replaceAll(RegExp(r'[^0-9]'), ''));
+            break;
+          case 5: // আত্মবিচার দিন
+            if (entry.selfAnalysis == 'হ্যাঁ' || entry.selfAnalysis == 'yes') sumInt += 1;
+            break;
+          case 6: // দাওয়াত যোগাযোগ
+            sumInt += int.parse(entry.contactCount.replaceAll(RegExp(r'[^0-9]'), ''));
+            break;
+          case 7: // উপকরণ বিতরণ
+            sumInt += int.parse(entry.dawahMaterials.isEmpty ? entry.dawah.replaceAll(RegExp(r'[^0-9]'), '') : entry.dawahMaterials.replaceAll(RegExp(r'[^0-9]'), ''));
+            break;
+          case 9: // সাংগঠনিক সময়
+            isDouble = true;
+            sumDouble += double.parse(entry.orgTime.isEmpty ? entry.timeService.replaceAll(RegExp(r'[^0-9.]'), '') : entry.orgTime.replaceAll(RegExp(r'[^0-9.]'), ''));
+            break;
+          case 10: // কর্মী যোগাযোগ
+            sumInt += int.parse(entry.memberContactCount.replaceAll(RegExp(r'[^0-9]'), ''));
+            break;
+        }
+      } catch (_) {}
+    }
+
+    if (!hasValue) return '-';
+    if (isDouble) return _bnDouble(sumDouble);
+    if (index == 8 || index == 11) return '-'; // মিটিং বা বিবিধ মোট দরকার নেই
+    return _bn(sumInt);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _darkBg,
-      appBar: AppBar(
-        backgroundColor: _cardBg,
-        iconTheme: const IconThemeData(color: _textLight),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: _textLight, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        titleSpacing: 0,
-        title: TabBar(
-          controller: _tabController,
-          indicatorColor: _accentGreen,
-          indicatorWeight: 2.5,
-          labelColor: _accentGreen,
-          unselectedLabelColor: _textMuted,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          tabs: const [
-            Tab(text: 'রিপোর্ট'),
-            Tab(text: 'মন্তব্য'),
-          ],
-        ),
-        elevation: 0,
-      ),
-      body: Stack(
-        children: [
-          Positioned.fill(child: CustomPaint(painter: _PersonalBgPainter())),
-          TabBarView(
-            controller: _tabController,
+    return AnimatedBuilder(
+      animation: themeManager,
+      builder: (context, _) {
+        return Scaffold(
+          backgroundColor: _darkBg,
+          appBar: AppBar(
+            backgroundColor: _cardBg,
+            iconTheme: IconThemeData(color: _textLight),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios_new, color: _textLight, size: 20),
+              onPressed: () => Navigator.pop(context),
+            ),
+            titleSpacing: 0,
+            title: TabBar(
+              controller: _tabController,
+              indicatorColor: _accentGreen,
+              indicatorWeight: 2.5,
+              labelColor: _accentGreen,
+              unselectedLabelColor: _textMuted,
+              labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              tabs: const [
+                Tab(text: 'রিপোর্ট টেবিল'),
+                Tab(text: 'মাসিক পরিকল্পনা'),
+                Tab(text: 'মন্তব্য সমূহ'),
+              ],
+            ),
+            elevation: 0,
+          ),
+          body: Stack(
             children: [
-              _buildReportTab(),
-              _buildCommentsTab(),
+              Positioned.fill(child: CustomPaint(painter: _PersonalBgPainter(isDark: _isDark))),
+              TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildReportTab(),
+                  _buildPlanTab(),
+                  _buildCommentsTab(),
+                ],
+              ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -282,10 +578,9 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
 
     return Column(
       children: [
-        // ১. স্টিকি হেডার রো (Corner Cell + Horizontal Header Data Columns)
+        // ১. স্টিকি হেডার রো
         Row(
           children: [
-            // কর্নারের ফাঁকা ঘরে বর্তমান মাস ও বছরটি উলম্বভাবে (rotated)
             Container(
               width: _dateColW,
               height: _headerH,
@@ -298,7 +593,7 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
                 quarterTurns: 3,
                 child: Text(
                   '${_monthNames[widget.month - 1]} ${_bn(widget.year)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: _accentGreen,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -307,7 +602,6 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
                 ),
               ),
             ),
-            // স্ক্রোলযোগ্য হেডারসমূহ (কোরআন অধ্যয়ন, হাদীস অধ্যয়ন ইত্যাদি)
             Expanded(
               child: SingleChildScrollView(
                 controller: _headerHorController,
@@ -326,7 +620,7 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
                         ),
                         child: Text(
                           g.title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: _textLight,
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
@@ -342,12 +636,11 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
           ],
         ),
 
-        // ২. স্ক্রোলযোগ্য বডি (বামপাশে তারিখ কলাম ও ডানপাশে ডাটা রো)
+        // ২. বডি
         Expanded(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // তারিখের রো (বামপাশে ফিক্সড)
               SizedBox(
                 width: _dateColW,
                 child: ListView.builder(
@@ -391,8 +684,6 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
                   },
                 ),
               ),
-
-              // ডাটা রো (ডানপাশে স্ক্রোলযোগ্য)
               Expanded(
                 child: SingleChildScrollView(
                   controller: _dataHorController,
@@ -454,10 +745,9 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
           ),
         ),
 
-        // ৩. স্টিকি ফুটার রো (বামপাশে "মোট" লেবেল + ডানপাশে ফুটার রো)
+        // ৩. স্টিকি ফুটার রো (যোগফল দেখায়)
         Row(
           children: [
-            // বামপাশে "মোট" লেবেল
             Container(
               width: _dateColW,
               height: _cellH,
@@ -466,12 +756,11 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
                 color: _headerBg,
                 border: Border.all(color: _borderColor, width: 0.5),
               ),
-              child: const Text(
+              child: Text(
                 'মোট',
                 style: TextStyle(color: _accentGreen, fontSize: 11, fontWeight: FontWeight.bold),
               ),
             ),
-            // ডানপাশে ফুটার রো
             Expanded(
               child: SingleChildScrollView(
                 controller: _footerHorController,
@@ -479,16 +768,23 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
                 child: SizedBox(
                   width: totalWidth,
                   child: Row(
-                    children: groups.map((_) => Container(
-                      width: _cellW,
-                      height: _cellH,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: _headerBg,
-                        border: Border.all(color: _borderColor, width: 0.5),
-                      ),
-                      child: const Text('', style: TextStyle(color: _textLight, fontSize: 12)),
-                    )).toList(),
+                    children: groups.asMap().entries.map((e) {
+                      final idx = e.key;
+                      final totalVal = _calculateTotalForGroup(idx);
+                      return Container(
+                        width: _cellW,
+                        height: _cellH,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: _headerBg,
+                          border: Border.all(color: _borderColor, width: 0.5),
+                        ),
+                        child: Text(
+                          totalVal,
+                          style: TextStyle(color: _accentGreen, fontSize: 11, fontWeight: FontWeight.bold),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
               ),
@@ -499,15 +795,186 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
     );
   }
 
-  // ===========================
-  // ট্যাব ২: মন্তব্য
-  // ===========================
-  Widget _buildCommentsTab() {
+  // ==========================================
+  // ট্যাব ২: মাসিক পরিকল্পনা (Porikolpona Input Form)
+  // ==========================================
+  Widget _buildPlanTab() {
+    final fill = _isDark ? const Color(0xFF0F172A) : Colors.white;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            'ব্যক্তিগত মাসিক পরিকল্পনা (টার্গেট)',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _accentGreen),
+          ),
+          Text(
+            '${_monthNames[widget.month - 1]} ${_bn(widget.year)} সেশনের জন্য আপনার লক্ষ্যগুলো লিখুন।',
+            style: TextStyle(fontSize: 12, color: _textMuted),
+          ),
+          const SizedBox(height: 20),
+
+          // ১. অধ্যয়ন টার্গেট
+          _subHeader('১. অধ্যয়ন (Study Targets)'),
+          _planField('কুরআন: আয়াত সংখ্যা', _quranAyahCountCtrl, fill, 'যেমন: ২০০'),
+          _planField('কুরআন: সূরা/পারা নাম', _quranSuraParaCtrl, fill, 'যেমন: সূরা আল-বাকারা'),
+          _planField('কুরআন দারস তৈরি (টি)', _quranDarsCountCtrl, fill, 'যেমন: ২'),
+          _planField('কুরআন দারস বিষয়', _quranDarsTopicCtrl, fill, 'যেমন: চরিত্র গঠন'),
+          _planField('কুরআন মুখস্থ (আয়াত)', _quranMemorizeAyahCtrl, fill, 'যেমন: ১০ আয়াত'),
+          const Divider(height: 32),
+
+          _planField('হাদিস: পঠন সংখ্যা', _hadithCountCtrl, fill, 'যেমন: ৫০'),
+          _planField('হাদিস: বিষয়/গ্রন্থ', _hadithTopicCtrl, fill, 'যেমন: রিয়াদুস সালেহীন'),
+          _planField('হাদিস দারস তৈরি (টি)', _hadithDarsCountCtrl, fill, 'যেমন: ১'),
+          _planField('হাদিস দারস বিষয়', _hadithDarsTopicCtrl, fill, 'যেমন: তাকওয়া'),
+          _planField('হাদিস মুখস্থ (টি)', _hadithMemorizeCountCtrl, fill, 'যেমন: ৫টি হাদিস'),
+          const Divider(height: 32),
+
+          _planField('দ্বীনি সাহিত্য: পৃষ্ঠা সংখ্যা', _litPagesCtrl, fill, 'যেমন: ৩০০ পৃষ্ঠা'),
+          _planField('দ্বীনি সাহিত্য: বইয়ের নাম', _litBookCtrl, fill, 'যেমন: ইসলামী আন্দোলন ও সংগঠন'),
+          _planField('আলোচনা/বইয়ের নোট (পৃষ্ঠা)', _litNotesCtrl, fill, 'যেমন: ৫ পৃষ্ঠা'),
+          const Divider(height: 32),
+
+          _planField('পাঠ্যপুস্তক/ক্লাস অধ্যয়ন (ঘণ্টা)', _academicHoursCtrl, fill, 'যেমন: ৮০ ঘণ্টা'),
+          const SizedBox(height: 20),
+
+          // ২. ইবাদত টার্গেট
+          _subHeader('২. ইবাদত (Worship Targets)'),
+          _planField('জামাআতে নামায (ওয়াক্ত)', _jamaatPrayerWaqtCtrl, fill, 'যেমন: ১৫০ ওয়াক্ত'),
+          _planField('নফল ইবাদত বিবরণ', _naflPrayerCtrl, fill, 'যেমন: তাহাজ্জুদ ও ইশরাক'),
+          _planField('আত্মবিচার দিন সংখ্যা', _selfAnalysisDaysCtrl, fill, 'যেমন: ৩০ দিন'),
+          const SizedBox(height: 20),
+
+          // ৩. দাওয়াতি কাজ টার্গেট
+          _subHeader('৩. দাওয়াতি কাজ (Dawah Targets)'),
+          _planField('বন্ধু বৃদ্ধি টার্গেট (জন)', _friendTargetCountCtrl, fill, 'যেমন: ২'),
+          _planField('টার্গেট বন্ধুদের নাম', _friendTargetNamesCtrl, fill, 'যেমন: আবির, হাসান'),
+          _planField('প্রাথমিক সদস্য বৃদ্ধি টার্গেট (জন)', _primaryMemberTargetCountCtrl, fill, 'যেমন: ৩'),
+          _planField('টার্গেট সদস্যের নাম', _primaryMemberTargetNamesCtrl, fill, 'যেমন: তারেক, সাকিব'),
+          _planField('বই/পরিচিতি/স্টিকার বিতরণ (টি)', _dawahBookletCountCtrl, fill, 'যেমন: ২০'),
+          _planField('ছাত্র পরিক্রমা বিতরণ (টি)', _studentReviewCountCtrl, fill, 'যেমন: ৫'),
+          _planField('শুভাকাঙ্ক্ষী যোগাযোগ (জন)', _supporterTargetCountCtrl, fill, 'যেমন: ১০'),
+          _planField('টার্গেট শুভাকাঙ্ক্ষীদের নাম', _supporterTargetNamesCtrl, fill, 'যেমন: রফিক সাহেব'),
+          _planField('কার্ড/উপহার/SMS বিতরণ (টি)', _giftSmsCountCtrl, fill, 'যেমন: ১৫'),
+          _planField('গ্রুপ দাওয়াত (বার)', _groupDawahCountCtrl, fill, 'যেমন: ৪'),
+          _planField('অন্যান্য দাওয়াতি উপকরণ', _otherDawahMaterialsCtrl, fill, 'যেমন: দাওয়াতি কার্ড'),
+          const SizedBox(height: 20),
+
+          // ৪. সাংগঠনিক কাজ টার্গেট
+          _subHeader('৪. সাংগঠনিক কাজ (Organization Targets)'),
+          _planField('কর্মী মানে উন্নীতকরণ (জন)', _upgradeWorkerCountCtrl, fill, 'যেমন: ১'),
+          _planField('উন্নীতকরণের জন্য নির্ধারিত নাম', _upgradeWorkerNamesCtrl, fill, 'যেমন: ইমরান'),
+          _planField('সভায় যোগদান (টি)', _meetingsCountCtrl, fill, 'যেমন: ৪টি সভা'),
+          _planField('সাংগঠনিক সময়দান (ঘণ্টা)', _orgHoursCtrl, fill, 'যেমন: ২০ ঘণ্টা'),
+          _planField('বায়তুলমাল প্রদান (টাকা)', _baytulmalAmountCtrl, fill, 'যেমন: ৫০০ টাকা'),
+          _planField('কর্মী যোগাযোগ (জন)', _workerContactsCountCtrl, fill, 'যেমন: ৮'),
+          _planField('যোগাযোগকৃত কর্মীদের নাম', _workerContactsNamesCtrl, fill, 'যেমন: ফাহাদ, রায়হান'),
+          const SizedBox(height: 20),
+
+          // ৫. বিবিধ
+          _subHeader('৫. বিবিধ টার্গেট (Misc Targets)'),
+          _planField('দৈনিক পত্রিকা পাঠ (মিনিট)', _newspaperMinutesCtrl, fill, 'যেমন: ৩০ মিনিট'),
+          _planField('শরীরচর্চা (দিন)', _physicalExerciseDaysCtrl, fill, 'যেমন: ২০ দিন'),
+          _planField('কারিগরি/কম্পিউটার/ভাষা শিক্ষা (ঘণ্টা)', _technicalSkillHoursCtrl, fill, 'যেমন: ১০ ঘণ্টা'),
+          _planField('পারিবারিক/সামাজিক খেদমত (ঘণ্টা)', _familyTimeHoursCtrl, fill, 'যেমন: ১৫ ঘণ্টা'),
+          _planField('অন্যান্য কোনো পরিকল্পনা', _otherNotesCtrl, fill, 'অন্যান্য চিন্তা বা নোট...'),
+          const SizedBox(height: 20),
+
+          // ৬. সংশ্লিষ্টদের জন্য
+          _subHeader('৬. সংশ্লিষ্টদের জন্য টার্গেট (Leader\'s Upgrades)'),
+          _planField('সদস্য স্তরে উন্নীতকরণ টার্গেট (জন)', _memberUpgradeTargetCountCtrl, fill, 'যেমন: ১'),
+          _planField('সদস্য স্তরে উন্নীতকরণ নাম', _memberUpgradeTargetNamesCtrl, fill, 'যেমন: জামিল'),
+          _planField('সহযোগী সদস্য স্তরে উন্নীতকরণ (জন)', _associateUpgradeTargetCountCtrl, fill, 'যেমন: ২'),
+          _planField('সহযোগী সদস্য স্তরে উন্নীতকরণ নাম', _associateUpgradeTargetNamesCtrl, fill, 'যেমন: রাসেল, আবিদ'),
+          const SizedBox(height: 35),
+
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: _savePlan,
+              icon: const Icon(Icons.save, color: Colors.white),
+              label: const Text(
+                'মাসিক পরিকল্পনা সংরক্ষণ করুন',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _accentGreen,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                elevation: 2,
+              ),
+            ),
+          ),
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
+  Widget _subHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 14, bottom: 12),
+      child: Row(
+        children: [
+          Container(width: 4, height: 16, decoration: BoxDecoration(color: _accentGreen, borderRadius: BorderRadius.circular(2))),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF34D399)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _planField(String label, TextEditingController ctrl, Color fill, String hint) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 6),
+          TextField(
+            controller: ctrl,
+            style: TextStyle(color: _textLight, fontSize: 14),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: const TextStyle(color: Color(0xFF4A5568), fontSize: 12),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: _borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: _accentGreen, width: 1.5),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              filled: true,
+              fillColor: fill,
+              isDense: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================
+  // ট্যাব ৩: মন্তব্য তালিকা এবং ফর্ম
+  // ==========================================
+  Widget _buildCommentsTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Add comment form
           Container(
             decoration: BoxDecoration(
               color: _cardBg,
@@ -518,14 +985,14 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'মন্তব্য',
                   style: TextStyle(color: _textMuted, fontSize: 14, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 6),
                 _buildCommentField(_commentCtrl, maxLines: 3, hint: 'আপনার মন্তব্য লিখুন...'),
                 const SizedBox(height: 14),
-                const Text(
+                Text(
                   'সাক্ষর',
                   style: TextStyle(color: _textMuted, fontSize: 14, fontWeight: FontWeight.bold),
                 ),
@@ -563,7 +1030,7 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
 
           // Comments list
           if (_comments.isNotEmpty) ...[
-            const Text('মন্তব্য সমূহ পড়ুন',
+            Text('মন্তব্য সমূহ পড়ুন',
                 style: TextStyle(color: _textLight, fontWeight: FontWeight.bold, fontSize: 14)),
             const SizedBox(height: 12),
             ..._comments.map((c) => _buildCommentBubble(c)),
@@ -586,17 +1053,17 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
     return TextField(
       controller: ctrl,
       maxLines: maxLines,
-      style: const TextStyle(color: _textLight, fontSize: 14),
+      style: TextStyle(color: _textLight, fontSize: 14),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Color(0xFF4A5568), fontSize: 13),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _borderColor),
+          borderSide: BorderSide(color: _borderColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _accentGreen, width: 1.5),
+          borderSide: BorderSide(color: _accentGreen, width: 1.5),
         ),
         filled: true,
         fillColor: const Color(0xFF0A1628),
@@ -617,7 +1084,7 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
           context: context,
           builder: (_) => AlertDialog(
             backgroundColor: _cardBg,
-            title: const Text('মন্তব্য মুছবেন?', style: TextStyle(color: _textLight)),
+            title: Text('মন্তব্য মুছবেন?', style: TextStyle(color: _textLight)),
             actions: [
               TextButton(onPressed: () => Navigator.pop(context), child: const Text('না')),
               TextButton(
@@ -642,14 +1109,38 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
           children: [
             Text(
               '${c.signature}: ${c.comment}',
-              style: const TextStyle(color: _textLight, fontSize: 14, fontStyle: FontStyle.italic),
+              style: TextStyle(color: _textLight, fontSize: 14, fontStyle: FontStyle.italic),
             ),
             const SizedBox(height: 6),
-            Text(dateStr, style: const TextStyle(color: _accentGreen, fontSize: 12)),
+            Text(dateStr, style: TextStyle(color: _accentGreen, fontSize: 12)),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _saveComment() async {
+    final comment = _commentCtrl.text.trim();
+    final signature = _signatureCtrl.text.trim();
+    if (comment.isEmpty || signature.isEmpty) return;
+
+    final newComment = MonthlyComment(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      yearMonth: _monthKey,
+      comment: comment,
+      signature: signature,
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+    );
+
+    await ReportStorageService.saveComment(newComment);
+    _commentCtrl.clear();
+    _signatureCtrl.clear();
+    await _loadData();
+  }
+
+  Future<void> _deleteComment(String id) async {
+    await ReportStorageService.deleteComment(id);
+    await _loadData();
   }
 }
 
@@ -662,8 +1153,18 @@ class _ColGroup {
 }
 
 class _PersonalBgPainter extends CustomPainter {
+  final bool isDark;
+  _PersonalBgPainter({required this.isDark});
+
   @override
   void paint(Canvas canvas, Size size) {
+    if (!isDark) {
+      final grid = Paint()..color = Colors.grey.withValues(alpha: 0.05)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+      for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
+      for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+      return;
+    }
+
     final fill = Paint()..color = const Color(0xFF10B981).withValues(alpha: 0.025)..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.05), 130, fill);
     canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.5), 100, fill);

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:mojlish_app/core/theme/theme_manager.dart';
 import '../../data/services/report_storage_service.dart';
 import 'baytulmal_report_screen.dart';
 
@@ -16,13 +17,6 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
   late int _selectedYear;
   late int _selectedMonth;
   Map<int, bool> _savedMonths = {};
-
-  static const _darkBg = Color(0xFF0D1B2A);
-  static const _cardBg = Color(0xFF162032);
-  static const _borderColor = Color(0xFF2A3F58);
-  static const _accentBlue = Color(0xFF0EA5E9);
-  static const _textLight = Color(0xFFE2E8F0);
-  static const _textMuted = Color(0xFF94A3B8);
 
   static const _monthShort = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -68,50 +62,77 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _darkBg,
-      appBar: AppBar(
-        backgroundColor: _cardBg,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: _textLight, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'বায়তুলমাল রিপোর্ট বই',
-          style: TextStyle(color: _accentBlue, fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: Stack(
-        children: [
-          Positioned.fill(child: CustomPaint(painter: _BgPainter())),
-          SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              children: [
-                const SizedBox(height: 12),
-                _buildStatusCard(),
-                const SizedBox(height: 16),
-                _buildYearSelector(),
-                const SizedBox(height: 16),
-                _buildMonthGrid(),
-                const SizedBox(height: 24),
-              ],
+    return AnimatedBuilder(
+      animation: themeManager,
+      builder: (context, _) {
+        final isDark = themeManager.isDarkMode;
+
+        // Theme colors
+        final bg = isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF8FAFC);
+        final appBarBg = isDark ? const Color(0xFF162032) : Colors.white;
+        final cardBg = isDark ? const Color(0xFF162032) : Colors.white;
+        final borderColor = isDark ? const Color(0xFF2A3F58) : const Color(0xFFE2E8F0);
+        final textLight = isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
+        final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+        const accentBlue = Color(0xFF0EA5E9);
+
+        return Scaffold(
+          backgroundColor: bg,
+          appBar: AppBar(
+            backgroundColor: appBarBg,
+            elevation: 0,
+            centerTitle: true,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios_new, color: textLight, size: 20),
+              onPressed: () => Navigator.pop(context),
             ),
+            title: const Text(
+              'বায়তুলমাল রিপোর্ট বই',
+              style: TextStyle(color: accentBlue, fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  isDark ? Icons.wb_sunny : Icons.nightlight_round,
+                  color: isDark ? Colors.yellow : Colors.black87,
+                ),
+                onPressed: () {
+                  themeManager.toggleTheme();
+                },
+              ),
+            ],
           ),
-        ],
-      ),
+          body: Stack(
+            children: [
+              Positioned.fill(child: CustomPaint(painter: _BgPainter(isDark: isDark))),
+              SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 12),
+                    _buildStatusCard(cardBg, borderColor, textLight, accentBlue),
+                    const SizedBox(height: 16),
+                    _buildYearSelector(cardBg, borderColor, textLight),
+                    const SizedBox(height: 16),
+                    _buildMonthGrid(cardBg, borderColor, textLight, textMuted, accentBlue),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildStatusCard() {
+  Widget _buildStatusCard(Color cardBg, Color borderColor, Color textLight, Color accentBlue) {
     int count = _savedMonths.values.where((v) => v).length;
     return Container(
       decoration: BoxDecoration(
-        color: _cardBg,
+        color: cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _borderColor),
+        border: Border.all(color: borderColor),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -120,11 +141,11 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: _accentBlue.withValues(alpha: 0.15),
+              color: accentBlue.withValues(alpha: 0.15),
               shape: BoxShape.circle,
-              border: Border.all(color: _accentBlue.withValues(alpha: 0.4), width: 2),
+              border: Border.all(color: accentBlue.withValues(alpha: 0.4), width: 2),
             ),
-            child: const Icon(Icons.account_balance_wallet, color: _accentBlue, size: 26),
+            child: Icon(Icons.account_balance_wallet, color: accentBlue, size: 26),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -133,12 +154,12 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
               children: [
                 Text(
                   '[_selectedYear সালের শাখা বায়তুলমাল রিপোর্ট]',
-                  style: TextStyle(color: _textLight.withValues(alpha: 0.8), fontSize: 14),
+                  style: TextStyle(color: textLight.withValues(alpha: 0.8), fontSize: 14),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   '১২ মাসের মধ্যে $count মাসের রিপোর্ট সেভ করা আছে',
-                  style: const TextStyle(color: _accentBlue, fontSize: 13, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: accentBlue, fontSize: 13, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -148,18 +169,18 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
     );
   }
 
-  Widget _buildYearSelector() {
+  Widget _buildYearSelector(Color cardBg, Color borderColor, Color textLight) {
     return Container(
       decoration: BoxDecoration(
-        color: _cardBg,
+        color: cardBg,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: _borderColor),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: const Icon(Icons.chevron_left, color: _textLight),
+            icon: Icon(Icons.chevron_left, color: textLight),
             onPressed: () {
               setState(() => _selectedYear--);
               _loadSavedMonths();
@@ -168,10 +189,10 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(_bn(_selectedYear),
-                style: const TextStyle(color: _textLight, fontSize: 18, fontWeight: FontWeight.bold)),
+                style: TextStyle(color: textLight, fontSize: 18, fontWeight: FontWeight.bold)),
           ),
           IconButton(
-            icon: const Icon(Icons.chevron_right, color: _textLight),
+            icon: Icon(Icons.chevron_right, color: textLight),
             onPressed: () {
               if (_selectedYear < _now.year) {
                 setState(() => _selectedYear++);
@@ -184,7 +205,7 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
     );
   }
 
-  Widget _buildMonthGrid() {
+  Widget _buildMonthGrid(Color cardBg, Color borderColor, Color textLight, Color textMuted, Color accentBlue) {
     final rows = [
       [1, 2, 3, 4, 5],
       [6, 7, 8, 9],
@@ -195,13 +216,13 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
         padding: const EdgeInsets.only(bottom: 12),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: row.map(_buildMonthCircle).toList(),
+          children: row.map((m) => _buildMonthCircle(m, cardBg, borderColor, textLight, textMuted, accentBlue)).toList(),
         ),
       )).toList(),
     );
   }
 
-  Widget _buildMonthCircle(int month) {
+  Widget _buildMonthCircle(int month, Color cardBg, Color borderColor, Color textLight, Color textMuted, Color accentBlue) {
     final isSelected = month == _selectedMonth;
     final isSaved = _savedMonths[month] ?? false;
     final isFuture = _selectedYear == _now.year && month > _now.month;
@@ -215,16 +236,16 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: isSelected
-              ? _accentBlue.withValues(alpha: 0.15)
+              ? accentBlue.withValues(alpha: 0.15)
               : isFuture
-                  ? const Color(0xFF0A1220)
-                  : _cardBg,
+                  ? cardBg.withValues(alpha: 0.2)
+                  : cardBg,
           border: Border.all(
             color: isSelected
-                ? _accentBlue
+                ? accentBlue
                 : isSaved
                     ? const Color(0xFF10B981)
-                    : _borderColor,
+                    : borderColor,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -236,10 +257,10 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
               _monthShort[month - 1],
               style: TextStyle(
                 color: isSelected
-                    ? _accentBlue
+                    ? accentBlue
                     : isFuture
-                        ? _textMuted.withValues(alpha: 0.4)
-                        : _textLight,
+                        ? textMuted.withValues(alpha: 0.4)
+                        : textLight,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 fontSize: 14,
               ),
@@ -256,13 +277,23 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
 }
 
 class _BgPainter extends CustomPainter {
+  final bool isDark;
+  _BgPainter({required this.isDark});
+
   @override
   void paint(Canvas canvas, Size size) {
-    final fill = Paint()..color = const Color(0xFF0EA5E9).withValues(alpha: 0.025)..style = PaintingStyle.fill;
+    if (!isDark) {
+      final grid = Paint()..color = Colors.grey.withValues(alpha: 0.05)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+      for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
+      for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+      return;
+    }
+
+    final fill = Paint()..color = Colors.blue.withValues(alpha: 0.025)..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.08), 120, fill);
     canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.45), 90, fill);
 
-    final grid = Paint()..color = const Color(0xFF0EA5E9).withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+    final grid = Paint()..color = Colors.blue.withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
     for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
     for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
 
