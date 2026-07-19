@@ -6,6 +6,7 @@ import '../../data/models/monthly_plan.dart';
 import '../../data/services/report_storage_service.dart';
 import 'daily_entry_screen.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
+import '../../data/services/pdf_generator_service.dart';
 
 /// মাসিক রিপোর্ট স্ক্রিন — কাগজের ফরম অনুযায়ী কলামসমূহ এবং পরিকল্পনা ও মন্তব্য
 class PersonalReportScreen extends StatefulWidget {
@@ -892,22 +893,104 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
           _planField('সহযোগী সদস্য স্তরে উন্নীতকরণ নাম', _associateUpgradeTargetNamesCtrl, fill, 'যেমন: রাসেল, আবিদ'),
           const SizedBox(height: 35),
 
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton.icon(
-              onPressed: _savePlan,
-              icon: const Icon(Icons.save, color: Colors.white),
-              label: const Text(
-                'মাসিক পরিকল্পনা সংরক্ষণ করুন',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    onPressed: _savePlan,
+                    icon: const Icon(Icons.save, color: Colors.white, size: 18),
+                    label: const Text(
+                      'পরিকল্পনা সংরক্ষণ',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _accentGreen,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      elevation: 2,
+                    ),
+                  ),
+                ),
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _accentGreen,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                elevation: 2,
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      _savePlan();
+                      final plan = MonthlyPlan(
+                        year: widget.year,
+                        month: widget.month,
+                        quranAyahCount: _quranAyahCountCtrl.text.trim(),
+                        quranSuraPara: _quranSuraParaCtrl.text.trim(),
+                        quranDarsCount: _quranDarsCountCtrl.text.trim(),
+                        quranDarsTopic: _quranDarsTopicCtrl.text.trim(),
+                        quranMemorizeAyah: _quranMemorizeAyahCtrl.text.trim(),
+                        hadithCount: _hadithCountCtrl.text.trim(),
+                        hadithTopic: _hadithTopicCtrl.text.trim(),
+                        hadithDarsCount: _hadithDarsCountCtrl.text.trim(),
+                        hadithDarsTopic: _hadithDarsTopicCtrl.text.trim(),
+                        hadithMemorizeCount: _hadithMemorizeCountCtrl.text.trim(),
+                        hadithMemorizeTopic: _hadithMemorizeTopicCtrl.text.trim(),
+                        litPages: _litPagesCtrl.text.trim(),
+                        litBook: _litBookCtrl.text.trim(),
+                        litNotes: _litNotesCtrl.text.trim(),
+                        academicHours: _academicHoursCtrl.text.trim(),
+                        jamaatPrayerWaqt: _jamaatPrayerWaqtCtrl.text.trim(),
+                        selfAnalysisDays: _selfAnalysisDaysCtrl.text.trim(),
+                        naflPrayer: _naflPrayerCtrl.text.trim(),
+                        friendTargetCount: _friendTargetCountCtrl.text.trim(),
+                        friendTargetNames: _friendTargetNamesCtrl.text.trim(),
+                        primaryMemberTargetCount: _primaryMemberTargetCountCtrl.text.trim(),
+                        primaryMemberTargetNames: _primaryMemberTargetNamesCtrl.text.trim(),
+                        dawahBookletCount: _dawahBookletCountCtrl.text.trim(),
+                        studentReviewCount: _studentReviewCountCtrl.text.trim(),
+                        supporterTargetCount: _supporterTargetCountCtrl.text.trim(),
+                        supporterTargetNames: _supporterTargetNamesCtrl.text.trim(),
+                        giftSmsCount: _giftSmsCountCtrl.text.trim(),
+                        groupDawahCount: _groupDawahCountCtrl.text.trim(),
+                        otherDawahMaterials: _otherDawahMaterialsCtrl.text.trim(),
+                        upgradeWorkerCount: _upgradeWorkerCountCtrl.text.trim(),
+                        upgradeWorkerNames: _upgradeWorkerNamesCtrl.text.trim(),
+                        meetingsCount: _meetingsCountCtrl.text.trim(),
+                        orgHours: _orgHoursCtrl.text.trim(),
+                        baytulmalAmount: _baytulmalAmountCtrl.text.trim(),
+                        workerContactsCount: _workerContactsCountCtrl.text.trim(),
+                        workerContactsNames: _workerContactsNamesCtrl.text.trim(),
+                        newspaperMinutes: _newspaperMinutesCtrl.text.trim(),
+                        physicalExerciseDays: _physicalExerciseDaysCtrl.text.trim(),
+                        technicalSkillHours: _technicalSkillHoursCtrl.text.trim(),
+                        familyTimeHours: _familyTimeHoursCtrl.text.trim(),
+                        otherNotes: _otherNotesCtrl.text.trim(),
+                        memberUpgradeTargetCount: _memberUpgradeTargetCountCtrl.text.trim(),
+                        memberUpgradeTargetNames: _memberUpgradeTargetNamesCtrl.text.trim(),
+                        associateUpgradeTargetCount: _associateUpgradeTargetCountCtrl.text.trim(),
+                        associateUpgradeTargetNames: _associateUpgradeTargetNamesCtrl.text.trim(),
+                      );
+                      await PdfGeneratorService.generatePersonalPlanPdf(
+                        plan: plan,
+                        userName: 'ব্যবহারকারী',
+                        branchName: 'শাখা কার্যালয়',
+                        year: widget.year,
+                        month: widget.month,
+                      );
+                    },
+                    icon: const Icon(Icons.picture_as_pdf, color: Colors.black, size: 18),
+                    label: const Text(
+                      'পিডিএফ ডাউনলোড',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFBBF24),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      elevation: 2,
+                    ),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
           const SizedBox(height: 40),
         ],

@@ -819,4 +819,162 @@ class PdfGeneratorService {
     final d = DateTime.fromMillisecondsSinceEpoch(ms);
     return '${d.day}/${d.month}/${d.year}';
   }
+
+  /// ব্যক্তিগত মাসিক পরিকল্পনা PDF তৈরি করা (Same to Same printed brochure layout)
+  static Future<void> generatePersonalPlanPdf({
+    required MonthlyPlan plan,
+    required String userName,
+    required String branchName,
+    required int year,
+    required int month,
+  }) async {
+    final pdf = pw.Document();
+
+    final font = await PdfGoogleFonts.notoSansBengaliRegular();
+    final boldFont = await PdfGoogleFonts.notoSansBengaliBold();
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Center(
+                child: pw.Column(
+                  children: [
+                    pw.Text('বিসমিল্লাহির রাহমানির রাহীম', style: pw.TextStyle(font: font, fontSize: 10)),
+                    pw.SizedBox(height: 4),
+                    pw.Text('বাংলাদেশ ইসলামী যুব মজলিস', style: pw.TextStyle(font: boldFont, fontSize: 20, color: PdfColors.blue900)),
+                    pw.Text('ব্যক্তিগত মাসিক পরিকল্পনা (টার্গেট)', style: pw.TextStyle(font: boldFont, fontSize: 12)),
+                    pw.SizedBox(height: 10),
+                  ],
+                ),
+              ),
+              // Meta Row
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text('কর্মীর নাম: $userName', style: pw.TextStyle(font: font, fontSize: 9)),
+                  pw.Text('শাখা: $branchName', style: pw.TextStyle(font: font, fontSize: 9)),
+                  pw.Text('মাস: ${_formatDateMonth(DateTime(year, month))}', style: pw.TextStyle(font: font, fontSize: 9)),
+                ],
+              ),
+              pw.SizedBox(height: 12),
+              pw.Container(height: 1, color: PdfColors.blue800),
+              pw.SizedBox(height: 12),
+
+              _pdfPlanRowGroup(boldFont, font, '১. কুরআন অধ্যয়ন', [
+                _pdfKeyValue('মোট পঠিত আয়াত টার্গেট:', '${plan.quranAyahCount} টি'),
+                _pdfKeyValue('সূরা/পারা:', plan.quranSuraPara),
+                _pdfKeyValue('দারস তৈরি:', '${plan.quranDarsCount} টি'),
+                _pdfKeyValue('দারস বিষয়:', plan.quranDarsTopic),
+                _pdfKeyValue('মুখস্থ আয়াত সংখ্যা:', plan.quranMemorizeAyah),
+              ]),
+
+              _pdfPlanRowGroup(boldFont, font, '২. হাদীস অধ্যয়ন', [
+                _pdfKeyValue('পঠিত হাদীস সংখ্যা টার্গেট:', '${plan.hadithCount} টি'),
+                _pdfKeyValue('হাদীস গ্রন্থ/বিষয়:', plan.hadithTopic),
+                _pdfKeyValue('দারস তৈরি:', '${plan.hadithDarsCount} টি'),
+                _pdfKeyValue('দারস বিষয়:', plan.hadithDarsTopic),
+                _pdfKeyValue('মুখস্থ হাদীস সংখ্যা:', plan.hadithMemorizeCount),
+              ]),
+
+              _pdfPlanRowGroup(boldFont, font, '৩. দ্বীনি ও সাধারণ সাহিত্য পাঠ', [
+                _pdfKeyValue('পঠিত পৃষ্ঠা সংখ্যা টার্গেট:', '${plan.litPages} পৃষ্ঠা'),
+                _pdfKeyValue('বইয়ের নাম:', plan.litBook),
+                _pdfKeyValue('বই/আলোচনা নোট পৃষ্ঠা:', '${plan.litNotes} পৃষ্ঠা'),
+              ]),
+
+              _pdfPlanRowGroup(boldFont, font, '৪. সালাত ও আত্মগঠন (ইবাদত)', [
+                _pdfKeyValue('জামাআতে নামাজ (ওয়াক্ত):', '${plan.jamaatPrayerWaqt} ওয়াক্ত'),
+                _pdfKeyValue('নফল ইবাদত বিবরণ:', plan.naflPrayer),
+                _pdfKeyValue('আত্মবিচার আদায় দিন টার্গেট:', '${plan.selfAnalysisDays} দিন'),
+              ]),
+
+              _pdfPlanRowGroup(boldFont, font, '৫. দাওয়াতি কাজ ও জনসংযোগ', [
+                _pdfKeyValue('বন্ধু যোগাযোগ (জন):', plan.friendTargetCount),
+                _pdfKeyValue('টার্গেট বন্ধুদের নাম:', plan.friendTargetNames),
+                _pdfKeyValue('প্রাথমিক সদস্য বৃদ্ধি (জন):', plan.primaryMemberTargetCount),
+                _pdfKeyValue('টার্গেট সদস্যদের নাম:', plan.primaryMemberTargetNames),
+                _pdfKeyValue('বই/পরিচিতি/স্টিকার বিতরণ:', plan.dawahBookletCount),
+                _pdfKeyValue('ছাত্র পরিক্রমা বিতরণ (টি):', plan.studentReviewCount),
+                _pdfKeyValue('শুভাকাঙ্ক্ষী যোগাযোগ (জন):', plan.supporterTargetCount),
+                _pdfKeyValue('কার্ড/উপহার/SMS বিতরণ:', plan.giftSmsCount),
+                _pdfKeyValue('গ্রুপ দাওয়াত (বার):', plan.groupDawahCount),
+              ]),
+
+              _pdfPlanRowGroup(boldFont, font, '৬. সাংগঠনিক কাজ', [
+                _pdfKeyValue('সভায় যোগদান টার্গেট:', plan.meetingsCount),
+                _pdfKeyValue('কর্মী যোগাযোগ টার্গেট (জন):', plan.workerContactsCount),
+                _pdfKeyValue('সাংগঠনিক সময়দান:', '${plan.orgHours} ঘণ্টা'),
+                _pdfKeyValue('বায়তুলমাল পরিশোধ টার্গেট:', '${plan.baytulmalAmount} টাকা'),
+              ]),
+
+              _pdfPlanRowGroup(boldFont, font, '৭. বিবিধ ও সংশ্লিষ্টদের জন্য', [
+                _pdfKeyValue('পত্রিকা পাঠ (মিনিট):', plan.newspaperMinutes),
+                _pdfKeyValue('শরীরচর্চা দিন টার্গেট:', plan.physicalExerciseDays),
+                _pdfKeyValue('কারিগরি শিক্ষা সময়:', plan.technicalSkillHours),
+                _pdfKeyValue('পারিবারিক/সামাজিক সময়:', plan.familyTimeHours),
+                _pdfKeyValue('সদস্য স্তরে উন্নীতকরণ:', plan.memberUpgradeTargetCount),
+                _pdfKeyValue('সহযোগী সদস্য স্তরে উন্নীতকরণ:', plan.associateUpgradeTargetCount),
+              ]),
+
+              pw.Spacer(),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text('তারিখ: ________________', style: pw.TextStyle(font: font, fontSize: 9)),
+                  pw.Column(
+                    children: [
+                      pw.Container(width: 120, height: 0.5, color: PdfColors.black),
+                      pw.SizedBox(height: 4),
+                      pw.Text('কর্মীর স্বাক্ষর', style: pw.TextStyle(font: font, fontSize: 9)),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
+  }
+
+  static pw.Widget _pdfPlanRowGroup(pw.Font boldFont, pw.Font font, String title, List<pw.Widget> items) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.only(bottom: 10),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(title, style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.blue800)),
+          pw.SizedBox(height: 4),
+          pw.Wrap(
+            spacing: 12,
+            runSpacing: 4,
+            children: items,
+          ),
+        ],
+      ),
+    );
+  }
+
+  static pw.Widget _pdfKeyValue(String key, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.only(right: 8),
+      child: pw.Row(
+        mainAxisSize: pw.MainAxisSize.min,
+        children: [
+          pw.Text(key, style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700)),
+          pw.SizedBox(width: 3),
+          pw.Text(value.isEmpty ? '-' : value, style: const pw.TextStyle(fontSize: 8, color: PdfColors.black)),
+        ],
+      ),
+    );
+  }
 }
