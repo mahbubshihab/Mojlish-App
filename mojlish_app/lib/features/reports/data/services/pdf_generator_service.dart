@@ -4,10 +4,13 @@ import 'package:printing/printing.dart';
 import 'package:flutter/services.dart';
 import '../models/daily_personal_entry.dart';
 import '../models/baytulmal_report_entry.dart';
+import '../models/monthly_plan.dart';
+import '../models/monthly_comment.dart';
+import 'report_storage_service.dart';
 
 /// PDF জেনারেটর সার্ভিস — রিপোর্ট থেকে PDF তৈরি ও শেয়ার করে
 class PdfGeneratorService {
-  /// ব্যক্তিগত তৎপরতার রিপোর্ট PDF তৈরি করা
+  /// ব্যক্তিগত তৎপরতার রিপোর্ট PDF তৈরি করা (Daily Grid + Targets comparison summary)
   static Future<void> generatePersonalReportPdf({
     required List<DailyPersonalEntry> entries,
     required DateTime fromDate,
@@ -17,7 +20,6 @@ class PdfGeneratorService {
   }) async {
     final pdf = pw.Document();
 
-    // Font loading (use default for now since custom Bangla font needs TTF asset)
     final font = await PdfGoogleFonts.notoSansBengaliRegular();
     final boldFont = await PdfGoogleFonts.notoSansBengaliBold();
 
@@ -36,83 +38,202 @@ class PdfGeneratorService {
       current = current.add(const Duration(days: 1));
     }
 
-    // Column headers
+    // Fetch plan and comment for context month
+    final plan = await ReportStorageService.getMonthlyPlan(fromDate.year, fromDate.month);
+    final commentsList = await ReportStorageService.getCommentsForMonth(fromDate.year, fromDate.month);
+
+    // Calculate aggregates
+    int quranDays = 0;
+    int quranTotalAyah = 0;
+    int hadithDays = 0;
+    int hadithTotalCount = 0;
+    int litDays = 0;
+    int litTotalPages = 0;
+    double academicTotalHours = 0.0;
+    int jamaatTotalWaqt = 0;
+    int selfAnalysisTotalDays = 0;
+    int dawahTotalFriends = 0;
+    int dawahTotalMaterials = 0;
+    int orgMeetings = 0;
+    double orgTotalHours = 0.0;
+    int orgTotalWorkers = 0;
+    int miscNewspaper = 0;
+    int miscExercise = 0;
+    int miscWelfare = 0;
+
+    for (final entry in entries) {
+      if (entry.isEmpty) continue;
+      
+      // Quran
+      if (entry.quranSura.isNotEmpty || entry.quranAyah.isNotEmpty) {
+        quranDays++;
+        try {
+          quranTotalAyah += int.parse(entry.quranAyah.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+
+      // Hadith
+      final hCount = entry.hadithCount.isEmpty ? entry.hadithStudy : entry.hadithCount;
+      if (hCount.isNotEmpty) {
+        hadithDays++;
+        try {
+          hadithTotalCount += int.parse(hCount.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+
+      // Lit
+      final lPages = entry.islamicLitPages.isEmpty ? entry.islamicLiterature : entry.islamicLitPages;
+      if (lPages.isNotEmpty) {
+        litDays++;
+        try {
+          litTotalPages += int.parse(lPages.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+
+      // Academic
+      final aHours = entry.textbookHours.isEmpty ? entry.textbookStudy : entry.textbookHours;
+      if (aHours.isNotEmpty) {
+        try {
+          academicTotalHours += double.parse(aHours.replaceAll(RegExp(r'[^0-9.]'), ''));
+        } catch (_) {}
+      }
+
+      // Jamaat
+      if (entry.jamaatPrayer.isNotEmpty) {
+        try {
+          jamaatTotalWaqt += int.parse(entry.jamaatPrayer.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+
+      // Self
+      if (entry.selfAnalysis == 'হ্যাঁ' || entry.selfAnalysis == 'yes') {
+        selfAnalysisTotalDays++;
+      }
+
+      // Dawah friends
+      if (entry.contactCount.isNotEmpty) {
+        try {
+          dawahTotalFriends += int.parse(entry.contactCount.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+
+      // Dawah materials
+      final dMat = entry.dawahMaterials.isEmpty ? entry.dawah : entry.dawahMaterials;
+      if (dMat.isNotEmpty) {
+        try {
+          dawahTotalMaterials += int.parse(dMat.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+
+      // Meetings
+      if (entry.meetingName.isNotEmpty) {
+        orgMeetings++;
+      }
+
+      // Org hours
+      final oHours = entry.orgTime.isEmpty ? entry.timeService : entry.orgTime;
+      if (oHours.isNotEmpty) {
+        try {
+          orgTotalHours += double.parse(oHours.replaceAll(RegExp(r'[^0-9.]'), ''));
+        } catch (_) {}
+      }
+
+      // Org workers
+      if (entry.memberContactCount.isNotEmpty) {
+        try {
+          orgTotalWorkers += int.parse(entry.memberContactCount.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+
+      // Misc
+      if (entry.newspaperTime.isNotEmpty) {
+        try {
+          miscNewspaper += int.parse(entry.newspaperTime.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+      if (entry.physicalExerciseTime.isNotEmpty) {
+        try {
+          miscExercise += int.parse(entry.physicalExerciseTime.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+      if (entry.familyWelfareTime.isNotEmpty) {
+        try {
+          miscWelfare += int.parse(entry.familyWelfareTime.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+    }
+
     final headers = [
       'তারিখ',
-      'কোরআন\nঅধ্যয়ন',
-      'হাদীস\nঅধ্যয়ন',
-      'ইসলামী\nসাহিত্য',
-      'জামায়াতে\nনামাজ',
-      'যোগাযোগ',
-      'দাওয়াত\n(জন)',
-      'সময় দান',
-      'সমাজ\nসেবা',
-      'মন্তব্য',
+      'কুরআন\n(সূরা/আয়াত)',
+      'হাদীস\n(সংখ্যা/বিষয়)',
+      'সাহিত্য\n(পৃষ্ঠা/বই)',
+      'পাঠ্যপুস্তক\n(ঘণ্টা)',
+      'সালাত\n(ওয়াক্ত)',
+      'আত্মবিচার\n(হ্যাঁ/না)',
+      'বন্ধু যোগযোগ\n(জন)',
+      'দাওয়াত উপকরণ\n(টি)',
+      'সভায় যোগদান\n(নাম)',
+      'কর্মী যোগাযোগ\n(জন)',
+      'সাংগঠনিক সময়\n(ঘণ্টা)',
+      'বিবিধ\n(পত্রিকা/ব্যায়াম)',
     ];
 
+    // Page 1: Daily Grid landscape
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4.landscape,
-        margin: const pw.EdgeInsets.all(20),
+        margin: const pw.EdgeInsets.all(16),
         build: (context) {
           return [
-            // Header
+            // Title Header
             pw.Center(
               child: pw.Column(
                 children: [
-                  pw.Text(
-                    'বিসমিল্লাহির রাহমানির রাহীম',
-                    style: pw.TextStyle(font: font, fontSize: 10),
-                  ),
+                  pw.Text('বিসমিল্লাহির রাহমানির রাহীম', style: pw.TextStyle(font: font, fontSize: 8)),
+                  pw.SizedBox(height: 2),
+                  pw.Text('বাংলাদেশ ইসলামী যুব মজলিস', style: pw.TextStyle(font: boldFont, fontSize: 18, color: PdfColors.blue900)),
+                  pw.Text('ব্যক্তিগত তৎপরতার দৈনিক রিপোর্ট টেবিল', style: pw.TextStyle(font: boldFont, fontSize: 11)),
                   pw.SizedBox(height: 4),
-                  pw.Text(
-                    'খেলাফত মজলিস',
-                    style: pw.TextStyle(font: boldFont, fontSize: 22),
-                  ),
-                  pw.Text(
-                    'কেন্দ্রীয় কার্যালয়: ১৬ বিজয়নগর, (৫ম তলা), ঢাকা-১০০০ | ফোন: ০২-৪৯৩৫৪৯২১',
-                    style: pw.TextStyle(font: font, fontSize: 8),
-                  ),
-                  pw.SizedBox(height: 8),
-                  pw.Text(
-                    'ব্যক্তিগত তৎপরতার রিপোর্ট',
-                    style: pw.TextStyle(font: boldFont, fontSize: 14),
-                  ),
-                  pw.SizedBox(height: 6),
                 ],
               ),
             ),
-            // Meta info
+            // Meta Row
             pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Expanded(child: pw.Text('কর্মীর নাম: $userName', style: pw.TextStyle(font: font, fontSize: 10))),
-                pw.Expanded(child: pw.Text('শাখা: $branchName', style: pw.TextStyle(font: font, fontSize: 10))),
-                pw.Expanded(child: pw.Text('সময়কাল: ${_formatDate(fromDate)} - ${_formatDate(toDate)}', style: pw.TextStyle(font: font, fontSize: 10))),
+                pw.Text('কর্মীর নাম: $userName', style: pw.TextStyle(font: font, fontSize: 8)),
+                pw.Text('শাখা: $branchName', style: pw.TextStyle(font: font, fontSize: 8)),
+                pw.Text('রিপোর্ট মাস: ${_formatDateMonth(fromDate)}', style: pw.TextStyle(font: font, fontSize: 8)),
               ],
             ),
-            pw.SizedBox(height: 8),
+            pw.SizedBox(height: 6),
             // Table
             pw.Table(
-              border: pw.TableBorder.all(color: PdfColors.grey600, width: 0.5),
+              border: pw.TableBorder.all(color: PdfColors.grey500, width: 0.5),
               columnWidths: {
-                0: const pw.FixedColumnWidth(35),
-                1: const pw.FlexColumnWidth(),
-                2: const pw.FlexColumnWidth(),
-                3: const pw.FlexColumnWidth(),
-                4: const pw.FlexColumnWidth(),
-                5: const pw.FlexColumnWidth(),
-                6: const pw.FlexColumnWidth(),
-                7: const pw.FlexColumnWidth(),
-                8: const pw.FlexColumnWidth(),
-                9: const pw.FlexColumnWidth(1.5),
+                0: const pw.FixedColumnWidth(26), // Date
+                1: const pw.FlexColumnWidth(1.2), // Quran
+                2: const pw.FlexColumnWidth(1.1), // Hadith
+                3: const pw.FlexColumnWidth(1.1), // Lit
+                4: const pw.FlexColumnWidth(0.8), // Textbook
+                5: const pw.FlexColumnWidth(0.8), // Prayer
+                6: const pw.FlexColumnWidth(0.7), // Self analysis
+                7: const pw.FlexColumnWidth(0.8), // Friend Contact
+                8: const pw.FlexColumnWidth(0.8), // Dawah materials
+                9: const pw.FlexColumnWidth(1.0), // Meetings
+                10: const pw.FlexColumnWidth(0.8), // Worker contact
+                11: const pw.FlexColumnWidth(0.8), // Org time
+                12: const pw.FlexColumnWidth(1.0), // Misc
               },
               children: [
                 // Header row
                 pw.TableRow(
-                  decoration: const pw.BoxDecoration(color: PdfColors.blue100),
-                  children: headers.map((h) => pw.Padding(
-                    padding: const pw.EdgeInsets.all(4),
-                    child: pw.Text(h, style: pw.TextStyle(font: boldFont, fontSize: 7), textAlign: pw.TextAlign.center),
+                  decoration: const pw.BoxDecoration(color: PdfColors.blue50),
+                  children: headers.map((h) => pw.Container(
+                    alignment: pw.Alignment.center,
+                    padding: const pw.EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+                    child: pw.Text(h, style: pw.TextStyle(font: boldFont, fontSize: 6), textAlign: pw.TextAlign.center),
                   )).toList(),
                 ),
                 // Data rows
@@ -120,33 +241,201 @@ class PdfGeneratorService {
                   final key = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
                   final entry = entryMap[key];
                   final isMissing = entry == null || entry.isEmpty;
+
+                  String quranVal = '';
+                  String hadithVal = '';
+                  String litVal = '';
+                  String textVal = '';
+                  String prayerVal = '';
+                  String selfVal = '';
+                  String dFriends = '';
+                  String dMaterials = '';
+                  String meetingVal = '';
+                  String orgWorkers = '';
+                  String orgHoursVal = '';
+                  String miscVal = '';
+
+                  if (!isMissing) {
+                    if (entry.quranSura.isNotEmpty || entry.quranAyah.isNotEmpty) {
+                      quranVal = '${entry.quranSura} (${entry.quranAyah})';
+                    } else {
+                      quranVal = entry.quranStudy;
+                    }
+
+                    if (entry.hadithCount.isNotEmpty || entry.hadithTopic.isNotEmpty) {
+                      hadithVal = '${entry.hadithCount} (${entry.hadithTopic})';
+                    } else {
+                      hadithVal = entry.hadithStudy;
+                    }
+
+                    if (entry.islamicLitPages.isNotEmpty || entry.islamicLitBook.isNotEmpty) {
+                      litVal = '${entry.islamicLitPages} (${entry.islamicLitBook})';
+                    } else {
+                      litVal = entry.islamicLiterature;
+                    }
+
+                    textVal = entry.textbookHours.isNotEmpty ? entry.textbookHours : entry.textbookStudy;
+                    prayerVal = entry.jamaatPrayer;
+                    selfVal = entry.selfAnalysis;
+                    dFriends = entry.contactCount;
+                    dMaterials = entry.dawahMaterials.isEmpty ? entry.dawah : entry.dawahMaterials;
+                    meetingVal = entry.meetingName;
+                    orgWorkers = entry.memberContactCount;
+                    orgHoursVal = entry.orgTime.isEmpty ? entry.timeService : entry.orgTime;
+                    
+                    List<String> miscParts = [];
+                    if (entry.newspaperTime.isNotEmpty) miscParts.add('পত্রিকা: ${entry.newspaperTime}মি.');
+                    if (entry.physicalExerciseTime.isNotEmpty) miscParts.add('শরীরচর্চা: ${entry.physicalExerciseTime}মি.');
+                    if (entry.familyWelfareTime.isNotEmpty) miscParts.add('সামাজিক: ${entry.familyWelfareTime}মি.');
+                    miscVal = miscParts.join('\n');
+                  }
+
                   return pw.TableRow(
-                    decoration: isMissing ? const pw.BoxDecoration(color: PdfColors.red50) : null,
                     children: [
-                      _cell('${date.day.toString().padLeft(2, '0')}', boldFont, 8),
-                      _cell(isMissing ? 'মিসিং' : entry.quranStudy, font, 7, isMissing: isMissing),
-                      _cell(isMissing ? '' : entry.hadithStudy, font, 7),
-                      _cell(isMissing ? '' : entry.islamicLiterature, font, 7),
-                      _cell(isMissing ? '' : entry.jamaatPrayer, font, 7),
-                      _cell(isMissing ? '' : entry.contact, font, 7),
-                      _cell(isMissing ? '' : entry.dawah, font, 7),
-                      _cell(isMissing ? '' : entry.volunteering, font, 7),
-                      _cell(isMissing ? '' : entry.socialService, font, 7),
-                      _cell(isMissing ? '' : entry.remarks, font, 7),
+                      _cell('${date.day}', boldFont, 6.5, align: pw.TextAlign.center),
+                      _cell(quranVal, font, 6),
+                      _cell(hadithVal, font, 6),
+                      _cell(litVal, font, 6),
+                      _cell(textVal, font, 6, align: pw.TextAlign.center),
+                      _cell(prayerVal, font, 6, align: pw.TextAlign.center),
+                      _cell(selfVal, font, 6, align: pw.TextAlign.center),
+                      _cell(dFriends, font, 6, align: pw.TextAlign.center),
+                      _cell(dMaterials, font, 6, align: pw.TextAlign.center),
+                      _cell(meetingVal, font, 6),
+                      _cell(orgWorkers, font, 6, align: pw.TextAlign.center),
+                      _cell(orgHoursVal, font, 6, align: pw.TextAlign.center),
+                      _cell(miscVal, font, 5.5),
                     ],
                   );
                 }),
-              ],
-            ),
-            pw.SizedBox(height: 16),
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Text('তারিখ: ___________', style: pw.TextStyle(font: font, fontSize: 10)),
-                pw.Text('দায়িত্বশীলের স্বাক্ষর: ___________', style: pw.TextStyle(font: font, fontSize: 10)),
+                // Total Summary row at bottom
+                pw.TableRow(
+                  decoration: const pw.BoxDecoration(color: PdfColors.blue50),
+                  children: [
+                    _cell('মোট', boldFont, 6.5, align: pw.TextAlign.center),
+                    _cell('$quranTotalAyah আয়াত\n($quranDays দিন)', boldFont, 6, align: pw.TextAlign.center),
+                    _cell('$hadithTotalCount হাদীস\n($hadithDays দিন)', boldFont, 6, align: pw.TextAlign.center),
+                    _cell('$litTotalPages পৃষ্ঠা\n($litDays দিন)', boldFont, 6, align: pw.TextAlign.center),
+                    _cell('${academicTotalHours.toStringAsFixed(1)} ঘ.', boldFont, 6, align: pw.TextAlign.center),
+                    _cell('$jamaatTotalWaqt ওয়াক্ত', boldFont, 6, align: pw.TextAlign.center),
+                    _cell('$selfAnalysisTotalDays দিন', boldFont, 6, align: pw.TextAlign.center),
+                    _cell('$dawahTotalFriends জন', boldFont, 6, align: pw.TextAlign.center),
+                    _cell('$dawahTotalMaterials টি', boldFont, 6, align: pw.TextAlign.center),
+                    _cell('$orgMeetings টি', boldFont, 6, align: pw.TextAlign.center),
+                    _cell('$orgTotalWorkers জন', boldFont, 6, align: pw.TextAlign.center),
+                    _cell('${orgTotalHours.toStringAsFixed(1)} ঘ.', boldFont, 6, align: pw.TextAlign.center),
+                    _cell('পত্রিকা: $miscNewspaper মি.\nব্যায়াম: $miscExercise মি.', boldFont, 5.5),
+                  ],
+                ),
               ],
             ),
           ];
+        },
+      ),
+    );
+
+    // Page 2: Summary Dashboard & Comments (Portrait layout looks better for dashboard)
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (context) {
+          final targetQuran = plan?.quranAyahCount ?? '-';
+          final targetHadith = plan?.hadithCount ?? '-';
+          final targetLit = plan?.litPages ?? '-';
+          final targetAcademic = plan?.academicHours ?? '-';
+          final targetPrayer = plan?.jamaatPrayerWaqt ?? '-';
+          final targetSelf = plan?.selfAnalysisDays ?? '-';
+          final targetFriend = plan?.friendTargetCount ?? '-';
+          final targetMaterials = plan?.dawahBookletCount ?? '-';
+          final targetMeetings = plan?.meetingsCount ?? '-';
+          final targetWorkers = plan?.workerContactsCount ?? '-';
+          final targetOrgHours = plan?.orgHours ?? '-';
+
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Center(
+                child: pw.Column(
+                  children: [
+                    pw.Text('বাংলাদেশ ইসলামী যুব মজলিস', style: pw.TextStyle(font: boldFont, fontSize: 18, color: PdfColors.blue900)),
+                    pw.Text('ব্যক্তিগত মাসিক তৎপরতা রিপোর্ট সামারি (পরিকল্পনা বনাম অর্জন)', style: pw.TextStyle(font: boldFont, fontSize: 11)),
+                    pw.SizedBox(height: 12),
+                  ],
+                ),
+              ),
+              
+              pw.Text('১. কুরআন অধ্যয়ন:', style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.blue800)),
+              _pdfSummaryRow(font, boldFont, 'মোট পঠিত আয়াত:', '$targetQuran টি', '$quranTotalAyah টি'),
+              _pdfSummaryRow(font, boldFont, 'গড় পঠিত আয়াত:', '-', quranDays > 0 ? '${(quranTotalAyah / quranDays).toStringAsFixed(1)} টি' : '০ টি'),
+
+              _pdfSummaryRow(font, boldFont, 'দারস তৈরি:', '${plan?.quranDarsCount ?? "-"} টি', '-'),
+              _pdfSummaryRow(font, boldFont, 'দারস বিষয়:', plan?.quranDarsTopic ?? '-', '-'),
+              _pdfSummaryRow(font, boldFont, 'মুখস্থ আয়াত:', plan?.quranMemorizeAyah ?? '-', '-'),
+
+              pw.SizedBox(height: 8),
+              pw.Text('২. হাদীস অধ্যয়ন:', style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.blue800)),
+              _pdfSummaryRow(font, boldFont, 'মোট পঠিত হাদীস:', '$targetHadith টি', '$hadithTotalCount টি'),
+              _pdfSummaryRow(font, boldFont, 'দারস তৈরি:', '${plan?.hadithDarsCount ?? "-"} টি', '-'),
+
+              pw.SizedBox(height: 8),
+              pw.Text('৩. দ্বীনি ও সাধারণ সাহিত্য পাঠ:', style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.blue800)),
+              _pdfSummaryRow(font, boldFont, 'মোট পৃষ্ঠা পাঠ:', '$targetLit পৃষ্ঠা', '$litTotalPages পৃষ্ঠা'),
+              _pdfSummaryRow(font, boldFont, 'বইয়ের নাম:', plan?.litBook ?? '-', '-'),
+
+              pw.SizedBox(height: 8),
+              pw.Text('৪. সালাত ও আত্মগঠন (ইবাদত):', style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.blue800)),
+              _pdfSummaryRow(font, boldFont, 'জামাআতে নামাজ (ওয়াক্ত):', '$targetPrayer ওয়াক্ত', '$jamaatTotalWaqt ওয়াক্ত'),
+              _pdfSummaryRow(font, boldFont, 'আত্মবিচার আদায় (দিন):', '$targetSelf দিন', '$selfAnalysisTotalDays দিন'),
+
+              pw.SizedBox(height: 8),
+              pw.Text('৫. দাওয়াতি কাজ ও জনসংযোগ:', style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.blue800)),
+              _pdfSummaryRow(font, boldFont, 'বন্ধু যোগাযোগ (জন):', '$targetFriend জন', '$dawahTotalFriends জন'),
+              _pdfSummaryRow(font, boldFont, 'উপকরণ বিতরণ (টি):', '$targetMaterials টি', '$dawahTotalMaterials টি'),
+
+              pw.SizedBox(height: 8),
+              pw.Text('৬. সাংগঠনিক কাজ:', style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.blue800)),
+              _pdfSummaryRow(font, boldFont, 'সভায় যোগদান:', '$targetMeetings টি', '$orgMeetings টি'),
+              _pdfSummaryRow(font, boldFont, 'কর্মী যোগাযোগ (জন):', '$targetWorkers জন', '$orgTotalWorkers জন'),
+              _pdfSummaryRow(font, boldFont, 'সাংগঠনিক সময়দান:', '$targetOrgHours ঘণ্টা', '${orgTotalHours.toStringAsFixed(1)} ঘণ্টা'),
+
+              pw.SizedBox(height: 12),
+              pw.Container(height: 1, color: PdfColors.grey400),
+              pw.SizedBox(height: 8),
+
+              // Comments Section
+              pw.Text('দায়িত্বশীলের মন্তব্য ও মূল্যায়ন:', style: pw.TextStyle(font: boldFont, fontSize: 11, color: PdfColors.blue800)),
+              pw.SizedBox(height: 6),
+              if (commentsList != null && commentsList.isNotEmpty)
+                ...commentsList.map((c) => pw.Padding(
+                  padding: const pw.EdgeInsets.only(bottom: 6),
+                  child: pw.Text('• ${c.comment} (তারিখ: ${_formatEpoch(c.timestamp)})', style: pw.TextStyle(font: font, fontSize: 9)),
+                ))
+              else
+                pw.Text('কোনো মন্তব্য পাওয়া যায়নি।', style: pw.TextStyle(font: font, fontSize: 9, color: PdfColors.grey600)),
+
+              pw.Spacer(),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Column(
+                    children: [
+                      pw.Container(width: 100, height: 0.5, color: PdfColors.black),
+                      pw.SizedBox(height: 4),
+                      pw.Text('কর্মীর স্বাক্ষর', style: pw.TextStyle(font: font, fontSize: 9)),
+                    ],
+                  ),
+                  pw.Column(
+                    children: [
+                      pw.Container(width: 100, height: 0.5, color: PdfColors.black),
+                      pw.SizedBox(height: 4),
+                      pw.Text('দায়িত্বশীলের স্বাক্ষর', style: pw.TextStyle(font: font, fontSize: 9)),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          );
         },
       ),
     );
@@ -272,7 +561,7 @@ class PdfGeneratorService {
   }
 
   // Helper widgets
-  static pw.Widget _cell(String text, pw.Font font, double fontSize, {bool isMissing = false}) {
+  static pw.Widget _cell(String text, pw.Font font, double fontSize, {bool isMissing = false, pw.TextAlign align = pw.TextAlign.left}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.all(3),
       child: pw.Text(
@@ -282,7 +571,7 @@ class PdfGeneratorService {
           fontSize: fontSize,
           color: isMissing ? PdfColors.red : PdfColors.black,
         ),
-        textAlign: pw.TextAlign.center,
+        textAlign: align,
       ),
     );
   }
@@ -498,5 +787,36 @@ class PdfGeneratorService {
         ],
       ),
     );
+  }
+
+  static pw.Widget _pdfSummaryRow(pw.Font font, pw.Font boldFont, String label, String target, String actual) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 2),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(label, style: pw.TextStyle(font: font, fontSize: 9)),
+          pw.Row(
+            children: [
+              pw.Text('পরিকল্পনা: ', style: pw.TextStyle(font: font, fontSize: 8, color: PdfColors.grey700)),
+              pw.Text(target, style: pw.TextStyle(font: boldFont, fontSize: 8.5)),
+              pw.SizedBox(width: 12),
+              pw.Text('অর্জিত: ', style: pw.TextStyle(font: font, fontSize: 8, color: PdfColors.grey700)),
+              pw.Text(actual, style: pw.TextStyle(font: boldFont, fontSize: 8.5, color: PdfColors.green800)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  static String _formatDateMonth(DateTime d) {
+    const months = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+    return '${months[d.month - 1]} ${d.year}';
+  }
+
+  static String _formatEpoch(int ms) {
+    final d = DateTime.fromMillisecondsSinceEpoch(ms);
+    return '${d.day}/${d.month}/${d.year}';
   }
 }
