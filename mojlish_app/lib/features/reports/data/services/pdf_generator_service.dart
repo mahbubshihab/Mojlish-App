@@ -319,4 +319,184 @@ class PdfGeneratorService {
 
   static String _formatDate(DateTime d) => '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
   static String _formatDateFile(DateTime d) => '${d.year}${d.month.toString().padLeft(2, '0')}${d.day.toString().padLeft(2, '0')}';
+
+  /// প্রাথমিক সদস্য ফরম PDF তৈরি করা (Same to Same printed brochure layout)
+  static Future<void> generateMembershipPdf({
+    required String name,
+    required String fatherName,
+    required String nidNo,
+    required String bloodGroup,
+    required String phone,
+    required String email,
+    required String currentAddress,
+    required String village,
+    required String union,
+    required String thana,
+    required String district,
+    required String joinDate,
+    required String fbLink,
+  }) async {
+    final pdf = pw.Document();
+
+    final font = await PdfGoogleFonts.notoSansBengaliRegular();
+    final boldFont = await PdfGoogleFonts.notoSansBengaliBold();
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // ==========================================
+              // TOP HALF: OATH & DECLARATION
+              // ==========================================
+              pw.Center(
+                child: pw.Column(
+                  children: [
+                    pw.Text('বিসমিল্লাহির রাহমানির রাহীম', style: pw.TextStyle(font: font, fontSize: 10)),
+                    pw.SizedBox(height: 6),
+                    pw.Text('বাংলাদেশ ইসলামী যুব মজলিস', style: pw.TextStyle(font: boldFont, fontSize: 20, color: PdfColors.blue800)),
+                    pw.Text('www.yuvamajlis.org.bd', style: pw.TextStyle(font: font, fontSize: 9, color: PdfColors.grey700)),
+                    pw.SizedBox(height: 10),
+                    pw.Container(
+                      width: double.infinity,
+                      padding: const pw.EdgeInsets.symmetric(vertical: 6),
+                      decoration: const pw.BoxDecoration(
+                        color: PdfColors.blue700,
+                      ),
+                      alignment: pw.Alignment.center,
+                      child: pw.Text(
+                        'প্রাথমিক সদস্য ফরম (শপথ ও ঘোষণা)',
+                        style: pw.TextStyle(font: boldFont, fontSize: 13, color: PdfColors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 16),
+              pw.RichText(
+                text: pw.TextSpan(
+                  style: pw.TextStyle(font: font, fontSize: 11, color: PdfColors.black, height: 1.6),
+                  children: [
+                    pw.TextSpan(text: 'আমি '),
+                    pw.TextSpan(text: '$name, ', style: pw.TextStyle(font: boldFont, color: PdfColors.blue900)),
+                    pw.TextSpan(text: 'দৃঢ়ভাবে বিশ্বাস করি যে, ইসলামই আল্লাহর একমাত্র মনোনীত জীবনব্যবস্থা। ইসলামী আদর্শের আলোকে যুবসমাজের নেতৃত্বে একটি কল্যাণমুখী সমাজ গড়ার লক্ষ্যে ইসলামী যুব মজলিসের সাথে একমত হয়ে এ সংগঠনে যোগদান করছি। আমি এ লক্ষ্য অর্জনে যথাসাধ্য চেষ্টা করব ইনশাআল্লাহ।'),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 50),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text('তারিখ: $joinDate', style: pw.TextStyle(font: font, fontSize: 11)),
+                  pw.Column(
+                    children: [
+                      pw.Container(width: 120, height: 0.5, color: PdfColors.black),
+                      pw.SizedBox(height: 4),
+                      pw.Text('আবেদনকারীর স্বাক্ষর', style: pw.TextStyle(font: font, fontSize: 10)),
+                    ],
+                  ),
+                ],
+              ),
+
+              pw.SizedBox(height: 35),
+              // Dashed Line separating top and bottom
+              pw.Row(
+                children: List.generate(
+                  40,
+                  (index) => pw.Expanded(
+                    child: pw.Container(
+                      height: 1,
+                      color: index % 2 == 0 ? PdfColors.white : PdfColors.grey500,
+                    ),
+                  ),
+                ),
+              ),
+              pw.SizedBox(height: 35),
+
+              // ==========================================
+              // BOTTOM HALF: DETAILED MEMBER INFO
+              // ==========================================
+              pw.Center(
+                child: pw.Column(
+                  children: [
+                    pw.Text('বাংলাদেশ ইসলামী যুব মজলিস', style: pw.TextStyle(font: boldFont, fontSize: 18, color: PdfColors.blue800)),
+                    pw.SizedBox(height: 16),
+                  ],
+                ),
+              ),
+
+              _pdfRow(font, boldFont, 'নাম :', name),
+              _pdfRow(font, boldFont, 'পিতার নাম :', fatherName),
+              pw.Row(
+                children: [
+                  pw.Expanded(child: _pdfRow(font, boldFont, 'জাতীয় পরিচয়পত্র (NID) :', nidNo)),
+                  pw.Expanded(child: _pdfRow(font, boldFont, 'রক্তের গ্রুপ :', bloodGroup)),
+                ],
+              ),
+              _pdfRow(font, boldFont, 'বর্তমান ঠিকানা :', currentAddress),
+              _pdfRow(font, boldFont, 'মোবাইল নম্বর :', phone),
+              _pdfRow(font, boldFont, 'ইমেইল ঠিকানা :', email.isEmpty ? '-' : email),
+              _pdfRow(font, boldFont, 'ফেসবুক লিংক :', fbLink.isEmpty ? '-' : fbLink),
+              
+              pw.SizedBox(height: 12),
+              pw.Text('স্থায়ী ঠিকানা:', style: pw.TextStyle(font: boldFont, fontSize: 11, color: PdfColors.blue700)),
+              pw.SizedBox(height: 4),
+              pw.Row(
+                children: [
+                  pw.Expanded(child: _pdfRow(font, boldFont, 'গ্রাম/মহল্লা :', village)),
+                  pw.Expanded(child: _pdfRow(font, boldFont, 'ইউনিয়ন/ওয়ার্ড :', union)),
+                ],
+              ),
+              pw.Row(
+                children: [
+                  pw.Expanded(child: _pdfRow(font, boldFont, 'থানা ও উপজেলা :', thana)),
+                  pw.Expanded(child: _pdfRow(font, boldFont, 'জেলা :', district)),
+                ],
+              ),
+
+              pw.SizedBox(height: 50),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text('তারিখ: $joinDate', style: pw.TextStyle(font: font, fontSize: 11)),
+                  pw.Column(
+                    children: [
+                      pw.Container(width: 120, height: 0.5, color: PdfColors.black),
+                      pw.SizedBox(height: 4),
+                      pw.Text('আবেদনকারীর স্বাক্ষর', style: pw.TextStyle(font: font, fontSize: 10)),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
+  }
+
+  static pw.Widget _pdfRow(pw.Font font, pw.Font boldFont, String label, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 4),
+      child: pw.Row(
+        children: [
+          pw.Text(label, style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.grey800)),
+          pw.SizedBox(width: 6),
+          pw.Expanded(
+            child: pw.Text(
+              value,
+              style: pw.TextStyle(font: font, fontSize: 10, color: PdfColors.black),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

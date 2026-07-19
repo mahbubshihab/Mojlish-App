@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import '../../../../../core/theme/app_theme.dart';
+import 'package:mojlish_app/features/reports/data/services/pdf_generator_service.dart';
 
 class JoinOrganizationScreen extends StatefulWidget {
   const JoinOrganizationScreen({super.key});
@@ -286,17 +287,25 @@ class _JoinOrganizationScreenState extends State<JoinOrganizationScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('সদস্য কার্ড স্ক্রিনশট হিসেবে সেভ করা হয়েছে! ✓', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  backgroundColor: goldAccent,
-                                  behavior: SnackBarBehavior.floating,
-                                ),
+                            onPressed: () async {
+                              await PdfGeneratorService.generateMembershipPdf(
+                                name: _nameCtrl.text.trim(),
+                                fatherName: _fatherNameCtrl.text.trim(),
+                                nidNo: _nidCtrl.text.trim(),
+                                bloodGroup: _bloodGroup,
+                                phone: _phoneCtrl.text.trim(),
+                                email: _emailCtrl.text.trim(),
+                                currentAddress: _currentAddrCtrl.text.trim(),
+                                village: _villageCtrl.text.trim(),
+                                union: _unionCtrl.text.trim(),
+                                thana: _thanaCtrl.text.trim(),
+                                district: _districtCtrl.text.trim(),
+                                joinDate: _joinDateCtrl.text.trim(),
+                                fbLink: _fbCtrl.text.trim(),
                               );
                             },
-                            icon: const Icon(Icons.camera_alt, color: Colors.black, size: 16),
-                            label: const Text('স্লিপ সেভ করুন', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                            icon: const Icon(Icons.picture_as_pdf, color: Colors.black, size: 16),
+                            label: const Text('পিডিএফ ডাউনলোড', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: goldAccent,
                             ),
