@@ -112,7 +112,7 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
 
     _dateVerController = ScrollController();
     _dataVerController = ScrollController();
@@ -542,9 +542,10 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
               indicatorWeight: 2.5,
               labelColor: _accentGreen,
               unselectedLabelColor: _textMuted,
-              labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               tabs: const [
                 Tab(text: 'রিপোর্ট টেবিল'),
+                Tab(text: 'রিপোর্ট সামারি'),
                 Tab(text: 'মাসিক পরিকল্পনা'),
                 Tab(text: 'মন্তব্য সমূহ'),
               ],
@@ -558,6 +559,7 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
                 controller: _tabController,
                 children: [
                   _buildReportTab(),
+                  _buildSummaryTab(),
                   _buildPlanTab(),
                   _buildCommentsTab(),
                 ],
@@ -908,6 +910,297 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
             ),
           ),
           const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryTab() {
+    // 1. Calculate aggregates
+    int quranDays = 0;
+    int quranTotalAyah = 0;
+    int hadithDays = 0;
+    int hadithTotalCount = 0;
+    int litDays = 0;
+    int litTotalPages = 0;
+    double academicTotalHours = 0.0;
+    int jamaatTotalWaqt = 0;
+    int selfAnalysisTotalDays = 0;
+    int dawahTotalFriends = 0;
+    int dawahTotalMaterials = 0;
+    int orgMeetings = 0;
+    double orgTotalHours = 0.0;
+    int orgTotalWorkers = 0;
+    int miscNewspaper = 0;
+    int miscExercise = 0;
+    int miscWelfare = 0;
+
+    for (final entry in _entries.values) {
+      if (entry.isEmpty) continue;
+      
+      // Quran
+      if (entry.quranSura.isNotEmpty || entry.quranAyah.isNotEmpty) {
+        quranDays++;
+        try {
+          quranTotalAyah += int.parse(entry.quranAyah.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+
+      // Hadith
+      final hCount = entry.hadithCount.isEmpty ? entry.hadithStudy : entry.hadithCount;
+      if (hCount.isNotEmpty) {
+        hadithDays++;
+        try {
+          hadithTotalCount += int.parse(hCount.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+
+      // Lit
+      final lPages = entry.islamicLitPages.isEmpty ? entry.islamicLiterature : entry.islamicLitPages;
+      if (lPages.isNotEmpty) {
+        litDays++;
+        try {
+          litTotalPages += int.parse(lPages.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+
+      // Academic
+      final aHours = entry.textbookHours.isEmpty ? entry.textbookStudy : entry.textbookHours;
+      if (aHours.isNotEmpty) {
+        try {
+          academicTotalHours += double.parse(aHours.replaceAll(RegExp(r'[^0-9.]'), ''));
+        } catch (_) {}
+      }
+
+      // Jamaat
+      if (entry.jamaatPrayer.isNotEmpty) {
+        try {
+          jamaatTotalWaqt += int.parse(entry.jamaatPrayer.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+
+      // Self
+      if (entry.selfAnalysis == 'হ্যাঁ' || entry.selfAnalysis == 'yes') {
+        selfAnalysisTotalDays++;
+      }
+
+      // Dawah friends
+      if (entry.contactCount.isNotEmpty) {
+        try {
+          dawahTotalFriends += int.parse(entry.contactCount.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+
+      // Dawah materials
+      final dMat = entry.dawahMaterials.isEmpty ? entry.dawah : entry.dawahMaterials;
+      if (dMat.isNotEmpty) {
+        try {
+          dawahTotalMaterials += int.parse(dMat.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+
+      // Meetings
+      if (entry.meetingName.isNotEmpty) {
+        orgMeetings++;
+      }
+
+      // Org hours
+      final oHours = entry.orgTime.isEmpty ? entry.timeService : entry.orgTime;
+      if (oHours.isNotEmpty) {
+        try {
+          orgTotalHours += double.parse(oHours.replaceAll(RegExp(r'[^0-9.]'), ''));
+        } catch (_) {}
+      }
+
+      // Org workers
+      if (entry.memberContactCount.isNotEmpty) {
+        try {
+          orgTotalWorkers += int.parse(entry.memberContactCount.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+
+      // Misc
+      if (entry.newspaperTime.isNotEmpty) {
+        try {
+          miscNewspaper += int.parse(entry.newspaperTime.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+      if (entry.physicalExerciseTime.isNotEmpty) {
+        try {
+          miscExercise += int.parse(entry.physicalExerciseTime.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+      if (entry.familyWelfareTime.isNotEmpty) {
+        try {
+          miscWelfare += int.parse(entry.familyWelfareTime.replaceAll(RegExp(r'[^0-9]'), ''));
+        } catch (_) {}
+      }
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'ব্যক্তিগত মাসিক রিপোর্ট সামারি',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _accentGreen),
+          ),
+          Text(
+            'পরিকল্পনা (টার্গেট) বনাম অর্জিত বাস্তবায়ন রিপোর্টের তুলনামূলক চিত্র।',
+            style: TextStyle(fontSize: 12, color: _textMuted),
+          ),
+          const SizedBox(height: 20),
+
+          _buildSummaryCard(
+            title: '১. কুরআন অধ্যয়ন',
+            icon: Icons.book,
+            children: [
+              _buildSummaryRow('মোট পঠিত আয়াত', '${_quranAyahCountCtrl.text} টি', '$quranTotalAyah টি'),
+              _buildSummaryRow('পঠিত দিন সংখ্যা', '-', '$quranDays দিন'),
+              _buildSummaryRow('গড় (আয়াত/দিন)', '-', quranDays > 0 ? '${(quranTotalAyah / quranDays).toStringAsFixed(1)} টি' : '০ টি'),
+              _buildSummaryRow('দারস তৈরি', '${_quranDarsCountCtrl.text} টি', '-'),
+              _buildSummaryRow('দারস বিষয়', _quranDarsTopicCtrl.text, '-'),
+              _buildSummaryRow('মুখস্থ আয়াত', _quranMemorizeAyahCtrl.text, '-'),
+            ],
+          ),
+
+          _buildSummaryCard(
+            title: '২. হাদীস অধ্যয়ন',
+            icon: Icons.bookmark,
+            children: [
+              _buildSummaryRow('মোট পঠিত হাদীস', '${_hadithCountCtrl.text} টি', '$hadithTotalCount টি'),
+              _buildSummaryRow('পঠিত দিন সংখ্যা', '-', '$hadithDays দিন'),
+              _buildSummaryRow('গড় (হাদীস/দিন)', '-', hadithDays > 0 ? '${(hadithTotalCount / hadithDays).toStringAsFixed(1)} টি' : '০ টি'),
+              _buildSummaryRow('দারস তৈরি', '${_hadithDarsCountCtrl.text} টি', '-'),
+              _buildSummaryRow('দারস বিষয়', _hadithDarsTopicCtrl.text, '-'),
+              _buildSummaryRow('মুখস্থ হাদীস', '${_hadithMemorizeCountCtrl.text} টি', '-'),
+            ],
+          ),
+
+          _buildSummaryCard(
+            title: '৩. দ্বীনি ও সাধারণ সাহিত্য পাঠ',
+            icon: Icons.menu_book,
+            children: [
+              _buildSummaryRow('মোট পৃষ্ঠা পাঠ', '${_litPagesCtrl.text} পৃষ্ঠা', '$litTotalPages পৃষ্ঠা'),
+              _buildSummaryRow('পঠিত দিন সংখ্যা', '-', '$litDays দিন'),
+              _buildSummaryRow('গড় (পৃষ্ঠা/দিন)', '-', litDays > 0 ? '${(litTotalPages / litDays).toStringAsFixed(1)} পৃষ্ঠা' : '০ পৃষ্ঠা'),
+              _buildSummaryRow('বইয়ের নাম', _litBookCtrl.text, '-'),
+              _buildSummaryRow('বই/আলোচনা নোট', '${_litNotesCtrl.text} পৃষ্ঠা', '-'),
+            ],
+          ),
+
+          _buildSummaryCard(
+            title: '৪. পাঠ্যপুস্তক অধ্যয়ন',
+            icon: Icons.school,
+            children: [
+              _buildSummaryRow('মোট সময় (ঘণ্টা)', '${_academicHoursCtrl.text} ঘণ্টা', '${_bnDouble(academicTotalHours)} ঘণ্টা'),
+            ],
+          ),
+
+          _buildSummaryCard(
+            title: '৫. সালাত ও আত্মগঠন (ইবাদত)',
+            icon: Icons.self_improvement,
+            children: [
+              _buildSummaryRow('জামাআতে নামাজ (ওয়াক্ত)', '${_jamaatPrayerWaqtCtrl.text} ওয়াক্ত', '$jamaatTotalWaqt ওয়াক্ত'),
+              _buildSummaryRow('নফল ইবাদত বিবরণ', _naflPrayerCtrl.text, '-'),
+              _buildSummaryRow('আত্মবিচার আদায় (দিন)', '${_selfAnalysisDaysCtrl.text} দিন', '$selfAnalysisTotalDays দিন'),
+            ],
+          ),
+
+          _buildSummaryCard(
+            title: '৬. দাওয়াতি কাজ ও জনসংযোগ',
+            icon: Icons.campaign,
+            children: [
+              _buildSummaryRow('বন্ধু যোগাযোগ (জন)', '${_friendTargetCountCtrl.text} জন', '$dawahTotalFriends জন'),
+              _buildSummaryRow('প্রাথমিক সদস্য বৃদ্ধি টার্গেট', '${_primaryMemberTargetCountCtrl.text} জন', '-'),
+              _buildSummaryRow('বই/পরিচিতি/স্টিকার বিতরণ', '${_dawahBookletCountCtrl.text} টি', '$dawahTotalMaterials টি'),
+              _buildSummaryRow('ছাত্র পরিক্রমা বিতরণ', '${_studentReviewCountCtrl.text} টি', '-'),
+              _buildSummaryRow('শুভাকাঙ্ক্ষী যোগাযোগ', '${_supporterTargetCountCtrl.text} জন', '-'),
+              _buildSummaryRow('কার্ড/উপহার/SMS বিতরণ', '${_giftSmsCountCtrl.text} টি', '-'),
+              _buildSummaryRow('গ্রুপ দাওয়াত', '${_groupDawahCountCtrl.text} বার', '-'),
+            ],
+          ),
+
+          _buildSummaryCard(
+            title: '৭. সাংগঠনিক কাজ',
+            icon: Icons.corporate_fare,
+            children: [
+              _buildSummaryRow('কর্মী মানে উন্নীতকরণ', '${_upgradeWorkerCountCtrl.text} জন', '-'),
+              _buildSummaryRow('সভায় যোগদান', '${_meetingsCountCtrl.text} টি', '$orgMeetings টি'),
+              _buildSummaryRow('সাংগঠনিক সময়দান', '${_orgHoursCtrl.text} ঘণ্টা', '${_bnDouble(orgTotalHours)} ঘণ্টা'),
+              _buildSummaryRow('কর্মী যোগাযোগ', '${_workerContactsCountCtrl.text} জন', '$orgTotalWorkers জন'),
+              _buildSummaryRow('বায়তুলমাল টার্গেট/প্রদান', '${_baytulmalAmountCtrl.text} টাকা', '-'),
+            ],
+          ),
+
+          _buildSummaryCard(
+            title: '৮. বিবিধ অর্জন',
+            icon: Icons.star,
+            children: [
+              _buildSummaryRow('দৈনিক পত্রিকা পাঠ (সময়)', '${_newspaperMinutesCtrl.text} মিনিট', '$miscNewspaper মিনিট'),
+              _buildSummaryRow('শরীরচর্চা (সময়)', '${_physicalExerciseDaysCtrl.text} দিন', '$miscExercise মিনিট'),
+              _buildSummaryRow('পারিবারিক/সামাজিক খেদমত', '${_familyTimeHoursCtrl.text} ঘণ্টা', '$miscWelfare মিনিট'),
+              _buildSummaryRow('কারিগরি শিক্ষা সময়', '${_technicalSkillHoursCtrl.text} ঘণ্টা', '-'),
+            ],
+          ),
+          
+          const SizedBox(height: 30),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard({
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _cardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: _accentGreen, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(color: _textLight, fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const Divider(height: 24),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(String label, String target, String actual) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(color: _textMuted, fontSize: 12)),
+          Row(
+            children: [
+              Text('পরিকল্পনা: ', style: TextStyle(color: _textMuted, fontSize: 10)),
+              Text(target.isEmpty ? '-' : target, style: TextStyle(color: _textLight, fontSize: 11, fontWeight: FontWeight.bold)),
+              const SizedBox(width: 12),
+              Text('অর্জিত: ', style: TextStyle(color: _textMuted, fontSize: 10)),
+              Text(actual, style: TextStyle(color: _accentGreen, fontSize: 11, fontWeight: FontWeight.bold)),
+            ],
+          ),
         ],
       ),
     );
