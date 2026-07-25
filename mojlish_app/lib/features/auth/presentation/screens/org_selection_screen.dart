@@ -19,9 +19,9 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
       animation: themeManager,
       builder: (context, _) {
         final isDark = themeManager.isDarkMode;
-        final bgColor = isDark ? const Color(0xFF0F172A) : Colors.white;
+        final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
         final cardBgColor = isDark ? const Color(0xFF1E293B) : Colors.white;
-        final subtextColor = isDark ? Colors.grey.shade400 : Colors.grey.shade700;
+        final subtextColor = isDark ? Colors.grey.shade400 : Colors.grey.shade600;
         final labelColor = isDark ? Colors.grey.shade200 : AppTheme.textDark;
 
         return Scaffold(
@@ -55,60 +55,47 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Logo
-                  Image.asset('assets/images/logo.png', height: 120),
-                  const SizedBox(height: 16),
+                  Image.asset('assets/images/logo.png', height: 100),
+                  const SizedBox(height: 12),
                   
                   // Title
                   Text(
                     'খেলাফত মজলিস',
                     style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                      fontSize: 28,
+                      fontSize: 26,
                       color: isDark ? Colors.white : AppTheme.primaryDark,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   
                   // Subtitle
                   Text(
                     'খেলাফত প্রতিষ্ঠার লক্ষ্যে আন্দোলন গড়ে তুলুন।',
-                    style: TextStyle(fontSize: 14, color: subtextColor),
+                    style: TextStyle(fontSize: 13, color: subtextColor),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 28),
                   
                   // Selection text
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'আপনার সংগঠন নির্বাচন করুন:',
+                      'আপনার মজলিস নির্বাচন করুন:',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: labelColor),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   
-                  // Grid Selection
-                  GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 1.5,
-                    children: [
-                      _buildOrgBtn('যুব সংগঠন', Icons.people, Colors.orange, isDark, cardBgColor),
-                      _buildOrgBtn('ছাত্র সংগঠন', Icons.school, Colors.blue, isDark, cardBgColor),
-                      _buildOrgBtn('মহিলা সংগঠন', Icons.woman, Colors.pink, isDark, cardBgColor),
-                      _buildOrgBtn('শ্রমিক সংগঠন', Icons.engineering, Colors.amber.shade700, isDark, cardBgColor),
-                    ],
-                  ),
+                  // Central & Surrounding 5-Majlis Layout
+                  _buildMajlisLayout(isDark, cardBgColor),
                   
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 32),
                   
                   // Confirm Button
                   SizedBox(
                     width: double.infinity,
-                    height: 55,
+                    height: 54,
                     child: ElevatedButton(
                       onPressed: _selectedOrg != null
                           ? () {
@@ -122,12 +109,13 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
                         backgroundColor: AppTheme.primaryColor,
                         disabledBackgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: _selectedOrg != null ? 3 : 0,
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'সংগঠন নিশ্চিত করুন',
+                            'মজলিস নিশ্চিত করুন',
                             style: TextStyle(
                               fontSize: 18,
                               color: _selectedOrg != null
@@ -157,7 +145,150 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
     );
   }
 
-  Widget _buildOrgBtn(String title, IconData icon, Color color, bool isDark, Color defaultCardBg) {
+  Widget _buildMajlisLayout(bool isDark, Color defaultCardBg) {
+    return Column(
+      children: [
+        // 1. Central Hero Circle for খেলাফত মজলিস
+        _buildCentralMajlisCircle(
+          title: 'খেলাফত মজলিস',
+          subtitle: 'প্রধান মজলিস',
+          color: AppTheme.primaryColor,
+          isDark: isDark,
+          defaultCardBg: defaultCardBg,
+        ),
+        
+        const SizedBox(height: 20),
+        
+        // 2. Grid for surrounding 4 Majlises (2x2)
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 14,
+          crossAxisSpacing: 14,
+          childAspectRatio: 1.4,
+          children: [
+            _buildSatelliteMajlisCard('যুব মজলিস', Icons.groups, Colors.orange, isDark, defaultCardBg),
+            _buildSatelliteMajlisCard('ছাত্র মজলিস', Icons.school, Colors.blue, isDark, defaultCardBg),
+            _buildSatelliteMajlisCard('মহিলা মজলিস', Icons.woman, Colors.pink, isDark, defaultCardBg),
+            _buildSatelliteMajlisCard('শ্রমিক মজলিস', Icons.engineering, Colors.amber.shade700, isDark, defaultCardBg),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCentralMajlisCircle({
+    required String title,
+    required String subtitle,
+    required Color color,
+    required bool isDark,
+    required Color defaultCardBg,
+  }) {
+    bool isSelected = _selectedOrg == title;
+    
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedOrg = title;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? color.withOpacity(isDark ? 0.25 : 0.12)
+              : defaultCardBg,
+          borderRadius: BorderRadius.circular(100),
+          border: Border.all(
+            color: isSelected ? color : (isDark ? Colors.grey.shade700 : Colors.grey.shade300),
+            width: isSelected ? 3 : 1.5,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: color.withOpacity(isDark ? 0.4 : 0.25),
+                    blurRadius: 16,
+                    spreadRadius: 2,
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Center circular icon badge
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: color.withOpacity(isSelected ? 0.2 : 0.1),
+                border: Border.all(color: color, width: 1.5),
+              ),
+              child: Image.asset('assets/images/logo.png', height: 32, width: 32),
+            ),
+            const SizedBox(width: 14),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: isSelected ? color : (isDark ? Colors.white : AppTheme.primaryDark),
+                      ),
+                    ),
+                    if (isSelected) ...[
+                      const SizedBox(width: 6),
+                      Icon(Icons.check_circle, color: color, size: 20),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? const Color(0xFF34D399) : AppTheme.primaryDark,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSatelliteMajlisCard(
+    String title,
+    IconData icon,
+    Color color,
+    bool isDark,
+    Color defaultCardBg,
+  ) {
     bool isSelected = _selectedOrg == title;
     
     return GestureDetector(
@@ -172,31 +303,67 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
           color: isSelected
               ? color.withOpacity(isDark ? 0.25 : 0.1)
               : defaultCardBg,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? color
                 : (isDark ? Colors.grey.shade700 : Colors.grey.shade300),
-            width: isSelected ? 2 : 1,
+            width: isSelected ? 2.5 : 1,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: color.withOpacity(0.2),
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isDark ? 0.15 : 0.03),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
           children: [
-            Icon(
-              icon,
-              color: isSelected ? color : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
-              size: 32,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: isSelected ? color : (isDark ? Colors.grey.shade200 : Colors.grey.shade800),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: color.withOpacity(isSelected ? 0.2 : (isDark ? 0.15 : 0.08)),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: isSelected ? color : (isDark ? color.withOpacity(0.8) : color),
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: isSelected
+                          ? color
+                          : (isDark ? Colors.grey.shade200 : Colors.grey.shade800),
+                    ),
+                  ),
+                ],
               ),
             ),
+            if (isSelected)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Icon(Icons.check_circle, color: color, size: 18),
+              ),
           ],
         ),
       ),
