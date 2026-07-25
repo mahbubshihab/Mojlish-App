@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import '../../../../../core/theme/app_theme.dart';
-import 'package:mojlish_app/features/reports/data/services/pdf_generator_service.dart';
+import 'package:mojlish_app/features/reports/shared/data/services/pdf_generator_service.dart';
 
 class JoinOrganizationScreen extends StatefulWidget {
   const JoinOrganizationScreen({super.key});

@@ -1,22 +1,25 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
-import '../../data/services/report_storage_service.dart';
-import 'baytulmal_report_screen.dart';
+import 'package:mojlish_app/features/reports/shared/data/services/report_storage_service.dart';
+import 'package:mojlish_app/features/reports/personal_report/presentation/screens/personal_report_screen.dart';
+import 'package:mojlish_app/features/reports/personal_report/presentation/screens/daily_entry_screen.dart';
+import 'report_export_screen.dart';
 
-/// বায়তুলমাল রিপোর্ট বই — বছর/মাস নেভিগেশন, মাস সিলেক্ট করলে monthly form খোলে
-class BaytulmalReportBookScreen extends StatefulWidget {
-  const BaytulmalReportBookScreen({super.key});
+/// ব্যক্তিগত রিপোর্ট বই — বছর/মাস নেভিগেশন
+class ReportBookScreen extends StatefulWidget {
+  const ReportBookScreen({super.key});
 
   @override
-  State<BaytulmalReportBookScreen> createState() => _BaytulmalReportBookScreenState();
+  State<ReportBookScreen> createState() => _ReportBookScreenState();
 }
 
-class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
+class _ReportBookScreenState extends State<ReportBookScreen> {
   final _now = DateTime.now();
   late int _selectedYear;
   late int _selectedMonth;
-  Map<int, bool> _savedMonths = {};
+  int _filledDays = 0;
+  int _daysInMonth = 30;
 
   static const _monthShort = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -28,20 +31,20 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
     super.initState();
     _selectedYear = _now.year;
     _selectedMonth = _now.month;
-    _loadSavedMonths();
+    _loadStats();
   }
 
-  Future<void> _loadSavedMonths() async {
-    final Map<int, bool> saved = {};
-    for (int m = 1; m <= 12; m++) {
-      final entry = await ReportStorageService.getBaytulmalEntry(_selectedYear, m);
-      saved[m] = entry != null;
-    }
-    if (mounted) {
-      setState(() {
-        _savedMonths = saved;
-      });
-    }
+  Future<void> _loadStats() async {
+    try {
+      final days = await ReportStorageService.getFilledDaysCount(_selectedYear, _selectedMonth);
+      final dim = DateTime(_selectedYear, _selectedMonth + 1, 0).day;
+      if (mounted) {
+        setState(() {
+          _filledDays = days;
+          _daysInMonth = dim;
+        });
+      }
+    } catch (_) {}
   }
 
   String _bn(int n) {
@@ -53,11 +56,19 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => BaytulmalReportScreen(year: _selectedYear, month: month),
+        builder: (_) => PersonalReportScreen(year: _selectedYear, month: month),
       ),
     );
     setState(() => _selectedMonth = month);
-    _loadSavedMonths();
+    _loadStats();
+  }
+
+  void _openToday() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => DailyEntryScreen(date: _now)),
+    );
+    _loadStats();
   }
 
   @override
@@ -74,7 +85,7 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
         final borderColor = isDark ? const Color(0xFF2A3F58) : const Color(0xFFE2E8F0);
         final textLight = isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
         final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
-        const accentBlue = Color(0xFF0EA5E9);
+        const accentGreen = Color(0xFF10B981);
 
         return Scaffold(
           backgroundColor: bg,
@@ -87,8 +98,8 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
               onPressed: () => Navigator.pop(context),
             ),
             title: const Text(
-              'বায়তুলমাল রিপোর্ট বই',
-              style: TextStyle(color: accentBlue, fontSize: 18, fontWeight: FontWeight.bold),
+              'রিপোর্ট বই',
+              style: TextStyle(color: accentGreen, fontSize: 18, fontWeight: FontWeight.bold),
             ),
             actions: [
               IconButton(
@@ -98,6 +109,26 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
                 ),
                 onPressed: () {
                   themeManager.toggleTheme();
+                },
+              ),
+              PopupMenuButton<String>(
+                icon: Icon(Icons.more_vert, color: textLight),
+                color: cardBg,
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: 'export',
+                    child: Text('PDF এক্সপোর্ট', style: TextStyle(color: textLight)),
+                  ),
+                ],
+                onSelected: (val) {
+                  if (val == 'export') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ReportExportScreen(reportType: 'personal'),
+                      ),
+                    );
+                  }
                 },
               ),
             ],
@@ -110,11 +141,13 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 12),
-                    _buildStatusCard(cardBg, borderColor, textLight, accentBlue),
+                    _buildReportBookCard(cardBg, borderColor, textLight, accentGreen),
                     const SizedBox(height: 16),
                     _buildYearSelector(cardBg, borderColor, textLight),
                     const SizedBox(height: 16),
-                    _buildMonthGrid(cardBg, borderColor, textLight, textMuted, accentBlue),
+                    _buildMonthGrid(cardBg, borderColor, textLight, textMuted, accentGreen),
+                    const SizedBox(height: 16),
+                    _buildTodayButton(accentGreen),
                     const SizedBox(height: 24),
                   ],
                 ),
@@ -126,8 +159,10 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
     );
   }
 
-  Widget _buildStatusCard(Color cardBg, Color borderColor, Color textLight, Color accentBlue) {
-    int count = _savedMonths.values.where((v) => v).length;
+  Widget _buildReportBookCard(Color cardBg, Color borderColor, Color textLight, Color accentGreen) {
+    double pct = _daysInMonth > 0 ? _filledDays / _daysInMonth : 0.0;
+    pct = pct.clamp(0.0, 1.0);
+
     return Container(
       decoration: BoxDecoration(
         color: cardBg,
@@ -141,11 +176,11 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: accentBlue.withValues(alpha: 0.15),
+              color: accentGreen.withValues(alpha: 0.15),
               shape: BoxShape.circle,
-              border: Border.all(color: accentBlue.withValues(alpha: 0.4), width: 2),
+              border: Border.all(color: accentGreen.withValues(alpha: 0.4), width: 2),
             ),
-            child: Icon(Icons.account_balance_wallet, color: accentBlue, size: 26),
+            child: Icon(Icons.menu_book, color: accentGreen, size: 26),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -153,14 +188,26 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '[_selectedYear সালের শাখা বায়তুলমাল রিপোর্ট]',
+                  '[ব্যক্তিগত তথ্য আপডেট করুন।]',
                   style: TextStyle(color: textLight.withValues(alpha: 0.8), fontSize: 14),
                 ),
                 const SizedBox(height: 6),
-                Text(
-                  '১২ মাসের মধ্যে $count মাসের রিপোর্ট সেভ করা আছে',
-                  style: TextStyle(color: accentBlue, fontSize: 13, fontWeight: FontWeight.bold),
-                ),
+                Row(children: [
+                  Text('$_filledDays/$_daysInMonth দিন',
+                      style: TextStyle(color: accentGreen, fontSize: 12, fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: pct,
+                        backgroundColor: borderColor,
+                        valueColor: AlwaysStoppedAnimation(accentGreen),
+                        minHeight: 5,
+                      ),
+                    ),
+                  ),
+                ]),
               ],
             ),
           ),
@@ -181,10 +228,7 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
         children: [
           IconButton(
             icon: Icon(Icons.chevron_left, color: textLight),
-            onPressed: () {
-              setState(() => _selectedYear--);
-              _loadSavedMonths();
-            },
+            onPressed: () { setState(() => _selectedYear--); _loadStats(); },
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -194,10 +238,7 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
           IconButton(
             icon: Icon(Icons.chevron_right, color: textLight),
             onPressed: () {
-              if (_selectedYear < _now.year) {
-                setState(() => _selectedYear++);
-                _loadSavedMonths();
-              }
+              if (_selectedYear < _now.year) { setState(() => _selectedYear++); _loadStats(); }
             },
           ),
         ],
@@ -205,7 +246,7 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
     );
   }
 
-  Widget _buildMonthGrid(Color cardBg, Color borderColor, Color textLight, Color textMuted, Color accentBlue) {
+  Widget _buildMonthGrid(Color cardBg, Color borderColor, Color textLight, Color textMuted, Color accentGreen) {
     final rows = [
       [1, 2, 3, 4, 5],
       [6, 7, 8, 9],
@@ -213,64 +254,69 @@ class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
     ];
     return Column(
       children: rows.map((row) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.only(bottom: 10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: row.map((m) => _buildMonthCircle(m, cardBg, borderColor, textLight, textMuted, accentBlue)).toList(),
+          children: row.map((m) => _buildMonthCircle(m, cardBg, borderColor, textLight, textMuted, accentGreen)).toList(),
         ),
       )).toList(),
     );
   }
 
-  Widget _buildMonthCircle(int month, Color cardBg, Color borderColor, Color textLight, Color textMuted, Color accentBlue) {
+  Widget _buildMonthCircle(int month, Color cardBg, Color borderColor, Color textLight, Color textMuted, Color accentGreen) {
     final isSelected = month == _selectedMonth;
-    final isSaved = _savedMonths[month] ?? false;
     final isFuture = _selectedYear == _now.year && month > _now.month;
 
     return GestureDetector(
       onTap: isFuture ? null : () => _openMonth(month),
       child: Container(
-        width: 64,
-        height: 64,
+        width: 60,
+        height: 60,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: isSelected
-              ? accentBlue.withValues(alpha: 0.15)
+              ? accentGreen.withValues(alpha: 0.15)
               : isFuture
                   ? cardBg.withValues(alpha: 0.2)
                   : cardBg,
           border: Border.all(
-            color: isSelected
-                ? accentBlue
-                : isSaved
-                    ? const Color(0xFF10B981)
-                    : borderColor,
+            color: isSelected ? accentGreen : borderColor,
             width: isSelected ? 2 : 1,
           ),
         ),
         alignment: Alignment.center,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              _monthShort[month - 1],
-              style: TextStyle(
-                color: isSelected
-                    ? accentBlue
-                    : isFuture
-                        ? textMuted.withValues(alpha: 0.4)
-                        : textLight,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 14,
-              ),
-            ),
-            if (isSaved) ...[
-              const SizedBox(height: 2),
-              const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 12),
-            ],
-          ],
+        child: Text(
+          _monthShort[month - 1],
+          style: TextStyle(
+            color: isSelected
+                ? accentGreen
+                : isFuture
+                    ? textMuted.withValues(alpha: 0.4)
+                    : textLight,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            fontSize: 14,
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTodayButton(Color accentGreen) {
+    final isTodayFuture = _selectedYear > _now.year || (_selectedYear == _now.year && _selectedMonth > _now.month);
+    if (isTodayFuture) return const SizedBox.shrink();
+
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: ElevatedButton(
+        onPressed: _openToday,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: accentGreen,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        child: const Text('আজকের রিপোর্ট আপডেট করুন',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
       ),
     );
   }
@@ -289,11 +335,11 @@ class _BgPainter extends CustomPainter {
       return;
     }
 
-    final fill = Paint()..color = Colors.blue.withValues(alpha: 0.025)..style = PaintingStyle.fill;
+    final fill = Paint()..color = const Color(0xFF10B981).withValues(alpha: 0.03)..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.08), 120, fill);
     canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.45), 90, fill);
 
-    final grid = Paint()..color = Colors.blue.withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+    final grid = Paint()..color = const Color(0xFF10B981).withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
     for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
     for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
 

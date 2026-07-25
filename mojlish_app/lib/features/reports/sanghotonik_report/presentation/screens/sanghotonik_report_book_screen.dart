@@ -1,18 +1,18 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
-import '../../data/services/report_storage_service.dart';
-import 'zonal_report_screen.dart';
+import '../../../shared/data/services/report_storage_service.dart';
+import 'sanghotonik_report_screen.dart';
 
-/// জোনাল রিপোর্ট বই — বছর/মাস নেভিগেশন
-class ZonalReportBookScreen extends StatefulWidget {
-  const ZonalReportBookScreen({super.key});
+/// শাখা সাংগঠনিক রিপোর্ট বই — বছর/মাস নেভিগেশন
+class SanghotonikReportBookScreen extends StatefulWidget {
+  const SanghotonikReportBookScreen({super.key});
 
   @override
-  State<ZonalReportBookScreen> createState() => _ZonalReportBookScreenState();
+  State<SanghotonikReportBookScreen> createState() => _SanghotonikReportBookScreenState();
 }
 
-class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
+class _SanghotonikReportBookScreenState extends State<SanghotonikReportBookScreen> {
   final _now = DateTime.now();
   late int _selectedYear;
   late int _selectedMonth;
@@ -34,7 +34,7 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
   Future<void> _loadSavedMonths() async {
     final Map<int, bool> saved = {};
     for (int m = 1; m <= 12; m++) {
-      final entry = await ReportStorageService.getZonalEntry(_selectedYear, m);
+      final entry = await ReportStorageService.getSanghotonikEntry(_selectedYear, m);
       saved[m] = entry != null;
     }
     if (mounted) {
@@ -53,7 +53,7 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ZonalReportScreen(year: _selectedYear, month: month),
+        builder: (_) => SanghotonikReportScreen(year: _selectedYear, month: month),
       ),
     );
     setState(() => _selectedMonth = month);
@@ -74,7 +74,7 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
         final borderColor = isDark ? const Color(0xFF2A3F58) : const Color(0xFFE2E8F0);
         final textLight = isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
         final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
-        const accentPurple = Colors.purple;
+        const accentOrange = Colors.orange;
 
         return Scaffold(
           backgroundColor: bg,
@@ -87,8 +87,8 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
               onPressed: () => Navigator.pop(context),
             ),
             title: const Text(
-              'জোনাল রিপোর্ট বই',
-              style: TextStyle(color: accentPurple, fontSize: 18, fontWeight: FontWeight.bold),
+              'সাংগঠনিক রিপোর্ট বই',
+              style: TextStyle(color: accentOrange, fontSize: 18, fontWeight: FontWeight.bold),
             ),
             actions: [
               IconButton(
@@ -110,11 +110,11 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 12),
-                    _buildStatusCard(cardBg, borderColor, textLight, accentPurple),
+                    _buildStatusCard(cardBg, borderColor, textLight, accentOrange),
                     const SizedBox(height: 16),
                     _buildYearSelector(cardBg, borderColor, textLight),
                     const SizedBox(height: 16),
-                    _buildMonthGrid(cardBg, borderColor, textLight, textMuted, accentPurple),
+                    _buildMonthGrid(cardBg, borderColor, textLight, textMuted, accentOrange),
                     const SizedBox(height: 24),
                   ],
                 ),
@@ -126,7 +126,7 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
     );
   }
 
-  Widget _buildStatusCard(Color cardBg, Color borderColor, Color textLight, Color accentPurple) {
+  Widget _buildStatusCard(Color cardBg, Color borderColor, Color textLight, Color accentOrange) {
     int count = _savedMonths.values.where((v) => v).length;
     return Container(
       decoration: BoxDecoration(
@@ -141,11 +141,11 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: accentPurple.withValues(alpha: 0.15),
+              color: accentOrange.withValues(alpha: 0.15),
               shape: BoxShape.circle,
-              border: Border.all(color: accentPurple.withValues(alpha: 0.4), width: 2),
+              border: Border.all(color: accentOrange.withValues(alpha: 0.4), width: 2),
             ),
-            child: Icon(Icons.map, color: accentPurple, size: 26),
+            child: Icon(Icons.group_work, color: accentOrange, size: 26),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -153,13 +153,13 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '[_selectedYear সালের জোনাল রিপোর্ট]',
+                  '[_selectedYear সালের শাখা সাংগঠনিক রিপোর্ট]',
                   style: TextStyle(color: textLight.withValues(alpha: 0.8), fontSize: 14),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   '১২ মাসের মধ্যে $count মাসের রিপোর্ট সেভ করা আছে',
-                  style: TextStyle(color: accentPurple, fontSize: 13, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: accentOrange, fontSize: 13, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -205,7 +205,7 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
     );
   }
 
-  Widget _buildMonthGrid(Color cardBg, Color borderColor, Color textLight, Color textMuted, Color accentPurple) {
+  Widget _buildMonthGrid(Color cardBg, Color borderColor, Color textLight, Color textMuted, Color accentOrange) {
     final rows = [
       [1, 2, 3, 4, 5],
       [6, 7, 8, 9],
@@ -216,13 +216,13 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
         padding: const EdgeInsets.only(bottom: 12),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: row.map((m) => _buildMonthCircle(m, cardBg, borderColor, textLight, textMuted, accentPurple)).toList(),
+          children: row.map((m) => _buildMonthCircle(m, cardBg, borderColor, textLight, textMuted, accentOrange)).toList(),
         ),
       )).toList(),
     );
   }
 
-  Widget _buildMonthCircle(int month, Color cardBg, Color borderColor, Color textLight, Color textMuted, Color accentPurple) {
+  Widget _buildMonthCircle(int month, Color cardBg, Color borderColor, Color textLight, Color textMuted, Color accentOrange) {
     final isSelected = month == _selectedMonth;
     final isSaved = _savedMonths[month] ?? false;
     final isFuture = _selectedYear == _now.year && month > _now.month;
@@ -236,13 +236,13 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: isSelected
-              ? accentPurple.withValues(alpha: 0.15)
+              ? accentOrange.withValues(alpha: 0.15)
               : isFuture
                   ? cardBg.withValues(alpha: 0.2)
                   : cardBg,
           border: Border.all(
             color: isSelected
-                ? accentPurple
+                ? accentOrange
                 : isSaved
                     ? const Color(0xFF10B981)
                     : borderColor,
@@ -257,7 +257,7 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
               _monthShort[month - 1],
               style: TextStyle(
                 color: isSelected
-                    ? accentPurple
+                    ? accentOrange
                     : isFuture
                         ? textMuted.withValues(alpha: 0.4)
                         : textLight,
@@ -289,11 +289,11 @@ class _BgPainter extends CustomPainter {
       return;
     }
 
-    final fill = Paint()..color = Colors.purple.withValues(alpha: 0.025)..style = PaintingStyle.fill;
+    final fill = Paint()..color = Colors.orange.withValues(alpha: 0.025)..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.08), 120, fill);
     canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.45), 90, fill);
 
-    final grid = Paint()..color = Colors.purple.withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+    final grid = Paint()..color = Colors.orange.withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
     for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
     for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
 

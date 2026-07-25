@@ -1,26 +1,26 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
-import '../../data/models/sanghotonik_report_entry.dart';
-import '../../data/services/report_storage_service.dart';
+import '../../data/models/zonal_report_entry.dart';
+import '../../../shared/data/services/report_storage_service.dart';
 
-class SanghotonikReportScreen extends StatefulWidget {
+class ZonalReportScreen extends StatefulWidget {
   final int year;
   final int month;
 
-  const SanghotonikReportScreen({super.key, required this.year, required this.month});
+  const ZonalReportScreen({super.key, required this.year, required this.month});
 
   @override
-  State<SanghotonikReportScreen> createState() => _SanghotonikReportScreenState();
+  State<ZonalReportScreen> createState() => _ZonalReportScreenState();
 }
 
-class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
+class _ZonalReportScreenState extends State<ZonalReportScreen> {
   bool _isSaving = false;
   bool _isLocked = true;
-  SanghotonikReportEntry? _currentEntry;
+  ZonalReportEntry? _currentEntry;
 
   // Controllers
-  final _branchCtrl = TextEditingController();
+  final _zoneNameCtrl = TextEditingController();
 
   // জনশক্তি (Manpower)
   final _sodossoCountCtrl = TextEditingController();
@@ -29,54 +29,52 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
   final _sodossoPrarthiCountCtrl = TextEditingController();
   final _sodossoPrarthiBridhiCtrl = TextEditingController();
   final _sodossoPrarthiGhattiCtrl = TextEditingController();
-  final _kormiCountCtrl = TextEditingController();
-  final _kormiBridhiCtrl = TextEditingController();
-  final _kormiGhattiCtrl = TextEditingController();
-  final _prathmikCountCtrl = TextEditingController();
-  final _prathmikBridhiCtrl = TextEditingController();
-  final _prathmikGhattiCtrl = TextEditingController();
-  final _sudhiCountCtrl = TextEditingController();
-
-  // দাওয়াত ও গণসংযোগ (Dawah & Contact)
-  final _dawahPersonalCountCtrl = TextEditingController();
-  final _dawahPersonalPresCtrl = TextEditingController();
-  final _dawahGroupCountCtrl = TextEditingController();
-  final _dawahGroupPresCtrl = TextEditingController();
-  final _dawahMahfilCountCtrl = TextEditingController();
-  final _dawahMahfilPresCtrl = TextEditingController();
-  final _leafletDistCtrl = TextEditingController();
-  final _posterPastedCtrl = TextEditingController();
 
   // সংগঠন (Organization)
-  final _adminUnitCountCtrl = TextEditingController();
-  final _adminUnitNameCtrl = TextEditingController();
-  final _mosqueOrgCountCtrl = TextEditingController();
+  final _distCountCtrl = TextEditingController();
+  final _distOrgCtrl = TextEditingController();
+  final _distReorgCtrl = TextEditingController();
+  final _cityCountCtrl = TextEditingController();
+  final _cityOrgCtrl = TextEditingController();
+  final _cityReorgCtrl = TextEditingController();
+  final _upazilaCountCtrl = TextEditingController();
+  final _upazilaOrgCtrl = TextEditingController();
+  final _upazilaReorgCtrl = TextEditingController();
 
-  // সভাধমূহ (Meetings)
-  final _generalMeetingCountCtrl = TextEditingController();
-  final _generalMeetingPresCtrl = TextEditingController();
-  final _kormiMeetingCountCtrl = TextEditingController();
-  final _kormiMeetingPresCtrl = TextEditingController();
+  // সভা/প্রশিক্ষণ (Meeting/Training)
+  final _shakhaDaitoshilCountCtrl = TextEditingController();
+  final _shakhaDaitoshilPresCtrl = TextEditingController();
+  final _distExecCountCtrl = TextEditingController();
+  final _distExecPresCtrl = TextEditingController();
+  final _zonalTorbiotCountCtrl = TextEditingController();
+  final _zonalTorbiotPresCtrl = TextEditingController();
 
-  // বায়তুলমাল সংক্ষিপ্ত
-  final _totalIncomeCtrl = TextEditingController();
-  final _totalExpenseCtrl = TextEditingController();
+  // সফর (জোন থেকে)
+  final _travelDetailsCtrl = TextEditingController();
 
-  // প্রচার, প্রকাশনা ও পাঠাগার
-  final _newsReleaseCountCtrl = TextEditingController();
-  final _posterPublishedCtrl = TextEditingController();
-  final _libBookCountCtrl = TextEditingController();
-  final _libBookReadCountCtrl = TextEditingController();
+  // আয়-ব্যয় (Income-Expense summary)
+  final _safarIncomeTakaCtrl = TextEditingController();
+  final _centralIncomeTakaCtrl = TextEditingController();
+  final _onetimeIncomeTakaCtrl = TextEditingController();
+  final _safarExpenseTakaCtrl = TextEditingController();
+  final _communicationExpenseTakaCtrl = TextEditingController();
+  final _officeExpenseTakaCtrl = TextEditingController();
+  final _otherExpenseTakaCtrl = TextEditingController();
 
-  // সমাজকল্যাণ ও মন্তব্য
-  final _socialWelfareTakaCtrl = TextEditingController();
+  // অন্যান্য (Other status counters)
+  final _shakhaReportSubCtrl = TextEditingController();
+  final _shakhaPlanSubCtrl = TextEditingController();
+  final _shakhaBaytulmalSubCtrl = TextEditingController();
+
+  // মন্তব্য ও পরামর্শ
   final _remarksCtrl = TextEditingController();
+  final _suggestionsCtrl = TextEditingController();
 
   bool get _isDark => themeManager.isDarkMode;
   Color get _darkBg => _isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF8FAFC);
   Color get _cardBg => _isDark ? const Color(0xFF162032) : Colors.white;
   Color get _borderColor => _isDark ? const Color(0xFF2A3F58) : const Color(0xFFCBD5E1);
-  Color get _accentOrange => Colors.orange;
+  Color get _accentPurple => Colors.purple;
   Color get _accentGreen => const Color(0xFF10B981);
   Color get _textLight => _isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
   Color get _textMuted => _isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
@@ -91,17 +89,16 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
   @override
   void dispose() {
     for (final c in [
-      _branchCtrl, _sodossoCountCtrl, _sodossoBridhiCtrl, _sodossoGhattiCtrl,
+      _zoneNameCtrl, _sodossoCountCtrl, _sodossoBridhiCtrl, _sodossoGhattiCtrl,
       _sodossoPrarthiCountCtrl, _sodossoPrarthiBridhiCtrl, _sodossoPrarthiGhattiCtrl,
-      _kormiCountCtrl, _kormiBridhiCtrl, _kormiGhattiCtrl,
-      _prathmikCountCtrl, _prathmikBridhiCtrl, _prathmikGhattiCtrl, _sudhiCountCtrl,
-      _dawahPersonalCountCtrl, _dawahPersonalPresCtrl, _dawahGroupCountCtrl,
-      _dawahGroupPresCtrl, _dawahMahfilCountCtrl, _dawahMahfilPresCtrl,
-      _leafletDistCtrl, _posterPastedCtrl, _adminUnitCountCtrl, _adminUnitNameCtrl,
-      _mosqueOrgCountCtrl, _generalMeetingCountCtrl, _generalMeetingPresCtrl,
-      _kormiMeetingCountCtrl, _kormiMeetingPresCtrl, _totalIncomeCtrl,
-      _totalExpenseCtrl, _newsReleaseCountCtrl, _posterPublishedCtrl,
-      _libBookCountCtrl, _libBookReadCountCtrl, _socialWelfareTakaCtrl, _remarksCtrl
+      _distCountCtrl, _distOrgCtrl, _distReorgCtrl, _cityCountCtrl, _cityOrgCtrl,
+      _cityReorgCtrl, _upazilaCountCtrl, _upazilaOrgCtrl, _upazilaReorgCtrl,
+      _shakhaDaitoshilCountCtrl, _shakhaDaitoshilPresCtrl,
+      _distExecCountCtrl, _distExecPresCtrl, _zonalTorbiotCountCtrl, _zonalTorbiotPresCtrl,
+      _travelDetailsCtrl, _safarIncomeTakaCtrl, _centralIncomeTakaCtrl, _onetimeIncomeTakaCtrl,
+      _safarExpenseTakaCtrl, _communicationExpenseTakaCtrl, _officeExpenseTakaCtrl,
+      _otherExpenseTakaCtrl, _shakhaReportSubCtrl, _shakhaPlanSubCtrl,
+      _shakhaBaytulmalSubCtrl, _remarksCtrl, _suggestionsCtrl
     ]) {
       c.dispose();
     }
@@ -110,48 +107,46 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
 
   Future<void> _loadCurrentReport() async {
     try {
-      final entry = await ReportStorageService.getSanghotonikEntry(widget.year, widget.month);
+      final entry = await ReportStorageService.getZonalEntry(widget.year, widget.month);
       if (entry != null && mounted) {
         setState(() {
           _isLocked = true;
           _currentEntry = entry;
-          _branchCtrl.text = entry.branchName;
+          _zoneNameCtrl.text = entry.zoneName;
           _sodossoCountCtrl.text = entry.sodossoCount;
           _sodossoBridhiCtrl.text = entry.sodossoBridhi;
           _sodossoGhattiCtrl.text = entry.sodossoGhatti;
           _sodossoPrarthiCountCtrl.text = entry.sodossoPrarthiCount;
           _sodossoPrarthiBridhiCtrl.text = entry.sodossoPrarthiBridhi;
           _sodossoPrarthiGhattiCtrl.text = entry.sodossoPrarthiGhatti;
-          _kormiCountCtrl.text = entry.kormiCount;
-          _kormiBridhiCtrl.text = entry.kormiBridhi;
-          _kormiGhattiCtrl.text = entry.kormiGhatti;
-          _prathmikCountCtrl.text = entry.prathmikSodossoCount;
-          _prathmikBridhiCtrl.text = entry.prathmikSodossoBridhi;
-          _prathmikGhattiCtrl.text = entry.prathmikSodossoGhatti;
-          _sudhiCountCtrl.text = entry.sudhiCount;
-          _dawahPersonalCountCtrl.text = entry.dawahPersonalCount;
-          _dawahPersonalPresCtrl.text = entry.dawahPersonalPresence;
-          _dawahGroupCountCtrl.text = entry.dawahGroupCount;
-          _dawahGroupPresCtrl.text = entry.dawahGroupPresence;
-          _dawahMahfilCountCtrl.text = entry.dawahMahfilCount;
-          _dawahMahfilPresCtrl.text = entry.dawahMahfilPresence;
-          _leafletDistCtrl.text = entry.leafletDistributed;
-          _posterPastedCtrl.text = entry.posterPasted;
-          _adminUnitCountCtrl.text = entry.administrativeUnitCount;
-          _adminUnitNameCtrl.text = entry.administrativeUnitName;
-          _mosqueOrgCountCtrl.text = entry.mosqueOrganizationCount;
-          _generalMeetingCountCtrl.text = entry.generalMeetingCount;
-          _generalMeetingPresCtrl.text = entry.generalMeetingPresence;
-          _kormiMeetingCountCtrl.text = entry.kormiMeetingCount;
-          _kormiMeetingPresCtrl.text = entry.kormiMeetingPresence;
-          _totalIncomeCtrl.text = entry.totalIncome;
-          _totalExpenseCtrl.text = entry.totalExpense;
-          _newsReleaseCountCtrl.text = entry.newsReleaseCount;
-          _posterPublishedCtrl.text = entry.posterPublished;
-          _libBookCountCtrl.text = entry.libraryBookCount;
-          _libBookReadCountCtrl.text = entry.libraryBookReadCount;
-          _socialWelfareTakaCtrl.text = entry.socialWelfareTaka;
+          _distCountCtrl.text = entry.districtCount;
+          _distOrgCtrl.text = entry.districtOrg;
+          _distReorgCtrl.text = entry.districtReorg;
+          _cityCountCtrl.text = entry.cityCount;
+          _cityOrgCtrl.text = entry.cityOrg;
+          _cityReorgCtrl.text = entry.cityReorg;
+          _upazilaCountCtrl.text = entry.upazilaThanaCount;
+          _upazilaOrgCtrl.text = entry.upazilaThanaOrg;
+          _upazilaReorgCtrl.text = entry.upazilaThanaReorg;
+          _shakhaDaitoshilCountCtrl.text = entry.shakhaDaitoshilCount;
+          _shakhaDaitoshilPresCtrl.text = entry.shakhaDaitoshilPresence;
+          _distExecCountCtrl.text = entry.districtExecCount;
+          _distExecPresCtrl.text = entry.districtExecPresence;
+          _zonalTorbiotCountCtrl.text = entry.zonalTorbiotCount;
+          _zonalTorbiotPresCtrl.text = entry.zonalTorbiotPresence;
+          _travelDetailsCtrl.text = entry.travelDetails;
+          _safarIncomeTakaCtrl.text = entry.safarIncomeTaka;
+          _centralIncomeTakaCtrl.text = entry.centralIncomeTaka;
+          _onetimeIncomeTakaCtrl.text = entry.onetimeIncomeTaka;
+          _safarExpenseTakaCtrl.text = entry.safarExpenseTaka;
+          _communicationExpenseTakaCtrl.text = entry.communicationExpenseTaka;
+          _officeExpenseTakaCtrl.text = entry.officeExpenseTaka;
+          _otherExpenseTakaCtrl.text = entry.otherExpenseTaka;
+          _shakhaReportSubCtrl.text = entry.shakhaReportSubmitted;
+          _shakhaPlanSubCtrl.text = entry.shakhaPlanSubmitted;
+          _shakhaBaytulmalSubCtrl.text = entry.shakhaBaytulmalSubmitted;
           _remarksCtrl.text = entry.remarks;
+          _suggestionsCtrl.text = entry.suggestions;
         });
       } else {
         setState(() {
@@ -162,54 +157,52 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
     } catch (_) {}
   }
 
-  SanghotonikReportEntry _buildEntry() {
-    return SanghotonikReportEntry(
+  ZonalReportEntry _buildEntry() {
+    return ZonalReportEntry(
       month: widget.month.toString().padLeft(2, '0'),
       year: widget.year.toString(),
-      branchName: _branchCtrl.text.trim(),
+      zoneName: _zoneNameCtrl.text.trim(),
       sodossoCount: _sodossoCountCtrl.text.trim(),
       sodossoBridhi: _sodossoBridhiCtrl.text.trim(),
       sodossoGhatti: _sodossoGhattiCtrl.text.trim(),
       sodossoPrarthiCount: _sodossoPrarthiCountCtrl.text.trim(),
       sodossoPrarthiBridhi: _sodossoPrarthiBridhiCtrl.text.trim(),
       sodossoPrarthiGhatti: _sodossoPrarthiGhattiCtrl.text.trim(),
-      kormiCount: _kormiCountCtrl.text.trim(),
-      kormiBridhi: _kormiBridhiCtrl.text.trim(),
-      kormiGhatti: _kormiGhattiCtrl.text.trim(),
-      prathmikSodossoCount: _prathmikCountCtrl.text.trim(),
-      prathmikSodossoBridhi: _prathmikBridhiCtrl.text.trim(),
-      prathmikSodossoGhatti: _prathmikGhattiCtrl.text.trim(),
-      sudhiCount: _sudhiCountCtrl.text.trim(),
-      dawahPersonalCount: _dawahPersonalCountCtrl.text.trim(),
-      dawahPersonalPresence: _dawahPersonalPresCtrl.text.trim(),
-      dawahGroupCount: _dawahGroupCountCtrl.text.trim(),
-      dawahGroupPresence: _dawahGroupPresCtrl.text.trim(),
-      dawahMahfilCount: _dawahMahfilCountCtrl.text.trim(),
-      dawahMahfilPresence: _dawahMahfilPresCtrl.text.trim(),
-      leafletDistributed: _leafletDistCtrl.text.trim(),
-      posterPasted: _posterPastedCtrl.text.trim(),
-      administrativeUnitCount: _adminUnitCountCtrl.text.trim(),
-      administrativeUnitName: _adminUnitNameCtrl.text.trim(),
-      mosqueOrganizationCount: _mosqueOrgCountCtrl.text.trim(),
-      generalMeetingCount: _generalMeetingCountCtrl.text.trim(),
-      generalMeetingPresence: _generalMeetingPresCtrl.text.trim(),
-      kormiMeetingCount: _kormiMeetingCountCtrl.text.trim(),
-      kormiMeetingPresence: _kormiMeetingPresCtrl.text.trim(),
-      totalIncome: _totalIncomeCtrl.text.trim(),
-      totalExpense: _totalExpenseCtrl.text.trim(),
-      newsReleaseCount: _newsReleaseCountCtrl.text.trim(),
-      posterPublished: _posterPublishedCtrl.text.trim(),
-      libraryBookCount: _libBookCountCtrl.text.trim(),
-      libraryBookReadCount: _libBookReadCountCtrl.text.trim(),
-      socialWelfareTaka: _socialWelfareTakaCtrl.text.trim(),
+      districtCount: _distCountCtrl.text.trim(),
+      districtOrg: _distOrgCtrl.text.trim(),
+      districtReorg: _distReorgCtrl.text.trim(),
+      cityCount: _cityCountCtrl.text.trim(),
+      cityOrg: _cityOrgCtrl.text.trim(),
+      cityReorg: _cityReorgCtrl.text.trim(),
+      upazilaThanaCount: _upazilaCountCtrl.text.trim(),
+      upazilaThanaOrg: _upazilaOrgCtrl.text.trim(),
+      upazilaThanaReorg: _upazilaReorgCtrl.text.trim(),
+      shakhaDaitoshilCount: _shakhaDaitoshilCountCtrl.text.trim(),
+      shakhaDaitoshilPresence: _shakhaDaitoshilPresCtrl.text.trim(),
+      districtExecCount: _distExecCountCtrl.text.trim(),
+      districtExecPresence: _distExecPresCtrl.text.trim(),
+      zonalTorbiotCount: _zonalTorbiotCountCtrl.text.trim(),
+      zonalTorbiotPresence: _zonalTorbiotPresCtrl.text.trim(),
+      travelDetails: _travelDetailsCtrl.text.trim(),
+      safarIncomeTaka: _safarIncomeTakaCtrl.text.trim(),
+      centralIncomeTaka: _centralIncomeTakaCtrl.text.trim(),
+      onetimeIncomeTaka: _onetimeIncomeTakaCtrl.text.trim(),
+      safarExpenseTaka: _safarExpenseTakaCtrl.text.trim(),
+      communicationExpenseTaka: _communicationExpenseTakaCtrl.text.trim(),
+      officeExpenseTaka: _officeExpenseTakaCtrl.text.trim(),
+      otherExpenseTaka: _otherExpenseTakaCtrl.text.trim(),
+      shakhaReportSubmitted: _shakhaReportSubCtrl.text.trim(),
+      shakhaPlanSubmitted: _shakhaPlanSubCtrl.text.trim(),
+      shakhaBaytulmalSubmitted: _shakhaBaytulmalSubCtrl.text.trim(),
       remarks: _remarksCtrl.text.trim(),
+      suggestions: _suggestionsCtrl.text.trim(),
     );
   }
 
   Future<void> _save() async {
     setState(() => _isSaving = true);
     final entry = _buildEntry();
-    await ReportStorageService.saveSanghotonikEntry(entry);
+    await ReportStorageService.saveZonalEntry(entry);
     await _loadCurrentReport();
     setState(() {
       _isSaving = false;
@@ -218,7 +211,7 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('সাংগঠনিক রিপোর্ট সেভ করা হয়েছে ✓'),
+          content: const Text('জোনাল রিপোর্ট সেভ করা হয়েছে ✓'),
           backgroundColor: _accentGreen,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -245,7 +238,7 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
         return Scaffold(
           backgroundColor: _darkBg,
           appBar: AppBar(
-            title: const Text('শাখা সাংগঠনিক রিপোর্ট',
+            title: const Text('শাখা জোনাল রিপোর্ট',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
             centerTitle: true,
             backgroundColor: _cardBg,
@@ -254,8 +247,8 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
             actions: [
               if (_currentEntry != null && _isLocked)
                 TextButton.icon(
-                  icon: Icon(Icons.edit, color: _accentOrange, size: 16),
-                  label: Text('এডিট করুন', style: TextStyle(color: _accentOrange, fontSize: 13, fontWeight: FontWeight.bold)),
+                  icon: Icon(Icons.edit, color: _accentPurple, size: 16),
+                  label: Text('এডিট করুন', style: TextStyle(color: _accentPurple, fontSize: 13, fontWeight: FontWeight.bold)),
                   onPressed: () => setState(() => _isLocked = false),
                 ),
             ],
@@ -273,17 +266,17 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: _accentOrange.withValues(alpha: 0.12),
+                        color: _accentPurple.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _accentOrange.withValues(alpha: 0.3)),
+                        border: Border.all(color: _accentPurple.withValues(alpha: 0.3)),
                       ),
                       child: Row(children: [
-                        Icon(Icons.group_work, color: _accentOrange, size: 22),
+                        Icon(Icons.map, color: _accentPurple, size: 22),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             Text('${monthNames[widget.month - 1]} ${_bn(widget.year)} মাসের রিপোর্ট',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: _accentOrange)),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: _accentPurple)),
                             Text(_currentEntry != null ? 'সর্বশেষ সেভ করা আছে' : 'এখনো সেভ করা হয়নি',
                                 style: TextStyle(fontSize: 12, color: _currentEntry != null ? const Color(0xFF10B981) : const Color(0xFFF59E0B))),
                           ]),
@@ -292,34 +285,40 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Branch
-                    _sectionHeader('শাখার তথ্য'),
-                    _field('শাখার নাম', 'শাখার নাম লিখুন', _branchCtrl),
+                    // Zone
+                    _sectionHeader('জোনের তথ্য'),
+                    _field('জোনের নাম', 'জোনের নাম লিখুন', _zoneNameCtrl),
                     const SizedBox(height: 20),
 
-                    // জনশক্তি (Manpower)
+                    // জনশক্তি
                     _manpowerSection(),
-                    const SizedBox(height: 20),
-
-                    // দাওয়াত
-                    _dawahSection(),
                     const SizedBox(height: 20),
 
                     // সংগঠন
                     _organizationSection(),
                     const SizedBox(height: 20),
 
-                    // সভাসমূহ
+                    // সভা/প্রশিক্ষণ
                     _meetingsSection(),
                     const SizedBox(height: 20),
 
-                    // অন্যান্য
-                    _miscSection(),
+                    // সফর
+                    _sectionHeader('সফর (জোন থেকে)'),
+                    _field('সফর বিবরণী ও লক্ষ্য', 'তারিখ, শাখার নাম, উপলক্ষ ও মেহমান...', _travelDetailsCtrl, maxLines: 3),
                     const SizedBox(height: 20),
 
-                    // মন্তব্য
-                    _sectionHeader('মন্তব্য'),
-                    _field('মন্তব্য (সমস্যা ও সম্ভাবনা)', 'কোনো বিশেষ তথ্য...', _remarksCtrl, maxLines: 3),
+                    // আয়-ব্যয়
+                    _incomeExpenseSection(),
+                    const SizedBox(height: 20),
+
+                    // জমা রিপোর্ট
+                    _submissionCountersSection(),
+                    const SizedBox(height: 20),
+
+                    // মন্তব্য ও পরামর্শ
+                    _sectionHeader('মন্তব্য ও পরামর্শ'),
+                    _field('মন্তব্য', 'কোনো বিশেষ তথ্য...', _remarksCtrl, maxLines: 2),
+                    _field('পরামর্শ', 'কেন্দ্রীয় কার্যকরী কমিটির নিকট পরামর্শ...', _suggestionsCtrl, maxLines: 2),
                     const SizedBox(height: 24),
 
                     // Save button
@@ -335,7 +334,7 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
                           label: Text(_isSaving ? 'সেভ হচ্ছে...' : 'রিপোর্ট সেভ করুন',
                               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _accentOrange,
+                            backgroundColor: _accentPurple,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
@@ -357,28 +356,10 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
       decoration: BoxDecoration(color: _cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: _borderColor)),
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('জনশক্তি', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentOrange)),
+        Text('জনশক্তি', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentPurple)),
         const SizedBox(height: 14),
-        _threeColRow('সদস্য সংখ্যা', _sodossoCountCtrl, 'বৃদ্ধি', _sodossoBridhiCtrl, 'ঘাটতি', _sodossoGhattiCtrl),
+        _threeColRow('সদস্য', _sodossoCountCtrl, 'বৃদ্ধি', _sodossoBridhiCtrl, 'ঘাটতি', _sodossoGhattiCtrl),
         _threeColRow('সদস্য প্রার্থী', _sodossoPrarthiCountCtrl, 'বৃদ্ধি', _sodossoPrarthiBridhiCtrl, 'ঘাটতি', _sodossoPrarthiGhattiCtrl),
-        _threeColRow('কর্মী সংখ্যা', _kormiCountCtrl, 'বৃদ্ধি', _kormiBridhiCtrl, 'ঘাটতি', _kormiGhattiCtrl),
-        _threeColRow('প্রাথমিক সদস্য', _prathmikCountCtrl, 'বৃদ্ধি', _prathmikBridhiCtrl, 'ঘাটতি', _prathmikGhattiCtrl),
-        _field('সুধী / শুভাকাঙ্ক্ষী সংখ্যা', 'সংখ্যা', _sudhiCountCtrl),
-      ]),
-    );
-  }
-
-  Widget _dawahSection() {
-    return Container(
-      decoration: BoxDecoration(color: _cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: _borderColor)),
-      padding: const EdgeInsets.all(16),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('দাওয়াত ও গণসংযোগ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentOrange)),
-        const SizedBox(height: 14),
-        _twoColRow('ব্যক্তিগত দাওয়াত দান (সংখ্যা)', _dawahPersonalCountCtrl, 'উপস্থিতি (গড়)', _dawahPersonalPresCtrl),
-        _twoColRow('গ্রুপ দাওয়াত (সংখ্যা)', _dawahGroupCountCtrl, 'উপস্থিতি (গড়)', _dawahGroupPresCtrl),
-        _twoColRow('দাওয়াতী মাহফিল / সভা', _dawahMahfilCountCtrl, 'উপস্থিতি (গড়)', _dawahMahfilPresCtrl),
-        _twoColRow('পরিচিতি/লিফলেট বিতরণ', _leafletDistCtrl, 'পোস্টার pasted', _posterPastedCtrl),
       ]),
     );
   }
@@ -388,10 +369,11 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
       decoration: BoxDecoration(color: _cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: _borderColor)),
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('সংগঠন', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentOrange)),
+        Text('সংগঠন', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentPurple)),
         const SizedBox(height: 14),
-        _twoColRow('প্রশাসনিক ইউনিট (সংখ্যা)', _adminUnitCountCtrl, 'সংগঠন বা নাম', _adminUnitNameCtrl),
-        _field('মসজিদ ভিত্তিক সংগঠন (সংখ্যা)', 'সংখ্যা', _mosqueOrgCountCtrl),
+        _threeColRow('জেলা', _distCountCtrl, 'সংগঠন', _distOrgCtrl, 'পুনর্গঠন', _distReorgCtrl),
+        _threeColRow('মহানগরী', _cityCountCtrl, 'সংগঠন', _cityOrgCtrl, 'পুনর্গঠন', _cityReorgCtrl),
+        _threeColRow('উপজেলা / থানা', _upazilaCountCtrl, 'সংগঠন', _upazilaOrgCtrl, 'পুনর্গঠন', _upazilaReorgCtrl),
       ]),
     );
   }
@@ -401,25 +383,41 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
       decoration: BoxDecoration(color: _cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: _borderColor)),
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('সভাসহ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentOrange)),
+        Text('সভা / প্রশিক্ষণ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentPurple)),
         const SizedBox(height: 14),
-        _twoColRow('সাধারণ সভা (সংখ্যা)', _generalMeetingCountCtrl, 'উপস্থিতি (গড়)', _generalMeetingPresCtrl),
-        _twoColRow('কর্মী সভা / সমাবেশ', _kormiMeetingCountCtrl, 'উপস্থিতি (গড়)', _kormiMeetingPresCtrl),
+        _twoColRow('শাখা দায়িত্বশীল বৈঠক (সংখ্যা)', _shakhaDaitoshilCountCtrl, 'উপস্থিতি (গড়)', _shakhaDaitoshilPresCtrl),
+        _twoColRow('জেলা নির্বাহী বৈঠক (সংখ্যা)', _distExecCountCtrl, 'উপস্থিতি (গড়)', _distExecPresCtrl),
+        _twoColRow('জোনাল তরবিয়তী মজলিস (সংখ্যা)', _zonalTorbiotCountCtrl, 'উপস্থিতি (গড়)', _zonalTorbiotPresCtrl),
       ]),
     );
   }
 
-  Widget _miscSection() {
+  Widget _incomeExpenseSection() {
     return Container(
       decoration: BoxDecoration(color: _cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: _borderColor)),
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('বায়তুলমাল, প্রচার ও লাইব্রেরি', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentOrange)),
+        Text('আয়-ব্যয় সংক্ষেপ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentPurple)),
         const SizedBox(height: 14),
-        _twoColRow('বায়তুলমাল মোট আয় (৳)', _totalIncomeCtrl, 'মোট ব্যয় (৳)', _totalExpenseCtrl),
-        _twoColRow('সংবাদ বিজ্ঞপ্তি (সংখ্যা)', _newsReleaseCountCtrl, 'পোস্টার প্রকাশিত', _posterPublishedCtrl),
-        _twoColRow('লাইব্রেরিতে বই সংখ্যা', _libBookCountCtrl, 'পঠিত বই সংখ্যা', _libBookReadCountCtrl),
-        _field('সমাজকল্যাণ অনুদান বিতরণ (৳)', 'পরিমাণ টাকা', _socialWelfareTakaCtrl),
+        _twoColRow('সফর আয় (৳)', _safarIncomeTakaCtrl, 'কেন্দ্র থেকে বরাদ্দ (৳)', _centralIncomeTakaCtrl),
+        _field('এককালীন আয় (৳)', 'পরিমাণ টাকা', _onetimeIncomeTakaCtrl),
+        const Divider(color: Colors.grey),
+        _twoColRow('সফর ব্যয় (৳)', _safarExpenseTakaCtrl, 'যোগাযোগ ব্যয় (৳)', _communicationExpenseTakaCtrl),
+        _twoColRow('অফিস ব্যয় (৳)', _officeExpenseTakaCtrl, 'অন্যান্য ব্যয় (৳)', _otherExpenseTakaCtrl),
+      ]),
+    );
+  }
+
+  Widget _submissionCountersSection() {
+    return Container(
+      decoration: BoxDecoration(color: _cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: _borderColor)),
+      padding: const EdgeInsets.all(16),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('জমা তথ্য বিবরণী', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentPurple)),
+        const SizedBox(height: 14),
+        _field('শাখা রিপোর্ট জমা হয়েছে (টি)', 'টি', _shakhaReportSubCtrl),
+        _field('শাখার পরিকল্পনা জমা হয়েছে (টি)', 'টি', _shakhaPlanSubCtrl),
+        _field('শাখার বায়তুলমাল জমা হয়েছে (টি)', 'টি', _shakhaBaytulmalSubCtrl),
       ]),
     );
   }
@@ -428,9 +426,9 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(children: [
-        Container(width: 4, height: 20, decoration: BoxDecoration(color: _accentOrange, borderRadius: BorderRadius.circular(2))),
+        Container(width: 4, height: 20, decoration: BoxDecoration(color: _accentPurple, borderRadius: BorderRadius.circular(2))),
         const SizedBox(width: 10),
-        Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFFDBA74))),
+        Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFD8B4FE))),
       ]),
     );
   }
@@ -457,7 +455,7 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: _accentOrange, width: 1.5),
+                borderSide: BorderSide(color: _accentPurple, width: 1.5),
               ),
               disabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -565,7 +563,7 @@ class _SanghotonikReportScreenState extends State<SanghotonikReportScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: _accentOrange),
+          borderSide: BorderSide(color: _accentPurple),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -593,11 +591,11 @@ class _BgPainter extends CustomPainter {
       return;
     }
 
-    final fill = Paint()..color = Colors.orange.withValues(alpha: 0.025)..style = PaintingStyle.fill;
+    final fill = Paint()..color = Colors.purple.withValues(alpha: 0.025)..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.05), 130, fill);
     canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.5), 100, fill);
 
-    final grid = Paint()..color = Colors.orange.withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+    final grid = Paint()..color = Colors.purple.withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
     for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
     for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
 

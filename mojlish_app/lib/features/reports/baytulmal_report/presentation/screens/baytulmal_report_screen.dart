@@ -2,8 +2,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import '../../data/models/baytulmal_report_entry.dart';
-import '../../data/services/report_storage_service.dart';
-import '../../data/services/pdf_generator_service.dart';
+import '../../../shared/data/services/report_storage_service.dart';
+import '../../../shared/data/services/pdf_generator_service.dart';
 
 class BaytulmalReportScreen extends StatefulWidget {
   final int year;

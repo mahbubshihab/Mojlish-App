@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import '../../data/models/daily_personal_entry.dart';
 import '../../data/models/monthly_comment.dart';
 import '../../data/models/monthly_plan.dart';
-import '../../data/services/report_storage_service.dart';
+import '../../../shared/data/services/report_storage_service.dart';
 import 'daily_entry_screen.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
-import '../../data/services/pdf_generator_service.dart';
+import '../../../shared/data/services/pdf_generator_service.dart';
 
 /// মাসিক রিপোর্ট স্ক্রিন — কাগজের ফরম অনুযায়ী কলামসমূহ এবং পরিকল্পনা ও মন্তব্য
 class PersonalReportScreen extends StatefulWidget {

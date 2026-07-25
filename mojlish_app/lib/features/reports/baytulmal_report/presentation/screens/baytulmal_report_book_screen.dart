@@ -1,18 +1,18 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
-import '../../data/services/report_storage_service.dart';
-import 'sanghotonik_report_screen.dart';
+import '../../../shared/data/services/report_storage_service.dart';
+import 'baytulmal_report_screen.dart';
 
-/// শাখা সাংগঠনিক রিপোর্ট বই — বছর/মাস নেভিগেশন
-class SanghotonikReportBookScreen extends StatefulWidget {
-  const SanghotonikReportBookScreen({super.key});
+/// বায়তুলমাল রিপোর্ট বই — বছর/মাস নেভিগেশন, মাস সিলেক্ট করলে monthly form খোলে
+class BaytulmalReportBookScreen extends StatefulWidget {
+  const BaytulmalReportBookScreen({super.key});
 
   @override
-  State<SanghotonikReportBookScreen> createState() => _SanghotonikReportBookScreenState();
+  State<BaytulmalReportBookScreen> createState() => _BaytulmalReportBookScreenState();
 }
 
-class _SanghotonikReportBookScreenState extends State<SanghotonikReportBookScreen> {
+class _BaytulmalReportBookScreenState extends State<BaytulmalReportBookScreen> {
   final _now = DateTime.now();
   late int _selectedYear;
   late int _selectedMonth;
@@ -34,7 +34,7 @@ class _SanghotonikReportBookScreenState extends State<SanghotonikReportBookScree
   Future<void> _loadSavedMonths() async {
     final Map<int, bool> saved = {};
     for (int m = 1; m <= 12; m++) {
-      final entry = await ReportStorageService.getSanghotonikEntry(_selectedYear, m);
+      final entry = await ReportStorageService.getBaytulmalEntry(_selectedYear, m);
       saved[m] = entry != null;
     }
     if (mounted) {
@@ -53,7 +53,7 @@ class _SanghotonikReportBookScreenState extends State<SanghotonikReportBookScree
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => SanghotonikReportScreen(year: _selectedYear, month: month),
+        builder: (_) => BaytulmalReportScreen(year: _selectedYear, month: month),
       ),
     );
     setState(() => _selectedMonth = month);
@@ -74,7 +74,7 @@ class _SanghotonikReportBookScreenState extends State<SanghotonikReportBookScree
         final borderColor = isDark ? const Color(0xFF2A3F58) : const Color(0xFFE2E8F0);
         final textLight = isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
         final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
-        const accentOrange = Colors.orange;
+        const accentBlue = Color(0xFF0EA5E9);
 
         return Scaffold(
           backgroundColor: bg,
@@ -87,8 +87,8 @@ class _SanghotonikReportBookScreenState extends State<SanghotonikReportBookScree
               onPressed: () => Navigator.pop(context),
             ),
             title: const Text(
-              'সাংগঠনিক রিপোর্ট বই',
-              style: TextStyle(color: accentOrange, fontSize: 18, fontWeight: FontWeight.bold),
+              'বায়তুলমাল রিপোর্ট বই',
+              style: TextStyle(color: accentBlue, fontSize: 18, fontWeight: FontWeight.bold),
             ),
             actions: [
               IconButton(
@@ -110,11 +110,11 @@ class _SanghotonikReportBookScreenState extends State<SanghotonikReportBookScree
                 child: Column(
                   children: [
                     const SizedBox(height: 12),
-                    _buildStatusCard(cardBg, borderColor, textLight, accentOrange),
+                    _buildStatusCard(cardBg, borderColor, textLight, accentBlue),
                     const SizedBox(height: 16),
                     _buildYearSelector(cardBg, borderColor, textLight),
                     const SizedBox(height: 16),
-                    _buildMonthGrid(cardBg, borderColor, textLight, textMuted, accentOrange),
+                    _buildMonthGrid(cardBg, borderColor, textLight, textMuted, accentBlue),
                     const SizedBox(height: 24),
                   ],
                 ),
@@ -126,7 +126,7 @@ class _SanghotonikReportBookScreenState extends State<SanghotonikReportBookScree
     );
   }
 
-  Widget _buildStatusCard(Color cardBg, Color borderColor, Color textLight, Color accentOrange) {
+  Widget _buildStatusCard(Color cardBg, Color borderColor, Color textLight, Color accentBlue) {
     int count = _savedMonths.values.where((v) => v).length;
     return Container(
       decoration: BoxDecoration(
@@ -141,11 +141,11 @@ class _SanghotonikReportBookScreenState extends State<SanghotonikReportBookScree
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: accentOrange.withValues(alpha: 0.15),
+              color: accentBlue.withValues(alpha: 0.15),
               shape: BoxShape.circle,
-              border: Border.all(color: accentOrange.withValues(alpha: 0.4), width: 2),
+              border: Border.all(color: accentBlue.withValues(alpha: 0.4), width: 2),
             ),
-            child: Icon(Icons.group_work, color: accentOrange, size: 26),
+            child: Icon(Icons.account_balance_wallet, color: accentBlue, size: 26),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -153,13 +153,13 @@ class _SanghotonikReportBookScreenState extends State<SanghotonikReportBookScree
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '[_selectedYear সালের শাখা সাংগঠনিক রিপোর্ট]',
+                  '[_selectedYear সালের শাখা বায়তুলমাল রিপোর্ট]',
                   style: TextStyle(color: textLight.withValues(alpha: 0.8), fontSize: 14),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   '১২ মাসের মধ্যে $count মাসের রিপোর্ট সেভ করা আছে',
-                  style: TextStyle(color: accentOrange, fontSize: 13, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: accentBlue, fontSize: 13, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -205,7 +205,7 @@ class _SanghotonikReportBookScreenState extends State<SanghotonikReportBookScree
     );
   }
 
-  Widget _buildMonthGrid(Color cardBg, Color borderColor, Color textLight, Color textMuted, Color accentOrange) {
+  Widget _buildMonthGrid(Color cardBg, Color borderColor, Color textLight, Color textMuted, Color accentBlue) {
     final rows = [
       [1, 2, 3, 4, 5],
       [6, 7, 8, 9],
@@ -216,13 +216,13 @@ class _SanghotonikReportBookScreenState extends State<SanghotonikReportBookScree
         padding: const EdgeInsets.only(bottom: 12),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: row.map((m) => _buildMonthCircle(m, cardBg, borderColor, textLight, textMuted, accentOrange)).toList(),
+          children: row.map((m) => _buildMonthCircle(m, cardBg, borderColor, textLight, textMuted, accentBlue)).toList(),
         ),
       )).toList(),
     );
   }
 
-  Widget _buildMonthCircle(int month, Color cardBg, Color borderColor, Color textLight, Color textMuted, Color accentOrange) {
+  Widget _buildMonthCircle(int month, Color cardBg, Color borderColor, Color textLight, Color textMuted, Color accentBlue) {
     final isSelected = month == _selectedMonth;
     final isSaved = _savedMonths[month] ?? false;
     final isFuture = _selectedYear == _now.year && month > _now.month;
@@ -236,13 +236,13 @@ class _SanghotonikReportBookScreenState extends State<SanghotonikReportBookScree
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: isSelected
-              ? accentOrange.withValues(alpha: 0.15)
+              ? accentBlue.withValues(alpha: 0.15)
               : isFuture
                   ? cardBg.withValues(alpha: 0.2)
                   : cardBg,
           border: Border.all(
             color: isSelected
-                ? accentOrange
+                ? accentBlue
                 : isSaved
                     ? const Color(0xFF10B981)
                     : borderColor,
@@ -257,7 +257,7 @@ class _SanghotonikReportBookScreenState extends State<SanghotonikReportBookScree
               _monthShort[month - 1],
               style: TextStyle(
                 color: isSelected
-                    ? accentOrange
+                    ? accentBlue
                     : isFuture
                         ? textMuted.withValues(alpha: 0.4)
                         : textLight,
@@ -289,11 +289,11 @@ class _BgPainter extends CustomPainter {
       return;
     }
 
-    final fill = Paint()..color = Colors.orange.withValues(alpha: 0.025)..style = PaintingStyle.fill;
+    final fill = Paint()..color = Colors.blue.withValues(alpha: 0.025)..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.08), 120, fill);
     canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.45), 90, fill);
 
-    final grid = Paint()..color = Colors.orange.withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+    final grid = Paint()..color = Colors.blue.withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
     for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
     for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
 

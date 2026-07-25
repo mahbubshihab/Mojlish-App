@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
-import '../../../reports/presentation/screens/report_selection_screen.dart';
+import '../../../reports/general_report/presentation/screens/report_selection_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 import 'about/about_screen.dart';
 import 'social_media/social_media_screen.dart';

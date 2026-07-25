@@ -1,11 +1,11 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
-import '../../data/services/report_storage_service.dart';
+import 'package:mojlish_app/features/reports/shared/data/services/report_storage_service.dart';
 import 'report_book_screen.dart';
-import 'baytulmal_report_book_screen.dart';
-import 'sanghotonik_report_book_screen.dart';
-import 'zonal_report_book_screen.dart';
+import 'package:mojlish_app/features/reports/baytulmal_report/presentation/screens/baytulmal_report_book_screen.dart';
+import 'package:mojlish_app/features/reports/sanghotonik_report/presentation/screens/sanghotonik_report_book_screen.dart';
+import 'package:mojlish_app/features/reports/zonal_report/presentation/screens/zonal_report_book_screen.dart';
 
 /// রিপোর্টসমূহ — মূল হাব স্ক্রিন, সব রিপোর্টের কার্ড দেখায়
 class ReportSelectionScreen extends StatefulWidget {
