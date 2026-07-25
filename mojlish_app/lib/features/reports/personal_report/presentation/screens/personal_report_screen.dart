@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/models/daily_personal_entry.dart';
 import '../../data/models/monthly_comment.dart';
 import '../../data/models/monthly_plan.dart';
+import '../../data/models/majlis_personal_report_config.dart';
 import '../../../shared/data/services/report_storage_service.dart';
 import 'daily_entry_screen.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
@@ -12,8 +13,14 @@ import '../../../shared/data/services/pdf_generator_service.dart';
 class PersonalReportScreen extends StatefulWidget {
   final int year;
   final int month;
+  final MajlisType majlisType;
 
-  const PersonalReportScreen({super.key, required this.year, required this.month});
+  const PersonalReportScreen({
+    super.key,
+    required this.year,
+    required this.month,
+    this.majlisType = MajlisType.khelafat,
+  });
 
   @override
   State<PersonalReportScreen> createState() => _PersonalReportScreenState();
@@ -415,57 +422,66 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
 
   // কলামসমূহ কাগজের ফরমের ৩১-দিন গ্রিড অনুযায়ী
   List<_ColGroup> _getColGroups() {
-    return [
-      _ColGroup('কুরআন অধ্যয়ন\nসূরা (আয়াত)', (DailyPersonalEntry e) {
-        if (e.quranSura.isNotEmpty || e.quranAyah.isNotEmpty) {
-          return '${e.quranSura} (${e.quranAyah})';
+    final config = MajlisPersonalReportConfig.getConfig(widget.majlisType);
+    return config.columns.map((col) {
+      final header = col.subtitle.isEmpty ? col.title : '${col.title}\n${col.subtitle}';
+      return _ColGroup(header, (DailyPersonalEntry e) {
+        switch (col.id) {
+          case 'quran':
+            if (e.quranSura.isNotEmpty || e.quranAyah.isNotEmpty) {
+              return '${e.quranSura} (${e.quranAyah})';
+            }
+            return e.quranStudy;
+          case 'hadith':
+            if (e.hadithCount.isNotEmpty || e.hadithTopic.isNotEmpty) {
+              return '${e.hadithCount} (${e.hadithTopic})';
+            }
+            return e.hadithStudy;
+          case 'literature':
+            if (e.islamicLitPages.isNotEmpty || e.islamicLitBook.isNotEmpty) {
+              return '${e.islamicLitPages} (${e.islamicLitBook})';
+            }
+            return e.islamicLiterature;
+          case 'textbook':
+            return e.textbookHours.isNotEmpty ? e.textbookHours : e.textbookStudy;
+          case 'jamaat':
+            return e.jamaatPrayer;
+          case 'atmo':
+            return e.selfAnalysis;
+          case 'contact':
+          case 'dawat_contact':
+            if (e.contactCount.isNotEmpty || e.contactName.isNotEmpty) {
+              return '${e.contactCount} (${e.contactName})';
+            }
+            return e.contact;
+          case 'dawat':
+            return e.dawah.isNotEmpty ? e.dawah : e.contactCount;
+          case 'dawat_materials':
+            return e.dawahMaterials.isNotEmpty ? e.dawahMaterials : e.dawah;
+          case 'meeting':
+            return e.meetingName;
+          case 'time':
+          case 'sanghotonik_time':
+            return e.orgTime.isNotEmpty ? e.orgTime : e.timeService;
+          case 'social':
+            return e.socialService.isNotEmpty ? e.socialService : (e.familyWelfareTime.isNotEmpty ? 'খেদমত: ${e.familyWelfareTime}মি' : '');
+          case 'kormi_contact':
+            if (e.memberContactCount.isNotEmpty || e.memberContactName.isNotEmpty) {
+              return '${e.memberContactCount} (${e.memberContactName})';
+            }
+            return '';
+          case 'job_business':
+            return e.jobBusinessTime;
+          case 'extra_activities':
+          default:
+            final list = <String>[];
+            if (e.newspaperTime.isNotEmpty) list.add('প:${e.newspaperTime}মি');
+            if (e.physicalExerciseTime.isNotEmpty) list.add('শ:${e.physicalExerciseTime}মি');
+            if (e.familyWelfareTime.isNotEmpty) list.add('খ:${e.familyWelfareTime}মি');
+            return list.join(', ');
         }
-        return e.quranStudy;
-      }),
-      _ColGroup('হাদীস অধ্যয়ন\nসংখ্যা (বিষয়)', (DailyPersonalEntry e) {
-        if (e.hadithCount.isNotEmpty || e.hadithTopic.isNotEmpty) {
-          return '${e.hadithCount} (${e.hadithTopic})';
-        }
-        return e.hadithStudy;
-      }),
-      _ColGroup('ইসলামী সাহিত্য\nপৃষ্ঠা (বই)', (DailyPersonalEntry e) {
-        if (e.islamicLitPages.isNotEmpty || e.islamicLitBook.isNotEmpty) {
-          return '${e.islamicLitPages} (${e.islamicLitBook})';
-        }
-        return e.islamicLiterature;
-      }),
-      _ColGroup('পাঠ্যপুস্তক\nসময় (ঘণ্টা)', (DailyPersonalEntry e) {
-        return e.textbookHours.isNotEmpty ? e.textbookHours : e.textbookStudy;
-      }),
-      _ColGroup('জামাআতে নামায\nওয়াক্ত', (DailyPersonalEntry e) => e.jamaatPrayer),
-      _ColGroup('আত্মবিচার\nহ্যাঁ/না', (DailyPersonalEntry e) => e.selfAnalysis),
-      _ColGroup('দাওয়াতি যোগাযোগ\nসংখ্যা (নাম)', (DailyPersonalEntry e) {
-        if (e.contactCount.isNotEmpty || e.contactName.isNotEmpty) {
-          return '${e.contactCount} (${e.contactName})';
-        }
-        return e.contact;
-      }),
-      _ColGroup('উপকরণ বিতরণ\nপরিমাণ', (DailyPersonalEntry e) {
-        return e.dawahMaterials.isNotEmpty ? e.dawahMaterials : e.dawah;
-      }),
-      _ColGroup('সভায় যোগদান\nসভার নাম', (DailyPersonalEntry e) => e.meetingName),
-      _ColGroup('সাংগঠনিক সময়\nঘণ্টা', (DailyPersonalEntry e) {
-        return e.orgTime.isNotEmpty ? e.orgTime : e.timeService;
-      }),
-      _ColGroup('কর্মী যোগাযোগ\nসংখ্যা (নাম)', (DailyPersonalEntry e) {
-        if (e.memberContactCount.isNotEmpty || e.memberContactName.isNotEmpty) {
-          return '${e.memberContactCount} (${e.memberContactName})';
-        }
-        return '';
-      }),
-      _ColGroup('বিবিধ\nপত্রিকা/শরীরচর্চা/খেদমত', (DailyPersonalEntry e) {
-        final list = <String>[];
-        if (e.newspaperTime.isNotEmpty) list.add('প:${e.newspaperTime}মি');
-        if (e.physicalExerciseTime.isNotEmpty) list.add('শ:${e.physicalExerciseTime}মি');
-        if (e.familyWelfareTime.isNotEmpty) list.add('খ:${e.familyWelfareTime}মি');
-        return list.join(', ');
-      }),
-    ];
+      });
+    }).toList();
   }
 
   // মাসিক এগ্রিগেশন বা সামারি হিসাব (মোট রো-এর জন্য)

@@ -38,6 +38,9 @@ class DailyPersonalEntry {
   final String physicalExerciseTime; // শরীরচর্চা সময় (মিনিট)
   final String familyWelfareTime;   // পারিবারিক/সামাজিক খেদমত সময় (মিনিট)
 
+  // যুব মজলিস বিশেষ ফিল্ড
+  final String jobBusinessTime; // চাকুরি/ব্যবসা বসা সময় দান (ঘণ্টা)
+
   // পুরনো ফিল্ডসমূহ (backward compatibility)
   final String quranStudy;
   final String hadithStudy;
@@ -72,6 +75,7 @@ class DailyPersonalEntry {
     this.newspaperTime = '',
     this.physicalExerciseTime = '',
     this.familyWelfareTime = '',
+    this.jobBusinessTime = '',
     
     // Default compatibility values
     this.quranStudy = '',
@@ -108,6 +112,7 @@ class DailyPersonalEntry {
     'newspaperTime': newspaperTime,
     'physicalExerciseTime': physicalExerciseTime,
     'familyWelfareTime': familyWelfareTime,
+    'jobBusinessTime': jobBusinessTime,
     
     'quranStudy': quranStudy,
     'hadithStudy': hadithStudy,
@@ -144,6 +149,7 @@ class DailyPersonalEntry {
       newspaperTime: json['newspaperTime'] ?? '',
       physicalExerciseTime: json['physicalExerciseTime'] ?? '',
       familyWelfareTime: json['familyWelfareTime'] ?? '',
+      jobBusinessTime: json['jobBusinessTime'] ?? '',
       
       // Compatibility mapping (fallback to old keys if new keys are empty)
       quranStudy: json['quranStudy'] ?? '',
@@ -179,5 +185,6 @@ class DailyPersonalEntry {
       memberContactName.isEmpty &&
       newspaperTime.isEmpty &&
       physicalExerciseTime.isEmpty &&
-      familyWelfareTime.isEmpty;
+      familyWelfareTime.isEmpty &&
+      jobBusinessTime.isEmpty;
 }

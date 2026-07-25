@@ -4,11 +4,14 @@ import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/features/reports/shared/data/services/report_storage_service.dart';
 import 'package:mojlish_app/features/reports/personal_report/presentation/screens/personal_report_screen.dart';
 import 'package:mojlish_app/features/reports/personal_report/presentation/screens/daily_entry_screen.dart';
+import 'package:mojlish_app/features/reports/personal_report/data/models/majlis_personal_report_config.dart';
 import 'report_export_screen.dart';
 
 /// ব্যক্তিগত রিপোর্ট বই — বছর/মাস নেভিগেশন
 class ReportBookScreen extends StatefulWidget {
-  const ReportBookScreen({super.key});
+  final MajlisType majlisType;
+
+  const ReportBookScreen({super.key, this.majlisType = MajlisType.khelafat});
 
   @override
   State<ReportBookScreen> createState() => _ReportBookScreenState();
@@ -56,7 +59,11 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PersonalReportScreen(year: _selectedYear, month: month),
+        builder: (_) => PersonalReportScreen(
+          year: _selectedYear,
+          month: month,
+          majlisType: widget.majlisType,
+        ),
       ),
     );
     setState(() => _selectedMonth = month);
