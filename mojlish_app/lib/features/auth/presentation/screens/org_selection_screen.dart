@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/theme_manager.dart';
+import '../../../../core/services/user_storage_service.dart';
 import '../../../dashboard/presentation/screens/main_dashboard_screen.dart';
 
 class OrgSelectionScreen extends StatefulWidget {
@@ -12,6 +13,19 @@ class OrgSelectionScreen extends StatefulWidget {
 
 class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
   String? _selectedOrg;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedMajlis();
+  }
+
+  Future<void> _loadSavedMajlis() async {
+    final saved = await UserStorageService.getSelectedMajlis();
+    setState(() {
+      _selectedOrg = saved;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,11 +112,14 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
                     height: 54,
                     child: ElevatedButton(
                       onPressed: _selectedOrg != null
-                          ? () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(builder: (_) => const MainDashboardScreen()),
-                              );
+                          ? () async {
+                              await UserStorageService.saveSelectedMajlis(_selectedOrg!);
+                              if (mounted) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const MainDashboardScreen()),
+                                );
+                              }
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
@@ -148,7 +165,18 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
   Widget _buildMajlisLayout(bool isDark, Color defaultCardBg) {
     return Column(
       children: [
-        // 1. Central Hero Circle for খেলাফত মজলিস
+        // Top 2 Satellite Cards: যুব মজলিস & ছাত্র মজলিস
+        Row(
+          children: [
+            Expanded(child: _buildSatelliteMajlisCard('যুব মজলিস', Icons.groups, Colors.orange, isDark, defaultCardBg)),
+            const SizedBox(width: 12),
+            Expanded(child: _buildSatelliteMajlisCard('ছাত্র মজলিস', Icons.school, Colors.blue, isDark, defaultCardBg)),
+          ],
+        ),
+        
+        const SizedBox(height: 16),
+        
+        // Central Hero Circle for খেলাফত মজলিস (মাঝখানে প্রধান মজলিস)
         _buildCentralMajlisCircle(
           title: 'খেলাফত মজলিস',
           subtitle: 'প্রধান মজলিস',
@@ -157,21 +185,14 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
           defaultCardBg: defaultCardBg,
         ),
         
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
         
-        // 2. Grid for surrounding 4 Majlises (2x2)
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 14,
-          crossAxisSpacing: 14,
-          childAspectRatio: 1.4,
+        // Bottom 2 Satellite Cards: মহিলা মজলিস & শ্রমিক মজলিস
+        Row(
           children: [
-            _buildSatelliteMajlisCard('যুব মজলিস', Icons.groups, Colors.orange, isDark, defaultCardBg),
-            _buildSatelliteMajlisCard('ছাত্র মজলিস', Icons.school, Colors.blue, isDark, defaultCardBg),
-            _buildSatelliteMajlisCard('মহিলা মজলিস', Icons.woman, Colors.pink, isDark, defaultCardBg),
-            _buildSatelliteMajlisCard('শ্রমিক মজলিস', Icons.engineering, Colors.amber.shade700, isDark, defaultCardBg),
+            Expanded(child: _buildSatelliteMajlisCard('মহিলা মজলিস', Icons.woman, Colors.pink, isDark, defaultCardBg)),
+            const SizedBox(width: 12),
+            Expanded(child: _buildSatelliteMajlisCard('শ্রমিক মজলিস', Icons.engineering, Colors.amber.shade700, isDark, defaultCardBg)),
           ],
         ),
       ],
