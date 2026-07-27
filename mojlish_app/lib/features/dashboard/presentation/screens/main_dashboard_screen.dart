@@ -6,6 +6,7 @@ import '../../../notifications/presentation/screens/notifications_screen.dart';
 import 'about/about_screen.dart';
 import 'social_media/social_media_screen.dart';
 import 'resources/resources_screen.dart';
+import 'package:mojlish_app/features/syllabi/khelafot_syllabus/presentation/screens/khelafot_syllabus_screen.dart';
 
 class MainDashboardScreen extends StatelessWidget {
   const MainDashboardScreen({super.key});
@@ -167,6 +168,19 @@ class MainDashboardScreen extends StatelessWidget {
                       textTitle: textTitle,
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportSelectionScreen()));
+                      },
+                    ),
+                    _buildMenuCard(
+                      context,
+                      title: 'খেলাফত মজলিস সিলেবাস',
+                      icon: Icons.menu_book_rounded,
+                      iconColor: const Color(0xFF059669), // Emerald
+                      iconBgColor: pGreenBg,
+                      cardBg: cardBg,
+                      borderColor: borderColor,
+                      textTitle: textTitle,
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const KhelafatSyllabusScreen()));
                       },
                     ),
                     _buildMenuCard(
