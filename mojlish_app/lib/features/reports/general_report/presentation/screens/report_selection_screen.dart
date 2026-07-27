@@ -9,6 +9,8 @@ import 'report_book_screen.dart';
 import 'package:mojlish_app/features/reports/baytulmal_report/presentation/screens/baytulmal_report_book_screen.dart';
 import 'package:mojlish_app/features/reports/sanghotonik_report/presentation/screens/sanghotonik_report_book_screen.dart';
 import 'package:mojlish_app/features/reports/zonal_report/presentation/screens/zonal_report_book_screen.dart';
+import 'package:mojlish_app/features/syllabi/khelafot_syllabus/presentation/screens/khelafot_syllabus_screen.dart';
+import 'package:mojlish_app/features/resources/ahobban_mohila/presentation/screens/ahobban_screen.dart';
 
 /// রিপোর্টসমূহ — মূল হাব স্ক্রিন, সব রিপোর্টের কার্ড দেখায়
 class ReportSelectionScreen extends StatefulWidget {
@@ -170,6 +172,48 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                           const SizedBox(height: 12),
                         ],
 
+                        // ৩. মহিলা মজলিস "আহ্বান" ম্যানিফেস্টো
+                        if (_selectedMajlis.contains('মহিলা')) ...[
+                          _buildReportCard(
+                            title: 'আহ্বান — মহিলা মজলিস',
+                            subtitle: 'ইসলামে নারীর মর্যাদা, হিজাব ও ৫-দফা কর্মসূচি',
+                            badge: 'আহ্বান',
+                            badgeColor: const Color(0xFFE11D48),
+                            icon: Icons.auto_awesome_rounded,
+                            color: const Color(0xFFE11D48),
+                            cardBg: cardBg,
+                            borderColor: borderColor,
+                            textLight: textLight,
+                            textMuted: textMuted,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const AhobbanMohilaScreen()),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+
+                        // ৪. খেলাফত মজলিস সিলেবাস
+                        if (_selectedMajlis.contains('খেলাফত') || _selectedMajlis.contains('খেলাফতী')) ...[
+                          _buildReportCard(
+                            title: 'খেলাফত মজলিস সিলেবাস',
+                            subtitle: 'কর্মীদের পাঠ্যক্রম ও পাঠ্য পুস্তক নির্দেশিকা',
+                            badge: 'সিলেবাস',
+                            badgeColor: const Color(0xFF059669),
+                            icon: Icons.menu_book_rounded,
+                            color: const Color(0xFF059669),
+                            cardBg: cardBg,
+                            borderColor: borderColor,
+                            textLight: textLight,
+                            textMuted: textMuted,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const KhelafatSyllabusScreen()),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+
                         // বায়তুলমাল রিপোর্ট
                         _buildReportCard(
                           title: 'শাখা বায়তুলমাল রিপোর্ট',
@@ -217,7 +261,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                           textLight: textLight,
                           textMuted: textMuted,
                           onTap: () => Navigator.push(context,
-                              MaterialPageRoute(builder: (_) => const ZonalReportBookScreen())),
+                              MaterialPageRoute(builder: (_) => ZonalReportBookScreen())),
                         ),
                         const SizedBox(height: 24),
                       ],

@@ -7,6 +7,7 @@ import 'about/about_screen.dart';
 import 'social_media/social_media_screen.dart';
 import 'resources/resources_screen.dart';
 import 'package:mojlish_app/features/syllabi/khelafot_syllabus/presentation/screens/khelafot_syllabus_screen.dart';
+import 'package:mojlish_app/features/resources/ahobban_mohila/presentation/screens/ahobban_screen.dart';
 
 class MainDashboardScreen extends StatelessWidget {
   const MainDashboardScreen({super.key});
@@ -194,6 +195,19 @@ class MainDashboardScreen extends StatelessWidget {
                       textTitle: textTitle,
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(builder: (_) => const SocialMediaScreen()));
+                      },
+                    ),
+                    _buildMenuCard(
+                      context,
+                      title: 'আহ্বান (মহিলা মজলিস)',
+                      icon: Icons.auto_awesome_rounded,
+                      iconColor: const Color(0xFFE11D48), // Rose
+                      iconBgColor: pPurpleBg,
+                      cardBg: cardBg,
+                      borderColor: borderColor,
+                      textTitle: textTitle,
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const AhobbanMohilaScreen()));
                       },
                     ),
                     _buildMenuCard(
