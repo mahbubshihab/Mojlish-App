@@ -6,6 +6,7 @@ import '../../../personal_report/data/models/monthly_comment.dart';
 import '../../../sanghotonik_report/data/models/sanghotonik_report_entry.dart';
 import '../../../zonal_report/data/models/zonal_report_entry.dart';
 import '../../../personal_report/data/models/monthly_plan.dart';
+import '../../../personal_report/data/models/chatro_monthly_plan.dart';
 
 /// লোকাল স্টোরেজ সার্ভিস — SharedPreferences দিয়ে রিপোর্ট সেভ ও লোড করে
 class ReportStorageService {
@@ -15,6 +16,7 @@ class ReportStorageService {
   static const String _zonalReportKey = 'zonal_reports';
   static const String _commentsKey = 'monthly_comments';
   static const String _personalPlanKey = 'personal_plans';
+  static const String _chatroPlanKey = 'chatro_monthly_plans';
 
   // ===========================
   // ব্যক্তিগত মাসিক পরিকল্পনা (Porikolpona) — CRUD
@@ -43,6 +45,38 @@ class ReportStorageService {
     return decoded.map(
       (k, v) => MapEntry(k, MonthlyPlan.fromJson(v as Map<String, dynamic>)),
     );
+  }
+
+  // ===========================
+  // ছাত্র মজলিস পরিকল্পনা — CRUD
+  // ===========================
+
+  static Future<void> saveChatroMonthlyPlan(ChatroMonthlyPlan plan) async {
+    final prefs = await SharedPreferences.getInstance();
+    final allData = await _getAllChatroMonthlyPlans();
+    final key = '${plan.year}-${plan.month}';
+    allData[key] = plan;
+    final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
+    await prefs.setString(_chatroPlanKey, jsonEncode(encoded));
+  }
+
+  static Future<ChatroMonthlyPlan?> getChatroMonthlyPlan(int year, int month) async {
+    final allData = await _getAllChatroMonthlyPlans();
+    return allData['$year-$month'];
+  }
+
+  static Future<Map<String, ChatroMonthlyPlan>> _getAllChatroMonthlyPlans() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_chatroPlanKey);
+    if (raw == null) return {};
+    try {
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      return decoded.map(
+        (k, v) => MapEntry(k, ChatroMonthlyPlan.fromJson(v as Map<String, dynamic>)),
+      );
+    } catch (_) {
+      return {};
+    }
   }
 
   // ===========================

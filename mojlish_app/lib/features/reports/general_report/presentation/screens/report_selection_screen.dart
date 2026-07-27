@@ -1,7 +1,10 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
+import 'package:mojlish_app/core/services/user_storage_service.dart';
 import 'package:mojlish_app/features/reports/shared/data/services/report_storage_service.dart';
+import 'package:mojlish_app/features/reports/personal_report/data/models/majlis_personal_report_config.dart';
+import 'package:mojlish_app/features/reports/personal_report/presentation/screens/chatro_plan_screen.dart';
 import 'report_book_screen.dart';
 import 'package:mojlish_app/features/reports/baytulmal_report/presentation/screens/baytulmal_report_book_screen.dart';
 import 'package:mojlish_app/features/reports/sanghotonik_report/presentation/screens/sanghotonik_report_book_screen.dart';
@@ -18,6 +21,7 @@ class ReportSelectionScreen extends StatefulWidget {
 class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
   int _personalFilledDays = 0;
   int _daysInMonth = 30;
+  String _selectedMajlis = 'বাংলাদেশ ইসলামী ছাত্র মজলিস';
   final _now = DateTime.now();
 
   static const _monthNames = [
@@ -35,10 +39,12 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
     try {
       final days = await ReportStorageService.getFilledDaysCount(_now.year, _now.month);
       final dim = DateTime(_now.year, _now.month + 1, 0).day;
+      final majlis = await UserStorageService.getSelectedMajlis();
       if (mounted) {
         setState(() {
           _personalFilledDays = days;
           _daysInMonth = dim;
+          _selectedMajlis = majlis;
         });
       }
     } catch (_) {}
@@ -112,7 +118,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                     child: ListView(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       children: [
-                        // ব্যক্তিগত রিপোর্ট
+                        // ১. ব্যক্তিগত তৎপরতার রিপোর্ট
                         _buildReportCard(
                           title: 'ব্যক্তিগত তৎপরতার রিপোর্ট',
                           subtitle: '${_monthNames[_now.month - 1]} ${_bn(_now.year)} মাস',
@@ -125,12 +131,44 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                           textLight: textLight,
                           textMuted: textMuted,
                           onTap: () async {
-                            await Navigator.push(context,
-                                MaterialPageRoute(builder: (_) => const ReportBookScreen()));
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ReportBookScreen(
+                                  majlisType: MajlisTypeExtension.fromString(_selectedMajlis),
+                                ),
+                              ),
+                            );
                             _loadStats();
                           },
                         ),
                         const SizedBox(height: 12),
+
+                        // ২. ছাত্র মজলিস স্বতন্ত্র পরিকল্পনা রিপোর্ট
+                        if (_selectedMajlis.contains('ছাত্র')) ...[
+                          _buildReportCard(
+                            title: 'ছাত্র মজলিস মাসিক পরিকল্পনা',
+                            subtitle: 'দাওয়াত, সংগঠন, প্রশিক্ষণ ও বাজেটের সমন্বিত পরিকল্পনা',
+                            badge: 'পরিকল্পনা',
+                            badgeColor: const Color(0xFF3B82F6),
+                            icon: Icons.assignment_outlined,
+                            color: const Color(0xFF3B82F6),
+                            cardBg: cardBg,
+                            borderColor: borderColor,
+                            textLight: textLight,
+                            textMuted: textMuted,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ChatroPlanScreen(
+                                  initialYear: _now.year,
+                                  initialMonth: _now.month,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
 
                         // বায়তুলমাল রিপোর্ট
                         _buildReportCard(
