@@ -48,6 +48,13 @@ class UserStorageService {
     return prefs.getString(_selectedMajlisKey) ?? 'খেলাফত মজলিস';
   }
 
+  /// ইউজার পূর্বে কোনো মজলিস সিলেক্ট করেছে কিনা চেক করা
+  static Future<bool> hasSavedMajlis() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString(_selectedMajlisKey);
+    return saved != null && saved.isNotEmpty;
+  }
+
   /// ফায়ারবেসে ডেটা সিঙ্ক করা
   static Future<void> _syncToFirebase({required String authId, required String majlisName}) async {
     try {
