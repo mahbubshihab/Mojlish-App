@@ -13,6 +13,50 @@ class OrgSelectionScreen extends StatefulWidget {
 
 class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
   String? _selectedOrg;
+  String? _hoveredOrg;
+
+  final List<Map<String, dynamic>> _majlisItems = [
+    {
+      'title': 'খেলাফত মজলিস',
+      'subtitle': 'কেন্দ্রীয় ও প্রধান মজলিস পরিচালনা সংস্থা',
+      'tag': 'মূল দল',
+      'icon': Icons.account_balance_rounded,
+      'color': const Color(0xFF059669),
+      'isHero': true,
+    },
+    {
+      'title': 'যুব মজলিস',
+      'subtitle': 'বাংলাদেশ ইসলামী যুব মজলিস',
+      'tag': 'অঙ্গ সংগঠন',
+      'icon': Icons.groups_rounded,
+      'color': const Color(0xFFD97706),
+      'isHero': false,
+    },
+    {
+      'title': 'ছাত্র মজলিস',
+      'subtitle': 'বাংলাদেশ ইসলামী ছাত্র মজলিস',
+      'tag': 'অঙ্গ সংগঠন',
+      'icon': Icons.school_rounded,
+      'color': const Color(0xFF2563EB),
+      'isHero': false,
+    },
+    {
+      'title': 'মহিলা মজলিস',
+      'subtitle': 'ইসলামী মহিলা মজলিস শাখা',
+      'tag': 'অঙ্গ সংগঠন',
+      'icon': Icons.woman_rounded,
+      'color': const Color(0xFFDB2777),
+      'isHero': false,
+    },
+    {
+      'title': 'শ্রমিক মজলিস',
+      'subtitle': 'বাংলাদেশ ইসলামী শ্রমিক মজলিস',
+      'tag': 'অঙ্গ সংগঠন',
+      'icon': Icons.engineering_rounded,
+      'color': const Color(0xFF0D9488),
+      'isHero': false,
+    },
+  ];
 
   @override
   void initState() {
@@ -33,66 +77,124 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
       animation: themeManager,
       builder: (context, _) {
         final isDark = themeManager.isDarkMode;
-        final bgColor = isDark ? const Color(0xFF0B132B) : const Color(0xFFF1F5F9);
-        final cardBgColor = isDark ? const Color(0xFF1C2541) : Colors.white;
-        final subtextColor = isDark ? Colors.grey.shade400 : Colors.grey.shade600;
+
+        // Modern Slate & Clean Color Palette
+        final scaffoldBg = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
+        final navBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+        final borderNav = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+        final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+        final textTitle = isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A);
+        final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
         return Scaffold(
-          backgroundColor: bgColor,
-          appBar: AppBar(
-            backgroundColor: isDark ? const Color(0xFF1C2541) : Colors.white,
-            elevation: 0,
-            centerTitle: true,
-            title: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset('assets/images/logo.png', height: 28),
-                const SizedBox(width: 10),
-                Text(
-                  'মজলিস নির্বাচন',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : AppTheme.primaryDark,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+          backgroundColor: scaffoldBg,
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(64),
+            child: Container(
+              decoration: BoxDecoration(
+                color: navBg,
+                border: Border(bottom: BorderSide(color: borderNav, width: 1)),
+              ),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Image.asset(
+                            'assets/images/logo.png',
+                            height: 32,
+                            errorBuilder: (_, __, ___) => const Icon(Icons.stars_rounded, color: Color(0xFF059669), size: 32),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'মজলিস পোর্টাল',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: textTitle,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF059669).withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Text(
+                              'v2.0',
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          InkWell(
+                            onTap: () => themeManager.toggleTheme(),
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: borderNav),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                                    size: 16,
+                                    color: isDark ? Colors.amber : const Color(0xFF475569),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    isDark ? 'লাইটিং' : 'ডার্ক',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark ? const Color(0xFFF8FAFC) : const Color(0xFF334155),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            actions: [
-              IconButton(
-                icon: Icon(
-                  isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-                  color: isDark ? Colors.amber : Colors.grey.shade700,
-                ),
-                tooltip: isDark ? 'লাইট থিম' : 'ডার্ক থিম',
-                onPressed: () => themeManager.toggleTheme(),
               ),
-              const SizedBox(width: 8),
-            ],
+            ),
           ),
           body: LayoutBuilder(
             builder: (context, constraints) {
-              final isDesktop = constraints.maxWidth > 800;
-              final contentWidth = isDesktop ? 1050.0 : constraints.maxWidth;
+              final isDesktop = constraints.maxWidth > 900;
+              final isTablet = constraints.maxWidth > 600 && constraints.maxWidth <= 900;
 
-              return Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: contentWidth),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: SingleChildScrollView(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: isDesktop ? 32.0 : 20.0,
-                            vertical: isDesktop ? 24.0 : 16.0,
-                          ),
+              return Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isDesktop ? 40.0 : (isTablet ? 24.0 : 16.0),
+                        vertical: isDesktop ? 32.0 : 20.0,
+                      ),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1100),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Header Banner
+                              // Hero Header Banner
                               Container(
                                 width: double.infinity,
-                                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                                padding: EdgeInsets.all(isDesktop ? 28.0 : 20.0),
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: isDark
@@ -101,111 +203,155 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(24),
                                   border: Border.all(
-                                    color: isDark ? const Color(0xFF10B981).withOpacity(0.3) : const Color(0xFFA7F3D0),
+                                    color: isDark ? const Color(0xFF059669).withOpacity(0.3) : const Color(0xFFA7F3D0),
+                                    width: 1.5,
                                   ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(isDark ? 0.3 : 0.04),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ],
                                 ),
                                 child: Column(
+                                  crossAxisAlignment: isDesktop ? CrossAxisAlignment.start : CrossAxisAlignment.center,
                                   children: [
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF059669).withOpacity(0.15),
+                                            borderRadius: BorderRadius.circular(20),
+                                            border: Border.all(color: const Color(0xFF059669).withOpacity(0.4)),
+                                          ),
+                                          child: const Row(
+                                            children: [
+                                              Icon(Icons.stars_rounded, color: Color(0xFF059669), size: 14),
+                                              SizedBox(width: 6),
+                                              Text(
+                                                'অফিসিয়াল প্যানেল',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xFF059669),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
                                     Text(
-                                      'আপনার মজলিস নির্বাচন করুন',
+                                      'আপনার মজলিস সিলেক্ট করুন',
                                       style: TextStyle(
-                                        fontSize: isDesktop ? 22 : 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: isDark ? const Color(0xFF34D399) : AppTheme.primaryDark,
+                                        fontSize: isDesktop ? 26 : 20,
+                                        fontWeight: FontWeight.w900,
+                                        color: textTitle,
+                                        letterSpacing: -0.3,
                                       ),
+                                      textAlign: isDesktop ? TextAlign.left : TextAlign.center,
                                     ),
                                     const SizedBox(height: 6),
                                     Text(
-                                      'আপনার দায়িত্বে থাকা মজলিসটি সিলেক্ট করে ড্যাশবোর্ডে প্রবেশ করুন',
-                                      style: TextStyle(fontSize: isDesktop ? 14 : 12, color: subtextColor),
-                                      textAlign: TextAlign.center,
+                                      'আপনার দায়িত্বে থাকা নির্দিষ্ট মজলিসটি নির্বাচন করে আপনার কেন্দ্রীয় ড্যাশবোর্ড ও রিপোর্ট সেকশনে প্রবেশ করুন।',
+                                      style: TextStyle(
+                                        fontSize: isDesktop ? 14 : 12,
+                                        color: textMuted,
+                                        height: 1.5,
+                                      ),
+                                      textAlign: isDesktop ? TextAlign.left : TextAlign.center,
                                     ),
                                   ],
                                 ),
                               ),
 
+                              const SizedBox(height: 28),
+
+                              // Responsive Cards Grid
+                              _buildResponsiveGrid(isDark, cardBg, textTitle, textMuted, isDesktop, isTablet),
+
                               const SizedBox(height: 24),
-
-                              // Central & Surrounding 5-Majlis Layout
-                              _buildMajlisLayout(isDark, cardBgColor, isDesktop),
-
-                              const SizedBox(height: 20),
                             ],
                           ),
                         ),
                       ),
+                    ),
+                  ),
 
-                      // Confirm Bar
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20.0),
-                        decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1C2541) : Colors.white,
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(isDark ? 0.4 : 0.08),
-                              blurRadius: 16,
-                              offset: const Offset(0, -4),
-                            ),
-                          ],
+                  // Bottom Action Bar
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                    decoration: BoxDecoration(
+                      color: navBg,
+                      border: Border(top: BorderSide(color: borderNav, width: 1)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(isDark ? 0.4 : 0.05),
+                          blurRadius: 16,
+                          offset: const Offset(0, -4),
                         ),
-                        child: Center(
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: isDesktop ? 500 : double.infinity),
-                            child: SizedBox(
-                              width: double.infinity,
-                              height: 54,
-                              child: ElevatedButton(
-                                onPressed: _selectedOrg != null
-                                    ? () async {
-                                        await UserStorageService.saveSelectedMajlis(_selectedOrg!);
-                                        if (mounted) {
-                                          Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(builder: (_) => const MainDashboardScreen()),
-                                          );
-                                        }
-                                      }
-                                    : null,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.primaryColor,
-                                  disabledBackgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                  elevation: _selectedOrg != null ? 4 : 0,
+                      ],
+                    ),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: isDesktop ? 500 : double.infinity),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 54,
+                          child: ElevatedButton(
+                            onPressed: _selectedOrg != null
+                                ? () async {
+                                    await UserStorageService.saveSelectedMajlis(_selectedOrg!);
+                                    if (mounted) {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (_) => const MainDashboardScreen()),
+                                      );
+                                    }
+                                  }
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF059669),
+                              disabledBackgroundColor: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              elevation: _selectedOrg != null ? 6 : 0,
+                              shadowColor: const Color(0xFF059669).withOpacity(0.4),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  _selectedOrg != null ? '$_selectedOrg এ প্রবেশ করুন' : 'একটি মজলিস নির্বাচন করুন',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: _selectedOrg != null
+                                        ? Colors.white
+                                        : (isDark ? Colors.grey.shade500 : Colors.grey.shade600),
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      _selectedOrg != null ? '$_selectedOrg নিয়ে এগিয়ে যান' : 'একটি মজলিস নির্বাচন করুন',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: _selectedOrg != null
-                                            ? Colors.white
-                                            : (isDark ? Colors.grey.shade500 : Colors.grey.shade600),
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Icon(
-                                      Icons.arrow_forward_rounded,
-                                      color: _selectedOrg != null
-                                          ? Colors.white
-                                          : (isDark ? Colors.grey.shade500 : Colors.grey.shade600),
-                                    ),
-                                  ],
+                                const SizedBox(width: 10),
+                                Icon(
+                                  Icons.arrow_forward_rounded,
+                                  color: _selectedOrg != null
+                                      ? Colors.white
+                                      : (isDark ? Colors.grey.shade500 : Colors.grey.shade600),
                                 ),
-                              ),
+                              ],
                             ),
                           ),
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               );
             },
           ),
@@ -214,354 +360,163 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
     );
   }
 
-  Widget _buildMajlisLayout(bool isDark, Color cardBg, bool isDesktop) {
-    if (isDesktop) {
-      return Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _buildSatelliteMajlisCard(
-                  title: 'যুব মজলিস',
-                  subtitle: 'বাংলাদেশ ইসলামী যুব মজলিস',
-                  icon: Icons.groups_rounded,
-                  color: const Color(0xFFF59E0B),
-                  isDark: isDark,
-                  cardBg: cardBg,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildCentralHeroCard(
-                  title: 'খেলাফত মজলিস',
-                  subtitle: 'কেন্দ্রীয় ও প্রধান মজলিস',
-                  color: AppTheme.primaryColor,
-                  isDark: isDark,
-                  cardBg: cardBg,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildSatelliteMajlisCard(
-                  title: 'ছাত্র মজলিস',
-                  subtitle: 'বাংলাদেশ ইসলামী ছাত্র মজলিস',
-                  icon: Icons.school_rounded,
-                  color: const Color(0xFF3B82F6),
-                  isDark: isDark,
-                  cardBg: cardBg,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildSatelliteMajlisCard(
-                  title: 'মহিলা মজলিস',
-                  subtitle: 'ইসলামী মহিলা মজলিস',
-                  icon: Icons.woman_rounded,
-                  color: const Color(0xFFEC4899),
-                  isDark: isDark,
-                  cardBg: cardBg,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildSatelliteMajlisCard(
-                  title: 'শ্রমিক মজলিস',
-                  subtitle: 'বাংলাদেশ ইসলামী শ্রমিক মজলিস',
-                  icon: Icons.engineering_rounded,
-                  color: const Color(0xFF10B981),
-                  isDark: isDark,
-                  cardBg: cardBg,
-                ),
-              ),
-            ],
-          ),
-        ],
-      );
-    }
+  Widget _buildResponsiveGrid(
+    bool isDark,
+    Color cardBg,
+    Color textTitle,
+    Color textMuted,
+    bool isDesktop,
+    bool isTablet,
+  ) {
+    int crossAxisCount = isDesktop ? 3 : (isTablet ? 2 : 1);
+    double aspectRatio = isDesktop ? 1.75 : (isTablet ? 1.8 : 2.5);
 
-    return Column(
-      children: [
-        // Top 2 Satellite Cards: যুব মজলিস & ছাত্র মজলিস
-        Row(
-          children: [
-            Expanded(
-              child: _buildSatelliteMajlisCard(
-                title: 'যুব মজলিস',
-                subtitle: 'বাংলাদেশ ইসলামী যুব মজলিস',
-                icon: Icons.groups_rounded,
-                color: const Color(0xFFF59E0B),
-                isDark: isDark,
-                cardBg: cardBg,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildSatelliteMajlisCard(
-                title: 'ছাত্র মজলিস',
-                subtitle: 'বাংলাদেশ ইসলামী ছাত্র মজলিস',
-                icon: Icons.school_rounded,
-                color: const Color(0xFF3B82F6),
-                isDark: isDark,
-                cardBg: cardBg,
-              ),
-            ),
-          ],
-        ),
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        childAspectRatio: aspectRatio,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: _majlisItems.length,
+      itemBuilder: (context, index) {
+        final item = _majlisItems[index];
+        final title = item['title'] as String;
+        final subtitle = item['subtitle'] as String;
+        final tag = item['tag'] as String;
+        final icon = item['icon'] as IconData;
+        final color = item['color'] as Color;
+        final isHero = item['isHero'] as bool;
+        final isSelected = _selectedOrg == title;
+        final isHovered = _hoveredOrg == title;
 
-        const SizedBox(height: 16),
-
-        // Central Main Emblem: খেলাফত মজলিস
-        _buildCentralHeroCard(
-          title: 'খেলাফত মজলিস',
-          subtitle: 'কেন্দ্রীয় ও প্রধান মজলিস',
-          color: AppTheme.primaryColor,
-          isDark: isDark,
-          cardBg: cardBg,
-        ),
-
-        const SizedBox(height: 16),
-
-        // Bottom 2 Satellite Cards: মহিলা মজলিস & শ্রমিক মজলিস
-        Row(
-          children: [
-            Expanded(
-              child: _buildSatelliteMajlisCard(
-                title: 'মহিলা মজলিস',
-                subtitle: 'ইসলামী মহিলা মজলিস',
-                icon: Icons.woman_rounded,
-                color: const Color(0xFFEC4899),
-                isDark: isDark,
-                cardBg: cardBg,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildSatelliteMajlisCard(
-                title: 'শ্রমিক মজলিস',
-                subtitle: 'বাংলাদেশ ইসলামী শ্রমিক মজলিস',
-                icon: Icons.engineering_rounded,
-                color: const Color(0xFF10B981),
-                isDark: isDark,
-                cardBg: cardBg,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCentralHeroCard({
-    required String title,
-    required String subtitle,
-    required Color color,
-    required bool isDark,
-    required Color cardBg,
-  }) {
-    bool isSelected = _selectedOrg == title;
-
-    return GestureDetector(
-      onTap: () => setState(() => _selectedOrg = title),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? color.withOpacity(isDark ? 0.25 : 0.12)
-              : cardBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? color : (isDark ? Colors.grey.shade800 : Colors.grey.shade300),
-            width: isSelected ? 3 : 1.5,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: color.withOpacity(isDark ? 0.4 : 0.25),
-                    blurRadius: 20,
-                    spreadRadius: 2,
-                  ),
-                ]
-              : [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
+        return MouseRegion(
+          onEnter: (_) => setState(() => _hoveredOrg = title),
+          onExit: (_) => setState(() => _hoveredOrg = null),
+          child: GestureDetector(
+            onTap: () => setState(() => _selectedOrg = title),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
-                shape: BoxShape.circle,
+                color: isSelected
+                    ? color.withOpacity(isDark ? 0.22 : 0.08)
+                    : (isHovered ? (isDark ? const Color(0xFF26334D) : const Color(0xFFF1F5F9)) : cardBg),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected
+                      ? color
+                      : (isHovered ? color.withOpacity(0.5) : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0))),
+                  width: isSelected ? 2.5 : 1,
+                ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: color.withOpacity(isDark ? 0.35 : 0.18),
+                          blurRadius: 18,
+                          offset: const Offset(0, 6),
+                        ),
+                      ]
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
               ),
-              child: Image.asset(
-                'assets/images/logo.png',
-                height: 36,
-                width: 36,
-                errorBuilder: (_, __, ___) => Icon(Icons.star_rounded, color: color, size: 32),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: color.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: isHero
+                                ? Image.asset(
+                                    'assets/images/logo.png',
+                                    height: 24,
+                                    width: 24,
+                                    errorBuilder: (_, __, ___) => Icon(icon, color: color, size: 24),
+                                  )
+                                : Icon(icon, color: color, size: 24),
+                          ),
+                          const SizedBox(width: 10),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: color.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              tag,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: color,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isSelected ? color : Colors.transparent,
+                          border: Border.all(
+                            color: isSelected ? color : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
+                            width: 2,
+                          ),
+                        ),
+                        child: isSelected ? const Icon(Icons.check_rounded, color: Colors.white, size: 15) : null,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         title,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 17,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : AppTheme.primaryDark,
+                          color: textTitle,
+                          letterSpacing: -0.2,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: color.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(10),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: textMuted,
+                          height: 1.3,
                         ),
-                        child: Text(
-                          'মূল দল',
-                          style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.bold),
-                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                    ),
-                  ),
                 ],
               ),
             ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 26,
-              height: 26,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isSelected ? color : Colors.transparent,
-                border: Border.all(
-                  color: isSelected ? color : (isDark ? Colors.grey.shade600 : Colors.grey.shade400),
-                  width: 2,
-                ),
-              ),
-              child: isSelected ? const Icon(Icons.check_rounded, color: Colors.white, size: 18) : null,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSatelliteMajlisCard({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required Color color,
-    required bool isDark,
-    required Color cardBg,
-  }) {
-    bool isSelected = _selectedOrg == title;
-
-    return GestureDetector(
-      onTap: () => setState(() => _selectedOrg = title),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? color.withOpacity(isDark ? 0.25 : 0.12)
-              : cardBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? color : (isDark ? Colors.grey.shade800 : Colors.grey.shade300),
-            width: isSelected ? 2.5 : 1,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: color.withOpacity(isDark ? 0.35 : 0.2),
-                    blurRadius: 16,
-                    spreadRadius: 1,
-                  ),
-                ]
-              : [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(isDark ? 0.15 : 0.03),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(icon, color: color, size: 24),
-                ),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 22,
-                  height: 22,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isSelected ? color : Colors.transparent,
-                    border: Border.all(
-                      color: isSelected ? color : (isDark ? Colors.grey.shade600 : Colors.grey.shade400),
-                      width: 2,
-                    ),
-                  ),
-                  child: isSelected ? const Icon(Icons.check_rounded, color: Colors.white, size: 14) : null,
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : AppTheme.primaryDark,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 11,
-                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 }
