@@ -76,7 +76,10 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-                    child: Column(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 800),
+                        child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         // Header Banner
@@ -126,9 +129,14 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
                     ),
                   ),
                 ),
+              ),
+            ),
 
                 // Floating Confirm Bar
-                Container(
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 800),
+                    child: Container(
                   padding: const EdgeInsets.all(20.0),
                   decoration: BoxDecoration(
                     color: isDark ? const Color(0xFF1C2541) : Colors.white,
@@ -184,6 +192,8 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
                           ),
                         ],
                       ),
+                    ),
+                  ),
                     ),
                   ),
                 ),
