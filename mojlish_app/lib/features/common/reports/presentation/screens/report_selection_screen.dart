@@ -18,8 +18,10 @@ import 'package:mojlish_app/features/khelafat_majlis/personal_report/presentatio
 import 'package:mojlish_app/features/khelafat_majlis/branch_report/presentation/screens/branch_report_screen.dart' as khelafat_branch;
 import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentation/screens/baytulmal_report_screen.dart' as khelafat_baytulmal;
 
-import 'package:mojlish_app/core/services/user_storage_service.dart';
+import 'package:mojlish_app/features/reports/personal_report/presentation/screens/personal_report_screen.dart';
+import 'package:mojlish_app/features/reports/personal_report/data/models/majlis_personal_report_config.dart';
 import 'package:mojlish_app/features/women_majlis/personal_report/presentation/screens/personal_report_screen.dart' as women_personal;
+import 'package:mojlish_app/core/services/user_storage_service.dart';
 
 /// Common Central Report & Forms Selection Screen — Shows ONLY Selected Majlis Reports
 class ReportSelectionScreen extends StatefulWidget {
@@ -132,7 +134,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                         textColor: textColor,
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const khelafat_personal.PersonalReportPage()),
+                          MaterialPageRoute(
+                            builder: (_) => PersonalReportScreen(
+                              year: DateTime.now().year,
+                              month: DateTime.now().month,
+                              majlisType: MajlisType.khelafat,
+                            ),
+                          ),
                         ),
                       ),
                       _buildReportItem(
@@ -198,7 +206,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                         textColor: textColor,
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const student_personal.PersonalReportPage()),
+                          MaterialPageRoute(
+                            builder: (_) => PersonalReportScreen(
+                              year: DateTime.now().year,
+                              month: DateTime.now().month,
+                              majlisType: MajlisType.chatro,
+                            ),
+                          ),
                         ),
                       ),
                       _buildReportItem(
@@ -238,7 +252,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                         textColor: textColor,
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const youth_personal.YouthMajlisPersonalReportPage()),
+                          MaterialPageRoute(
+                            builder: (_) => PersonalReportScreen(
+                              year: DateTime.now().year,
+                              month: DateTime.now().month,
+                              majlisType: MajlisType.jubo,
+                            ),
+                          ),
                         ),
                       ),
                     ] else if (activeMajlis == 'মহিলা মজলিস') ...[
@@ -252,7 +272,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                         textColor: textColor,
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const women_personal.WomenMajlisPersonalReportScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => PersonalReportScreen(
+                              year: DateTime.now().year,
+                              month: DateTime.now().month,
+                              majlisType: MajlisType.mohila,
+                            ),
+                          ),
                         ),
                       ),
                     ] else ...[
