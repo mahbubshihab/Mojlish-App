@@ -11,8 +11,50 @@ import 'package:mojlish_app/features/common/resources/ahobban_mohila/presentatio
 import 'package:mojlish_app/features/khelafat_majlis/executive_rules/presentation/pages/executive_rules_page.dart';
 import 'package:mojlish_app/features/khelafat_majlis/overview/presentation/pages/overview_page.dart' as khelafat_overview;
 
-class MainDashboardScreen extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mojlish_app/core/theme/theme_manager.dart';
+import 'package:mojlish_app/core/services/user_storage_service.dart';
+import '../../../reports/presentation/screens/report_selection_screen.dart';
+import '../../../notifications/presentation/screens/notifications_screen.dart';
+import 'about/about_screen.dart';
+import 'social_media/social_media_screen.dart';
+import 'resources/resources_screen.dart';
+import 'package:mojlish_app/features/common/syllabi/khelafot_syllabus/presentation/pages/khelafot_syllabus_page.dart';
+import 'package:mojlish_app/features/common/resources/ahobban_mohila/presentation/screens/ahobban_screen.dart';
+import 'package:mojlish_app/features/khelafat_majlis/executive_rules/presentation/pages/executive_rules_page.dart';
+import 'package:mojlish_app/features/khelafat_majlis/overview/presentation/pages/overview_page.dart' as khelafat_overview;
+import 'package:mojlish_app/features/women_majlis/overview/presentation/pages/overview_page.dart' as women_overview;
+import 'package:mojlish_app/features/youth_majlis/overview/presentation/pages/overview_screen.dart' as youth_overview;
+import 'package:mojlish_app/features/student_majlis/general_plan/presentation/pages/general_plan_screen.dart' as student_plan;
+import 'package:mojlish_app/features/common/auth/presentation/screens/org_selection_screen.dart';
+
+class MainDashboardScreen extends StatefulWidget {
   const MainDashboardScreen({super.key});
+
+  @override
+  State<MainDashboardScreen> createState() => _MainDashboardScreenState();
+}
+
+class _MainDashboardScreenState extends State<MainDashboardScreen> {
+  String _selectedMajlis = 'খেলাফত মজলিস';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSelectedMajlis();
+  }
+
+  Future<void> _loadSelectedMajlis() async {
+    final majlis = await UserStorageService.getSelectedMajlis();
+    if (mounted) {
+      setState(() {
+        _selectedMajlis = majlis;
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,173 +109,295 @@ class MainDashboardScreen extends StatelessWidget {
               )
             ],
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Greeting
-                Text(
-                  'আসসালামু আলাইকুম,',
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: textTitle),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'মিজানুর রহমান',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
-                ),
-                const SizedBox(height: 28),
-                
-                // Sync Data Card
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: borderColor),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.02),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                      )
-                    ],
-                  ),
+          body: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'আপনার রিপোর্টগুলো সুরক্ষিত রাখতে ও সিঙ্ক\nকরতে লগইন করুন',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 14, color: textMuted, height: 1.5),
+                      // Greeting & Active Majlis Badge
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'আসসালামু আলাইকুম,',
+                                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: textTitle),
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'মিজানুর রহমান',
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
+                              ),
+                            ],
+                          ),
+                          GestureDetector(
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const OrgSelectionScreen()),
+                              );
+                              _loadSelectedMajlis();
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF059669).withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: const Color(0xFF059669)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    _selectedMajlis,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF059669),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Icon(Icons.swap_horiz_rounded, size: 16, color: Color(0xFF059669)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
+                      
+                      // Sync Data Card
                       Container(
                         width: double.infinity,
+                        padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
+                          color: cardBg,
+                          borderRadius: BorderRadius.circular(16),
                           border: Border.all(color: borderColor),
-                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.02),
+                              blurRadius: 15,
+                              offset: const Offset(0, 5),
+                            )
+                          ],
                         ),
-                        child: TextButton.icon(
-                          onPressed: () {},
-                          icon: Image.asset('assets/images/google_logo.png', height: 20),
-                          label: Text(
-                            'ডাটা সিঙ্ক করতে গুগলে লগইন করুন',
-                            style: TextStyle(color: textTitle, fontWeight: FontWeight.bold, fontSize: 14),
-                          ),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          ),
+                        child: Column(
+                          children: [
+                            Text(
+                              'আপনার নির্বাচিত মজলিস: $_selectedMajlis\nরিপোর্ট সুরক্ষিত রাখতে ও সিঙ্ক করতে লগইন করুন',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 13, color: textMuted, height: 1.4),
+                            ),
+                            const SizedBox(height: 14),
+                            Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: borderColor),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: TextButton.icon(
+                                onPressed: () {},
+                                icon: Image.asset('assets/images/google_logo.png', height: 18),
+                                label: Text(
+                                  'ডাটা সিঙ্ক করতে গুগলে লগইন করুন',
+                                  style: TextStyle(color: textTitle, fontWeight: FontWeight.bold, fontSize: 13),
+                                ),
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                ),
+                              ),
+                            )
+                          ],
                         ),
-                      )
+                      ),
+                      const SizedBox(height: 28),
+
+                      // Menus Section title
+                      Text(
+                        '$_selectedMajlis — মেনুসমূহ',
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: menuHeaderColor),
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Filtered Menu Cards according to Selected Majlis
+                      GridView.count(
+                        crossAxisCount: 2,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        childAspectRatio: 0.95,
+                        children: _buildMajlisMenuCards(
+                          context,
+                          selectedMajlis: _selectedMajlis,
+                          cardBg: cardBg,
+                          borderColor: borderColor,
+                          textTitle: textTitle,
+                          pGreenBg: pGreenBg,
+                          pBlueBg: pBlueBg,
+                          pPurpleBg: pPurpleBg,
+                          pOrangeBg: pOrangeBg,
+                        ),
+                      ),
+                      const SizedBox(height: 30),
                     ],
                   ),
                 ),
-                const SizedBox(height: 36),
-
-                // Menus Section
-                Text(
-                  'মেনুসমূহ',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: menuHeaderColor),
-                ),
-                const SizedBox(height: 20),
-                
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 20,
-                  crossAxisSpacing: 20,
-                  childAspectRatio: 0.95,
-                  children: [
-                    _buildMenuCard(
-                      context,
-                      title: 'রিপোর্ট ও ফরম কেন্দ্র',
-                      icon: Icons.assignment_turned_in_rounded,
-                      iconColor: const Color(0xFF22C55E), // Green
-                      iconBgColor: pGreenBg,
-                      cardBg: cardBg,
-                      borderColor: borderColor,
-                      textTitle: textTitle,
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportSelectionScreen()));
-                      },
-                    ),
-                    _buildMenuCard(
-                      context,
-                      title: 'সংক্ষিপ্ত পরিচিতি',
-                      icon: Icons.info_outline_rounded,
-                      iconColor: const Color(0xFF0EA5E9), // Light blue
-                      iconBgColor: pBlueBg,
-                      cardBg: cardBg,
-                      borderColor: borderColor,
-                      textTitle: textTitle,
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const khelafat_overview.OverviewPage()));
-                      },
-                    ),
-                    _buildMenuCard(
-                      context,
-                      title: 'আহ্বান ও ম্যানিফেস্টো',
-                      icon: Icons.campaign_rounded,
-                      iconColor: const Color(0xFFE11D48), // Rose
-                      iconBgColor: pPurpleBg,
-                      cardBg: cardBg,
-                      borderColor: borderColor,
-                      textTitle: textTitle,
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const AhobbanMohilaScreen()));
-                      },
-                    ),
-                    _buildMenuCard(
-                      context,
-                      title: 'সিলেবাস ও পাঠক্রম',
-                      icon: Icons.menu_book_rounded,
-                      iconColor: const Color(0xFF059669), // Emerald
-                      iconBgColor: pGreenBg,
-                      cardBg: cardBg,
-                      borderColor: borderColor,
-                      textTitle: textTitle,
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const KhelafotSyllabusPage()));
-                      },
-                    ),
-                    _buildMenuCard(
-                      context,
-                      title: 'কর্মপ্রণালী নির্দেশিকা',
-                      icon: Icons.gavel_rounded,
-                      iconColor: const Color(0xFF9333EA), // Purple
-                      iconBgColor: pPurpleBg,
-                      cardBg: cardBg,
-                      borderColor: borderColor,
-                      textTitle: textTitle,
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const ExecutiveRulesPage()));
-                      },
-                    ),
-                    _buildMenuCard(
-                      context,
-                      title: 'সোশ্যাল মিডিয়া ও বই',
-                      icon: Icons.share_rounded,
-                      iconColor: const Color(0xFFF59E0B), // Orange
-                      iconBgColor: pOrangeBg,
-                      cardBg: cardBg,
-                      borderColor: borderColor,
-                      textTitle: textTitle,
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const SocialMediaScreen()));
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
-              ],
-            ),
-          ),
         );
       },
     );
+  }
+
+  List<Widget> _buildMajlisMenuCards(
+    BuildContext context, {
+    required String selectedMajlis,
+    required Color cardBg,
+    required Color borderColor,
+    required Color textTitle,
+    required Color pGreenBg,
+    required Color pBlueBg,
+    required Color pPurpleBg,
+    required Color pOrangeBg,
+  }) {
+    List<Widget> cards = [];
+
+    // 1. Central Reports & Forms Hub (Always first, configured for selectedMajlis)
+    cards.add(
+      _buildMenuCard(
+        context,
+        title: 'রিপোর্ট ও ফরম কেন্দ্র',
+        icon: Icons.assignment_turned_in_rounded,
+        iconColor: const Color(0xFF22C55E),
+        iconBgColor: pGreenBg,
+        cardBg: cardBg,
+        borderColor: borderColor,
+        textTitle: textTitle,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => ReportSelectionScreen(majlisName: selectedMajlis)),
+          );
+        },
+      ),
+    );
+
+    // 2. Specific Overview for Selected Majlis
+    cards.add(
+      _buildMenuCard(
+        context,
+        title: 'সংক্ষিপ্ত পরিচিতি',
+        icon: Icons.info_outline_rounded,
+        iconColor: const Color(0xFF0EA5E9),
+        iconBgColor: pBlueBg,
+        cardBg: cardBg,
+        borderColor: borderColor,
+        textTitle: textTitle,
+        onTap: () {
+          Widget page;
+          if (selectedMajlis == 'মহিলা মজলিস') {
+            page = const women_overview.WomenMajlisOverviewPage();
+          } else if (selectedMajlis == 'যুব মজলিস') {
+            page = const youth_overview.OverviewScreen();
+          } else {
+            page = const khelafat_overview.OverviewPage();
+          }
+          Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+        },
+      ),
+    );
+
+    // 3. Manifesto / Call / Plan
+    if (selectedMajlis == 'ছাত্র মজলিস') {
+      cards.add(
+        _buildMenuCard(
+          context,
+          title: 'কর্ম পরিকল্পনা',
+          icon: Icons.assignment_outlined,
+          iconColor: const Color(0xFF9333EA),
+          iconBgColor: pPurpleBg,
+          cardBg: cardBg,
+          borderColor: borderColor,
+          textTitle: textTitle,
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const student_plan.GeneralPlanScreen()));
+          },
+        ),
+      );
+    } else {
+      cards.add(
+        _buildMenuCard(
+          context,
+          title: 'আহ্বান ও ম্যানিফেস্টো',
+          icon: Icons.campaign_rounded,
+          iconColor: const Color(0xFFE11D48),
+          iconBgColor: pPurpleBg,
+          cardBg: cardBg,
+          borderColor: borderColor,
+          textTitle: textTitle,
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const AhobbanMohilaScreen()));
+          },
+        ),
+      );
+    }
+
+    // 4. Syllabus / Executive Rules
+    if (selectedMajlis == 'খেলাফত মজলিস') {
+      cards.add(
+        _buildMenuCard(
+          context,
+          title: 'সিলেবাস ও পাঠক্রম',
+          icon: Icons.menu_book_rounded,
+          iconColor: const Color(0xFF059669),
+          iconBgColor: pGreenBg,
+          cardBg: cardBg,
+          borderColor: borderColor,
+          textTitle: textTitle,
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const KhelafotSyllabusPage()));
+          },
+        ),
+      );
+      cards.add(
+        _buildMenuCard(
+          context,
+          title: 'কর্মপ্রণালী নির্দেশিকা',
+          icon: Icons.gavel_rounded,
+          iconColor: const Color(0xFF9333EA),
+          iconBgColor: pPurpleBg,
+          cardBg: cardBg,
+          borderColor: borderColor,
+          textTitle: textTitle,
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const ExecutiveRulesPage()));
+          },
+        ),
+      );
+    }
+
+    // 5. Social Media & Resources (Always available)
+    cards.add(
+      _buildMenuCard(
+        context,
+        title: 'সোশ্যাল মিডিয়া ও বই',
+        icon: Icons.share_rounded,
+        iconColor: const Color(0xFFF59E0B),
+        iconBgColor: pOrangeBg,
+        cardBg: cardBg,
+        borderColor: borderColor,
+        textTitle: textTitle,
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const SocialMediaScreen()));
+        },
+      ),
+    );
+
+    return cards;
   }
 
 
