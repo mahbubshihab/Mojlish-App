@@ -1,9 +1,18 @@
 import 'package:equatable/equatable.dart';
+import '../../domain/entities/member.dart';
 
-abstract class KhelafatMemberFormEvent extends Equatable {
-  const KhelafatMemberFormEvent();
+abstract class MemberFormEvent extends Equatable {
+  const MemberFormEvent();
+
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
-class LoadKhelafatMemberFormData extends KhelafatMemberFormEvent {}
+class SubmitMemberForm extends MemberFormEvent {
+  final KhelafatMajlisMember member;
+
+  const SubmitMemberForm(this.member);
+
+  @override
+  List<Object> get props => [member];
+}

@@ -289,20 +289,21 @@ class _JoinOrganizationScreenState extends State<JoinOrganizationScreen> {
                         Expanded(
                           child: ElevatedButton.icon(
                             onPressed: () async {
-                              // await PdfGeneratorService.generateMembershipPdf(
-                                name: _nameCtrl.text.trim(),
-                                fatherName: _fatherNameCtrl.text.trim(),
-                                nidNo: _nidCtrl.text.trim(),
-                                bloodGroup: _bloodGroup,
-                                phone: _phoneCtrl.text.trim(),
-                                email: _emailCtrl.text.trim(),
-                                currentAddress: _currentAddrCtrl.text.trim(),
-                                village: _villageCtrl.text.trim(),
-                                union: _unionCtrl.text.trim(),
-                                thana: _thanaCtrl.text.trim(),
-                                district: _districtCtrl.text.trim(),
-                                joinDate: _joinDateCtrl.text.trim(),
-                                fbLink: _fbCtrl.text.trim(),
+                              await PdfExportService.printOrDownloadPdf(
+                                title: 'সদস্য আবেদন ফরম',
+                                majlisName: 'মজলিস',
+                                userName: _nameCtrl.text.trim(),
+                                period: 'তাত্ক্ষণিক',
+                                dataFields: {
+                                  'নাম': _nameCtrl.text.trim(),
+                                  'পিতার নাম': _fatherNameCtrl.text.trim(),
+                                  'এনআইডি': _nidCtrl.text.trim(),
+                                  'রক্তের গ্রুপ': _bloodGroup ?? 'অনির্ধারিত',
+                                  'ফোন': _phoneCtrl.text.trim(),
+                                  'ইমেইল': _emailCtrl.text.trim(),
+                                  'বর্তমান ঠিকানা': _currentAddrCtrl.text.trim(),
+                                  'জেলা': _districtCtrl.text.trim(),
+                                },
                               );
                             },
                             icon: const Icon(Icons.picture_as_pdf, color: Colors.black, size: 16),

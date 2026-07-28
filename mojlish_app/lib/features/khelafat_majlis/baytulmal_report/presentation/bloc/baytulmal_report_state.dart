@@ -1,11 +1,13 @@
-import 'package:equatable/equatable.dart';
+abstract class BaytulmalReportState {}
 
-abstract class KhelafatBaytulmalReportState extends Equatable {
-  const KhelafatBaytulmalReportState();
-  @override
-  List<Object?> get props => [];
+class BaytulmalReportInitial extends BaytulmalReportState {}
+
+class BaytulmalReportLoading extends BaytulmalReportState {}
+
+class BaytulmalReportSuccess extends BaytulmalReportState {}
+
+class BaytulmalReportFailure extends BaytulmalReportState {
+  final String message;
+
+  BaytulmalReportFailure({required this.message});
 }
-
-class KhelafatBaytulmalReportInitial extends KhelafatBaytulmalReportState {}
-class KhelafatBaytulmalReportLoading extends KhelafatBaytulmalReportState {}
-class KhelafatBaytulmalReportLoaded extends KhelafatBaytulmalReportState {}

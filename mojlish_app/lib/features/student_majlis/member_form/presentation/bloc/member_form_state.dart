@@ -1,11 +1,9 @@
-import 'package:equatable/equatable.dart';
+abstract class MemberFormState {}
 
-abstract class StudentMemberFormState extends Equatable {
-  const StudentMemberFormState();
-  @override
-  List<Object?> get props => [];
+class MemberFormInitial extends MemberFormState {}
+class MemberFormLoading extends MemberFormState {}
+class MemberFormSuccess extends MemberFormState {}
+class MemberFormError extends MemberFormState {
+  final String message;
+  MemberFormError(this.message);
 }
-
-class StudentMemberFormInitial extends StudentMemberFormState {}
-class StudentMemberFormLoading extends StudentMemberFormState {}
-class StudentMemberFormLoaded extends StudentMemberFormState {}

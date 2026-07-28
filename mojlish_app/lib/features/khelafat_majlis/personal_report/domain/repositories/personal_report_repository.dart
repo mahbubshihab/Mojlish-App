@@ -1,4 +1,6 @@
-/// KhelafatPersonalReport Repository
-abstract class KhelafatPersonalReportRepository {
-  Future<void> getData();
+import '../domain/entities/personal_report.dart';
+
+abstract class PersonalReportRepository {
+  Future<void> savePersonalReport(PersonalReport report);
+  Future<PersonalReport?> getPersonalReport(String month, String year);
 }

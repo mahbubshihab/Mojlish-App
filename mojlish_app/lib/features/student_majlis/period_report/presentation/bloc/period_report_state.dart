@@ -1,53 +1,23 @@
 import 'package:equatable/equatable.dart';
-import '../../data/models/period_report_model.dart';
 
-abstract class StudentPeriodReportState extends Equatable {
-  const StudentPeriodReportState();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class StudentPeriodReportInitial extends StudentPeriodReportState {}
-
-class StudentPeriodReportLoading extends StudentPeriodReportState {}
-
-class StudentPeriodReportLoaded extends StudentPeriodReportState {
-  final StudentPeriodReportModel report;
-  final bool isSaving;
-  final bool isLocked;
-  final String? message;
-
-  const StudentPeriodReportLoaded({
-    required this.report,
-    this.isSaving = false,
-    this.isLocked = false,
-    this.message,
-  });
-
-  StudentPeriodReportLoaded copyWith({
-    StudentPeriodReportModel? report,
-    bool? isSaving,
-    bool? isLocked,
-    String? message,
-  }) {
-    return StudentPeriodReportLoaded(
-      report: report ?? this.report,
-      isSaving: isSaving ?? this.isSaving,
-      isLocked: isLocked ?? this.isLocked,
-      message: message,
-    );
-  }
+abstract class PeriodReportState extends Equatable {
+  const PeriodReportState();
 
   @override
-  List<Object?> get props => [report, isSaving, isLocked, message];
+  List<Object> get props => [];
 }
 
-class StudentPeriodReportError extends StudentPeriodReportState {
+class PeriodReportInitial extends PeriodReportState {}
+
+class PeriodReportLoading extends PeriodReportState {}
+
+class PeriodReportSuccess extends PeriodReportState {}
+
+class PeriodReportFailure extends PeriodReportState {
   final String message;
 
-  const StudentPeriodReportError(this.message);
+  const PeriodReportFailure({required this.message});
 
   @override
-  List<Object?> get props => [message];
+  List<Object> get props => [message];
 }

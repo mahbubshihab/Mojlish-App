@@ -1,42 +1,18 @@
 import 'package:equatable/equatable.dart';
-import '../../data/models/period_report_model.dart';
+import '../../domain/entities/period_report.dart';
 
-abstract class StudentPeriodReportEvent extends Equatable {
-  const StudentPeriodReportEvent();
+abstract class PeriodReportEvent extends Equatable {
+  const PeriodReportEvent();
 
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
-class LoadStudentPeriodReport extends StudentPeriodReportEvent {
-  final String periodType;
-  final int year;
-  final String periodName;
+class SubmitPeriodReportEvent extends PeriodReportEvent {
+  final PeriodReport report;
 
-  const LoadStudentPeriodReport({
-    required this.periodType,
-    required this.year,
-    required this.periodName,
-  });
+  const SubmitPeriodReportEvent({required this.report});
 
   @override
-  List<Object?> get props => [periodType, year, periodName];
-}
-
-class SaveStudentPeriodReport extends StudentPeriodReportEvent {
-  final StudentPeriodReportModel report;
-
-  const SaveStudentPeriodReport(this.report);
-
-  @override
-  List<Object?> get props => [report];
-}
-
-class UpdateStudentPeriodReport extends StudentPeriodReportEvent {
-  final StudentPeriodReportModel report;
-
-  const UpdateStudentPeriodReport(this.report);
-
-  @override
-  List<Object?> get props => [report];
+  List<Object> get props => [report];
 }

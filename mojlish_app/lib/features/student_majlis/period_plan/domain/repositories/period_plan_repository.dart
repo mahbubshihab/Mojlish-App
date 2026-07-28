@@ -1,4 +1,5 @@
-/// StudentPeriodPlan Repository Interface
-abstract class StudentPeriodPlanRepository {
-  Future<void> getData();
+import '../entities/period_plan.dart';
+
+abstract class PeriodPlanRepository {
+  Future<void> submitPeriodPlan(PeriodPlan plan);
 }

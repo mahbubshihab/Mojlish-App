@@ -1,11 +1,23 @@
 import 'package:equatable/equatable.dart';
 
-abstract class StudentPersonalPlanState extends Equatable {
-  const StudentPersonalPlanState();
+abstract class PersonalPlanState extends Equatable {
+  const PersonalPlanState();
+
   @override
   List<Object?> get props => [];
 }
 
-class StudentPersonalPlanInitial extends StudentPersonalPlanState {}
-class StudentPersonalPlanLoading extends StudentPersonalPlanState {}
-class StudentPersonalPlanLoaded extends StudentPersonalPlanState {}
+class PersonalPlanInitial extends PersonalPlanState {}
+
+class PersonalPlanLoading extends PersonalPlanState {}
+
+class PersonalPlanSuccess extends PersonalPlanState {}
+
+class PersonalPlanError extends PersonalPlanState {
+  final String message;
+
+  const PersonalPlanError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

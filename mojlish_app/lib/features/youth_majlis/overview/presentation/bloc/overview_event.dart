@@ -1,9 +1,10 @@
 import 'package:equatable/equatable.dart';
 
-abstract class YouthOverviewEvent extends Equatable {
-  const YouthOverviewEvent();
+abstract class OverviewEvent extends Equatable {
+  const OverviewEvent();
+
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
-class LoadYouthOverviewData extends YouthOverviewEvent {}
+class LoadOverviewEvent extends OverviewEvent {}

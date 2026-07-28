@@ -1,4 +1,5 @@
-/// KhelafatOverview Repository
-abstract class KhelafatOverviewRepository {
-  Future<void> getData();
+import '../entities/overview_entity.dart';
+
+abstract class OverviewRepository {
+  Future<OverviewEntity> getOverview();
 }

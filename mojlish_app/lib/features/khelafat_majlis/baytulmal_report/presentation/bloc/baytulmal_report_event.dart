@@ -1,9 +1,9 @@
-import 'package:equatable/equatable.dart';
+import '../../domain/entities/baytulmal_report_entity.dart';
 
-abstract class KhelafatBaytulmalReportEvent extends Equatable {
-  const KhelafatBaytulmalReportEvent();
-  @override
-  List<Object?> get props => [];
+abstract class BaytulmalReportEvent {}
+
+class SubmitBaytulmalReportEvent extends BaytulmalReportEvent {
+  final BaytulmalReportEntity report;
+
+  SubmitBaytulmalReportEvent({required this.report});
 }
-
-class LoadKhelafatBaytulmalReportData extends KhelafatBaytulmalReportEvent {}

@@ -1,4 +1,5 @@
-/// WomenOverview Repository
-abstract class WomenOverviewRepository {
-  Future<void> getData();
+import '../entities/overview_entity.dart';
+
+abstract class OverviewRepository {
+  Future<OverviewEntity> getOverview();
 }

@@ -1,56 +1,23 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/baytulmal_report_entity.dart';
 
-abstract class StudentBaytulmalReportState extends Equatable {
-  const StudentBaytulmalReportState();
+abstract class BaytulmalReportState extends Equatable {
+  const BaytulmalReportState();
 
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
-class StudentBaytulmalReportInitial extends StudentBaytulmalReportState {}
+class BaytulmalReportInitial extends BaytulmalReportState {}
 
-class StudentBaytulmalReportLoading extends StudentBaytulmalReportState {}
+class BaytulmalReportLoading extends BaytulmalReportState {}
 
-class StudentBaytulmalReportLoaded extends StudentBaytulmalReportState {
-  final StudentBaytulmalReportEntity report;
-  final bool isLocked;
-  final bool isSaving;
-  final String? successMessage;
-  final String? errorMessage;
+class BaytulmalReportSuccess extends BaytulmalReportState {}
 
-  const StudentBaytulmalReportLoaded({
-    required this.report,
-    this.isLocked = true,
-    this.isSaving = false,
-    this.successMessage,
-    this.errorMessage,
-  });
+class BaytulmalReportFailure extends BaytulmalReportState {
+  final String error;
 
-  StudentBaytulmalReportLoaded copyWith({
-    StudentBaytulmalReportEntity? report,
-    bool? isLocked,
-    bool? isSaving,
-    String? successMessage,
-    String? errorMessage,
-  }) {
-    return StudentBaytulmalReportLoaded(
-      report: report ?? this.report,
-      isLocked: isLocked ?? this.isLocked,
-      isSaving: isSaving ?? this.isSaving,
-      successMessage: successMessage,
-      errorMessage: errorMessage,
-    );
-  }
+  const BaytulmalReportFailure(this.error);
 
   @override
-  List<Object?> get props => [report, isLocked, isSaving, successMessage, errorMessage];
-}
-
-class StudentBaytulmalReportError extends StudentBaytulmalReportState {
-  final String message;
-  const StudentBaytulmalReportError({required this.message});
-
-  @override
-  List<Object?> get props => [message];
+  List<Object> get props => [error];
 }

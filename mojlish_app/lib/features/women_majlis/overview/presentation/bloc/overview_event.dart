@@ -1,9 +1,10 @@
 import 'package:equatable/equatable.dart';
 
-abstract class WomenOverviewEvent extends Equatable {
-  const WomenOverviewEvent();
+abstract class OverviewEvent extends Equatable {
+  const OverviewEvent();
+
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
-class LoadWomenOverviewData extends WomenOverviewEvent {}
+class LoadOverviewEvent extends OverviewEvent {}

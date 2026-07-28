@@ -1,9 +1,3 @@
-import 'package:equatable/equatable.dart';
+abstract class CallManifestoEvent {}
 
-abstract class YouthCallManifestoEvent extends Equatable {
-  const YouthCallManifestoEvent();
-  @override
-  List<Object?> get props => [];
-}
-
-class LoadYouthCallManifestoData extends YouthCallManifestoEvent {}
+class LoadCallManifestosEvent extends CallManifestoEvent {}

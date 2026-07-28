@@ -60,7 +60,7 @@ class PdfExportService {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Column(
-                    cross: pw.CrossAxisAlignment.start,
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text('ব্যবহারকারীর নাম: $userName', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
                       pw.SizedBox(height: 4),
@@ -68,7 +68,7 @@ class PdfExportService {
                     ],
                   ),
                   pw.Column(
-                    cross: pw.CrossAxisAlignment.end,
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
                     children: [
                       pw.Text('সময়কাল: $period', style: const pw.TextStyle(fontSize: 11)),
                       pw.SizedBox(height: 4),

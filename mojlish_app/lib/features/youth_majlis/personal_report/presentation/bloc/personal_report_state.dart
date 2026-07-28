@@ -1,11 +1,33 @@
 import 'package:equatable/equatable.dart';
+import '../../domain/entities/personal_report.dart';
 
-abstract class YouthPersonalReportState extends Equatable {
-  const YouthPersonalReportState();
+abstract class YouthMajlisPersonalReportState extends Equatable {
+  const YouthMajlisPersonalReportState();
+
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
-class YouthPersonalReportInitial extends YouthPersonalReportState {}
-class YouthPersonalReportLoading extends YouthPersonalReportState {}
-class YouthPersonalReportLoaded extends YouthPersonalReportState {}
+class PersonalReportInitial extends YouthMajlisPersonalReportState {}
+
+class PersonalReportLoading extends YouthMajlisPersonalReportState {}
+
+class PersonalReportLoaded extends YouthMajlisPersonalReportState {
+  final YouthMajlisPersonalReport report;
+
+  const PersonalReportLoaded({required this.report});
+
+  @override
+  List<Object> get props => [report];
+}
+
+class PersonalReportSaved extends YouthMajlisPersonalReportState {}
+
+class PersonalReportError extends YouthMajlisPersonalReportState {
+  final String message;
+
+  const PersonalReportError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}

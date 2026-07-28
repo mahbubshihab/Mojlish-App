@@ -1,4 +1,5 @@
-/// WomenCallManifesto Repository
-abstract class WomenCallManifestoRepository {
-  Future<void> getData();
+import '../entities/call_manifesto.dart';
+
+abstract class CallManifestoRepository {
+  Future<List<CallManifesto>> getCallManifestos();
 }

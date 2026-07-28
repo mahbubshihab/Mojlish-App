@@ -1,11 +1,31 @@
 import 'package:equatable/equatable.dart';
+import '../../domain/entities/overview_entity.dart';
 
-abstract class KhelafatOverviewState extends Equatable {
-  const KhelafatOverviewState();
+abstract class OverviewState extends Equatable {
+  const OverviewState();
+
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
-class KhelafatOverviewInitial extends KhelafatOverviewState {}
-class KhelafatOverviewLoading extends KhelafatOverviewState {}
-class KhelafatOverviewLoaded extends KhelafatOverviewState {}
+class OverviewInitial extends OverviewState {}
+
+class OverviewLoading extends OverviewState {}
+
+class OverviewLoaded extends OverviewState {
+  final OverviewEntity overview;
+
+  const OverviewLoaded({required this.overview});
+
+  @override
+  List<Object> get props => [overview];
+}
+
+class OverviewError extends OverviewState {
+  final String message;
+
+  const OverviewError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}

@@ -1,11 +1,23 @@
 import 'package:equatable/equatable.dart';
 
-abstract class KhelafatMemberFormState extends Equatable {
-  const KhelafatMemberFormState();
+abstract class MemberFormState extends Equatable {
+  const MemberFormState();
+  
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
-class KhelafatMemberFormInitial extends KhelafatMemberFormState {}
-class KhelafatMemberFormLoading extends KhelafatMemberFormState {}
-class KhelafatMemberFormLoaded extends KhelafatMemberFormState {}
+class MemberFormInitial extends MemberFormState {}
+
+class MemberFormLoading extends MemberFormState {}
+
+class MemberFormSuccess extends MemberFormState {}
+
+class MemberFormError extends MemberFormState {
+  final String message;
+
+  const MemberFormError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}

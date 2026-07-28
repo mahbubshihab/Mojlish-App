@@ -1,11 +1,19 @@
-import 'package:equatable/equatable.dart';
+import '../../domain/entities/call_manifesto.dart';
 
-abstract class YouthCallManifestoState extends Equatable {
-  const YouthCallManifestoState();
-  @override
-  List<Object?> get props => [];
+abstract class CallManifestoState {}
+
+class CallManifestoInitial extends CallManifestoState {}
+
+class CallManifestoLoading extends CallManifestoState {}
+
+class CallManifestoLoaded extends CallManifestoState {
+  final List<CallManifesto> manifestos;
+
+  CallManifestoLoaded(this.manifestos);
 }
 
-class YouthCallManifestoInitial extends YouthCallManifestoState {}
-class YouthCallManifestoLoading extends YouthCallManifestoState {}
-class YouthCallManifestoLoaded extends YouthCallManifestoState {}
+class CallManifestoError extends CallManifestoState {
+  final String message;
+
+  CallManifestoError(this.message);
+}

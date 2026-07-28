@@ -1,4 +1,5 @@
-/// KhelafatBaytulmalReport Repository
-abstract class KhelafatBaytulmalReportRepository {
-  Future<void> getData();
+import '../entities/baytulmal_report_entity.dart';
+
+abstract class BaytulmalReportRepository {
+  Future<void> submitReport(BaytulmalReportEntity report);
 }

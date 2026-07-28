@@ -1,62 +1,17 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/baytulmal_report_entity.dart';
 
-abstract class StudentBaytulmalReportEvent extends Equatable {
-  const StudentBaytulmalReportEvent();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class LoadStudentBaytulmalReportData extends StudentBaytulmalReportEvent {
-  final int year;
-  final int month;
-
-  const LoadStudentBaytulmalReportData({required this.year, required this.month});
+abstract class BaytulmalReportEvent extends Equatable {
+  const BaytulmalReportEvent();
 
   @override
-  List<Object?> get props => [year, month];
+  List<Object> get props => [];
 }
 
-class SaveStudentBaytulmalReportData extends StudentBaytulmalReportEvent {
-  final StudentBaytulmalReportEntity report;
+class SubmitBaytulmalReport extends BaytulmalReportEvent {
+  final Map<String, dynamic> reportData;
 
-  const SaveStudentBaytulmalReportData({required this.report});
+  const SubmitBaytulmalReport(this.reportData);
 
   @override
-  List<Object?> get props => [report];
+  List<Object> get props => [reportData];
 }
-
-class AddCustomIncomeRowEvent extends StudentBaytulmalReportEvent {
-  final String title;
-  const AddCustomIncomeRowEvent({required this.title});
-
-  @override
-  List<Object?> get props => [title];
-}
-
-class RemoveCustomIncomeRowEvent extends StudentBaytulmalReportEvent {
-  final int index;
-  const RemoveCustomIncomeRowEvent({required this.index});
-
-  @override
-  List<Object?> get props => [index];
-}
-
-class AddCustomExpenseRowEvent extends StudentBaytulmalReportEvent {
-  final String title;
-  const AddCustomExpenseRowEvent({required this.title});
-
-  @override
-  List<Object?> get props => [title];
-}
-
-class RemoveCustomExpenseRowEvent extends StudentBaytulmalReportEvent {
-  final int index;
-  const RemoveCustomExpenseRowEvent({required this.index});
-
-  @override
-  List<Object?> get props => [index];
-}
-
-class ToggleLockStatusEvent extends StudentBaytulmalReportEvent {}

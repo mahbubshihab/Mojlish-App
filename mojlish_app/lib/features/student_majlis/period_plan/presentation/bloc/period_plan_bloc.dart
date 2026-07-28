@@ -1,38 +1,25 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mojlish_app/features/common/reports/shared/data/services/report_storage_service.dart';
+import '../../domain/entities/period_plan.dart';
+import '../../domain/repositories/period_plan_repository.dart';
 import 'period_plan_event.dart';
 import 'period_plan_state.dart';
 
-class StudentPeriodPlanBloc extends Bloc<StudentPeriodPlanEvent, StudentPeriodPlanState> {
-  StudentPeriodPlanBloc() : super(StudentPeriodPlanInitial()) {
-    on<FetchStudentPeriodPlan>(_onFetchStudentPeriodPlan);
-    on<SaveStudentPeriodPlan>(_onSaveStudentPeriodPlan);
-  }
+class PeriodPlanBloc extends Bloc<PeriodPlanEvent, PeriodPlanState> {
+  final PeriodPlanRepository repository;
 
-  Future<void> _onFetchStudentPeriodPlan(
-    FetchStudentPeriodPlan event,
-    Emitter<StudentPeriodPlanState> emit,
-  ) async {
-    emit(StudentPeriodPlanLoading());
-    try {
-      final plan = await ReportStorageService.getChatroMonthlyPlan(event.year, event.month);
-      emit(StudentPeriodPlanLoaded(plan: plan));
-    } catch (e) {
-      emit(StudentPeriodPlanError('পরিকল্পনা ডাটা লোড করতে ব্যর্থ হয়েছে: ${e.toString()}'));
-    }
-  }
-
-  Future<void> _onSaveStudentPeriodPlan(
-    SaveStudentPeriodPlan event,
-    Emitter<StudentPeriodPlanState> emit,
-  ) async {
-    emit(StudentPeriodPlanLoading());
-    try {
-      await ReportStorageService.saveChatroMonthlyPlan(event.plan);
-      emit(StudentPeriodPlanSaved());
-      emit(StudentPeriodPlanLoaded(plan: event.plan));
-    } catch (e) {
-      emit(StudentPeriodPlanError('পরিকল্পনা সংরক্ষণ করতে ব্যর্থ হয়েছে: ${e.toString()}'));
-    }
+  PeriodPlanBloc({required this.repository}) : super(PeriodPlanInitial()) {
+    on<SubmitPeriodPlanEvent>((event, emit) async {
+      emit(PeriodPlanLoading());
+      try {
+        await repository.submitPeriodPlan(PeriodPlan(
+          branch: event.branch,
+          month: event.month,
+          session: event.session,
+        ));
+        emit(PeriodPlanSuccess());
+      } catch (e) {
+        emit(PeriodPlanFailure(e.toString()));
+      }
+    });
   }
 }
