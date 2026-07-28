@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/app_theme.dart';
+import 'package:mojlish_app/core/services/auth_service.dart';
 import 'package:mojlish_app/core/services/user_storage_service.dart';
+import 'google_login_screen.dart';
 import 'org_selection_screen.dart';
 import '../../../dashboard/presentation/screens/main_dashboard_screen.dart';
 
@@ -12,29 +14,40 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final AuthService _authService = AuthService();
+
   @override
   void initState() {
     super.initState();
-    _checkSavedMajlisAndNavigate();
+    _checkAuthAndNavigate();
   }
 
-  Future<void> _checkSavedMajlisAndNavigate() async {
+  Future<void> _checkAuthAndNavigate() async {
     await Future.delayed(const Duration(seconds: 2));
-    final hasSaved = await UserStorageService.hasSavedMajlis();
     if (!mounted) return;
 
-    if (hasSaved) {
-      // Direct entry to Dashboard if Majlis is already selected!
+    final user = _authService.currentUser;
+
+    if (user == null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const MainDashboardScreen()),
+        MaterialPageRoute(builder: (_) => const GoogleLoginScreen()),
       );
     } else {
-      // First-time selection page
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const OrgSelectionScreen()),
-      );
+      await _authService.syncUserProfile(user);
+      final activeMajlis = await UserStorageService.getActiveMajlis();
+
+      if (activeMajlis == null || activeMajlis.isEmpty) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const OrgSelectionScreen()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainDashboardScreen()),
+        );
+      }
     }
   }
 
@@ -44,18 +57,21 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Colors.white,
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: Main.center,
           children: [
-            // Placeholder for Logo
-            Icon(Icons.mosque, size: 80, color: AppTheme.primaryColor),
+            Image.asset(
+              'assets/images/election_symbol_wall_clock.png',
+              height: 100,
+              errorBuilder: (_, __, ___) => Icon(Icons.mosque, size: 80, color: AppTheme.primaryColor),
+            ),
             const SizedBox(height: 20),
             Text(
-              'খেলাফত মজলিস',
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24, color: AppTheme.primaryDark),
+              'মজলিশ অ্যাপ',
+              style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 26, color: AppTheme.primaryDark),
             ),
             const SizedBox(height: 10),
             Text(
-              'খেলাফত প্রতিষ্ঠার লক্ষ্যে আন্দোলন গড়ে তুলুন',
+              'সংগঠনের সকল রিপোর্ট ও পরিকল্পনার ডিজিটাল সমাধান',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],

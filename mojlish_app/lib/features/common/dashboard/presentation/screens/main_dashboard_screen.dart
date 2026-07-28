@@ -13,6 +13,7 @@ import 'package:mojlish_app/features/women_majlis/overview/presentation/pages/ov
 import 'package:mojlish_app/features/youth_majlis/overview/presentation/pages/overview_screen.dart' as youth_overview;
 import 'package:mojlish_app/features/student_majlis/general_plan/presentation/pages/general_plan_screen.dart' as student_plan;
 import 'package:mojlish_app/features/common/auth/presentation/screens/org_selection_screen.dart';
+import 'package:mojlish_app/features/common/profile/presentation/screens/profile_screen.dart';
 
 class MainDashboardScreen extends StatefulWidget {
   const MainDashboardScreen({super.key});
@@ -33,12 +34,12 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
   }
 
   Future<void> _loadUserData() async {
-    final majlis = await UserStorageService.getSelectedMajlis();
+    final majlis = await UserStorageService.getActiveMajlis();
     final userName = await UserStorageService.getUserName();
     if (mounted) {
       setState(() {
-        _selectedMajlis = majlis;
-        _userName = userName;
+        _selectedMajlis = (majlis != null && majlis.isNotEmpty) ? majlis : 'খেলাফত মজলিস';
+        _userName = userName.isNotEmpty ? userName : 'সম্মানিত সদস্য';
         _isLoading = false;
       });
     }
@@ -94,7 +95,18 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
                 },
-              )
+              ),
+              IconButton(
+                icon: const Icon(Icons.account_circle_rounded, color: Color(0xFF059669), size: 28),
+                tooltip: 'প্রোফাইল',
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                  );
+                  _loadUserData();
+                },
+              ),
             ],
           ),
           body: _isLoading

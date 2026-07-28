@@ -45,6 +45,10 @@ dependencies:
   intl: ^0.19.0
   dartz: ^0.10.1
   bijoy_helper: ^1.1.0
+  firebase_core: ^3.10.1
+  firebase_auth: ^5.4.1
+  cloud_firestore: ^5.6.1
+  google_sign_in: ^6.2.2
 
 dev_dependencies:
   flutter_test:
