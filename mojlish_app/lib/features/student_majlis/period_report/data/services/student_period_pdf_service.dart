@@ -6,10 +6,15 @@ import '../models/period_report_model.dart';
 /// ছাত্র মজলিস বার্ষিক/ষান্মাসিক/দ্বি-মাসিক রিপোর্ট PDF জেনারেটর সার্ভিস
 class StudentPeriodPdfService {
   static Future<void> generateAndPrintPdf(StudentPeriodReportModel report) async {
-    final pdf = pw.Document();
-
     final fontRegular = await PdfGoogleFonts.notoSansBengaliRegular();
     final fontBold = await PdfGoogleFonts.notoSansBengaliBold();
+
+    final pdf = pw.Document(
+      theme: pw.ThemeData.withFont(
+        base: fontRegular,
+        bold: fontBold,
+      ),
+    );
 
     final textStyleSmall = pw.TextStyle(font: fontRegular, fontSize: 8);
     final textStyleBoldSmall = pw.TextStyle(font: fontBold, fontSize: 8);

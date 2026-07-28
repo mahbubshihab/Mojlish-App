@@ -18,7 +18,15 @@ class PdfExportService {
     List<String>? tableHeaders,
     String? comments,
   }) async {
-    final pdf = pw.Document();
+    final font = await PdfGoogleFonts.notoSansBengaliRegular();
+    final fontBold = await PdfGoogleFonts.notoSansBengaliBold();
+
+    final pdf = pw.Document(
+      theme: pw.ThemeData.withFont(
+        base: font,
+        bold: fontBold,
+      ),
+    );
 
     pdf.addPage(
       pw.MultiPage(

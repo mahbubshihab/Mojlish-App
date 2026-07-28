@@ -15,10 +15,15 @@ class StudentBaytulmalPdfService {
   }
 
   static Future<void> generateAndSharePdf(dynamic report) async {
-    final pdf = pw.Document();
-
     final font = await PdfGoogleFonts.notoSansBengaliRegular();
     final boldFont = await PdfGoogleFonts.notoSansBengaliBold();
+
+    final pdf = pw.Document(
+      theme: pw.ThemeData.withFont(
+        base: font,
+        bold: boldFont,
+      ),
+    );
 
     final monthName = (report.month >= 1 && report.month <= 12)
         ? _monthNames[report.month - 1]

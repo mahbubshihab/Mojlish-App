@@ -18,10 +18,15 @@ class PdfGeneratorService {
     required String userName,
     required String branchName,
   }) async {
-    final pdf = pw.Document();
-
     final font = await PdfGoogleFonts.notoSansBengaliRegular();
     final boldFont = await PdfGoogleFonts.notoSansBengaliBold();
+
+    final pdf = pw.Document(
+      theme: pw.ThemeData.withFont(
+        base: font,
+        bold: boldFont,
+      ),
+    );
 
     // Map entries by date string
     final entryMap = <String, DailyPersonalEntry>{};
@@ -450,9 +455,15 @@ class PdfGeneratorService {
   static Future<void> generateBaytulmalReportPdf({
     required BaytulmalReportEntry entry,
   }) async {
-    final pdf = pw.Document();
     final font = await PdfGoogleFonts.notoSansBengaliRegular();
     final boldFont = await PdfGoogleFonts.notoSansBengaliBold();
+
+    final pdf = pw.Document(
+      theme: pw.ThemeData.withFont(
+        base: font,
+        bold: boldFont,
+      ),
+    );
 
     pdf.addPage(
       pw.Page(
@@ -625,10 +636,15 @@ class PdfGeneratorService {
     required String joinDate,
     required String fbLink,
   }) async {
-    final pdf = pw.Document();
-
     final font = await PdfGoogleFonts.notoSansBengaliRegular();
     final boldFont = await PdfGoogleFonts.notoSansBengaliBold();
+
+    final pdf = pw.Document(
+      theme: pw.ThemeData.withFont(
+        base: font,
+        bold: boldFont,
+      ),
+    );
 
     pdf.addPage(
       pw.Page(
@@ -828,10 +844,15 @@ class PdfGeneratorService {
     required int year,
     required int month,
   }) async {
-    final pdf = pw.Document();
-
     final font = await PdfGoogleFonts.notoSansBengaliRegular();
     final boldFont = await PdfGoogleFonts.notoSansBengaliBold();
+
+    final pdf = pw.Document(
+      theme: pw.ThemeData.withFont(
+        base: font,
+        bold: boldFont,
+      ),
+    );
 
     pdf.addPage(
       pw.Page(
