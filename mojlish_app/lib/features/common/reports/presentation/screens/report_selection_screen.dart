@@ -6,16 +6,19 @@ import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import 'report_book_screen.dart';
 
 // Import screens for direct entry
-import 'package:mojlish_app/features/student_majlis/member_form/presentation/pages/member_form_screen.dart' as student_member;
-import 'package:mojlish_app/features/student_majlis/personal_report/presentation/pages/personal_report_screen.dart' as student_personal;
-import 'package:mojlish_app/features/student_majlis/baytulmal_report/presentation/pages/baytulmal_report_screen.dart' as student_baytulmal;
-import 'package:mojlish_app/features/youth_majlis/member_form/presentation/pages/member_form_screen.dart' as youth_member;
-import 'package:mojlish_app/features/youth_majlis/personal_report/presentation/pages/personal_report_screen.dart' as youth_personal;
-import 'package:mojlish_app/features/khelafat_majlis/member_form/presentation/pages/member_form_screen.dart' as khelafat_member;
-import 'package:mojlish_app/features/khelafat_majlis/personal_report/presentation/pages/personal_report_page.dart' as khelafat_personal;
-import 'package:mojlish_app/features/khelafat_majlis/branch_report/presentation/pages/branch_report_screen.dart' as khelafat_branch;
-import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentation/pages/baytulmal_report_page.dart' as khelafat_baytulmal;
-import 'package:mojlish_app/features/women_majlis/personal_report/presentation/pages/women_majlis_personal_report_screen.dart' as women_personal;
+import 'package:mojlish_app/features/student_majlis/member_form/presentation/screens/member_form_screen.dart' as student_member;
+import 'package:mojlish_app/features/student_majlis/personal_report/presentation/screens/personal_report_screen.dart' as student_personal;
+import 'package:mojlish_app/features/student_majlis/baytulmal_report/presentation/screens/baytulmal_report_screen.dart' as student_baytulmal;
+
+import 'package:mojlish_app/features/youth_majlis/member_form/presentation/screens/member_form_screen.dart' as youth_member;
+import 'package:mojlish_app/features/youth_majlis/personal_report/presentation/screens/personal_report_screen.dart' as youth_personal;
+
+import 'package:mojlish_app/features/khelafat_majlis/member_form/presentation/screens/member_form_screen.dart' as khelafat_member;
+import 'package:mojlish_app/features/khelafat_majlis/personal_report/presentation/screens/personal_report_screen.dart' as khelafat_personal;
+import 'package:mojlish_app/features/khelafat_majlis/branch_report/presentation/screens/branch_report_screen.dart' as khelafat_branch;
+import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentation/screens/baytulmal_report_screen.dart' as khelafat_baytulmal;
+
+import 'package:mojlish_app/features/women_majlis/personal_report/presentation/screens/personal_report_screen.dart' as women_personal;
 
 /// Common Central Report & Forms Selection Screen with PDF Download Capabilities
 class ReportSelectionScreen extends StatefulWidget {
@@ -221,7 +224,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                         textColor: textColor,
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const student_personal.PersonalReportScreen()),
+                          MaterialPageRoute(builder: (_) => const student_personal.PersonalReportPage()),
                         ),
                         onPdfExport: () => _exportPdf(title: 'ছাত্র ব্যক্তিগত রিপোর্ট', majlis: activeMajlis),
                       ),
@@ -235,7 +238,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                         textColor: textColor,
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const student_baytulmal.BaytulmalReportScreen()),
+                          MaterialPageRoute(builder: (_) => const student_baytulmal.BaytulmalReportPage()),
                         ),
                         onPdfExport: () => _exportPdf(title: 'ছাত্র বায়তুলমাল রিপোর্ট', majlis: activeMajlis),
                       ),
@@ -264,7 +267,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                         textColor: textColor,
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const youth_personal.PersonalReportScreen()),
+                          MaterialPageRoute(builder: (_) => const youth_personal.YouthMajlisPersonalReportPage()),
                         ),
                         onPdfExport: () => _exportPdf(title: 'যুব ব্যক্তিগত রিপোর্ট', majlis: activeMajlis),
                       ),
@@ -380,4 +383,5 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
     );
   }
 }
+
 

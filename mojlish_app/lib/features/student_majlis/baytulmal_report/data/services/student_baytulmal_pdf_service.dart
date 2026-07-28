@@ -14,7 +14,7 @@ class StudentBaytulmalPdfService {
     return n.toString().split('').map((c) => digits[int.parse(c)]).join();
   }
 
-  static Future<void> generateAndSharePdf(StudentBaytulmalReportEntity report) async {
+  static Future<void> generateAndSharePdf(dynamic report) async {
     final pdf = pw.Document();
 
     final font = await PdfGoogleFonts.notoSansBengaliRegular();
