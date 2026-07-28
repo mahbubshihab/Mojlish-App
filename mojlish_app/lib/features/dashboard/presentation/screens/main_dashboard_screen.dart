@@ -8,7 +8,7 @@ import 'social_media/social_media_screen.dart';
 import 'resources/resources_screen.dart';
 import 'package:mojlish_app/features/syllabi/khelafot_syllabus/presentation/screens/khelafot_syllabus_screen.dart';
 import 'package:mojlish_app/features/resources/ahobban_mohila/presentation/screens/ahobban_screen.dart';
-import 'package:mojlish_app/features/khelafat_mojlish/presentation/screens/khelafat_hub_screen.dart';
+import 'package:mojlish_app/features/khelafat_majlis/presentation/screens/khelafat_hub_screen.dart';
 
 class MainDashboardScreen extends StatelessWidget {
   const MainDashboardScreen({super.key});
