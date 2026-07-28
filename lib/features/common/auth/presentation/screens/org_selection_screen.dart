@@ -70,142 +70,219 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
               const SizedBox(width: 8),
             ],
           ),
-          body: SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 800),
-                        child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Header Banner
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: isDark
-                                  ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
-                                  : [const Color(0xFFECFDF5), Colors.white],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: isDark ? const Color(0xFF10B981).withOpacity(0.3) : const Color(0xFFA7F3D0),
-                            ),
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              final isDesktop = constraints.maxWidth > 800;
+              final contentWidth = isDesktop ? 1050.0 : constraints.maxWidth;
+
+              return Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: contentWidth),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isDesktop ? 32.0 : 20.0,
+                            vertical: isDesktop ? 24.0 : 16.0,
                           ),
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                'আপনার মজলিস নির্বাচন করুন',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? const Color(0xFF34D399) : AppTheme.primaryDark,
+                              // Header Banner
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: isDark
+                                        ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
+                                        : [const Color(0xFFECFDF5), Colors.white],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: isDark ? const Color(0xFF10B981).withOpacity(0.3) : const Color(0xFFA7F3D0),
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'আপনার মজলিস নির্বাচন করুন',
+                                      style: TextStyle(
+                                        fontSize: isDesktop ? 22 : 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark ? const Color(0xFF34D399) : AppTheme.primaryDark,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      'আপনার দায়িত্বে থাকা মজলিসটি সিলেক্ট করে ড্যাশবোর্ডে প্রবেশ করুন',
+                                      style: TextStyle(fontSize: isDesktop ? 14 : 12, color: subtextColor),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'আপনার দায়িত্বে থাকা মজলিসটি সিলেক্ট করে ড্যাশবোর্ডে প্রবেশ করুন',
-                                style: TextStyle(fontSize: 12, color: subtextColor),
-                                textAlign: TextAlign.center,
-                              ),
+
+                              const SizedBox(height: 24),
+
+                              // Central & Surrounding 5-Majlis Layout
+                              _buildMajlisLayout(isDark, cardBgColor, isDesktop),
+
+                              const SizedBox(height: 20),
                             ],
                           ),
                         ),
+                      ),
 
-                        const SizedBox(height: 24),
-
-                        // Central & Surrounding 5-Majlis Modern Layout
-                        _buildMajlisLayout(isDark, cardBgColor),
-
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-                // Floating Confirm Bar
-                Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 800),
-                    child: Container(
-                  padding: const EdgeInsets.all(20.0),
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1C2541) : Colors.white,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(isDark ? 0.4 : 0.08),
-                        blurRadius: 16,
-                        offset: const Offset(0, -4),
+                      // Confirm Bar
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20.0),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF1C2541) : Colors.white,
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(isDark ? 0.4 : 0.08),
+                              blurRadius: 16,
+                              offset: const Offset(0, -4),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(maxWidth: isDesktop ? 500 : double.infinity),
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: 54,
+                              child: ElevatedButton(
+                                onPressed: _selectedOrg != null
+                                    ? () async {
+                                        await UserStorageService.saveSelectedMajlis(_selectedOrg!);
+                                        if (mounted) {
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(builder: (_) => const MainDashboardScreen()),
+                                          );
+                                        }
+                                      }
+                                    : null,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.primaryColor,
+                                  disabledBackgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                  elevation: _selectedOrg != null ? 4 : 0,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      _selectedOrg != null ? '$_selectedOrg নিয়ে এগিয়ে যান' : 'একটি মজলিস নির্বাচন করুন',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: _selectedOrg != null
+                                            ? Colors.white
+                                            : (isDark ? Colors.grey.shade500 : Colors.grey.shade600),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Icon(
+                                      Icons.arrow_forward_rounded,
+                                      color: _selectedOrg != null
+                                          ? Colors.white
+                                          : (isDark ? Colors.grey.shade500 : Colors.grey.shade600),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 54,
-                    child: ElevatedButton(
-                      onPressed: _selectedOrg != null
-                          ? () async {
-                              await UserStorageService.saveSelectedMajlis(_selectedOrg!);
-                              if (mounted) {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => const MainDashboardScreen()),
-                                );
-                              }
-                            }
-                          : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
-                        disabledBackgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                        elevation: _selectedOrg != null ? 4 : 0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            _selectedOrg != null ? '$_selectedOrg নিয়ে এগিয়ে যান' : 'একটি মজলিস নির্বাচন করুন',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: _selectedOrg != null
-                                  ? Colors.white
-                                  : (isDark ? Colors.grey.shade500 : Colors.grey.shade600),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Icon(
-                            Icons.arrow_forward_rounded,
-                            color: _selectedOrg != null
-                                ? Colors.white
-                                : (isDark ? Colors.grey.shade500 : Colors.grey.shade600),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                    ),
-                  ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
         );
       },
     );
   }
 
-  Widget _buildMajlisLayout(bool isDark, Color cardBg) {
+  Widget _buildMajlisLayout(bool isDark, Color cardBg, bool isDesktop) {
+    if (isDesktop) {
+      return Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _buildSatelliteMajlisCard(
+                  title: 'যুব মজলিস',
+                  subtitle: 'বাংলাদেশ ইসলামী যুব মজলিস',
+                  icon: Icons.groups_rounded,
+                  color: const Color(0xFFF59E0B),
+                  isDark: isDark,
+                  cardBg: cardBg,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildCentralHeroCard(
+                  title: 'খেলাফত মজলিস',
+                  subtitle: 'কেন্দ্রীয় ও প্রধান মজলিস',
+                  color: AppTheme.primaryColor,
+                  isDark: isDark,
+                  cardBg: cardBg,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildSatelliteMajlisCard(
+                  title: 'ছাত্র মজলিস',
+                  subtitle: 'বাংলাদেশ ইসলামী ছাত্র মজলিস',
+                  icon: Icons.school_rounded,
+                  color: const Color(0xFF3B82F6),
+                  isDark: isDark,
+                  cardBg: cardBg,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildSatelliteMajlisCard(
+                  title: 'মহিলা মজলিস',
+                  subtitle: 'ইসলামী মহিলা মজলিস',
+                  icon: Icons.woman_rounded,
+                  color: const Color(0xFFEC4899),
+                  isDark: isDark,
+                  cardBg: cardBg,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildSatelliteMajlisCard(
+                  title: 'শ্রমিক মজলিস',
+                  subtitle: 'বাংলাদেশ ইসলামী শ্রমিক মজলিস',
+                  icon: Icons.engineering_rounded,
+                  color: const Color(0xFF10B981),
+                  isDark: isDark,
+                  cardBg: cardBg,
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
     return Column(
       children: [
         // Top 2 Satellite Cards: যুব মজলিস & ছাত্র মজলিস
@@ -320,17 +397,20 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
         ),
         child: Row(
           children: [
-            // Center Logo Ring Badge
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
                 shape: BoxShape.circle,
-                color: color.withOpacity(isSelected ? 0.25 : 0.1),
-                border: Border.all(color: color, width: 2),
               ),
-              child: Image.asset('assets/images/logo.png', height: 40, width: 40),
+              child: Image.asset(
+                'assets/images/logo.png',
+                height: 36,
+                width: 36,
+                errorBuilder: (_, __, ___) => Icon(Icons.star_rounded, color: color, size: 32),
+              ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -340,25 +420,21 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
                       Text(
                         title,
                         style: TextStyle(
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: isSelected ? color : (isDark ? Colors.white : AppTheme.primaryDark),
+                          color: isDark ? Colors.white : AppTheme.primaryDark,
                         ),
                       ),
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.15),
+                          color: color.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
                           'মূল দল',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? const Color(0xFF34D399) : AppTheme.primaryDark,
-                          ),
+                          style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
@@ -367,7 +443,7 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 12,
                       color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                     ),
                   ),
@@ -376,20 +452,17 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
             ),
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.all(4),
+              width: 26,
+              height: 26,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isSelected ? color : Colors.transparent,
                 border: Border.all(
-                  color: isSelected ? color : (isDark ? Colors.grey.shade700 : Colors.grey.shade400),
+                  color: isSelected ? color : (isDark ? Colors.grey.shade600 : Colors.grey.shade400),
                   width: 2,
                 ),
               ),
-              child: Icon(
-                Icons.check_rounded,
-                size: 18,
-                color: isSelected ? Colors.white : Colors.transparent,
-              ),
+              child: isSelected ? const Icon(Icons.check_rounded, color: Colors.white, size: 18) : null,
             ),
           ],
         ),
@@ -410,14 +483,13 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
     return GestureDetector(
       onTap: () => setState(() => _selectedOrg = title),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        height: 125,
-        padding: const EdgeInsets.all(14),
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? color.withOpacity(isDark ? 0.22 : 0.1)
+              ? color.withOpacity(isDark ? 0.25 : 0.12)
               : cardBg,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? color : (isDark ? Colors.grey.shade800 : Colors.grey.shade300),
             width: isSelected ? 2.5 : 1,
@@ -425,75 +497,67 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: color.withOpacity(0.25),
-                    blurRadius: 12,
+                    color: color.withOpacity(isDark ? 0.35 : 0.2),
+                    blurRadius: 16,
                     spreadRadius: 1,
                   ),
                 ]
               : [
                   BoxShadow(
                     color: Colors.black.withOpacity(isDark ? 0.15 : 0.03),
-                    blurRadius: 6,
+                    blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),
                 ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(isSelected ? 0.25 : 0.12),
-                    borderRadius: BorderRadius.circular(10),
+                    color: color.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: color, size: 24),
                 ),
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(3),
+                  width: 22,
+                  height: 22,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isSelected ? color : Colors.transparent,
                     border: Border.all(
-                      color: isSelected ? color : (isDark ? Colors.grey.shade700 : Colors.grey.shade400),
-                      width: 1.5,
+                      color: isSelected ? color : (isDark ? Colors.grey.shade600 : Colors.grey.shade400),
+                      width: 2,
                     ),
                   ),
-                  child: Icon(
-                    Icons.check_rounded,
-                    size: 14,
-                    color: isSelected ? Colors.white : Colors.transparent,
-                  ),
+                  child: isSelected ? const Icon(Icons.check_rounded, color: Colors.white, size: 14) : null,
                 ),
               ],
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                    color: isSelected ? color : (isDark ? Colors.white : AppTheme.primaryDark),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+            const SizedBox(height: 14),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : AppTheme.primaryDark,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 11,
+                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -501,4 +565,3 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
     );
   }
 }
-
