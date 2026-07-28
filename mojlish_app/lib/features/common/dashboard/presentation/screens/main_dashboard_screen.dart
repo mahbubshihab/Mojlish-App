@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
-import '../../../reports/general_report/presentation/screens/report_selection_screen.dart';
+import '../../../reports/presentation/screens/report_selection_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 import 'about/about_screen.dart';
 import 'social_media/social_media_screen.dart';
 import 'resources/resources_screen.dart';
-import 'package:mojlish_app/features/common/syllabi/khelafot_syllabus/presentation/screens/khelafot_syllabus_screen.dart';
+import 'package:mojlish_app/features/common/syllabi/khelafot_syllabus/presentation/pages/khelafot_syllabus_page.dart';
 import 'package:mojlish_app/features/common/resources/ahobban_mohila/presentation/screens/ahobban_screen.dart';
-import 'package:mojlish_app/features/khelafat_majlis/presentation/screens/khelafat_hub_screen.dart';
+import 'package:mojlish_app/features/khelafat_majlis/executive_rules/presentation/pages/executive_rules_page.dart';
+import 'package:mojlish_app/features/khelafat_majlis/overview/presentation/pages/overview_page.dart' as khelafat_overview;
 
 class MainDashboardScreen extends StatelessWidget {
   const MainDashboardScreen({super.key});
@@ -148,21 +149,8 @@ class MainDashboardScreen extends StatelessWidget {
                   children: [
                     _buildMenuCard(
                       context,
-                      title: 'পরিচিতি',
-                      icon: Icons.badge,
-                      iconColor: const Color(0xFF0EA5E9), // Light blue
-                      iconBgColor: pBlueBg,
-                      cardBg: cardBg,
-                      borderColor: borderColor,
-                      textTitle: textTitle,
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen()));
-                      },
-                    ),
-                    _buildMenuCard(
-                      context,
-                      title: 'রিপোর্টসমূহ',
-                      icon: Icons.pie_chart,
+                      title: 'রিপোর্ট ও ফরম কেন্দ্র',
+                      icon: Icons.assignment_turned_in_rounded,
                       iconColor: const Color(0xFF22C55E), // Green
                       iconBgColor: pGreenBg,
                       cardBg: cardBg,
@@ -174,47 +162,21 @@ class MainDashboardScreen extends StatelessWidget {
                     ),
                     _buildMenuCard(
                       context,
-                      title: 'খেলাফত মজলিস হাব',
-                      icon: Icons.account_balance_rounded,
-                      iconColor: const Color(0xFF059669), // Emerald
-                      iconBgColor: pGreenBg,
+                      title: 'সংক্ষিপ্ত পরিচিতি',
+                      icon: Icons.info_outline_rounded,
+                      iconColor: const Color(0xFF0EA5E9), // Light blue
+                      iconBgColor: pBlueBg,
                       cardBg: cardBg,
                       borderColor: borderColor,
                       textTitle: textTitle,
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const KhelafatHubScreen()));
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const khelafat_overview.OverviewPage()));
                       },
                     ),
                     _buildMenuCard(
                       context,
-                      title: 'খেলাফত মজলিস সিলেবাস',
-                      icon: Icons.menu_book_rounded,
-                      iconColor: const Color(0xFF059669), // Emerald
-                      iconBgColor: pGreenBg,
-                      cardBg: cardBg,
-                      borderColor: borderColor,
-                      textTitle: textTitle,
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const SizedBox()));
-                      },
-                    ),
-                    _buildMenuCard(
-                      context,
-                      title: 'সোশ্যাল মিডিয়া',
-                      icon: Icons.share,
-                      iconColor: const Color(0xFFF59E0B), // Orange
-                      iconBgColor: pOrangeBg,
-                      cardBg: cardBg,
-                      borderColor: borderColor,
-                      textTitle: textTitle,
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const SocialMediaScreen()));
-                      },
-                    ),
-                    _buildMenuCard(
-                      context,
-                      title: 'আহ্বান (মহিলা মজলিস)',
-                      icon: Icons.auto_awesome_rounded,
+                      title: 'আহ্বান ও ম্যানিফেস্টো',
+                      icon: Icons.campaign_rounded,
                       iconColor: const Color(0xFFE11D48), // Rose
                       iconBgColor: pPurpleBg,
                       cardBg: cardBg,
@@ -226,15 +188,41 @@ class MainDashboardScreen extends StatelessWidget {
                     ),
                     _buildMenuCard(
                       context,
-                      title: 'রিসোর্স ও বই',
-                      icon: Icons.menu_book,
+                      title: 'সিলেবাস ও পাঠক্রম',
+                      icon: Icons.menu_book_rounded,
+                      iconColor: const Color(0xFF059669), // Emerald
+                      iconBgColor: pGreenBg,
+                      cardBg: cardBg,
+                      borderColor: borderColor,
+                      textTitle: textTitle,
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const KhelafotSyllabusPage()));
+                      },
+                    ),
+                    _buildMenuCard(
+                      context,
+                      title: 'কর্মপ্রণালী নির্দেশিকা',
+                      icon: Icons.gavel_rounded,
                       iconColor: const Color(0xFF9333EA), // Purple
                       iconBgColor: pPurpleBg,
                       cardBg: cardBg,
                       borderColor: borderColor,
                       textTitle: textTitle,
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const ResourcesScreen()));
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const ExecutiveRulesPage()));
+                      },
+                    ),
+                    _buildMenuCard(
+                      context,
+                      title: 'সোশ্যাল মিডিয়া ও বই',
+                      icon: Icons.share_rounded,
+                      iconColor: const Color(0xFFF59E0B), // Orange
+                      iconBgColor: pOrangeBg,
+                      cardBg: cardBg,
+                      borderColor: borderColor,
+                      textTitle: textTitle,
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const SocialMediaScreen()));
                       },
                     ),
                   ],
@@ -247,6 +235,7 @@ class MainDashboardScreen extends StatelessWidget {
       },
     );
   }
+
 
   Widget _buildMenuCard(
     BuildContext context, {
