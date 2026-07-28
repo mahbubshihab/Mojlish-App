@@ -18,9 +18,10 @@ import 'package:mojlish_app/features/khelafat_majlis/personal_report/presentatio
 import 'package:mojlish_app/features/khelafat_majlis/branch_report/presentation/screens/branch_report_screen.dart' as khelafat_branch;
 import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentation/screens/baytulmal_report_screen.dart' as khelafat_baytulmal;
 
+import 'package:mojlish_app/core/services/user_storage_service.dart';
 import 'package:mojlish_app/features/women_majlis/personal_report/presentation/screens/personal_report_screen.dart' as women_personal;
 
-/// Common Central Report & Forms Selection Screen with PDF Download Capabilities
+/// Common Central Report & Forms Selection Screen — Shows ONLY Selected Majlis Reports
 class ReportSelectionScreen extends StatefulWidget {
   final String? majlisName;
 
@@ -31,20 +32,30 @@ class ReportSelectionScreen extends StatefulWidget {
 }
 
 class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
-  late String activeMajlis;
-
-  final List<String> majlises = [
-    'খেলাফত মজলিস',
-    'ছাত্র মজলিস',
-    'যুব মজলিস',
-    'মহিলা মজলিস',
-    'শ্রমিক মজলিস',
-  ];
+  String activeMajlis = 'খেলাফত মজলিস';
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    activeMajlis = widget.majlisName ?? 'খেলাফত মজলিস';
+    _loadMajlis();
+  }
+
+  Future<void> _loadMajlis() async {
+    if (widget.majlisName != null && widget.majlisName!.isNotEmpty) {
+      setState(() {
+        activeMajlis = widget.majlisName!;
+        _isLoading = false;
+      });
+    } else {
+      final saved = await UserStorageService.getSelectedMajlis();
+      if (mounted) {
+        setState(() {
+          activeMajlis = saved;
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -62,9 +73,9 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
           appBar: AppBar(
             backgroundColor: isDark ? const Color(0xFF162032) : Colors.white,
             elevation: 0,
-            title: const Text(
-              'রিপোর্ট ও ফরম কেন্দ্র',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            title: Text(
+              '$activeMajlis — রিপোর্ট কেন্দ্র',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             actions: [
               IconButton(
@@ -74,42 +85,10 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
               const SizedBox(width: 8),
             ],
           ),
-          body: Column(
-            children: [
-              // Majlis Selector Chips
-              Container(
-                height: 56,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: majlises.length,
-                  itemBuilder: (context, index) {
-                    final majlis = majlises[index];
-                    final isSelected = majlis == activeMajlis;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: FilterChip(
-                        selected: isSelected,
-                        label: Text(majlis),
-                        selectedColor: const Color(0xFF059669),
-                        labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : textColor,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                        backgroundColor: cardBg,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() {
-                              activeMajlis = majlis;
-                            });
-                          }
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
+          body: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                  children: [
 
               Expanded(
                 child: ListView(
