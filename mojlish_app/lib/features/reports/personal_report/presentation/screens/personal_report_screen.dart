@@ -120,7 +120,7 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
 
     _dateVerController = ScrollController();
     _dataVerController = ScrollController();
@@ -563,7 +563,6 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
               tabs: const [
                 Tab(text: 'রিপোর্ট টেবিল'),
                 Tab(text: 'রিপোর্ট সামারি'),
-                Tab(text: 'মাসিক পরিকল্পনা'),
                 Tab(text: 'মন্তব্য সমূহ'),
               ],
             ),
@@ -577,7 +576,6 @@ class _PersonalReportScreenState extends State<PersonalReportScreen>
                 children: [
                   _buildReportTab(),
                   _buildSummaryTab(),
-                  _buildPlanTab(),
                   _buildCommentsTab(),
                 ],
               ),

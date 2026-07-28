@@ -20,6 +20,7 @@ import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentati
 
 import 'package:mojlish_app/features/reports/personal_report/presentation/screens/personal_report_screen.dart';
 import 'package:mojlish_app/features/reports/personal_report/data/models/majlis_personal_report_config.dart';
+import 'package:mojlish_app/features/reports/general_report/presentation/screens/report_book_screen.dart' as master_report_book;
 import 'package:mojlish_app/features/women_majlis/personal_report/presentation/screens/personal_report_screen.dart' as women_personal;
 import 'package:mojlish_app/core/services/user_storage_service.dart';
 
@@ -135,9 +136,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => PersonalReportScreen(
-                              year: DateTime.now().year,
-                              month: DateTime.now().month,
+                            builder: (_) => const master_report_book.ReportBookScreen(
                               majlisType: MajlisType.khelafat,
                             ),
                           ),
@@ -207,9 +206,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => PersonalReportScreen(
-                              year: DateTime.now().year,
-                              month: DateTime.now().month,
+                            builder: (_) => const master_report_book.ReportBookScreen(
                               majlisType: MajlisType.chatro,
                             ),
                           ),
@@ -253,9 +250,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => PersonalReportScreen(
-                              year: DateTime.now().year,
-                              month: DateTime.now().month,
+                            builder: (_) => const master_report_book.ReportBookScreen(
                               majlisType: MajlisType.jubo,
                             ),
                           ),
@@ -273,9 +268,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => PersonalReportScreen(
-                              year: DateTime.now().year,
-                              month: DateTime.now().month,
+                            builder: (_) => const master_report_book.ReportBookScreen(
                               majlisType: MajlisType.mohila,
                             ),
                           ),
