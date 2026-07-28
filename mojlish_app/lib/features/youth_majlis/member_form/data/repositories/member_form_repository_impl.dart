@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import '../../domain/entities/member_form_entity.dart';
-import '../../domain/repositories/member_form_repository.dart';
+import 'package:mojlish_app/features/youth_majlis/member_form/domain/entities/member_form_entity.dart';
+import 'package:mojlish_app/features/youth_majlis/member_form/domain/repositories/member_form_repository.dart';
 import '../datasources/member_form_remote_datasource.dart';
 import '../models/member_form_model.dart';
 

@@ -1,7 +1,7 @@
 import 'package:mojlish_app/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
-import '../../../../../core/theme/app_theme.dart';
+import 'package:mojlish_app/core/theme/app_theme.dart';
 import '../join/join_organization_screen.dart';
 
 class AboutScreen extends StatelessWidget {

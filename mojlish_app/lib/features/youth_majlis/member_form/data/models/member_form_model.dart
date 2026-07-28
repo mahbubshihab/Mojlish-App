@@ -1,4 +1,4 @@
-import '../../domain/entities/member_form_entity.dart';
+import 'package:mojlish_app/features/youth_majlis/member_form/domain/entities/member_form_entity.dart';
 
 class MemberFormModel extends MemberFormEntity {
   const MemberFormModel({

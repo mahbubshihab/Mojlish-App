@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_theme.dart';
+import 'package:mojlish_app/core/theme/app_theme.dart';
 import 'org_selection_screen.dart';
 
 class SplashScreen extends StatefulWidget {

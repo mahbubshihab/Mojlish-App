@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
+import 'package:mojlish_app/core/error/failures.dart';
 import '../entities/executive_rule.dart';
 
 abstract class ExecutiveRuleRepository {

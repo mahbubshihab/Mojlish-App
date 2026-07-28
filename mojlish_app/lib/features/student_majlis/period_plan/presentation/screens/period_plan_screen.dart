@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mojlish_app/core/theme/app_theme.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/features/common/reports/personal_report/data/models/chatro_monthly_plan.dart';
-import 'package:mojlish_app/features/common/reports/shared/data/services/pdf_generator_service.dart';
 import '../bloc/period_plan_bloc.dart';
 import '../bloc/period_plan_event.dart';
 import '../bloc/period_plan_state.dart';

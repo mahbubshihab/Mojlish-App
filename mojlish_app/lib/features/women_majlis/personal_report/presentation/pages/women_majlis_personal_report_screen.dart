@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/women_majlis_personal_report_bloc.dart';
 import '../bloc/women_majlis_personal_report_event.dart';
 import '../bloc/women_majlis_personal_report_state.dart';
-import '../../../../core/di/injection_container.dart';
+import '../../data/datasources/women_majlis_personal_report_remote_data_source.dart';
+import '../../data/repositories/women_majlis_personal_report_repository_impl.dart';
 
 class WomenMajlisPersonalReportScreen extends StatelessWidget {
   const WomenMajlisPersonalReportScreen({Key? key}) : super(key: key);
@@ -11,7 +12,11 @@ class WomenMajlisPersonalReportScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => sl<WomenMajlisPersonalReportBloc>()..add(LoadWomenMajlisPersonalReport()),
+      create: (_) => WomenMajlisPersonalReportBloc(
+        repository: WomenMajlisPersonalReportRepositoryImpl(
+          remoteDataSource: WomenMajlisPersonalReportRemoteDataSourceImpl(),
+        ),
+      )..add(LoadWomenMajlisPersonalReport()),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('মহিলা মজলিস ব্যক্তিগত রিপোর্ট'),

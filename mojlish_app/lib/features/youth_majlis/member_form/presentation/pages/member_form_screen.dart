@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/member_form_bloc.dart';
 import '../bloc/member_form_event.dart';
 import '../bloc/member_form_state.dart';
-import '../../../domain/entities/member_form_entity.dart';
+import 'package:mojlish_app/features/youth_majlis/member_form/domain/entities/member_form_entity.dart';
 
 class MemberFormScreen extends StatefulWidget {
   const MemberFormScreen({Key? key}) : super(key: key);

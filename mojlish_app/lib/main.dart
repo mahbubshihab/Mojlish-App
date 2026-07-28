@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'core/theme/app_theme.dart';
-import 'core/theme/theme_manager.dart';
+import 'package:mojlish_app/core/theme/app_theme.dart';
+import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'features/common/auth/presentation/screens/splash_screen.dart';
 
 void main() {
