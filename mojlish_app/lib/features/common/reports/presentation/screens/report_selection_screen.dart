@@ -111,7 +111,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                           ),
                           const SizedBox(height: 4),
                           const Text(
-                            'প্রতিটি রিপোর্টের তথ্য পূরণ করুন এবং সরাসরি PDF ডাউনলোড করুন।',
+                            'ফরম নির্বাচন করুন। ভেতরের প্রিভিউ সেকশন থেকে PDF ডাউনলোড করতে পারবেন।',
                             style: TextStyle(fontSize: 13, color: Color(0xFFA7F3D0)),
                           ),
                         ],
@@ -134,7 +134,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                           context,
                           MaterialPageRoute(builder: (_) => const khelafat_personal.PersonalReportPage()),
                         ),
-                        onPdfExport: () => _exportPdf(title: 'ব্যক্তিগত রিপোর্ট', majlis: activeMajlis),
                       ),
                       _buildReportItem(
                         context,
@@ -148,7 +147,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                           context,
                           MaterialPageRoute(builder: (_) => const khelafat_member.MemberFormScreen()),
                         ),
-                        onPdfExport: () => _exportPdf(title: 'প্রাথমিক সদস্য ফরম', majlis: activeMajlis),
                       ),
                       _buildReportItem(
                         context,
@@ -162,7 +160,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                           context,
                           MaterialPageRoute(builder: (_) => const khelafat_branch.BranchReportScreen()),
                         ),
-                        onPdfExport: () => _exportPdf(title: 'শাখা সাংগঠনিক রিপোর্ট', majlis: activeMajlis),
                       ),
                       _buildReportItem(
                         context,
@@ -176,7 +173,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                           context,
                           MaterialPageRoute(builder: (_) => const khelafat_baytulmal.BaytulmalReportPage()),
                         ),
-                        onPdfExport: () => _exportPdf(title: 'বায়তুলমাল রিপোর্ট', majlis: activeMajlis),
                       ),
                     ] else if (activeMajlis == 'ছাত্র মজলিস') ...[
                       _buildReportItem(
@@ -191,7 +187,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                           context,
                           MaterialPageRoute(builder: (_) => const student_member.MemberFormScreen()),
                         ),
-                        onPdfExport: () => _exportPdf(title: 'ছাত্র সদস্য ফরম', majlis: activeMajlis),
                       ),
                       _buildReportItem(
                         context,
@@ -205,7 +200,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                           context,
                           MaterialPageRoute(builder: (_) => const student_personal.PersonalReportPage()),
                         ),
-                        onPdfExport: () => _exportPdf(title: 'ছাত্র ব্যক্তিগত রিপোর্ট', majlis: activeMajlis),
                       ),
                       _buildReportItem(
                         context,
@@ -219,7 +213,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                           context,
                           MaterialPageRoute(builder: (_) => const student_baytulmal.BaytulmalReportPage()),
                         ),
-                        onPdfExport: () => _exportPdf(title: 'ছাত্র বায়তুলমাল রিপোর্ট', majlis: activeMajlis),
                       ),
                     ] else if (activeMajlis == 'যুব মজলিস') ...[
                       _buildReportItem(
@@ -234,7 +227,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                           context,
                           MaterialPageRoute(builder: (_) => const youth_member.MemberFormScreen()),
                         ),
-                        onPdfExport: () => _exportPdf(title: 'যুব সদস্য ফরম', majlis: activeMajlis),
                       ),
                       _buildReportItem(
                         context,
@@ -248,7 +240,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                           context,
                           MaterialPageRoute(builder: (_) => const youth_personal.YouthMajlisPersonalReportPage()),
                         ),
-                        onPdfExport: () => _exportPdf(title: 'যুব ব্যক্তিগত রিপোর্ট', majlis: activeMajlis),
                       ),
                     ] else if (activeMajlis == 'মহিলা মজলিস') ...[
                       _buildReportItem(
@@ -263,7 +254,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                           context,
                           MaterialPageRoute(builder: (_) => const women_personal.WomenMajlisPersonalReportScreen()),
                         ),
-                        onPdfExport: () => _exportPdf(title: 'মহিলা মজলিস ব্যক্তিগত রিপোর্ট', majlis: activeMajlis),
                       ),
                     ] else ...[
                       _buildReportItem(
@@ -278,7 +268,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                           context,
                           MaterialPageRoute(builder: (_) => ReportBookScreen(majlisName: activeMajlis, reportType: 'General')),
                         ),
-                        onPdfExport: () => _exportPdf(title: 'সাধারণ রিপোর্ট', majlis: activeMajlis),
                       ),
                     ],
                   ],
@@ -315,7 +304,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
     required Color cardBg,
     required Color textColor,
     required VoidCallback onTap,
-    required VoidCallback onPdfExport,
   }) {
     return Card(
       color: cardBg,
@@ -353,27 +341,14 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                OutlinedButton.icon(
-                  onPressed: onTap,
-                  icon: const Icon(Icons.edit_document, size: 15),
-                  label: const Text('রিপোর্ট ফরম / পূরণ করুন', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: color,
-                    side: BorderSide(color: color.withOpacity(0.5)),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    minimumSize: Size.zero,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                ),
-                const SizedBox(width: 8),
                 ElevatedButton.icon(
-                  onPressed: onPdfExport,
-                  icon: const Icon(Icons.picture_as_pdf, size: 15),
-                  label: const Text('PDF', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  onPressed: onTap,
+                  icon: const Icon(Icons.description_outlined, size: 16),
+                  label: const Text('ফরম পূরণ ও বিবরণ', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF059669),
+                    backgroundColor: color,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     minimumSize: Size.zero,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
