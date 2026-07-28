@@ -44,6 +44,7 @@ dependencies:
   shared_preferences: ^2.3.3
   intl: ^0.19.0
   dartz: ^0.10.1
+  bijoy_helper: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +71,16 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+    - assets/fonts/kalpurush.ttf
+    - assets/fonts/SutonnyMJ.ttf
+
+  fonts:
+    - family: Kalpurush
+      fonts:
+        - asset: assets/fonts/kalpurush.ttf
+    - family: SutonnyMJ
+      fonts:
+        - asset: assets/fonts/SutonnyMJ.ttf
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

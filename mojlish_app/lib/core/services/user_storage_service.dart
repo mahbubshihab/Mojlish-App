@@ -7,6 +7,7 @@ class UserStorageService {
   static const String _selectedMajlisKey = 'selected_majlis';
   static const String _deviceIdKey = 'user_device_id';
   static const String _userAuthIdKey = 'user_auth_id';
+  static const String _userNameKey = 'user_display_name';
 
   /// ইউজারের ইউনিক ডিভাইস আইডি (Android ID / Unique UUID) পাওয়া বা তৈরি করা
   static Future<String> getDeviceId() async {
@@ -30,6 +31,31 @@ class UserStorageService {
     return prefs.getString(_userAuthIdKey);
   }
 
+  /// ইউজারের নাম সেভ করা (লোকাল + ফায়ারবেস ব্যাকআপ)
+  static Future<void> saveUserName(String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    final trimmedName = name.trim();
+    final finalName = trimmedName.isEmpty ? 'মিজানুর রহমান' : trimmedName;
+    await prefs.setString(_userNameKey, finalName);
+
+    // ফায়ারবেসে স্টোর/ব্যাকআপ করা
+    final deviceId = await getDeviceId();
+    final authId = await getUserAuthId() ?? deviceId;
+    final majlis = await getSelectedMajlis();
+
+    await _syncToFirebase(authId: authId, majlisName: majlis, userName: finalName);
+  }
+
+  /// ইউজারের নাম রিট্রিভ করা (ডিফল্ট: 'মিজানুর রহমান')
+  static Future<String> getUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedName = prefs.getString(_userNameKey);
+    if (savedName == null || savedName.trim().isEmpty) {
+      return 'মিজানুর রহমান';
+    }
+    return savedName;
+  }
+
   /// নির্বাচিত মজলিস সেভ করা (লোকাল + ফায়ারবেস ব্যাকআপ)
   static Future<void> saveSelectedMajlis(String majlisName) async {
     final prefs = await SharedPreferences.getInstance();
@@ -38,8 +64,9 @@ class UserStorageService {
     // ফায়ারবেসে স্টোর/ব্যাকআপ করা
     final deviceId = await getDeviceId();
     final authId = await getUserAuthId() ?? deviceId;
+    final userName = await getUserName();
 
-    await _syncToFirebase(authId: authId, majlisName: majlisName);
+    await _syncToFirebase(authId: authId, majlisName: majlisName, userName: userName);
   }
 
   /// নির্বাচিত মজলিস লোড করা
@@ -56,14 +83,26 @@ class UserStorageService {
   }
 
   /// ফায়ারবেসে ডেটা সিঙ্ক করা
-  static Future<void> _syncToFirebase({required String authId, required String majlisName}) async {
+  static Future<void> _syncToFirebase({
+    required String authId,
+    required String majlisName,
+    String? userName,
+  }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final backupData = {
-        'authId': authId,
-        'selectedMajlis': majlisName,
-        'updatedAt': DateTime.now().toIso8601String(),
-      };
+      final currentBackupStr = prefs.getString('firebase_user_backup_$authId');
+      Map<String, dynamic> backupData = {};
+      if (currentBackupStr != null) {
+        try {
+          backupData = jsonDecode(currentBackupStr) as Map<String, dynamic>;
+        } catch (_) {}
+      }
+      backupData['authId'] = authId;
+      backupData['selectedMajlis'] = majlisName;
+      if (userName != null) {
+        backupData['userName'] = userName;
+      }
+      backupData['updatedAt'] = DateTime.now().toIso8601String();
       await prefs.setString('firebase_user_backup_$authId', jsonEncode(backupData));
     } catch (_) {}
   }

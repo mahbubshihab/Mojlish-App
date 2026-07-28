@@ -5,7 +5,14 @@ import '../bloc/baytulmal_report_event.dart';
 import '../bloc/baytulmal_report_state.dart';
 
 class BaytulmalReportPage extends StatefulWidget {
-  const BaytulmalReportPage({Key? key}) : super(key: key);
+  final String? initialMonth;
+  final String? initialSession;
+
+  const BaytulmalReportPage({
+    Key? key,
+    this.initialMonth,
+    this.initialSession,
+  }) : super(key: key);
 
   @override
   _BaytulmalReportPageState createState() => _BaytulmalReportPageState();
@@ -18,6 +25,17 @@ class _BaytulmalReportPageState extends State<BaytulmalReportPage> {
   final _branchController = TextEditingController();
   final _monthController = TextEditingController();
   final _sessionController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialMonth != null) {
+      _monthController.text = widget.initialMonth!;
+    }
+    if (widget.initialSession != null) {
+      _sessionController.text = widget.initialSession!;
+    }
+  }
 
   // Income
   final _jonoshoktiIyanotController = TextEditingController();

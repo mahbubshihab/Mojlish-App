@@ -6,7 +6,14 @@ import '../bloc/personal_plan_state.dart';
 import '../../domain/entities/personal_plan_entity.dart';
 
 class PersonalPlanPage extends StatefulWidget {
-  const PersonalPlanPage({super.key});
+  final String? initialMonth;
+  final String? initialYear;
+
+  const PersonalPlanPage({
+    super.key,
+    this.initialMonth,
+    this.initialYear,
+  });
 
   @override
   State<PersonalPlanPage> createState() => _PersonalPlanPageState();
@@ -21,6 +28,17 @@ class _PersonalPlanPageState extends State<PersonalPlanPage> {
   final branchController = TextEditingController();
   final monthController = TextEditingController();
   final yearController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialMonth != null) {
+      monthController.text = widget.initialMonth!;
+    }
+    if (widget.initialYear != null) {
+      yearController.text = widget.initialYear!;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

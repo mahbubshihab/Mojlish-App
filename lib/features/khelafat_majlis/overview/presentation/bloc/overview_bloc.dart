@@ -9,12 +9,11 @@ class OverviewBloc extends Bloc<OverviewEvent, OverviewState> {
   OverviewBloc({required this.repository}) : super(OverviewInitial()) {
     on<LoadOverviewEvent>((event, emit) async {
       emit(OverviewLoading());
-      try {
-        final overview = await repository.getOverview();
-        emit(OverviewLoaded(overview: overview));
-      } catch (e) {
-        emit(OverviewError(message: e.toString()));
-      }
+      final result = await repository.getOverview();
+      result.fold(
+        (failure) => emit(OverviewError(message: failure)),
+        (overview) => emit(OverviewLoaded(overview: overview)),
+      );
     });
   }
 }

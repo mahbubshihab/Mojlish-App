@@ -6,7 +6,14 @@ import 'package:mojlish_app/features/student_majlis/personal_report/presentation
 import 'package:mojlish_app/features/student_majlis/personal_report/domain/entities/personal_report_entity.dart';
 
 class PersonalReportPage extends StatefulWidget {
-  const PersonalReportPage({super.key});
+  final String? initialMonth;
+  final String? initialYear;
+
+  const PersonalReportPage({
+    super.key,
+    this.initialMonth,
+    this.initialYear,
+  });
 
   @override
   State<PersonalReportPage> createState() => _PersonalReportPageState();
@@ -21,7 +28,9 @@ class _PersonalReportPageState extends State<PersonalReportPage> {
   @override
   void initState() {
     super.initState();
-    context.read<PersonalReportBloc>().add(const LoadPersonalReport(month: 'January', year: '2026'));
+    final m = widget.initialMonth ?? 'January';
+    final y = widget.initialYear ?? '2026';
+    context.read<PersonalReportBloc>().add(LoadPersonalReport(month: m, year: y));
   }
 
   @override

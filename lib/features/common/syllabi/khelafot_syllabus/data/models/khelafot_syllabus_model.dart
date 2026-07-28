@@ -5,13 +5,14 @@ class KhelafotSyllabusModel extends KhelafotSyllabusEntity {
     required String id,
     required String title,
     required String description,
-  }) : super(id: id, title: title, description: description);
+    KhelafotSyllabusData? data,
+  }) : super(id: id, title: title, description: description, data: data);
 
   factory KhelafotSyllabusModel.fromJson(Map<String, dynamic> json) {
     return KhelafotSyllabusModel(
-      id: json['id'],
-      title: json['title'],
-      description: json['description'],
+      id: json['id'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
     );
   }
 

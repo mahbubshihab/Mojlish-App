@@ -8,11 +8,18 @@ class SocialMediaScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('সোশ্যাল মিডিয়া', style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.black),
+        title: Text(
+          'সোশ্যাল মিডিয়া',
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: isDark ? const Color(0xFF162032) : Colors.white,
+        iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black87),
         elevation: 0,
       ),
       body: Padding(
@@ -23,7 +30,7 @@ class SocialMediaScreen extends StatelessWidget {
             const SizedBox(height: 16),
             _buildSocialBtn('অফিসিয়াল ইউটিউব চ্যানেল', FontAwesomeIcons.youtube, const Color(0xFFFF0000)),
             const SizedBox(height: 16),
-            _buildSocialBtn('অফিসিয়াল এক্স (টুইটার)', FontAwesomeIcons.xTwitter, Colors.black),
+            _buildSocialBtn('অফিসিয়াল এক্স (টুইটার)', FontAwesomeIcons.xTwitter, isDark ? const Color(0xFF334155) : Colors.black),
             const SizedBox(height: 16),
             _buildSocialBtn('অফিসিয়াল ওয়েবসাইট', FontAwesomeIcons.globe, AppTheme.primaryColor),
           ],

@@ -5,7 +5,7 @@ abstract class OverviewState extends Equatable {
   const OverviewState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class OverviewInitial extends OverviewState {}
@@ -18,7 +18,7 @@ class OverviewLoaded extends OverviewState {
   const OverviewLoaded({required this.overview});
 
   @override
-  List<Object> get props => [overview];
+  List<Object?> get props => [overview];
 }
 
 class OverviewError extends OverviewState {
@@ -27,5 +27,5 @@ class OverviewError extends OverviewState {
   const OverviewError({required this.message});
 
   @override
-  List<Object> get props => [message];
+  List<Object?> get props => [message];
 }

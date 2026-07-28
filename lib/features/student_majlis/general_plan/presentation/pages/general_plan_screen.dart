@@ -4,7 +4,14 @@ import '../bloc/general_plan_bloc.dart';
 import '../../domain/entities/general_plan_entity.dart';
 
 class GeneralPlanScreen extends StatefulWidget {
-  const GeneralPlanScreen({Key? key}) : super(key: key);
+  final String? initialMonth;
+  final String? initialSession;
+
+  const GeneralPlanScreen({
+    Key? key,
+    this.initialMonth,
+    this.initialSession,
+  }) : super(key: key);
 
   @override
   State<GeneralPlanScreen> createState() => _GeneralPlanScreenState();
@@ -17,6 +24,17 @@ class _GeneralPlanScreenState extends State<GeneralPlanScreen> {
   final TextEditingController _branchController = TextEditingController();
   final TextEditingController _monthController = TextEditingController();
   final TextEditingController _sessionController = TextEditingController();
+  
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialMonth != null) {
+      _monthController.text = widget.initialMonth!;
+    }
+    if (widget.initialSession != null) {
+      _sessionController.text = widget.initialSession!;
+    }
+  }
   
   @override
   void dispose() {

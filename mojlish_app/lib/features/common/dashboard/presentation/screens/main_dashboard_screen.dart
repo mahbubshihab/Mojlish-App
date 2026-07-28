@@ -1,27 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:mojlish_app/core/theme/theme_manager.dart';
-import '../../../reports/presentation/screens/report_selection_screen.dart';
-import '../../../notifications/presentation/screens/notifications_screen.dart';
-import 'about/about_screen.dart';
-import 'social_media/social_media_screen.dart';
-import 'resources/resources_screen.dart';
-import 'package:mojlish_app/features/common/syllabi/khelafot_syllabus/presentation/pages/khelafot_syllabus_page.dart';
-import 'package:mojlish_app/features/common/resources/ahobban_mohila/presentation/screens/ahobban_screen.dart';
-import 'package:mojlish_app/features/khelafat_majlis/executive_rules/presentation/pages/executive_rules_page.dart';
-import 'package:mojlish_app/features/khelafat_majlis/overview/presentation/pages/overview_page.dart' as khelafat_overview;
-
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/services/user_storage_service.dart';
+import 'package:mojlish_app/core/constants/majlis_assets.dart';
 import '../../../reports/presentation/screens/report_selection_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
-import 'about/about_screen.dart';
 import 'social_media/social_media_screen.dart';
-import 'resources/resources_screen.dart';
 import 'package:mojlish_app/features/common/syllabi/khelafot_syllabus/presentation/pages/khelafot_syllabus_page.dart';
-import 'package:mojlish_app/features/common/resources/ahobban_mohila/presentation/screens/ahobban_screen.dart';
+import 'package:mojlish_app/features/women_majlis/call_manifesto/presentation/pages/call_manifesto_page.dart' as women_manifesto;
 import 'package:mojlish_app/features/khelafat_majlis/executive_rules/presentation/pages/executive_rules_page.dart';
 import 'package:mojlish_app/features/khelafat_majlis/overview/presentation/pages/overview_page.dart' as khelafat_overview;
 import 'package:mojlish_app/features/women_majlis/overview/presentation/pages/overview_page.dart' as women_overview;
@@ -38,19 +23,22 @@ class MainDashboardScreen extends StatefulWidget {
 
 class _MainDashboardScreenState extends State<MainDashboardScreen> {
   String _selectedMajlis = 'খেলাফত মজলিস';
+  String _userName = 'মিজানুর রহমান';
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadSelectedMajlis();
+    _loadUserData();
   }
 
-  Future<void> _loadSelectedMajlis() async {
+  Future<void> _loadUserData() async {
     final majlis = await UserStorageService.getSelectedMajlis();
+    final userName = await UserStorageService.getUserName();
     if (mounted) {
       setState(() {
         _selectedMajlis = majlis;
+        _userName = userName;
         _isLoading = false;
       });
     }
@@ -120,27 +108,34 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'আসসালামু আলাইকুম,',
-                                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: textTitle),
-                              ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'মিজানুর রহমান',
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
-                              ),
-                            ],
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'আসসালামু আলাইকুম,',
+                                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: textTitle),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _userName,
+                                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
                           ),
+                          const SizedBox(width: 8),
                           GestureDetector(
                             onTap: () async {
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(builder: (_) => const OrgSelectionScreen()),
                               );
-                              _loadSelectedMajlis();
+                              _loadUserData();
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -151,6 +146,8 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
                               ),
                               child: Row(
                                 children: [
+                                  MajlisAssets.getLogoWidget(_selectedMajlis, size: 20),
+                                  const SizedBox(width: 6),
                                   Text(
                                     _selectedMajlis,
                                     style: const TextStyle(
@@ -328,11 +325,11 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           },
         ),
       );
-    } else {
+    } else if (selectedMajlis == 'মহিলা মজলিস') {
       cards.add(
         _buildMenuCard(
           context,
-          title: 'আহ্বান ও ম্যানিফেস্টো',
+          title: 'আমাদের আহ্বান',
           icon: Icons.campaign_rounded,
           iconColor: const Color(0xFFE11D48),
           iconBgColor: pPurpleBg,
@@ -340,7 +337,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           borderColor: borderColor,
           textTitle: textTitle,
           onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const AhobbanMohilaScreen()));
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const women_manifesto.CallManifestoPage()));
           },
         ),
       );
@@ -366,7 +363,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
       cards.add(
         _buildMenuCard(
           context,
-          title: 'কর্মপ্রণালী নির্দেশিকা',
+          title: 'কার্যপ্রণালী',
           icon: Icons.gavel_rounded,
           iconColor: const Color(0xFF9333EA),
           iconBgColor: pPurpleBg,

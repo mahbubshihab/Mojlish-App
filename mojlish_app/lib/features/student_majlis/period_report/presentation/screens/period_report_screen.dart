@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/period_report.dart';
-import 'bloc/period_report_bloc.dart';
-import 'bloc/period_report_event.dart';
-import 'bloc/period_report_state.dart';
+import '../bloc/period_report_bloc.dart';
+import '../bloc/period_report_event.dart';
+import '../bloc/period_report_state.dart';
 
 class PeriodReportPage extends StatefulWidget {
   const PeriodReportPage({super.key});

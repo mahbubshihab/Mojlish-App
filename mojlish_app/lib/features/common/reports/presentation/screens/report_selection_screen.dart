@@ -1,296 +1,233 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:mojlish_app/core/theme/app_theme.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
-import 'package:mojlish_app/core/services/pdf_export_service.dart';
-
+import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 import 'report_book_screen.dart';
+import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentation/screens/baytulmal_report_book_screen.dart';
+import 'package:mojlish_app/features/common/reports/sanghotonik_report/presentation/screens/sanghotonik_report_book_screen.dart';
+import 'package:mojlish_app/features/common/reports/zonal_report/presentation/screens/zonal_report_book_screen.dart';
 
-// Import screens for direct entry
-import 'package:mojlish_app/features/student_majlis/member_form/presentation/screens/member_form_screen.dart' as student_member;
-import 'package:mojlish_app/features/student_majlis/personal_report/presentation/screens/personal_report_screen.dart' as student_personal;
-import 'package:mojlish_app/features/student_majlis/baytulmal_report/presentation/screens/baytulmal_report_screen.dart' as student_baytulmal;
+import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
 
-import 'package:mojlish_app/features/youth_majlis/member_form/presentation/screens/member_form_screen.dart' as youth_member;
-import 'package:mojlish_app/features/youth_majlis/personal_report/presentation/screens/personal_report_screen.dart' as youth_personal;
-
-import 'package:mojlish_app/features/khelafat_majlis/member_form/presentation/screens/member_form_screen.dart' as khelafat_member;
-import 'package:mojlish_app/features/khelafat_majlis/personal_report/presentation/screens/personal_report_screen.dart' as khelafat_personal;
-import 'package:mojlish_app/features/khelafat_majlis/branch_report/presentation/screens/branch_report_screen.dart' as khelafat_branch;
-import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentation/screens/baytulmal_report_screen.dart' as khelafat_baytulmal;
-
-import 'package:mojlish_app/features/reports/personal_report/presentation/screens/personal_report_screen.dart';
-import 'package:mojlish_app/features/reports/personal_report/data/models/majlis_personal_report_config.dart';
-import 'package:mojlish_app/features/reports/general_report/presentation/screens/report_book_screen.dart' as master_report_book;
-import 'package:mojlish_app/features/women_majlis/personal_report/presentation/screens/personal_report_screen.dart' as women_personal;
-import 'package:mojlish_app/core/services/user_storage_service.dart';
-
-/// Common Central Report & Forms Selection Screen — Shows ONLY Selected Majlis Reports
+/// রিপোর্টসমূহ — মূল হাব স্ক্রিন, সব রিপোর্টের কার্ড দেখায়
 class ReportSelectionScreen extends StatefulWidget {
   final String? majlisName;
+  final MajlisType? majlisType;
 
-  const ReportSelectionScreen({super.key, this.majlisName});
+  const ReportSelectionScreen({super.key, this.majlisName, this.majlisType});
 
   @override
   State<ReportSelectionScreen> createState() => _ReportSelectionScreenState();
 }
 
 class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
-  String activeMajlis = 'খেলাফত মজলিস';
-  bool _isLoading = true;
+  int _personalFilledDays = 0;
+  int _daysInMonth = 30;
+  final _now = DateTime.now();
+
+  static const _monthNames = [
+    'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
+    'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর',
+  ];
 
   @override
   void initState() {
     super.initState();
-    _loadMajlis();
+    _loadStats();
   }
 
-  Future<void> _loadMajlis() async {
-    if (widget.majlisName != null && widget.majlisName!.isNotEmpty) {
-      setState(() {
-        activeMajlis = widget.majlisName!;
-        _isLoading = false;
-      });
-    } else {
-      final saved = await UserStorageService.getSelectedMajlis();
+  Future<void> _loadStats() async {
+    try {
+      final days = await ReportStorageService.getFilledDaysCount(_now.year, _now.month);
+      final dim = DateTime(_now.year, _now.month + 1, 0).day;
       if (mounted) {
         setState(() {
-          activeMajlis = saved;
-          _isLoading = false;
+          _personalFilledDays = days;
+          _daysInMonth = dim;
         });
       }
+    } catch (_) {}
+  }
+
+  String _bn(int n) {
+    const digits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+    return n.toString().split('').map((c) => digits[int.parse(c)]).join();
+  }
+
+  MajlisType _resolveMajlisType() {
+    if (widget.majlisType != null) return widget.majlisType!;
+    if (widget.majlisName != null && widget.majlisName!.isNotEmpty) {
+      return MajlisTypeExtension.fromString(widget.majlisName!);
     }
+    return MajlisType.khelafat;
   }
 
   @override
   Widget build(BuildContext context) {
+    final activeMajlisType = _resolveMajlisType();
+    final bool isSromik = activeMajlisType == MajlisType.sromik;
+
     return AnimatedBuilder(
       animation: themeManager,
       builder: (context, _) {
         final isDark = themeManager.isDarkMode;
-        final bgColor = isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF8FAFC);
+
+        // Theme colors
+        final bg = isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF8FAFC);
+        final appBarBg = isDark ? const Color(0xFF162032) : Colors.white;
         final cardBg = isDark ? const Color(0xFF162032) : Colors.white;
-        final textColor = isDark ? Colors.white : AppTheme.textDark;
+        final borderColor = isDark ? const Color(0xFF2A3F58) : const Color(0xFFE2E8F0);
+        final textLight = isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
+        final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+        const accentGreen = Color(0xFF10B981);
 
         return Scaffold(
-          backgroundColor: bgColor,
+          backgroundColor: bg,
           appBar: AppBar(
-            backgroundColor: isDark ? const Color(0xFF162032) : Colors.white,
+            backgroundColor: appBarBg,
             elevation: 0,
-            title: Text(
-              '$activeMajlis — রিপোর্ট কেন্দ্র',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            centerTitle: true,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios_new, color: textLight, size: 20),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  isSromik ? 'শ্রমিক মজলিস রিপোর্ট' : 'রিপোর্টসমূহ',
+                  style: const TextStyle(color: accentGreen, fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  '${_monthNames[_now.month - 1]} ${_bn(_now.year)}',
+                  style: TextStyle(color: textMuted, fontSize: 11),
+                ),
+              ],
             ),
             actions: [
               IconButton(
-                icon: Icon(isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
-                onPressed: () => themeManager.toggleTheme(),
+                icon: Icon(
+                  isDark ? Icons.wb_sunny : Icons.nightlight_round,
+                  color: isDark ? Colors.yellow : Colors.black87,
+                ),
+                onPressed: () {
+                  themeManager.toggleTheme();
+                },
               ),
-              const SizedBox(width: 8),
             ],
           ),
-          body: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Column(
-                  children: [
-
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.all(16.0),
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF059669), Color(0xFF047857)],
+          body: Stack(
+            children: [
+              Positioned.fill(child: CustomPaint(painter: _HubBgPainter(isDark: isDark))),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+                  // Cards list
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      children: [
+                        // ব্যক্তিগত রিপোর্ট (Personal Report Book & Form)
+                        _buildReportCard(
+                          title: 'ব্যক্তিগত তৎপরতার রিপোর্ট',
+                          subtitle: '${_monthNames[_now.month - 1]} ${_bn(_now.year)} মাস',
+                          badge: '$_personalFilledDays/$_daysInMonth দিন আপডেট',
+                          badgeColor: _personalFilledDays >= _now.day ? const Color(0xFF059669) : const Color(0xFFF59E0B),
+                          icon: Icons.person_outline,
+                          color: const Color(0xFF10B981),
+                          cardBg: cardBg,
+                          borderColor: borderColor,
+                          textLight: textLight,
+                          textMuted: textMuted,
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ReportBookScreen(majlisType: activeMajlisType),
+                              ),
+                            );
+                            _loadStats();
+                          },
                         ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '$activeMajlis — রিপোর্ট বই ও ফরম',
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                        const SizedBox(height: 12),
+
+                        // Show other organizational reports ONLY if NOT Sromik Majlis
+                        if (!isSromik) ...[
+                          // বায়তুলমাল রিপোর্ট
+                          _buildReportCard(
+                            title: 'শাখা বায়তুলমাল রিপোর্ট',
+                            subtitle: 'মাসিক আয়-ব্যয় রিপোর্ট',
+                            badge: 'মাসিক',
+                            badgeColor: const Color(0xFF0EA5E9),
+                            icon: Icons.account_balance_wallet_outlined,
+                            color: const Color(0xFF0EA5E9),
+                            cardBg: cardBg,
+                            borderColor: borderColor,
+                            textLight: textLight,
+                            textMuted: textMuted,
+                            onTap: () => Navigator.push(context,
+                                MaterialPageRoute(builder: (_) => const BaytulmalReportBookScreen())),
                           ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'ফরম নির্বাচন করুন। ভেতরের প্রিভিউ সেকশন থেকে PDF ডাউনলোড করতে পারবেন।',
-                            style: TextStyle(fontSize: 13, color: Color(0xFFA7F3D0)),
+                          const SizedBox(height: 12),
+
+                          // সাংগঠনিক রিপোর্ট
+                          _buildReportCard(
+                            title: 'শাখা সাংগঠনিক রিপোর্ট',
+                            subtitle: 'মাসিক সাংগঠনিক রিপোর্ট',
+                            badge: 'মাসিক',
+                            badgeColor: Colors.orange,
+                            icon: Icons.group_work_outlined,
+                            color: Colors.orange,
+                            cardBg: cardBg,
+                            borderColor: borderColor,
+                            textLight: textLight,
+                            textMuted: textMuted,
+                            onTap: () => Navigator.push(context,
+                                MaterialPageRoute(builder: (_) => const SanghotonikReportBookScreen())),
                           ),
+                          const SizedBox(height: 12),
+
+                          // জোনাল রিপোর্ট
+                          _buildReportCard(
+                            title: 'জোনাল রিপোর্ট',
+                            subtitle: 'জোনাল পর্যায়ের রিপোর্ট',
+                            badge: 'মাসিক',
+                            badgeColor: Colors.purple,
+                            icon: Icons.map_outlined,
+                            color: Colors.purple,
+                            cardBg: cardBg,
+                            borderColor: borderColor,
+                            textLight: textLight,
+                            textMuted: textMuted,
+                            onTap: () => Navigator.push(context,
+                                MaterialPageRoute(builder: (_) => const ZonalReportBookScreen())),
+                          ),
+                          const SizedBox(height: 24),
                         ],
-                      ),
+                      ],
                     ),
-
-                    const SizedBox(height: 20),
-
-                    // Report & Form Cards according to selected Majlis
-                    if (activeMajlis == 'খেলাফত মজলিস') ...[
-                      _buildReportItem(
-                        context,
-                        title: 'ব্যক্তিগত রিপোর্ট বই',
-                        subtitle: '৩১ দিনের দৈনন্দিন তৎপরতা ও আমলের রিপোর্ট',
-                        icon: Icons.person_outline_rounded,
-                        color: const Color(0xFFDC2626),
-                        cardBg: cardBg,
-                        textColor: textColor,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const master_report_book.ReportBookScreen(
-                              majlisType: MajlisType.khelafat,
-                            ),
-                          ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );িক',
+                          badgeColor: Colors.purple,
+                          icon: Icons.map_outlined,
+                          color: Colors.purple,
+                          cardBg: cardBg,
+                          borderColor: borderColor,
+                          textLight: textLight,
+                          textMuted: textMuted,
+                          onTap: () => Navigator.push(context,
+                              MaterialPageRoute(builder: (_) => const ZonalReportBookScreen())),
                         ),
-                      ),
-                      _buildReportItem(
-                        context,
-                        title: 'প্রাথমিক সদস্য ফরম',
-                        subtitle: 'সদস্য আবেদনের জন্য বিস্তারিত তথ্য ফরম',
-                        icon: Icons.badge_outlined,
-                        color: const Color(0xFF0284C7),
-                        cardBg: cardBg,
-                        textColor: textColor,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const khelafat_member.MemberFormScreen()),
-                        ),
-                      ),
-                      _buildReportItem(
-                        context,
-                        title: 'শাখা সাংগঠনিক রিপোর্ট',
-                        subtitle: 'মাসিক সাংগঠনিক সভা ও তৎপরতার রিপোর্ট',
-                        icon: Icons.assessment_outlined,
-                        color: const Color(0xFF059669),
-                        cardBg: cardBg,
-                        textColor: textColor,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const khelafat_branch.BranchReportScreen()),
-                        ),
-                      ),
-                      _buildReportItem(
-                        context,
-                        title: 'বায়তুলমাল রিপোর্ট',
-                        subtitle: 'মাসিক আয়-ব্যয় ও শাখা তহবিল হিসাব',
-                        icon: Icons.account_balance_wallet_outlined,
-                        color: const Color(0xFF16A34A),
-                        cardBg: cardBg,
-                        textColor: textColor,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const khelafat_baytulmal.BaytulmalReportPage()),
-                        ),
-                      ),
-                    ] else if (activeMajlis == 'ছাত্র মজলিস') ...[
-                      _buildReportItem(
-                        context,
-                        title: 'ছাত্র সদস্য ফরম',
-                        subtitle: 'প্রাথমিক সদস্য আবেদন ফরম',
-                        icon: Icons.badge_outlined,
-                        color: const Color(0xFF0284C7),
-                        cardBg: cardBg,
-                        textColor: textColor,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const student_member.MemberFormScreen()),
-                        ),
-                      ),
-                      _buildReportItem(
-                        context,
-                        title: 'ব্যক্তিগত রিপোর্ট বই',
-                        subtitle: 'দৈনিক ইবাদত ও দাওয়াতি কাজের হিসাব',
-                        icon: Icons.person_outline_rounded,
-                        color: const Color(0xFFDC2626),
-                        cardBg: cardBg,
-                        textColor: textColor,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const master_report_book.ReportBookScreen(
-                              majlisType: MajlisType.chatro,
-                            ),
-                          ),
-                        ),
-                      ),
-                      _buildReportItem(
-                        context,
-                        title: 'বায়তুলমাল রিপোর্ট',
-                        subtitle: 'ছাত্র বায়তুলমাল তহবিল রিপোর্ট',
-                        icon: Icons.account_balance_wallet_outlined,
-                        color: const Color(0xFF16A34A),
-                        cardBg: cardBg,
-                        textColor: textColor,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const student_baytulmal.BaytulmalReportPage()),
-                        ),
-                      ),
-                    ] else if (activeMajlis == 'যুব মজলিস') ...[
-                      _buildReportItem(
-                        context,
-                        title: 'যুব সদস্য ফরম',
-                        subtitle: 'সদস্য আবেদনপত্র',
-                        icon: Icons.badge_outlined,
-                        color: const Color(0xFF0284C7),
-                        cardBg: cardBg,
-                        textColor: textColor,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const youth_member.MemberFormScreen()),
-                        ),
-                      ),
-                      _buildReportItem(
-                        context,
-                        title: 'ব্যক্তিগত রিপোর্ট',
-                        subtitle: 'যুব সমাজের দৈনন্দিন তৎপরতার হিসাব',
-                        icon: Icons.person_outline_rounded,
-                        color: const Color(0xFFDC2626),
-                        cardBg: cardBg,
-                        textColor: textColor,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const master_report_book.ReportBookScreen(
-                              majlisType: MajlisType.jubo,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ] else if (activeMajlis == 'মহিলা মজলিস') ...[
-                      _buildReportItem(
-                        context,
-                        title: 'ব্যক্তিগত রিপোর্ট বই',
-                        subtitle: 'মহিলা মজলিসের দৈনন্দিন ট্র্যাকিং রিপোর্ট',
-                        icon: Icons.person_outline_rounded,
-                        color: const Color(0xFFE11D48),
-                        cardBg: cardBg,
-                        textColor: textColor,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const master_report_book.ReportBookScreen(
-                              majlisType: MajlisType.mohila,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ] else ...[
-                      _buildReportItem(
-                        context,
-                        title: 'সাধারণ রিপোর্ট বই',
-                        subtitle: 'সংগঠনের সার্বিক তৎপরতার সাধারণ রিপোর্ট',
-                        icon: Icons.assessment_outlined,
-                        color: const Color(0xFF0284C7),
-                        cardBg: cardBg,
-                        textColor: textColor,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => ReportBookScreen(majlisName: activeMajlis, reportType: 'General')),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -299,80 +236,86 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
     );
   }
 
-  void _exportPdf({required String title, required String majlis}) {
-    PdfExportService.printOrDownloadPdf(
-      title: title,
-      majlisName: majlis,
-      userName: 'মিজানুর রহমান',
-      period: 'চলতি মাস',
-      dataFields: {
-        'মজলিস': majlis,
-        'স্ট্যাটাস': 'সম্পূর্ণ',
-        'তারিখ': DateTime.now().toString().split(' ')[0],
-      },
-      comments: 'উক্ত রিপোর্টটি সিস্টেম থেকে পিডিএফ এক্সপোর্ট করা হয়েছে।',
-    );
-  }
-
-  Widget _buildReportItem(
-    BuildContext context, {
+  Widget _buildReportCard({
     required String title,
     required String subtitle,
+    required String badge,
+    required Color badgeColor,
     required IconData icon,
     required Color color,
     required Color cardBg,
-    required Color textColor,
+    required Color borderColor,
+    required Color textLight,
+    required Color textMuted,
     required VoidCallback onTap,
+    bool disabled = false,
   }) {
-    return Card(
-      color: cardBg,
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: disabled ? cardBg.withValues(alpha: 0.5) : cardBg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: disabled ? borderColor.withValues(alpha: 0.5) : borderColor,
+          ),
+          boxShadow: disabled ? [] : [
+            BoxShadow(
+              color: color.withValues(alpha: 0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Row(
           children: [
-            InkWell(
-              onTap: onTap,
-              child: Row(
+            // Icon
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: disabled ? 0.05 : 0.12),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: color.withValues(alpha: disabled ? 0.1 : 0.25)),
+              ),
+              child: Icon(icon, color: disabled ? color.withValues(alpha: 0.4) : color, size: 26),
+            ),
+            const SizedBox(width: 14),
+            // Text
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: color.withOpacity(0.12), shape: BoxShape.circle),
-                    child: Icon(icon, color: color, size: 24),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: textColor)),
-                        const SizedBox(height: 2),
-                        Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
-                      ],
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: disabled ? textMuted : textLight,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
                     ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(subtitle, style: TextStyle(color: textMuted, fontSize: 12)),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: badgeColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: badgeColor.withValues(alpha: 0.3)),
+                    ),
+                    child: Text(badge,
+                        style: TextStyle(color: badgeColor, fontSize: 11, fontWeight: FontWeight.w600)),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: onTap,
-                  icon: const Icon(Icons.description_outlined, size: 16),
-                  label: const Text('ফরম পূরণ ও বিবরণ', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: color,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    minimumSize: Size.zero,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                ),
-              ],
+            const SizedBox(width: 8),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 14,
+              color: disabled ? borderColor : textMuted,
             ),
           ],
         ),
@@ -381,4 +324,45 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
   }
 }
 
+class _HubBgPainter extends CustomPainter {
+  final bool isDark;
+  _HubBgPainter({required this.isDark});
 
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (!isDark) {
+      // Light background grid
+      final grid = Paint()..color = Colors.grey.withValues(alpha: 0.05)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+      for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
+      for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+      return;
+    }
+
+    final fill = Paint()..color = const Color(0xFF10B981).withValues(alpha: 0.025)..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.05), 130, fill);
+    canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.5), 100, fill);
+
+    final grid = Paint()..color = const Color(0xFF10B981).withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+    for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
+    for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+
+    final star = Paint()..color = const Color(0xFF1E3A52)..style = PaintingStyle.fill;
+    _drawStar(canvas, Offset(size.width * 0.85, size.height * 0.12), 18, star);
+    _drawStar(canvas, Offset(size.width * 0.08, size.height * 0.3), 12, star);
+  }
+
+  void _drawStar(Canvas canvas, Offset c, double r, Paint p) {
+    final path = Path();
+    for (int i = 0; i < 8; i++) {
+      final a = i * 45 * pi / 180;
+      final rad = i % 2 == 0 ? r : r * 0.45;
+      i == 0 ? path.moveTo(c.dx + rad * cos(a), c.dy + rad * sin(a))
+             : path.lineTo(c.dx + rad * cos(a), c.dy + rad * sin(a));
+    }
+    path.close();
+    canvas.drawPath(path, p);
+  }
+
+  @override
+  bool shouldRepaint(_HubBgPainter _) => false;
+}

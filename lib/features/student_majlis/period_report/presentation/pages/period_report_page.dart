@@ -6,7 +6,14 @@ import 'bloc/period_report_event.dart';
 import 'bloc/period_report_state.dart';
 
 class PeriodReportPage extends StatefulWidget {
-  const PeriodReportPage({super.key});
+  final String? initialMonth;
+  final String? initialSession;
+
+  const PeriodReportPage({
+    super.key,
+    this.initialMonth,
+    this.initialSession,
+  });
 
   @override
   State<PeriodReportPage> createState() => _PeriodReportPageState();
@@ -15,9 +22,9 @@ class PeriodReportPage extends StatefulWidget {
 class _PeriodReportPageState extends State<PeriodReportPage> {
   final _formKey = GlobalKey<FormState>();
   
-  String branch = '';
-  String month = '';
-  String session = '';
+  late String branch = '';
+  late String month = widget.initialMonth ?? '';
+  late String session = widget.initialSession ?? '';
 
   @override
   Widget build(BuildContext context) {
@@ -54,10 +61,12 @@ class _PeriodReportPageState extends State<PeriodReportPage> {
                     onSaved: (value) => branch = value ?? '',
                   ),
                   TextFormField(
+                    initialValue: month,
                     decoration: const InputDecoration(labelText: 'Month'),
                     onSaved: (value) => month = value ?? '',
                   ),
                   TextFormField(
+                    initialValue: session,
                     decoration: const InputDecoration(labelText: 'Session'),
                     onSaved: (value) => session = value ?? '',
                   ),

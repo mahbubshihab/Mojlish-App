@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:mojlish_app/core/error/failures.dart';
+import '../../../../../../core/error/failures.dart';
 import '../../domain/entities/khelafot_syllabus_entity.dart';
 import '../../domain/repositories/khelafot_syllabus_repository.dart';
 import '../datasources/khelafot_syllabus_remote_datasource.dart';
