@@ -4,6 +4,8 @@ import '../bloc/member_form_bloc.dart';
 import '../bloc/member_form_event.dart';
 import '../bloc/member_form_state.dart';
 import 'package:mojlish_app/features/youth_majlis/member_form/domain/entities/member_form_entity.dart';
+import 'package:mojlish_app/features/youth_majlis/member_form/data/datasources/member_form_remote_datasource.dart';
+import 'package:mojlish_app/features/youth_majlis/member_form/data/repositories/member_form_repository_impl.dart';
 
 class MemberFormScreen extends StatefulWidget {
   const MemberFormScreen({Key? key}) : super(key: key);
@@ -72,11 +74,19 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('প্রাথমিক সদস্য ফরম'),
+    return BlocProvider<MemberFormBloc>(
+      create: (_) => MemberFormBloc(
+        repository: MemberFormRepositoryImpl(
+          remoteDataSource: MemberFormRemoteDataSourceImpl(),
+        ),
       ),
-      body: BlocConsumer<MemberFormBloc, MemberFormState>(
+      child: Builder(
+        builder: (context) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('প্রাথমিক সদস্য ফরম'),
+            ),
+            body: BlocConsumer<MemberFormBloc, MemberFormState>(
         listener: (context, state) {
           if (state is MemberFormSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -207,6 +217,9 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
               ),
             ),
           );
+        },
+      ),
+    );
         },
       ),
     );

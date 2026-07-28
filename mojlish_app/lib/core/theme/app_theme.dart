@@ -18,6 +18,8 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       brightness: Brightness.light,
+      fontFamily: GoogleFonts.notoSansBengali().fontFamily,
+      fontFamilyFallback: const ['Noto Sans Bengali', 'Roboto', 'sans-serif'],
       primaryColor: primaryColor,
       scaffoldBackgroundColor: scaffoldBackground,
       colorScheme: ColorScheme.fromSeed(
@@ -43,6 +45,8 @@ class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark,
+      fontFamily: GoogleFonts.notoSansBengali().fontFamily,
+      fontFamilyFallback: const ['Noto Sans Bengali', 'Roboto', 'sans-serif'],
       primaryColor: primaryColor,
       scaffoldBackgroundColor: darkBg,
       colorScheme: ColorScheme.fromSeed(
