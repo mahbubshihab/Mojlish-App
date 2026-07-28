@@ -5,9 +5,11 @@ import 'package:mojlish_app/features/reports/shared/data/services/report_storage
 import 'package:mojlish_app/features/reports/personal_report/presentation/screens/personal_report_screen.dart';
 import 'package:mojlish_app/features/reports/personal_report/presentation/screens/daily_entry_screen.dart';
 import 'package:mojlish_app/features/reports/personal_report/data/models/majlis_personal_report_config.dart';
+import 'package:mojlish_app/features/reports/personal_report/data/models/daily_personal_entry.dart';
+import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import 'report_export_screen.dart';
 
-/// ব্যক্তিগত রিপোর্ট বই — বছর/মাস নেভিগেশন
+/// ব্যক্তিগত রিপোর্ট বই — বছর/মাস নেভিগেশন ও মাসিক PDF ডাউনলোড
 class ReportBookScreen extends StatefulWidget {
   final MajlisType majlisType;
 
@@ -23,10 +25,16 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
   late int _selectedMonth;
   int _filledDays = 0;
   int _daysInMonth = 30;
+  bool _isExporting = false;
 
   static const _monthShort = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  static const _monthNames = [
+    'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
+    'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর',
   ];
 
   @override
@@ -78,6 +86,98 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
     _loadStats();
   }
 
+  Future<void> _exportSelectedMonthPdf() async {
+    setState(() => _isExporting = true);
+    try {
+      final monthName = _monthNames[_selectedMonth - 1];
+      final config = MajlisPersonalReportConfig.getConfig(widget.majlisType);
+
+      final allEntries = await ReportStorageService.getAllPersonalEntries();
+      final monthEntries = <String, DailyPersonalEntry>{};
+      for (final e in allEntries.entries) {
+        try {
+          final d = DateTime.parse(e.key);
+          if (d.year == _selectedYear && d.month == _selectedMonth) {
+            monthEntries[e.key] = e.value;
+          }
+        } catch (_) {}
+      }
+
+      final List<List<String>> tableData = [];
+      final daysInMonth = DateTime(_selectedYear, _selectedMonth + 1, 0).day;
+
+      for (int day = 1; day <= daysInMonth; day++) {
+        final dateStr = '${_selectedYear}-${_selectedMonth.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+        final entry = monthEntries[dateStr];
+        final List<String> row = [_bn(day)];
+
+        for (final col in config.columns) {
+          if (entry == null) {
+            row.add('-');
+          } else {
+            switch (col.id) {
+              case 'quran':
+                row.add(entry.quranStudy.isNotEmpty ? entry.quranStudy : '${entry.quranSura} ${entry.quranAyah}'.trim());
+                break;
+              case 'hadith':
+                row.add(entry.hadithStudy.isNotEmpty ? entry.hadithStudy : '${entry.hadithCount} ${entry.hadithTopic}'.trim());
+                break;
+              case 'literature':
+                row.add(entry.islamicLiterature.isNotEmpty ? entry.islamicLiterature : entry.islamicLitPages);
+                break;
+              case 'jamaat':
+                row.add(entry.jamaatPrayer);
+                break;
+              case 'contact':
+              case 'kormi_contact':
+                row.add(entry.contactCount.isNotEmpty ? entry.contactCount : entry.memberContactCount);
+                break;
+              case 'dawat':
+                row.add(entry.dawah.isNotEmpty ? entry.dawah : entry.dawahMaterials);
+                break;
+              case 'time':
+              case 'sanghotonik_time':
+                row.add(entry.orgTime.isNotEmpty ? entry.orgTime : entry.timeService);
+                break;
+              case 'atmo':
+                row.add(entry.selfAnalysis);
+                break;
+              default:
+                row.add('-');
+            }
+          }
+        }
+        tableData.add(row);
+      }
+
+      final headers = ['তারিখ', ...config.columns.map((c) => c.title)];
+
+      await PdfExportService.printOrDownloadPdf(
+        title: '${config.name} — মাসিক ব্যক্তিগত রিপোর্ট',
+        majlisName: config.name,
+        userName: 'রিপোর্ট প্রদানকারী',
+        period: '$monthName ${_bn(_selectedYear)}',
+        dataFields: {
+          'মাস': monthName,
+          'বছর': _bn(_selectedYear),
+          'মোট দিন': _bn(daysInMonth),
+          'পূরণকৃত দিন': _bn(monthEntries.length),
+        },
+        tableHeaders: headers,
+        tableData: tableData,
+        comments: config.footerNotes.join(' | '),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('PDF এক্সপোর্টে সমস্যা হয়েছে: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -85,7 +185,6 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
       builder: (context, _) {
         final isDark = themeManager.isDarkMode;
 
-        // Theme colors
         final bg = isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF8FAFC);
         final appBarBg = isDark ? const Color(0xFF162032) : Colors.white;
         final cardBg = isDark ? const Color(0xFF162032) : Colors.white;
@@ -93,6 +192,8 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
         final textLight = isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
         final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
         const accentGreen = Color(0xFF10B981);
+
+        final selectedMonthName = _monthNames[_selectedMonth - 1];
 
         return Scaffold(
           backgroundColor: bg,
@@ -104,9 +205,9 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
               icon: Icon(Icons.arrow_back_ios_new, color: textLight, size: 20),
               onPressed: () => Navigator.pop(context),
             ),
-            title: const Text(
-              'রিপোর্ট বই',
-              style: TextStyle(color: accentGreen, fontSize: 18, fontWeight: FontWeight.bold),
+            title: Text(
+              '${widget.majlisType.displayName} — রিপোর্ট বই',
+              style: const TextStyle(color: accentGreen, fontSize: 16, fontWeight: FontWeight.bold),
             ),
             actions: [
               IconButton(
@@ -116,26 +217,6 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
                 ),
                 onPressed: () {
                   themeManager.toggleTheme();
-                },
-              ),
-              PopupMenuButton<String>(
-                icon: Icon(Icons.more_vert, color: textLight),
-                color: cardBg,
-                itemBuilder: (_) => [
-                  PopupMenuItem(
-                    value: 'export',
-                    child: Text('PDF এক্সপোর্ট', style: TextStyle(color: textLight)),
-                  ),
-                ],
-                onSelected: (val) {
-                  if (val == 'export') {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ReportExportScreen(reportType: 'personal'),
-                      ),
-                    );
-                  }
                 },
               ),
             ],
@@ -153,7 +234,31 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
                     _buildYearSelector(cardBg, borderColor, textLight),
                     const SizedBox(height: 16),
                     _buildMonthGrid(cardBg, borderColor, textLight, textMuted, accentGreen),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
+
+                    // Selected Month PDF Download Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        onPressed: _isExporting ? null : _exportSelectedMonthPdf,
+                        icon: _isExporting
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                            : const Icon(Icons.picture_as_pdf_rounded, size: 22),
+                        label: Text(
+                          '📥 $selectedMonthName ${_bn(_selectedYear)} এর PDF রিপোর্ট ডাউনলোড করুন',
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0284C7),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 3,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
                     _buildTodayButton(accentGreen),
                     const SizedBox(height: 24),
                   ],
@@ -170,6 +275,8 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
     double pct = _daysInMonth > 0 ? _filledDays / _daysInMonth : 0.0;
     pct = pct.clamp(0.0, 1.0);
 
+    final monthName = _monthNames[_selectedMonth - 1];
+
     return Container(
       decoration: BoxDecoration(
         color: cardBg,
@@ -183,9 +290,9 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: accentGreen.withValues(alpha: 0.15),
+              color: accentGreen.withOpacity(0.15),
               shape: BoxShape.circle,
-              border: Border.all(color: accentGreen.withValues(alpha: 0.4), width: 2),
+              border: Border.all(color: accentGreen.withOpacity(0.4), width: 2),
             ),
             child: Icon(Icons.menu_book, color: accentGreen, size: 26),
           ),
@@ -195,8 +302,8 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '[ব্যক্তিগত তথ্য আপডেট করুন।]',
-                  style: TextStyle(color: textLight.withValues(alpha: 0.8), fontSize: 14),
+                  '$monthName ${_bn(_selectedYear)} — রিপোর্ট অগ্রগতির হিসাব',
+                  style: TextStyle(color: textLight, fontSize: 14, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 6),
                 Row(children: [
@@ -210,7 +317,7 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
                         value: pct,
                         backgroundColor: borderColor,
                         valueColor: AlwaysStoppedAnimation(accentGreen),
-                        minHeight: 5,
+                        minHeight: 6,
                       ),
                     ),
                   ),
@@ -275,7 +382,15 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
     final isFuture = _selectedYear == _now.year && month > _now.month;
 
     return GestureDetector(
-      onTap: isFuture ? null : () => _openMonth(month),
+      onTap: isFuture
+          ? null
+          : () {
+              setState(() {
+                _selectedMonth = month;
+              });
+              _loadStats();
+              _openMonth(month);
+            },
       child: Container(
         width: 60,
         height: 60,
@@ -283,13 +398,13 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: isSelected
-              ? accentGreen.withValues(alpha: 0.15)
+              ? accentGreen.withOpacity(0.15)
               : isFuture
-                  ? cardBg.withValues(alpha: 0.2)
+                  ? cardBg.withOpacity(0.2)
                   : cardBg,
           border: Border.all(
             color: isSelected ? accentGreen : borderColor,
-            width: isSelected ? 2 : 1,
+            width: isSelected ? 2.5 : 1,
           ),
         ),
         alignment: Alignment.center,
@@ -299,7 +414,7 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
             color: isSelected
                 ? accentGreen
                 : isFuture
-                    ? textMuted.withValues(alpha: 0.4)
+                    ? textMuted.withOpacity(0.4)
                     : textLight,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             fontSize: 14,
@@ -336,36 +451,19 @@ class _BgPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (!isDark) {
-      final grid = Paint()..color = Colors.grey.withValues(alpha: 0.05)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+      final grid = Paint()..color = Colors.grey.withOpacity(0.05)..strokeWidth = 0.5..style = PaintingStyle.stroke;
       for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
       for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
       return;
     }
 
-    final fill = Paint()..color = const Color(0xFF10B981).withValues(alpha: 0.03)..style = PaintingStyle.fill;
+    final fill = Paint()..color = const Color(0xFF10B981).withOpacity(0.03)..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.08), 120, fill);
     canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.45), 90, fill);
 
-    final grid = Paint()..color = const Color(0xFF10B981).withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+    final grid = Paint()..color = const Color(0xFF10B981).withOpacity(0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
     for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
     for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-
-    final star = Paint()..color = const Color(0xFF1E3A52)..style = PaintingStyle.fill;
-    _drawStar(canvas, Offset(size.width * 0.85, size.height * 0.15), 18, star);
-    _drawStar(canvas, Offset(size.width * 0.1, size.height * 0.35), 14, star);
-  }
-
-  void _drawStar(Canvas canvas, Offset c, double r, Paint p) {
-    final path = Path();
-    for (int i = 0; i < 8; i++) {
-      final a = i * 45 * pi / 180;
-      final rad = i % 2 == 0 ? r : r * 0.45;
-      final x = c.dx + rad * cos(a);
-      final y = c.dy + rad * sin(a);
-      i == 0 ? path.moveTo(x, y) : path.lineTo(x, y);
-    }
-    path.close();
-    canvas.drawPath(path, p);
   }
 
   @override
