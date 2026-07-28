@@ -1,5 +1,4 @@
-/// StudentPeriodReport Entity
-class StudentPeriodReportEntity {
-  final String id;
-  const StudentPeriodReportEntity({required this.id});
-}
+import '../../data/models/period_report_model.dart';
+
+/// StudentPeriodReport Entity (Typedef or Wrapper over StudentPeriodReportModel)
+typedef StudentPeriodReportEntity = StudentPeriodReportModel;

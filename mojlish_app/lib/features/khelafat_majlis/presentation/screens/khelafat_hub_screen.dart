@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/app_theme.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
-import 'package:mojlish_app/features/syllabi/khelafot_syllabus/presentation/screens/khelafot_syllabus_screen.dart';
-import 'package:mojlish_app/features/reports/general_report/presentation/screens/report_book_screen.dart';
-import 'package:mojlish_app/features/reports/personal_report/data/models/majlis_personal_report_config.dart';
-import 'package:mojlish_app/features/reports/sanghotonik_report/presentation/screens/sanghotonik_report_book_screen.dart';
-import 'package:mojlish_app/features/reports/baytulmal_report/presentation/screens/baytulmal_report_book_screen.dart';
+import 'package:mojlish_app/features/common/syllabi/khelafot_syllabus/presentation/screens/khelafot_syllabus_screen.dart';
 
-import 'khelafat_overview_screen.dart';
-import 'khelafat_rules_screen.dart';
-import 'khelafat_member_form_screen.dart';
-import 'khelafat_branch_plan_screen.dart';
+import '../../overview/presentation/screens/overview_screen.dart';
+import '../../executive_rules/presentation/screens/executive_rules_screen.dart';
+import '../../member_form/presentation/screens/member_form_screen.dart';
+import '../../branch_plan/presentation/screens/branch_plan_screen.dart';
+import '../../branch_report/presentation/screens/branch_report_screen.dart';
+import '../../baytulmal_report/presentation/screens/baytulmal_report_screen.dart';
+import '../../personal_report/presentation/screens/personal_report_screen.dart';
 
 /// Khelafat Majlis Central Hub Screen
 class KhelafatHubScreen extends StatelessWidget {
@@ -35,19 +34,9 @@ class KhelafatHubScreen extends StatelessWidget {
               children: [
                 Icon(Icons.account_balance_rounded, color: AppTheme.primaryColor),
                 SizedBox(width: 8),
-                Text(
-                  'খেলাফত মজলিস হাব',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                ),
+                Text('খেলাফত মজলিস হাব', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               ],
             ),
-            actions: [
-              IconButton(
-                icon: Icon(isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
-                onPressed: () => themeManager.toggleTheme(),
-              ),
-              const SizedBox(width: 8),
-            ],
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
@@ -60,33 +49,22 @@ class KhelafatHubScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [Color(0xFF059669), Color(0xFF047857)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'খেলাফত মজলিস',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
+                      Text('খেলাফত মজলিস', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
                       SizedBox(height: 4),
-                      Text(
-                        'খেলাফত প্রতিষ্ঠার লক্ষ্যে গণ-আন্দোলন গড়ে তুলুন',
-                        style: TextStyle(fontSize: 13, color: Color(0xFFA7F3D0), fontWeight: FontWeight.w500),
-                      ),
+                      Text('খেলাফত প্রতিষ্ঠার লক্ষ্যে গণ-আন্দোলন গড়ে তুলুন', style: TextStyle(fontSize: 13, color: Color(0xFFA7F3D0))),
                     ],
                   ),
                 ),
 
                 const SizedBox(height: 24),
 
-                const Text(
-                  '৭টি মূল সাব-ফিচারসমূহ:',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: AppTheme.primaryColor),
-                ),
+                const Text('৭টি সাব-ফিচারসমূহ:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: AppTheme.primaryColor)),
                 const SizedBox(height: 14),
 
                 GridView.count(
@@ -113,7 +91,7 @@ class KhelafatHubScreen extends StatelessWidget {
                       color: const Color(0xFF0D9488),
                       cardBg: cardBg,
                       textColor: textColor,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const KhelafatRulesScreen())),
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const KhelafatExecutiveRulesScreen())),
                     ),
                     _buildHubCard(
                       title: 'প্রাথমিক সদস্য ফরম',
@@ -140,7 +118,7 @@ class KhelafatHubScreen extends StatelessWidget {
                       color: const Color(0xFFD97706),
                       cardBg: cardBg,
                       textColor: textColor,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const KhelafatSyllabusScreen())),
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => KhelafatSyllabusScreen())),
                     ),
                     _buildHubCard(
                       title: 'ব্যক্তিগত রিপোর্ট',
@@ -149,10 +127,7 @@ class KhelafatHubScreen extends StatelessWidget {
                       color: const Color(0xFFDC2626),
                       cardBg: cardBg,
                       textColor: textColor,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => ReportBookScreen(majlisType: MajlisTypeExtension.fromString('খেলাফত মজলিস'))),
-                      ),
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const KhelafatPersonalReportScreen())),
                     ),
                     _buildHubCard(
                       title: 'শাখা সাংগঠনিক রিপোর্ট',
@@ -161,7 +136,7 @@ class KhelafatHubScreen extends StatelessWidget {
                       color: const Color(0xFF0284C7),
                       cardBg: cardBg,
                       textColor: textColor,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SanghotonikReportBookScreen())),
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const KhelafatBranchReportScreen())),
                     ),
                     _buildHubCard(
                       title: 'শাখা বায়তুলমাল রিপোর্ট',
@@ -170,12 +145,10 @@ class KhelafatHubScreen extends StatelessWidget {
                       color: const Color(0xFF16A34A),
                       cardBg: cardBg,
                       textColor: textColor,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BaytulmalReportBookScreen())),
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const KhelafatBaytulmalReportScreen())),
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 24),
               ],
             ),
           ),
