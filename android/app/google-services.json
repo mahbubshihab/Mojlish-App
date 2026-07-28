@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "770946894742",
+    "project_id": "king-classes-13",
+    "storage_bucket": "king-classes-13.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:770946894742:android:33c3a8248d9c496c876bb7",
+        "android_client_info": {
+          "package_name": "com.mydulislam.amolnama"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "770946894742-vt89e6cpp4ru0bpmtqqt3das19kd5l4n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBchhbf77EmaldggoEOUE1ZWX_qCFTVLCA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "770946894742-vt89e6cpp4ru0bpmtqqt3das19kd5l4n.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "770946894742-1khs1vktmofi0gk00o5udrnde7ltgrla.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.khelafatmojlish.mojlishApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:770946894742:android:7cc2b7e97d45d9e4876bb7",
+        "android_client_info": {
+          "package_name": "org.khelafatmojlish.mojlish_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "770946894742-vt89e6cpp4ru0bpmtqqt3das19kd5l4n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBchhbf77EmaldggoEOUE1ZWX_qCFTVLCA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "770946894742-vt89e6cpp4ru0bpmtqqt3das19kd5l4n.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "770946894742-1khs1vktmofi0gk00o5udrnde7ltgrla.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.khelafatmojlish.mojlishApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
