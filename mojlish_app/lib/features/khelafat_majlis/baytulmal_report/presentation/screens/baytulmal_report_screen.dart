@@ -4,6 +4,8 @@ import '../bloc/baytulmal_report_bloc.dart';
 import '../bloc/baytulmal_report_event.dart';
 import '../bloc/baytulmal_report_state.dart';
 import '../../domain/entities/baytulmal_report_entity.dart';
+import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/data/datasources/baytulmal_report_remote_datasource.dart';
+import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/data/repositories/baytulmal_report_repository_impl.dart';
 
 class BaytulmalReportPage extends StatefulWidget {
   const BaytulmalReportPage({super.key});
@@ -154,11 +156,17 @@ class _BaytulmalReportPageState extends State<BaytulmalReportPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('বায়তুলমাল রিপোর্ট (খেলাফত মজলিস)'),
+    return BlocProvider<BaytulmalReportBloc>(
+      create: (_) => BaytulmalReportBloc(
+        repository: BaytulmalReportRepositoryImpl(
+          remoteDataSource: BaytulmalReportRemoteDataSourceImpl(),
+        ),
       ),
-      body: BlocConsumer<BaytulmalReportBloc, BaytulmalReportState>(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('বায়তুলমাল রিপোর্ট (খেলাফত মজলিস)'),
+        ),
+        body: BlocConsumer<BaytulmalReportBloc, BaytulmalReportState>(
         listener: (context, state) {
           if (state is BaytulmalReportSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -237,6 +245,7 @@ class _BaytulmalReportPageState extends State<BaytulmalReportPage> {
           );
         },
       ),
+    ),
     );
   }
 }

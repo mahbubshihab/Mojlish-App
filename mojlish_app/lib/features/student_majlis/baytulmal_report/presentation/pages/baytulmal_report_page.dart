@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/baytulmal_report_bloc.dart';
 import '../bloc/baytulmal_report_event.dart';
 import '../bloc/baytulmal_report_state.dart';
+import 'package:mojlish_app/features/student_majlis/baytulmal_report/data/datasources/baytulmal_report_remote_datasource.dart';
+import 'package:mojlish_app/features/student_majlis/baytulmal_report/data/repositories/baytulmal_report_repository_impl.dart';
 
 class BaytulmalReportPage extends StatefulWidget {
   const BaytulmalReportPage({Key? key}) : super(key: key);
@@ -40,43 +42,50 @@ class _BaytulmalReportPageState extends State<BaytulmalReportPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('বায়তুলমাল রিপোর্ট'),
+    return BlocProvider<BaytulmalReportBloc>(
+      create: (_) => BaytulmalReportBloc(
+        repository: BaytulmalReportRepositoryImpl(
+          remoteDataSource: BaytulmalReportRemoteDataSourceImpl(),
+        ),
       ),
-      body: BlocListener<BaytulmalReportBloc, BaytulmalReportState>(
-        listener: (context, state) {
-          if (state is BaytulmalReportSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Report submitted successfully!')),
-            );
-            Navigator.pop(context);
-          } else if (state is BaytulmalReportFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Failed: ${state.error}')),
-            );
-          }
-        },
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildHeaderSection(),
-                const SizedBox(height: 24),
-                _buildIncomeSection(),
-                const SizedBox(height: 24),
-                _buildExpenditureSection(),
-                const SizedBox(height: 24),
-                _buildSignatureSection(),
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: _submitForm,
-                  child: const Text('Submit Report'),
-                ),
-              ],
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('বায়তুলমাল রিপোর্ট'),
+        ),
+        body: BlocListener<BaytulmalReportBloc, BaytulmalReportState>(
+          listener: (context, state) {
+            if (state is BaytulmalReportSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Report submitted successfully!')),
+              );
+              Navigator.pop(context);
+            } else if (state is BaytulmalReportFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed: ${state.error}')),
+              );
+            }
+          },
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHeaderSection(),
+                  const SizedBox(height: 24),
+                  _buildIncomeSection(),
+                  const SizedBox(height: 24),
+                  _buildExpenditureSection(),
+                  const SizedBox(height: 24),
+                  _buildSignatureSection(),
+                  const SizedBox(height: 32),
+                  ElevatedButton(
+                    onPressed: _submitForm,
+                    child: const Text('Submit Report'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
