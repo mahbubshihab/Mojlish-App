@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mojlish_app/core/theme/app_theme.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
-import 'package:mojlish_app/features/common/resources/ahobban_mohila/data/models/ahobban_data.dart';
+import 'package:mojlish_app/features/women_majlis/resources/ahobban_mohila/data/models/ahobban_data.dart';
 
 /// বাংলাদেশ ইসলামী মহিলা মজলিস "আমাদের আহ্বান" (Call Manifesto) রিডার স্ক্রিন
 class AhobbanMohilaScreen extends StatefulWidget {

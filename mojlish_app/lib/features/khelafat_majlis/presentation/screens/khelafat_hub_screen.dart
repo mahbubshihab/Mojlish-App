@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/app_theme.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
-import 'package:mojlish_app/features/common/syllabi/khelafot_syllabus/presentation/pages/khelafot_syllabus_page.dart';
+import 'package:mojlish_app/features/khelafat_majlis/syllabi/khelafot_syllabus/presentation/pages/khelafot_syllabus_page.dart';
 
 import '../../overview/presentation/pages/overview_page.dart';
 import '../../executive_rules/presentation/screens/executive_rules_screen.dart';

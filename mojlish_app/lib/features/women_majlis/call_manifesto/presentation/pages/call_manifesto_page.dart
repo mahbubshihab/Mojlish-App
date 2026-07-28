@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mojlish_app/features/common/resources/ahobban_mohila/presentation/screens/ahobban_screen.dart';
+import 'package:mojlish_app/features/women_majlis/resources/ahobban_mohila/presentation/screens/ahobban_screen.dart';
 
 /// Women Majlis Call Manifesto Page
 class CallManifestoPage extends StatelessWidget {
