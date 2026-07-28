@@ -1,4 +1,4 @@
-import '../entities/personal_report.dart';
+import 'package:mojlish_app/features/youth_majlis/personal_report/domain/entities/personal_report.dart';
 
 class YouthMajlisDailyActivityModel extends YouthMajlisDailyActivity {
   const YouthMajlisDailyActivityModel({

@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:mojlish_app/core/error/failures.dart';
-import '../../domain/entities/personal_report.dart';
+import 'package:mojlish_app/features/youth_majlis/personal_report/domain/entities/personal_report.dart';
 import '../../domain/repositories/personal_report_repository.dart';
 import '../datasources/personal_report_remote_datasource.dart';
 import '../models/personal_report_model.dart';

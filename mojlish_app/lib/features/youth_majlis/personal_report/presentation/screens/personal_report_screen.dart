@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entities/personal_report.dart';
+import 'package:mojlish_app/features/youth_majlis/personal_report/domain/entities/personal_report.dart';
 import '../bloc/personal_report_bloc.dart';
 import '../bloc/personal_report_event.dart';
 import '../bloc/personal_report_state.dart';
+import 'package:mojlish_app/features/youth_majlis/personal_report/data/datasources/personal_report_remote_datasource.dart';
+import 'package:mojlish_app/features/youth_majlis/personal_report/data/repositories/personal_report_repository_impl.dart';
 
 class YouthMajlisPersonalReportPage extends StatefulWidget {
   const YouthMajlisPersonalReportPage({Key? key}) : super(key: key);
@@ -49,11 +51,19 @@ class _YouthMajlisPersonalReportPageState extends State<YouthMajlisPersonalRepor
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('মাসিক ব্যক্তিগত তৎপরতার রিপোর্ট'),
+    return BlocProvider<YouthMajlisPersonalReportBloc>(
+      create: (_) => YouthMajlisPersonalReportBloc(
+        repository: YouthMajlisPersonalReportRepositoryImpl(
+          remoteDataSource: YouthMajlisPersonalReportRemoteDataSourceImpl(),
+        ),
       ),
-      body: BlocConsumer<YouthMajlisPersonalReportBloc, YouthMajlisPersonalReportState>(
+      child: Builder(
+        builder: (context) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('মাসিক ব্যক্তিগত তৎপরতার রিপোর্ট'),
+            ),
+            body: BlocConsumer<YouthMajlisPersonalReportBloc, YouthMajlisPersonalReportState>(
         listener: (context, state) {
           if (state is PersonalReportSaved) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -114,6 +124,9 @@ class _YouthMajlisPersonalReportPageState extends State<YouthMajlisPersonalRepor
                 ],
               ),
             ),
+          );
+        },
+      ),
           );
         },
       ),
