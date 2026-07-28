@@ -24,7 +24,7 @@ class StudentPeriodPdfService {
         margin: const pw.EdgeInsets.all(16),
         build: (pw.Context context) {
           return pw.Column(
-            cross: pw.CrossAxisAlignment.center,
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
               pw.Text('বিসমিল্লাহির রাহমানির রাহীম', style: pw.TextStyle(font: fontRegular, fontSize: 9)),
               pw.SizedBox(height: 2),
@@ -43,7 +43,7 @@ class StudentPeriodPdfService {
                   border: pw.Border.all(color: PdfColors.blue900, width: 1),
                 ),
                 child: pw.Row(
-                  mainpw: pw.MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text('শাখা : ${report.branch}', style: textStyleBoldSmall),
                     pw.Text('মাস/সময়কাল : ${report.periodName}', style: textStyleBoldSmall),
@@ -84,7 +84,7 @@ class StudentPeriodPdfService {
               ),
               pw.SizedBox(height: 2),
               pw.Row(
-                cross: pw.CrossAxisAlignment.start,
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Expanded(
                     child: pw.TableHelper.fromTextArray(
@@ -130,7 +130,7 @@ class StudentPeriodPdfService {
                 padding: const pw.EdgeInsets.all(4),
                 decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400)),
                 child: pw.Column(
-                  cross: pw.CrossAxisAlignment.start,
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text('শাখার সংবাদ প্রকাশিত হয়েছে (প্রিন্ট/ইলেকট্রনিক/অনলাইন): ${report.newsPublishedCount} | বার দেয়ালিকা প্রকাশ: ${report.wallMagazineCount} | দেয়াল লিখন: ${report.wallWritingCount}', style: textStyleSmall),
                     pw.SizedBox(height: 2),
@@ -181,7 +181,7 @@ class StudentPeriodPdfService {
         margin: const pw.EdgeInsets.all(16),
         build: (pw.Context context) {
           return pw.Column(
-            cross: pw.CrossAxisAlignment.center,
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
               pw.Text(
                 '${report.periodType} রিপোর্ট (${report.periodName}) - পৃষ্ঠা ২',
@@ -196,7 +196,7 @@ class StudentPeriodPdfService {
               ),
               pw.SizedBox(height: 2),
               pw.Row(
-                cross: pw.CrossAxisAlignment.start,
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Expanded(
                     child: pw.TableHelper.fromTextArray(
@@ -270,14 +270,14 @@ class StudentPeriodPdfService {
 
               // সেকশন ৬ & ৭: পাঠাগার ও বায়তুলমাল
               pw.Row(
-                cross: pw.CrossAxisAlignment.start,
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Expanded(
                     child: pw.Container(
                       padding: const pw.EdgeInsets.all(4),
                       decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400)),
                       child: pw.Column(
-                        cross: pw.CrossAxisAlignment.start,
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
                         children: [
                           pw.Text('৬. পাঠাগার', style: textStyleBoldSmall),
                           pw.Text('সংখ্যা: ${report.libraryCount} | বই সংখ্যা: ${report.bookCount}', style: textStyleSmall),
@@ -293,7 +293,7 @@ class StudentPeriodPdfService {
                       padding: const pw.EdgeInsets.all(4),
                       decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400)),
                       child: pw.Column(
-                        cross: pw.CrossAxisAlignment.start,
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
                         children: [
                           pw.Text('৭. বায়তুলমাল', style: textStyleBoldSmall),
                           pw.Text('আয়: ৳${report.totalIncome} | ব্যয়: ৳${report.totalExpense}', style: textStyleSmall),
@@ -312,7 +312,7 @@ class StudentPeriodPdfService {
                 padding: const pw.EdgeInsets.all(4),
                 decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400)),
                 child: pw.Column(
-                  cross: pw.CrossAxisAlignment.start,
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text('৮. প্রকাশনা: মোট ক্রয়: ৳${report.pubTotalPurchase} | পরিশোধ: ৳${report.pubRepaid} | বকেয়া: ৳${report.pubDue} | বকেয়া পরিশোধ: ৳${report.pubDueRepaid}', style: textStyleSmall),
                     pw.SizedBox(height: 2),
@@ -328,7 +328,7 @@ class StudentPeriodPdfService {
                 padding: const pw.EdgeInsets.all(4),
                 decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400)),
                 child: pw.Column(
-                  cross: pw.CrossAxisAlignment.start,
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text('১০. যোগাযোগ: সার্কুলার প্রাপ্ত: ${report.circularReceived.count} (কপি: ${report.circularReceived.copyCount}) | সার্কুলার প্রেরিত: ${report.circularSent.count} | চিঠি প্রাপ্ত: ${report.letterReceived.count} | চিঠি প্রেরিত: ${report.letterSent.count}', style: textStyleSmall),
                     pw.SizedBox(height: 2),
@@ -342,7 +342,7 @@ class StudentPeriodPdfService {
 
               // স্বাক্ষর
               pw.Row(
-                mainpw: pw.MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text('তারিখ: ${report.presidentSignatureDate}', style: textStyleSmall),
                   pw.Column(

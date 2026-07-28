@@ -289,7 +289,7 @@ class _JoinOrganizationScreenState extends State<JoinOrganizationScreen> {
                         Expanded(
                           child: ElevatedButton.icon(
                             onPressed: () async {
-                              await PdfGeneratorService.generateMembershipPdf(
+                              // await PdfGeneratorService.generateMembershipPdf(
                                 name: _nameCtrl.text.trim(),
                                 fatherName: _fatherNameCtrl.text.trim(),
                                 nidNo: _nidCtrl.text.trim(),

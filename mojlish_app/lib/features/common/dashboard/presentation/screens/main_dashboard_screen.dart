@@ -195,7 +195,7 @@ class MainDashboardScreen extends StatelessWidget {
                       borderColor: borderColor,
                       textTitle: textTitle,
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => KhelafatSyllabusScreen()));
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const SizedBox()));
                       },
                     ),
                     _buildMenuCard(
