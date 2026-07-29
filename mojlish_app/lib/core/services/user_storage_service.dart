@@ -75,6 +75,22 @@ class UserStorageService {
     return prefs.getString(_selectedMajlisKey) ?? 'খেলাফত মজলিস';
   }
 
+  /// নির্বাচিত মজলিস লোড করা (Alias for active majlis)
+  static Future<String?> getActiveMajlis() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_selectedMajlisKey);
+  }
+
+  static Future<void> saveActiveMajlis(String majlisName) async {
+    await saveSelectedMajlis(majlisName);
+  }
+
+  /// ইউজার অ্যাকাউন্ট সংক্রান্ত সকল লোকাল স্টোরেজ ক্লিয়ার করা
+  static Future<void> clearAll() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+  }
+
   /// ইউজার পূর্বে কোনো মজলিস সিলেক্ট করেছে কিনা চেক করা
   static Future<bool> hasSavedMajlis() async {
     final prefs = await SharedPreferences.getInstance();

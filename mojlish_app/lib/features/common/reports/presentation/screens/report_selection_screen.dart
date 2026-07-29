@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 import 'report_book_screen.dart';
-import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentation/screens/baytulmal_report_book_screen.dart';
-import 'package:mojlish_app/features/common/reports/sanghotonik_report/presentation/screens/sanghotonik_report_book_screen.dart';
-import 'package:mojlish_app/features/common/reports/zonal_report/presentation/screens/zonal_report_book_screen.dart';
 
 import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
 
@@ -149,79 +146,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                             );
                             _loadStats();
                           },
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Show other organizational reports ONLY if NOT Sromik Majlis
-                        if (!isSromik) ...[
-                          // বায়তুলমাল রিপোর্ট
-                          _buildReportCard(
-                            title: 'শাখা বায়তুলমাল রিপোর্ট',
-                            subtitle: 'মাসিক আয়-ব্যয় রিপোর্ট',
-                            badge: 'মাসিক',
-                            badgeColor: const Color(0xFF0EA5E9),
-                            icon: Icons.account_balance_wallet_outlined,
-                            color: const Color(0xFF0EA5E9),
-                            cardBg: cardBg,
-                            borderColor: borderColor,
-                            textLight: textLight,
-                            textMuted: textMuted,
-                            onTap: () => Navigator.push(context,
-                                MaterialPageRoute(builder: (_) => const BaytulmalReportBookScreen())),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // সাংগঠনিক রিপোর্ট
-                          _buildReportCard(
-                            title: 'শাখা সাংগঠনিক রিপোর্ট',
-                            subtitle: 'মাসিক সাংগঠনিক রিপোর্ট',
-                            badge: 'মাসিক',
-                            badgeColor: Colors.orange,
-                            icon: Icons.group_work_outlined,
-                            color: Colors.orange,
-                            cardBg: cardBg,
-                            borderColor: borderColor,
-                            textLight: textLight,
-                            textMuted: textMuted,
-                            onTap: () => Navigator.push(context,
-                                MaterialPageRoute(builder: (_) => const SanghotonikReportBookScreen())),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // জোনাল রিপোর্ট
-                          _buildReportCard(
-                            title: 'জোনাল রিপোর্ট',
-                            subtitle: 'জোনাল পর্যায়ের রিপোর্ট',
-                            badge: 'মাসিক',
-                            badgeColor: Colors.purple,
-                            icon: Icons.map_outlined,
-                            color: Colors.purple,
-                            cardBg: cardBg,
-                            borderColor: borderColor,
-                            textLight: textLight,
-                            textMuted: textMuted,
-                            onTap: () => Navigator.push(context,
-                                MaterialPageRoute(builder: (_) => const ZonalReportBookScreen())),
-                          ),
-                          const SizedBox(height: 24),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );িক',
-                          badgeColor: Colors.purple,
-                          icon: Icons.map_outlined,
-                          color: Colors.purple,
-                          cardBg: cardBg,
-                          borderColor: borderColor,
-                          textLight: textLight,
-                          textMuted: textMuted,
-                          onTap: () => Navigator.push(context,
-                              MaterialPageRoute(builder: (_) => const ZonalReportBookScreen())),
                         ),
                         const SizedBox(height: 24),
                       ],

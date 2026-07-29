@@ -83,7 +83,6 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
   Future<void> _handleProceed() async {
     final majlis = _selectedOrg ?? 'খেলাফত মজলিস';
     await _authService.updateActiveMajlis(majlis);
-    themeManager.setMajlisTheme(majlis);
 
     if (mounted) {
       Navigator.pushReplacement(
@@ -122,7 +121,7 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
                   child: Row(
-                    mainAxisAlignment: Main.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
                         children: [
@@ -357,8 +356,8 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
                             ),
                             elevation: 4,
                           ),
-                          child: const Row(
-                            mainAxisAlignment: Main.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 'ড্যাশবোর্ডে প্রবেশ করুন',

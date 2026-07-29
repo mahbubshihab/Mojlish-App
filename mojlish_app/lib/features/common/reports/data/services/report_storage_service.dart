@@ -3,48 +3,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/daily_personal_entry.dart';
-import '../models/majlis_personal_report_config.dart';
 
-/// লোকাল স্টোরেজ সার্ভিস — SharedPreferences দিয়ে রিপোর্ট সেভ ও লোড করে
+/// লোকাল স্টোরেজ ও ফায়ারস্টোর সিঙ্ক সার্ভিস — SharedPreferences ও Cloud Firestore
 class ReportStorageService {
   static const String _personalReportKey = 'personal_reports';
-  static const String _baytulmalReportKey = 'baytulmal_reports';
-  static const String _sanghotonikReportKey = 'sanghotonik_reports';
-  static const String _zonalReportKey = 'zonal_reports';
-  static const String _commentsKey = 'monthly_comments';
-  static const String _personalPlanKey = 'personal_plans';
 
   // ===========================
-  // ব্যক্তিগত মাসিক পরিকল্পনা (Porikolpona) — CRUD
-  // ===========================
-
-  static Future<void> saveMonthlyPlan(MonthlyPlan plan) async {
-    final prefs = await SharedPreferences.getInstance();
-    final allData = await _getAllMonthlyPlans();
-    final key = '${plan.year}-${plan.month}';
-    allData[key] = plan;
-    final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
-    await prefs.setString(_personalPlanKey, jsonEncode(encoded));
-  }
-
-  static Future<MonthlyPlan?> getMonthlyPlan(int year, int month) async {
-    final all = await _getAllMonthlyPlans();
-    final key = '$year-$month';
-    return all[key];
-  }
-
-  static Future<Map<String, MonthlyPlan>> _getAllMonthlyPlans() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_personalPlanKey);
-    if (raw == null) return {};
-    final decoded = jsonDecode(raw) as Map<String, dynamic>;
-    return decoded.map(
-      (k, v) => MapEntry(k, MonthlyPlan.fromJson(v as Map<String, dynamic>)),
-    );
-  }
-
-  // ===========================
-  // ব্যক্তিগত রিপোর্ট — CRUD
+  // ব্যক্তিগত রিপোর্ট — CRUD & Offline Firestore Sync
   // ===========================
 
   static Future<void> savePersonalEntry(DailyPersonalEntry entry) async {
@@ -110,133 +75,6 @@ class ReportStorageService {
       } catch (_) {}
     }
     return count;
-  }
-
-  // ===========================
-  // বায়তুলমাল রিপোর্ট — CRUD
-  // ===========================
-
-  static Future<void> saveBaytulmalEntry(BaytulmalReportEntry entry) async {
-    final prefs = await SharedPreferences.getInstance();
-    final allData = await getAllBaytulmalEntries();
-    final key = '${entry.year}-${entry.month}';
-    allData[key] = entry;
-    final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
-    await prefs.setString(_baytulmalReportKey, jsonEncode(encoded));
-  }
-
-  static Future<Map<String, BaytulmalReportEntry>> getAllBaytulmalEntries() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_baytulmalReportKey);
-    if (raw == null) return {};
-    final decoded = jsonDecode(raw) as Map<String, dynamic>;
-    return decoded.map(
-      (k, v) => MapEntry(k, BaytulmalReportEntry.fromJson(v as Map<String, dynamic>)),
-    );
-  }
-
-  static Future<BaytulmalReportEntry?> getBaytulmalEntry(int year, int month) async {
-    final all = await getAllBaytulmalEntries();
-    final key = '$year-${month.toString().padLeft(2, '0')}';
-    return all[key];
-  }
-
-  // ===========================
-  // সাংগঠনিক রিপোর্ট — CRUD
-  // ===========================
-
-  static Future<void> saveSanghotonikEntry(SanghotonikReportEntry entry) async {
-    final prefs = await SharedPreferences.getInstance();
-    final allData = await getAllSanghotonikEntries();
-    final key = '${entry.year}-${entry.month}';
-    allData[key] = entry;
-    final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
-    await prefs.setString(_sanghotonikReportKey, jsonEncode(encoded));
-  }
-
-  static Future<Map<String, SanghotonikReportEntry>> getAllSanghotonikEntries() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_sanghotonikReportKey);
-    if (raw == null) return {};
-    final decoded = jsonDecode(raw) as Map<String, dynamic>;
-    return decoded.map(
-      (k, v) => MapEntry(k, SanghotonikReportEntry.fromJson(v as Map<String, dynamic>)),
-    );
-  }
-
-  static Future<SanghotonikReportEntry?> getSanghotonikEntry(int year, int month) async {
-    final all = await getAllSanghotonikEntries();
-    final key = '$year-${month.toString().padLeft(2, '0')}';
-    return all[key];
-  }
-
-  // ===========================
-  // জোনাল রিপোর্ট — CRUD
-  // ===========================
-
-  static Future<void> saveZonalEntry(ZonalReportEntry entry) async {
-    final prefs = await SharedPreferences.getInstance();
-    final allData = await getAllZonalEntries();
-    final key = '${entry.year}-${entry.month}';
-    allData[key] = entry;
-    final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
-    await prefs.setString(_zonalReportKey, jsonEncode(encoded));
-  }
-
-  static Future<Map<String, ZonalReportEntry>> getAllZonalEntries() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_zonalReportKey);
-    if (raw == null) return {};
-    final decoded = jsonDecode(raw) as Map<String, dynamic>;
-    return decoded.map(
-      (k, v) => MapEntry(k, ZonalReportEntry.fromJson(v as Map<String, dynamic>)),
-    );
-  }
-
-  static Future<ZonalReportEntry?> getZonalEntry(int year, int month) async {
-    final all = await getAllZonalEntries();
-    final key = '$year-${month.toString().padLeft(2, '0')}';
-    return all[key];
-  }
-
-  // ===========================
-  // মাসিক মন্তব্য — CRUD
-  // ===========================
-
-  static Future<void> saveComment(MonthlyComment comment) async {
-    final prefs = await SharedPreferences.getInstance();
-    final all = await _getAllComments();
-    all[comment.id] = comment;
-    final encoded = all.map((k, v) => MapEntry(k, v.toJson()));
-    await prefs.setString(_commentsKey, jsonEncode(encoded));
-  }
-
-  static Future<void> deleteComment(String id) async {
-    final prefs = await SharedPreferences.getInstance();
-    final all = await _getAllComments();
-    all.remove(id);
-    final encoded = all.map((k, v) => MapEntry(k, v.toJson()));
-    await prefs.setString(_commentsKey, jsonEncode(encoded));
-  }
-
-  static Future<List<MonthlyComment>> getCommentsForMonth(int year, int month) async {
-    final all = await _getAllComments();
-    final yearMonth = '$year-${month.toString().padLeft(2, '0')}';
-    final result = all.values
-        .where((c) => c.yearMonth == yearMonth)
-        .toList()
-      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    return result;
-  }
-
-  static Future<Map<String, MonthlyComment>> _getAllComments() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_commentsKey);
-    if (raw == null) return {};
-    final decoded = jsonDecode(raw) as Map<String, dynamic>;
-    return decoded.map(
-      (k, v) => MapEntry(k, MonthlyComment.fromJson(v as Map<String, dynamic>)),
-    );
   }
 
   // ===========================

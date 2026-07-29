@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mojlish_app/core/services/auth_service.dart';
 import 'package:mojlish_app/core/services/user_storage_service.dart';
-import 'package:mojlish_app/core/theme/theme_manager.dart';
+import 'package:mojlish_app/core/theme/app_theme.dart';
 import 'package:mojlish_app/features/common/auth/presentation/screens/org_selection_screen.dart';
 import 'package:mojlish_app/features/common/dashboard/presentation/screens/main_dashboard_screen.dart';
 
@@ -20,25 +20,17 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen> {
   Future<void> _handleGoogleSignIn() async {
     setState(() => _isLoading = true);
     try {
-      final userCredential = await _authService.signInWithGoogle();
-      if (userCredential != null && mounted) {
-        final activeMajlis = await UserStorageService.getActiveMajlis();
-        if (activeMajlis == null || activeMajlis.isEmpty) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const OrgSelectionScreen()),
-          );
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const MainDashboardScreen()),
-          );
-        }
+      final user = await _authService.signInWithGoogle();
+      if (user != null && mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const OrgSelectionScreen()),
+        );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('গুগল লগইন করতে ব্যর্থ হয়েছে: $e')),
+          SnackBar(content: Text('সাইন-ইন ব্যর্থ হয়েছে: $e')),
         );
       }
     } finally {
@@ -48,8 +40,6 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = AppThemeManager.getThemeForMajlis('খেলাফত মজলিস');
-
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -59,7 +49,7 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              theme.primaryColor.withValues(alpha: 0.85),
+              AppTheme.primaryColor.withValues(alpha: 0.85),
               const Color(0xFF0F172A),
             ],
           ),
@@ -68,7 +58,7 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 36.0),
             child: Column(
-              mainAxisAlignment: Main.between,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const SizedBox(height: 20),
 
@@ -140,7 +130,7 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen> {
                           shadowColor: Colors.black.withValues(alpha: 0.3),
                         ),
                         child: Row(
-                          mainAxisAlignment: Main.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
                               padding: const EdgeInsets.all(4),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mojlish_app/core/services/auth_service.dart';
 import 'package:mojlish_app/core/services/user_storage_service.dart';
+import 'package:mojlish_app/core/theme/app_theme.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/features/common/auth/presentation/screens/google_login_screen.dart';
 
@@ -88,7 +89,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await _authService.updateUserName(newName);
       await _authService.updateActiveMajlis(_currentMajlis);
 
-      themeManager.setMajlisTheme(_currentMajlis);
+      // Update session theme
+      themeManager.toggleTheme();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -141,12 +143,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final activeTheme = AppThemeManager.getThemeForMajlis(_currentMajlis);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('প্রোফাইল ও সংগঠন সেটিং'),
-        backgroundColor: activeTheme.primaryColor,
+        backgroundColor: AppTheme.primaryColor,
         foregroundColor: Colors.white,
         elevation: 2,
       ),
@@ -167,12 +167,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           CircleAvatar(
                             radius: 36,
-                            backgroundColor: activeTheme.primaryColor.withValues(alpha: 0.1),
+                            backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
                             backgroundImage: (_user?.photoURL != null && _user!.photoURL!.isNotEmpty)
                                 ? NetworkImage(_user!.photoURL!)
                                 : null,
                             child: (_user?.photoURL == null || _user!.photoURL!.isEmpty)
-                                ? Icon(Icons.person, size: 40, color: activeTheme.primaryColor)
+                                ? Icon(Icons.person, size: 40, color: AppTheme.primaryColor)
                                 : null,
                           ),
                           const SizedBox(width: 16),
@@ -199,7 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: activeTheme.primaryColor.withValues(alpha: 0.15),
+                                    color: AppTheme.primaryColor.withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
@@ -207,7 +207,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
-                                      color: activeTheme.primaryColor,
+                                      color: AppTheme.primaryColor,
                                     ),
                                   ),
                                 ),
@@ -290,7 +290,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: ElevatedButton(
                       onPressed: _isSaving ? null : _saveProfileChanges,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: activeTheme.primaryColor,
+                        backgroundColor: AppTheme.primaryColor,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),

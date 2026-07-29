@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
-import 'package:mojlish_app/features/common/reports/personal_report/presentation/screens/personal_report_screen.dart';
-import 'package:mojlish_app/features/common/reports/personal_report/presentation/screens/daily_entry_screen.dart';
 import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
 import 'package:mojlish_app/features/common/reports/presentation/screens/report_download_screen.dart';
+import 'package:mojlish_app/features/khelafat_majlis/personal_report/presentation/screens/personal_report_screen.dart';
+import 'package:mojlish_app/features/student_majlis/personal_report/presentation/screens/personal_report_screen.dart';
+import 'package:mojlish_app/features/youth_majlis/personal_report/presentation/screens/personal_report_screen.dart';
+import 'package:mojlish_app/features/women_majlis/personal_report/presentation/screens/personal_report_screen.dart';
+
 
 /// ব্যক্তিগত রিপোর্ট বই — বছর/মাস নেভিগেশন ও কাস্টম মাল্টি-মান্থ A4 PDF ডাউনলোড
 class ReportBookScreen extends StatefulWidget {
@@ -36,17 +39,15 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
     _loadStats();
   }
 
-  Future<void> _loadStats() async {
-    try {
-      final days = await ReportStorageService.getFilledDaysCount(_selectedYear, _selectedMonth);
-      final dim = DateTime(_selectedYear, _selectedMonth + 1, 0).day;
-      if (mounted) {
-        setState(() {
-          _filledDays = days;
-          _daysInMonth = dim;
-        });
-      }
-    } catch (_) {}
+  void _loadStats() async {
+    final count = await ReportStorageService.getFilledDaysCount(_selectedYear, _selectedMonth);
+    final days = DateUtils.getDaysInMonth(_selectedYear, _selectedMonth);
+    if (mounted) {
+      setState(() {
+        _filledDays = count;
+        _daysInMonth = days;
+      });
+    }
   }
 
   String _bn(int n) {
@@ -55,26 +56,34 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
   }
 
   void _openMonth(int month) async {
+    Widget page;
+    switch (widget.majlisType) {
+      case MajlisType.khelafat:
+        page = const KhelafatPersonalReportScreen();
+        break;
+      case MajlisType.chatro:
+        page = const StudentPersonalReportScreen();
+        break;
+      case MajlisType.jubo:
+        page = const YouthPersonalReportScreen();
+        break;
+      case MajlisType.mohila:
+        page = const WomenMajlisPersonalReportScreen();
+        break;
+      default:
+        page = const KhelafatPersonalReportScreen();
+    }
+
     await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => PersonalReportScreen(
-          year: _selectedYear,
-          month: month,
-          majlisType: widget.majlisType,
-        ),
-      ),
+      MaterialPageRoute(builder: (_) => page),
     );
     setState(() => _selectedMonth = month);
     _loadStats();
   }
 
   void _openToday() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => DailyEntryScreen(date: _now, majlisType: widget.majlisType)),
-    );
-    _loadStats();
+    _openMonth(_now.month);
   }
 
   /// Opens Dedicated Multi-Month PDF Export Screen

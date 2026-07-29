@@ -57,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Colors.white,
       body: Center(
         child: Column(
-          mainAxisAlignment: Main.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
               'assets/images/logo.png',
