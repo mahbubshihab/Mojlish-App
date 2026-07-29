@@ -1,11 +1,9 @@
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:flutter/services.dart';
 import '../models/daily_personal_entry.dart';
 import '../models/baytulmal_report_entry.dart';
 import '../models/monthly_plan.dart';
-import '../models/monthly_comment.dart';
 import 'report_storage_service.dart';
 
 /// PDF জেনারেটর সার্ভিস — রিপোর্ট থেকে PDF তৈরি ও শেয়ার করে
@@ -411,7 +409,7 @@ class PdfGeneratorService {
               // Comments Section
               pw.Text('দায়িত্বশীলের মন্তব্য ও মূল্যায়ন:', style: pw.TextStyle(font: boldFont, fontSize: 11, color: PdfColors.blue800)),
               pw.SizedBox(height: 6),
-              if (commentsList != null && commentsList.isNotEmpty)
+              if (commentsList.isNotEmpty)
                 ...commentsList.map((c) => pw.Padding(
                   padding: const pw.EdgeInsets.only(bottom: 6),
                   child: pw.Text('• ${c.comment} (তারিখ: ${_formatEpoch(c.timestamp)})', style: pw.TextStyle(font: font, fontSize: 9)),

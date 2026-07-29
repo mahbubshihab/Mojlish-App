@@ -2,9 +2,9 @@ import '../../domain/entities/overview_entity.dart';
 
 class OverviewModel extends OverviewEntity {
   const OverviewModel({
-    required String title,
-    required String content,
-  }) : super(title: title, content: content);
+    required super.title,
+    required super.content,
+  });
 
   factory OverviewModel.fromJson(Map<String, dynamic> json) {
     return OverviewModel(

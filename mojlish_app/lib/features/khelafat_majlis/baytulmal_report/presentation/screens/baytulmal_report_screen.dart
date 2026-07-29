@@ -89,7 +89,10 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
 
   String _bn(num n) {
     const digits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-    return n.toString().split('').map((c) => digits[int.tryParse(c) ?? 0] ?? c).join();
+    return n.toString().split('').map((c) {
+      final val = int.tryParse(c);
+      return val != null ? digits[val] : c;
+    }).join();
   }
 
   Future<void> _save() async {
@@ -162,7 +165,6 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
         final cardBg = isDark ? const Color(0xFF162032) : Colors.white;
         final borderColor = isDark ? const Color(0xFF2A3F58) : const Color(0xFFE2E8F0);
         final textLight = isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
-        final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
         const accentAmber = Color(0xFFD97706);
 
         return Scaffold(

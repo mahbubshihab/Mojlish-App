@@ -100,7 +100,7 @@ class _KhelafatExecutiveRulesScreenState
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF059669).withOpacity(0.15),
+                      color: const Color(0xFF059669).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
@@ -379,13 +379,13 @@ class _KhelafatExecutiveRulesScreenState
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isExpanded
-              ? const Color(0xFF059669).withOpacity(0.5)
+              ? const Color(0xFF059669).withValues(alpha: 0.5)
               : borderColor,
           width: isExpanded ? 1.5 : 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
@@ -406,7 +406,7 @@ class _KhelafatExecutiveRulesScreenState
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF059669).withOpacity(0.12),
+                      color: const Color(0xFF059669).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(section.icon,
@@ -425,7 +425,7 @@ class _KhelafatExecutiveRulesScreenState
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF059669).withOpacity(0.15),
+                                color: const Color(0xFF059669).withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -489,7 +489,7 @@ class _KhelafatExecutiveRulesScreenState
                             : const Color(0xFFECFDF5),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                            color: const Color(0xFF059669).withOpacity(0.2)),
+                            color: const Color(0xFF059669).withValues(alpha: 0.2)),
                       ),
                       child: Row(
                         children: [
@@ -595,7 +595,7 @@ class _KhelafatExecutiveRulesScreenState
               style: TextStyle(
                 fontSize: 13.5,
                 height: 1.5,
-                color: textColor.withOpacity(0.9),
+                color: textColor.withValues(alpha: 0.9),
               ),
             ),
           ],
@@ -611,7 +611,7 @@ class _KhelafatExecutiveRulesScreenState
                     ? const Color(0xFF2B2111)
                     : const Color(0xFFFFFBEB),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4)),
+                border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.4)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -660,7 +660,7 @@ class _KhelafatExecutiveRulesScreenState
                         style: TextStyle(
                           fontSize: 13,
                           height: 1.45,
-                          color: textColor.withOpacity(0.9),
+                          color: textColor.withValues(alpha: 0.9),
                         ),
                       ),
                     ),

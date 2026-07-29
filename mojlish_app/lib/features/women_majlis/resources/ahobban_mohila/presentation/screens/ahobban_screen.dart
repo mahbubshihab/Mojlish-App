@@ -154,7 +154,7 @@ class _AhobbanMohilaScreenState extends State<AhobbanMohilaScreen> with SingleTi
               ),
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
-                BoxShadow(color: _rosePrimary.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4)),
+                BoxShadow(color: _rosePrimary.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 4)),
               ],
             ),
             child: Column(
@@ -275,7 +275,7 @@ class _AhobbanMohilaScreenState extends State<AhobbanMohilaScreen> with SingleTi
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF3F1D2C) : const Color(0xFFFCE7F3),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: _rosePrimary.withOpacity(0.4)),
+              border: Border.all(color: _rosePrimary.withValues(alpha: 0.4)),
             ),
             child: const Row(
               children: [
@@ -364,7 +364,7 @@ class _AhobbanMohilaScreenState extends State<AhobbanMohilaScreen> with SingleTi
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF3F1D2C) : const Color(0xFFFCE7F3),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: _rosePrimary.withOpacity(0.4)),
+              border: Border.all(color: _rosePrimary.withValues(alpha: 0.4)),
             ),
             child: const Row(
               children: [
@@ -522,7 +522,7 @@ class _AhobbanMohilaScreenState extends State<AhobbanMohilaScreen> with SingleTi
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
-                BoxShadow(color: _rosePrimary.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3)),
+                BoxShadow(color: _rosePrimary.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 3)),
               ],
             ),
             child: Column(
@@ -564,7 +564,7 @@ class _AhobbanMohilaScreenState extends State<AhobbanMohilaScreen> with SingleTi
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: isDark ? Colors.grey.shade800 : Colors.grey.shade200),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.04), blurRadius: 8, offset: const Offset(0, 3)),
+                  BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04), blurRadius: 8, offset: const Offset(0, 3)),
                 ],
               ),
               child: Row(

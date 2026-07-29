@@ -1,11 +1,12 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
+import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/report_download_screen.dart';
 import 'zonal_report_screen.dart';
 
-/// জোনাল রিপোর্ট বই — বছর/মাস নেভিগেশন
+/// জোনাল রিপোর্ট বই — বছর/মাস নেভিগেশন ও রিপোর্ট ডাউনলোড
 class ZonalReportBookScreen extends StatefulWidget {
   const ZonalReportBookScreen({super.key});
 
@@ -18,6 +19,11 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
   late int _selectedYear;
   late int _selectedMonth;
   Map<int, bool> _savedMonths = {};
+
+  static const _monthNames = [
+    'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
+    'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর',
+  ];
 
   static const _monthShort = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -61,6 +67,19 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
     _loadSavedMonths();
   }
 
+  void _openDownloadScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ReportDownloadScreen(
+          majlisType: MajlisType.khelafat,
+          initialYear: _selectedYear,
+          initialMonth: _selectedMonth,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -68,8 +87,6 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
       builder: (context, _) {
         final isDark = themeManager.isDarkMode;
 
-        // Theme colors
-        final bg = isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF8FAFC);
         final appBarBg = isDark ? const Color(0xFF162032) : Colors.white;
         final cardBg = isDark ? const Color(0xFF162032) : Colors.white;
         final borderColor = isDark ? const Color(0xFF2A3F58) : const Color(0xFFE2E8F0);
@@ -78,7 +95,6 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
         const accentPurple = Colors.purple;
 
         return Scaffold(
-          backgroundColor: bg,
           appBar: AppBar(
             backgroundColor: appBarBg,
             elevation: 0,
@@ -103,24 +119,43 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
               ),
             ],
           ),
-          body: Stack(
-            children: [
-              Positioned.fill(child: CustomPaint(painter: _BgPainter(isDark: isDark))),
-              SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 12),
-                    _buildStatusCard(cardBg, borderColor, textLight, accentPurple),
-                    const SizedBox(height: 16),
-                    _buildYearSelector(cardBg, borderColor, textLight),
-                    const SizedBox(height: 16),
-                    _buildMonthGrid(cardBg, borderColor, textLight, textMuted, accentPurple),
-                    const SizedBox(height: 24),
-                  ],
-                ),
+          body: AmbientBackgroundWidget(
+            primaryAccent: accentPurple,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  const SizedBox(height: 12),
+                  _buildStatusCard(cardBg, borderColor, textLight, accentPurple),
+                  const SizedBox(height: 16),
+                  _buildYearSelector(cardBg, borderColor, textLight),
+                  const SizedBox(height: 16),
+                  _buildMonthGrid(cardBg, borderColor, textLight, textMuted, accentPurple),
+                  const SizedBox(height: 24),
+
+                  // Report Download Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton.icon(
+                      onPressed: _openDownloadScreen,
+                      icon: const Icon(Icons.file_download_outlined, size: 24),
+                      label: const Text(
+                        'জোনাল রিপোর্ট ডাউনলোড',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0284C7),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        elevation: 3,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },
@@ -129,9 +164,11 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
 
   Widget _buildStatusCard(Color cardBg, Color borderColor, Color textLight, Color accentPurple) {
     int count = _savedMonths.values.where((v) => v).length;
+    final monthName = _monthNames[_selectedMonth - 1];
+
     return Container(
       decoration: BoxDecoration(
-        color: cardBg,
+        color: cardBg.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: borderColor),
       ),
@@ -154,12 +191,12 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '[_selectedYear সালের জোনাল রিপোর্ট]',
-                  style: TextStyle(color: textLight.withValues(alpha: 0.8), fontSize: 14),
+                  'জোনাল রিপোর্ট — $monthName ${_bn(_selectedYear)}',
+                  style: TextStyle(color: textLight, fontSize: 14.5, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
-                  '১২ মাসের মধ্যে $count মাসের রিপোর্ট সেভ করা আছে',
+                  '১২ মাসের মধ্যে ${_bn(count)} মাসের জোনাল রিপোর্ট সেভ করা আছে',
                   style: TextStyle(color: accentPurple, fontSize: 13, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -173,7 +210,7 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
   Widget _buildYearSelector(Color cardBg, Color borderColor, Color textLight) {
     return Container(
       decoration: BoxDecoration(
-        color: cardBg,
+        color: cardBg.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(28),
         border: Border.all(color: borderColor),
       ),
@@ -181,7 +218,7 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: Icon(Icons.chevron_left, color: textLight),
+            icon: Icon(Icons.chevron_left, color: textLight, size: 28),
             onPressed: () {
               setState(() => _selectedYear--);
               _loadSavedMonths();
@@ -190,15 +227,13 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(_bn(_selectedYear),
-                style: TextStyle(color: textLight, fontSize: 18, fontWeight: FontWeight.bold)),
+                style: TextStyle(color: textLight, fontSize: 19, fontWeight: FontWeight.bold)),
           ),
           IconButton(
-            icon: Icon(Icons.chevron_right, color: textLight),
+            icon: Icon(Icons.chevron_right, color: textLight, size: 28),
             onPressed: () {
-              if (_selectedYear < _now.year) {
-                setState(() => _selectedYear++);
-                _loadSavedMonths();
-              }
+              setState(() => _selectedYear++);
+              _loadSavedMonths();
             },
           ),
         ],
@@ -226,21 +261,16 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
   Widget _buildMonthCircle(int month, Color cardBg, Color borderColor, Color textLight, Color textMuted, Color accentPurple) {
     final isSelected = month == _selectedMonth;
     final isSaved = _savedMonths[month] ?? false;
-    final isFuture = _selectedYear == _now.year && month > _now.month;
 
     return GestureDetector(
-      onTap: isFuture ? null : () => _openMonth(month),
+      onTap: () => _openMonth(month),
       child: Container(
-        width: 64,
-        height: 64,
+        width: 62,
+        height: 62,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: isSelected
-              ? accentPurple.withValues(alpha: 0.15)
-              : isFuture
-                  ? cardBg.withValues(alpha: 0.2)
-                  : cardBg,
+          color: isSelected ? accentPurple.withValues(alpha: 0.15) : cardBg.withValues(alpha: 0.9),
           border: Border.all(
             color: isSelected
                 ? accentPurple
@@ -257,11 +287,7 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
             Text(
               _monthShort[month - 1],
               style: TextStyle(
-                color: isSelected
-                    ? accentPurple
-                    : isFuture
-                        ? textMuted.withValues(alpha: 0.4)
-                        : textLight,
+                color: isSelected ? accentPurple : textLight,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 fontSize: 14,
               ),
@@ -275,47 +301,4 @@ class _ZonalReportBookScreenState extends State<ZonalReportBookScreen> {
       ),
     );
   }
-}
-
-class _BgPainter extends CustomPainter {
-  final bool isDark;
-  _BgPainter({required this.isDark});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (!isDark) {
-      final grid = Paint()..color = Colors.grey.withValues(alpha: 0.05)..strokeWidth = 0.5..style = PaintingStyle.stroke;
-      for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
-      for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-      return;
-    }
-
-    final fill = Paint()..color = Colors.purple.withValues(alpha: 0.025)..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.08), 120, fill);
-    canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.45), 90, fill);
-
-    final grid = Paint()..color = Colors.purple.withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
-    for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
-    for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-
-    final star = Paint()..color = const Color(0xFF1E3A52)..style = PaintingStyle.fill;
-    _drawStar(canvas, Offset(size.width * 0.85, size.height * 0.15), 18, star);
-    _drawStar(canvas, Offset(size.width * 0.1, size.height * 0.35), 14, star);
-  }
-
-  void _drawStar(Canvas canvas, Offset c, double r, Paint p) {
-    final path = Path();
-    for (int i = 0; i < 8; i++) {
-      final a = i * 45 * pi / 180;
-      final rad = i % 2 == 0 ? r : r * 0.45;
-      final x = c.dx + rad * cos(a);
-      final y = c.dy + rad * sin(a);
-      i == 0 ? path.moveTo(x, y) : path.lineTo(x, y);
-    }
-    path.close();
-    canvas.drawPath(path, p);
-  }
-
-  @override
-  bool shouldRepaint(_BgPainter _) => false;
 }

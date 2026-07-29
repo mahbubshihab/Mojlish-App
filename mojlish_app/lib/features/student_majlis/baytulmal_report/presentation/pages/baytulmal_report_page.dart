@@ -7,7 +7,7 @@ import 'package:mojlish_app/features/student_majlis/baytulmal_report/data/dataso
 import 'package:mojlish_app/features/student_majlis/baytulmal_report/data/repositories/baytulmal_report_repository_impl.dart';
 
 class BaytulmalReportPage extends StatefulWidget {
-  const BaytulmalReportPage({Key? key}) : super(key: key);
+  const BaytulmalReportPage({super.key});
 
   @override
   _BaytulmalReportPageState createState() => _BaytulmalReportPageState();

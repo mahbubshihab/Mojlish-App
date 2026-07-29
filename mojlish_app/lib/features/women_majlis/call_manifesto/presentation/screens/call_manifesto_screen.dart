@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../bloc/call_manifesto_bloc.dart';
 
 class WomenCallManifestoScreen extends StatelessWidget {
   const WomenCallManifestoScreen({super.key});

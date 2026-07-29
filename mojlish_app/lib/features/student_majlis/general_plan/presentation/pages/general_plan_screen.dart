@@ -4,7 +4,7 @@ import '../bloc/general_plan_bloc.dart';
 import '../../domain/entities/general_plan_entity.dart';
 
 class GeneralPlanScreen extends StatefulWidget {
-  const GeneralPlanScreen({Key? key}) : super(key: key);
+  const GeneralPlanScreen({super.key});
 
   @override
   State<GeneralPlanScreen> createState() => _GeneralPlanScreenState();

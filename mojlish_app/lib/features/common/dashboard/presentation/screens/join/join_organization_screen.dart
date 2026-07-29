@@ -584,7 +584,7 @@ class _JoinOrganizationScreenState extends State<JoinOrganizationScreen> {
         ),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
-          value: _bloodGroup,
+          initialValue: _bloodGroup,
           items: _bloodGroups.map((g) => DropdownMenuItem(value: g, child: Text(g, style: TextStyle(color: textLight)))).toList(),
           onChanged: (val) {
             if (val != null) setState(() => _bloodGroup = val);

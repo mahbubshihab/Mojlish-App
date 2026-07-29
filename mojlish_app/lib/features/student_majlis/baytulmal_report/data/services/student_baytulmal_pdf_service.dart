@@ -1,7 +1,6 @@
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import '../../domain/entities/baytulmal_report_entity.dart';
 
 class StudentBaytulmalPdfService {
   static const _monthNames = [

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/services/user_storage_service.dart';
-import 'package:mojlish_app/core/constants/majlis_assets.dart';
 import '../../../reports/presentation/screens/report_selection_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 import 'social_media/social_media_screen.dart';
@@ -12,7 +11,6 @@ import 'package:mojlish_app/features/khelafat_majlis/overview/presentation/pages
 import 'package:mojlish_app/features/women_majlis/overview/presentation/pages/overview_page.dart' as women_overview;
 import 'package:mojlish_app/features/youth_majlis/overview/presentation/pages/overview_screen.dart' as youth_overview;
 import 'package:mojlish_app/features/student_majlis/general_plan/presentation/pages/general_plan_screen.dart' as student_plan;
-import 'package:mojlish_app/features/common/auth/presentation/screens/org_selection_screen.dart';
 import 'package:mojlish_app/features/common/profile/presentation/screens/profile_screen.dart';
 
 class MainDashboardScreen extends StatefulWidget {

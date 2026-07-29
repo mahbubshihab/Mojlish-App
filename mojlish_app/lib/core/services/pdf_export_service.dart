@@ -57,7 +57,7 @@ List<_TextToken> _splitBengaliEnglishTokens(String text) {
     }
 
     if (currentIsBengali != null && isBn != currentIsBengali) {
-      tokens.add(_TextToken(currentIsBengali!, buffer.toString()));
+      tokens.add(_TextToken(currentIsBengali, buffer.toString()));
       buffer.clear();
     }
 
@@ -66,7 +66,7 @@ List<_TextToken> _splitBengaliEnglishTokens(String text) {
   }
 
   if (buffer.isNotEmpty && currentIsBengali != null) {
-    tokens.add(_TextToken(currentIsBengali!, buffer.toString()));
+    tokens.add(_TextToken(currentIsBengali, buffer.toString()));
   }
 
   return tokens;

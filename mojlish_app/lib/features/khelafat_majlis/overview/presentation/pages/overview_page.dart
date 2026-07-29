@@ -266,9 +266,9 @@ class _OverviewViewState extends State<OverviewView> {
                           child: Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: primaryColor.withOpacity(0.08),
+                              color: primaryColor.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: primaryColor.withOpacity(0.2)),
+                              border: Border.all(color: primaryColor.withValues(alpha: 0.2)),
                             ),
                             child: Row(
                               children: [
@@ -455,7 +455,7 @@ class _OverviewViewState extends State<OverviewView> {
                                       lvl,
                                       style: const TextStyle(fontSize: 12),
                                     ),
-                                    backgroundColor: primaryColor.withOpacity(0.1),
+                                    backgroundColor: primaryColor.withValues(alpha: 0.1),
                                   );
                                 }).toList(),
                               ),
@@ -664,11 +664,11 @@ class _OverviewViewState extends State<OverviewView> {
                                 children: [
                                   Chip(
                                     label: Text('বিনিময় : ${overview.callToAction.price}'),
-                                    backgroundColor: primaryColor.withOpacity(0.1),
+                                    backgroundColor: primaryColor.withValues(alpha: 0.1),
                                   ),
                                   Chip(
                                     label: Text('নিবন্ধন নং : ${overview.callToAction.regNo}'),
-                                    backgroundColor: primaryColor.withOpacity(0.1),
+                                    backgroundColor: primaryColor.withValues(alpha: 0.1),
                                   ),
                                 ],
                               )
@@ -749,7 +749,7 @@ class _OverviewViewState extends State<OverviewView> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withOpacity(0.3),
+            color: primaryColor.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 5),
           )
@@ -760,7 +760,7 @@ class _OverviewViewState extends State<OverviewView> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Image.asset(
@@ -819,7 +819,7 @@ class _OverviewViewState extends State<OverviewView> {
         border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )

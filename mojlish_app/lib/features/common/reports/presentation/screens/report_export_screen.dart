@@ -77,8 +77,7 @@ class _ReportExportScreenState extends State<ReportExportScreen> {
               onPrimary: Colors.white,
               surface: _cardBg,
               onSurface: _textLight,
-            ),
-            dialogBackgroundColor: _darkBg,
+            ), dialogTheme: DialogThemeData(backgroundColor: _darkBg),
           ),
           child: child!,
         );
@@ -391,8 +390,12 @@ class _ExportBgPainter extends CustomPainter {
     canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.5), 100, fill);
 
     final grid = Paint()..color = const Color(0xFF10B981).withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
-    for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
-    for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+    for (double x = 0; x < size.width; x += 40) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
+    }
+    for (double y = 0; y < size.height; y += 40) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+    }
 
     final star = Paint()..color = const Color(0xFF1E3A52)..style = PaintingStyle.fill;
     _drawStar(canvas, Offset(size.width * 0.85, size.height * 0.12), 18, star);

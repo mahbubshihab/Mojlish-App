@@ -50,6 +50,7 @@ class ZonalReportEntry {
   // মন্তব্য ও পরামর্শ
   final String remarks;
   final String suggestions;
+  final int? updatedAt;
 
   ZonalReportEntry({
     required this.month,
@@ -89,6 +90,7 @@ class ZonalReportEntry {
     this.shakhaBaytulmalSubmitted = '',
     this.remarks = '',
     this.suggestions = '',
+    this.updatedAt,
   });
 
   Map<String, dynamic> toJson() {
@@ -130,6 +132,7 @@ class ZonalReportEntry {
       'shakhaBaytulmalSubmitted': shakhaBaytulmalSubmitted,
       'remarks': remarks,
       'suggestions': suggestions,
+      'updatedAt': updatedAt,
     };
   }
 
@@ -172,6 +175,7 @@ class ZonalReportEntry {
       shakhaBaytulmalSubmitted: json['shakhaBaytulmalSubmitted'] ?? '',
       remarks: json['remarks'] ?? '',
       suggestions: json['suggestions'] ?? '',
+      updatedAt: json['updatedAt'],
     );
   }
 

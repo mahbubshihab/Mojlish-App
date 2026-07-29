@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class BranchReportScreen extends StatefulWidget {
-  const BranchReportScreen({Key? key}) : super(key: key);
+  const BranchReportScreen({super.key});
 
   @override
   State<BranchReportScreen> createState() => _BranchReportScreenState();

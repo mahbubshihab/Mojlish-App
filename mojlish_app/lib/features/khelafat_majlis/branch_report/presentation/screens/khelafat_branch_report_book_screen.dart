@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
+import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
+import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/report_download_screen.dart';
 import 'branch_report_screen.dart';
 
-/// খেলাফত মজলিস — শাখা রিপোর্ট ফরম বই (মাস ও বছর নির্বাচন)
+/// খেলাফত মজলিস — শাখা রিপোর্ট ফরম বই (মাস ও বছর নির্বাচন ও ডাউনলোড)
 class KhelafatBranchReportBookScreen extends StatefulWidget {
   const KhelafatBranchReportBookScreen({super.key});
 
@@ -14,6 +17,11 @@ class _KhelafatBranchReportBookScreenState extends State<KhelafatBranchReportBoo
   final _now = DateTime.now();
   late int _selectedYear;
   late int _selectedMonth;
+
+  static const _monthNames = [
+    'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
+    'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর',
+  ];
 
   static const _monthShort = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -42,13 +50,26 @@ class _KhelafatBranchReportBookScreenState extends State<KhelafatBranchReportBoo
     );
   }
 
+  void _openDownloadScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ReportDownloadScreen(
+          majlisType: MajlisType.khelafat,
+          initialYear: _selectedYear,
+          initialMonth: _selectedMonth,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: themeManager,
       builder: (context, _) {
         final isDark = themeManager.isDarkMode;
-        final bg = isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF8FAFC);
+
         final appBarBg = isDark ? const Color(0xFF162032) : Colors.white;
         final cardBg = isDark ? const Color(0xFF162032) : Colors.white;
         final borderColor = isDark ? const Color(0xFF2A3F58) : const Color(0xFFE2E8F0);
@@ -57,29 +78,67 @@ class _KhelafatBranchReportBookScreenState extends State<KhelafatBranchReportBoo
         const purpleColor = Color(0xFFC084FC);
 
         return Scaffold(
-          backgroundColor: bg,
           appBar: AppBar(
             backgroundColor: appBarBg,
             elevation: 0,
+            centerTitle: true,
             leading: IconButton(
-              icon: Icon(Icons.arrow_back_rounded, color: textLight),
+              icon: Icon(Icons.arrow_back_ios_new, color: textLight, size: 20),
               onPressed: () => Navigator.pop(context),
             ),
-            title: Text(
+            title: const Text(
               'শাখা রিপোর্ট বই',
-              style: TextStyle(color: textLight, fontWeight: FontWeight.bold, fontSize: 18),
+              style: TextStyle(color: purpleColor, fontSize: 16, fontWeight: FontWeight.bold),
             ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  isDark ? Icons.wb_sunny : Icons.nightlight_round,
+                  color: isDark ? Colors.yellow : Colors.black87,
+                ),
+                onPressed: () {
+                  themeManager.toggleTheme();
+                },
+              ),
+            ],
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                _buildYearHeader(cardBg, borderColor, textLight, purpleColor),
-                const SizedBox(height: 24),
-                _buildMonthGrid(cardBg, borderColor, textLight, textMuted, purpleColor),
-                const SizedBox(height: 24),
-                _buildTodayButton(purpleColor),
-              ],
+          body: AmbientBackgroundWidget(
+            primaryAccent: purpleColor,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  _buildBookSummaryCard(cardBg, borderColor, textLight, purpleColor),
+                  const SizedBox(height: 16),
+                  _buildYearHeader(cardBg, borderColor, textLight, purpleColor),
+                  const SizedBox(height: 20),
+                  _buildMonthGrid(cardBg, borderColor, textLight, textMuted, purpleColor),
+                  const SizedBox(height: 24),
+
+                  // Report Download Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton.icon(
+                      onPressed: _openDownloadScreen,
+                      icon: const Icon(Icons.file_download_outlined, size: 24),
+                      label: const Text(
+                        'রিপোর্ট ডাউনলোড',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0284C7),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        elevation: 3,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  _buildTodayButton(purpleColor),
+                ],
+              ),
             ),
           ),
         );
@@ -87,11 +146,53 @@ class _KhelafatBranchReportBookScreenState extends State<KhelafatBranchReportBoo
     );
   }
 
+  Widget _buildBookSummaryCard(Color cardBg, Color borderColor, Color textLight, Color purpleColor) {
+    final monthName = _monthNames[_selectedMonth - 1];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardBg.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: purpleColor.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.assessment_rounded, color: purpleColor, size: 28),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'শাখা রিপোর্ট — $monthName ${_bn(_selectedYear)}',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: textLight),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'মাসিক সাংগঠনিক বিবরণী, দাওয়াত, বৈঠক ও বায়তুলমাল রিপোর্ট',
+                  style: TextStyle(fontSize: 12.5, color: textLight.withValues(alpha: 0.7)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildYearHeader(Color cardBg, Color borderColor, Color textLight, Color accentPurple) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: cardBg,
+        color: cardBg.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(30),
         border: Border.all(color: borderColor),
       ),
@@ -99,15 +200,15 @@ class _KhelafatBranchReportBookScreenState extends State<KhelafatBranchReportBoo
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: Icon(Icons.chevron_left_rounded, color: textLight),
+            icon: Icon(Icons.chevron_left_rounded, color: textLight, size: 28),
             onPressed: () => setState(() => _selectedYear--),
           ),
           Text(
             _bn(_selectedYear),
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textLight),
+            style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: textLight),
           ),
           IconButton(
-            icon: Icon(Icons.chevron_right_rounded, color: textLight),
+            icon: Icon(Icons.chevron_right_rounded, color: textLight, size: 28),
             onPressed: () => setState(() => _selectedYear++),
           ),
         ],
@@ -130,21 +231,16 @@ class _KhelafatBranchReportBookScreenState extends State<KhelafatBranchReportBoo
             mainAxisAlignment: MainAxisAlignment.center,
             children: row.map((m) {
               final isSelected = m == _selectedMonth;
-              final isFuture = _selectedYear == _now.year && m > _now.month;
 
               return GestureDetector(
-                onTap: isFuture ? null : () => _openMonth(m),
+                onTap: () => _openMonth(m),
                 child: Container(
                   width: 58,
                   height: 58,
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isSelected
-                        ? accentPurple.withValues(alpha: 0.15)
-                        : isFuture
-                            ? cardBg.withValues(alpha: 0.3)
-                            : cardBg,
+                    color: isSelected ? accentPurple.withValues(alpha: 0.15) : cardBg.withValues(alpha: 0.9),
                     border: Border.all(
                       color: isSelected ? accentPurple : borderColor,
                       width: isSelected ? 2.0 : 1.0,
@@ -165,11 +261,7 @@ class _KhelafatBranchReportBookScreenState extends State<KhelafatBranchReportBoo
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected
-                          ? accentPurple
-                          : isFuture
-                              ? textMuted.withValues(alpha: 0.4)
-                              : textLight,
+                      color: isSelected ? accentPurple : textLight,
                     ),
                   ),
                 ),

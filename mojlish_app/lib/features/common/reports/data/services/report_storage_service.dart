@@ -212,6 +212,45 @@ class ReportStorageService {
     return all[key];
   }
 
+  static const String _branchReportKey = 'branch_reports_storage_key';
+  static const String _branchPlanKey = 'branch_plans_storage_key';
+
+  static Future<void> saveBranchReport(int year, int month, Map<String, dynamic> data) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_branchReportKey);
+    final Map<String, dynamic> all = raw != null ? jsonDecode(raw) as Map<String, dynamic> : {};
+    final key = '$year-${month.toString().padLeft(2, '0')}';
+    all[key] = data;
+    await prefs.setString(_branchReportKey, jsonEncode(all));
+  }
+
+  static Future<Map<String, dynamic>?> getBranchReport(int year, int month) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_branchReportKey);
+    if (raw == null) return null;
+    final Map<String, dynamic> all = jsonDecode(raw) as Map<String, dynamic>;
+    final key = '$year-${month.toString().padLeft(2, '0')}';
+    return all[key] as Map<String, dynamic>?;
+  }
+
+  static Future<void> saveBranchPlan(int year, int month, Map<String, dynamic> data) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_branchPlanKey);
+    final Map<String, dynamic> all = raw != null ? jsonDecode(raw) as Map<String, dynamic> : {};
+    final key = '$year-${month.toString().padLeft(2, '0')}';
+    all[key] = data;
+    await prefs.setString(_branchPlanKey, jsonEncode(all));
+  }
+
+  static Future<Map<String, dynamic>?> getBranchPlan(int year, int month) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_branchPlanKey);
+    if (raw == null) return null;
+    final Map<String, dynamic> all = jsonDecode(raw) as Map<String, dynamic>;
+    final key = '$year-${month.toString().padLeft(2, '0')}';
+    return all[key] as Map<String, dynamic>?;
+  }
+
   // ===========================
   // Utility
   // ===========================

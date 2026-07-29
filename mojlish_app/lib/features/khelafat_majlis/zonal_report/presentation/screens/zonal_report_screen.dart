@@ -1,7 +1,6 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
+import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import 'package:mojlish_app/features/common/reports/data/models/zonal_report_entry.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 
@@ -62,7 +61,7 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
   final _officeExpenseTakaCtrl = TextEditingController();
   final _otherExpenseTakaCtrl = TextEditingController();
 
-  // অন্যান্য (Other status counters)
+  // উপশাখার রিপোর্ট ও পরিকল্পনা প্রাপ্তি
   final _shakhaReportSubCtrl = TextEditingController();
   final _shakhaPlanSubCtrl = TextEditingController();
   final _shakhaBaytulmalSubCtrl = TextEditingController();
@@ -71,15 +70,18 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
   final _remarksCtrl = TextEditingController();
   final _suggestionsCtrl = TextEditingController();
 
-  bool get _isDark => themeManager.isDarkMode;
-  Color get _darkBg => _isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF8FAFC);
-  Color get _cardBg => _isDark ? const Color(0xFF162032) : Colors.white;
-  Color get _borderColor => _isDark ? const Color(0xFF2A3F58) : const Color(0xFFCBD5E1);
-  Color get _accentPurple => Colors.purple;
-  Color get _accentGreen => const Color(0xFF10B981);
-  Color get _textLight => _isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
-  Color get _textMuted => _isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
-  Color get _inputFill => _isDark ? const Color(0xFF0A1628) : const Color(0xFFF1F5F9);
+  // Colors
+  final Color _accentGreen = const Color(0xFF10B981);
+  final Color _accentPurple = Colors.purple;
+  final Color _cardBg = const Color(0xFF1E293B);
+  final Color _borderColor = const Color(0xFF334155);
+  final Color _textLight = const Color(0xFFF8FAFC);
+  final Color _textMuted = const Color(0xFF94A3B8);
+
+  static const _monthNames = [
+    'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
+    'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর',
+  ];
 
   @override
   void initState() {
@@ -89,17 +91,17 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
 
   @override
   void dispose() {
-    for (final c in [
+    for (var c in [
       _zoneNameCtrl, _sodossoCountCtrl, _sodossoBridhiCtrl, _sodossoGhattiCtrl,
       _sodossoPrarthiCountCtrl, _sodossoPrarthiBridhiCtrl, _sodossoPrarthiGhattiCtrl,
       _distCountCtrl, _distOrgCtrl, _distReorgCtrl, _cityCountCtrl, _cityOrgCtrl,
       _cityReorgCtrl, _upazilaCountCtrl, _upazilaOrgCtrl, _upazilaReorgCtrl,
-      _shakhaDaitoshilCountCtrl, _shakhaDaitoshilPresCtrl,
-      _distExecCountCtrl, _distExecPresCtrl, _zonalTorbiotCountCtrl, _zonalTorbiotPresCtrl,
-      _travelDetailsCtrl, _safarIncomeTakaCtrl, _centralIncomeTakaCtrl, _onetimeIncomeTakaCtrl,
-      _safarExpenseTakaCtrl, _communicationExpenseTakaCtrl, _officeExpenseTakaCtrl,
-      _otherExpenseTakaCtrl, _shakhaReportSubCtrl, _shakhaPlanSubCtrl,
-      _shakhaBaytulmalSubCtrl, _remarksCtrl, _suggestionsCtrl
+      _shakhaDaitoshilCountCtrl, _shakhaDaitoshilPresCtrl, _distExecCountCtrl,
+      _distExecPresCtrl, _zonalTorbiotCountCtrl, _zonalTorbiotPresCtrl,
+      _travelDetailsCtrl, _safarIncomeTakaCtrl, _centralIncomeTakaCtrl,
+      _onetimeIncomeTakaCtrl, _safarExpenseTakaCtrl, _communicationExpenseTakaCtrl,
+      _officeExpenseTakaCtrl, _otherExpenseTakaCtrl, _shakhaReportSubCtrl,
+      _shakhaPlanSubCtrl, _shakhaBaytulmalSubCtrl, _remarksCtrl, _suggestionsCtrl
     ]) {
       c.dispose();
     }
@@ -197,6 +199,7 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
       shakhaBaytulmalSubmitted: _shakhaBaytulmalSubCtrl.text.trim(),
       remarks: _remarksCtrl.text.trim(),
       suggestions: _suggestionsCtrl.text.trim(),
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
     );
   }
 
@@ -212,7 +215,7 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('জোনাল রিপোর্ট সেভ করা হয়েছে ✓'),
+          content: const Text('জোনাল রিপোর্ট সফলভাবে সেভ ও লক করা হয়েছে ✓'),
           backgroundColor: _accentGreen,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -226,245 +229,324 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
     return n.toString().split('').map((c) => digits[int.parse(c)]).join();
   }
 
+  Future<void> _exportPdf() async {
+    final yearStr = _bn(widget.year);
+    final monthStr = _monthNames[widget.month - 1];
+
+    await PdfExportService.printOrDownloadPdf(
+      title: 'জোনাল রিপোর্ট ফরম',
+      majlisName: 'বাংলাদেশ খেলাফত মজলিস',
+      userName: _zoneNameCtrl.text.isEmpty ? 'জোন পরিচালক' : _zoneNameCtrl.text,
+      period: '$monthStr $yearStr',
+      dataFields: {
+        'জোনের নাম': _zoneNameCtrl.text,
+        'সদস্য সংখ্যা/বৃদ্ধি/ঘাটতি': '${_sodossoCountCtrl.text} / ${_sodossoBridhiCtrl.text} / ${_sodossoGhattiCtrl.text}',
+        'সদস্য প্রার্থী সংখ্যা/বৃদ্ধি/ঘাটতি': '${_sodossoPrarthiCountCtrl.text} / ${_sodossoPrarthiBridhiCtrl.text} / ${_sodossoPrarthiGhattiCtrl.text}',
+        'জেলা শাখা গঠন/পুনর্গঠন': '${_distCountCtrl.text} / ${_distOrgCtrl.text} / ${_distReorgCtrl.text}',
+        'মহানগর শাখা গঠন/পুনর্গঠন': '${_cityCountCtrl.text} / ${_cityOrgCtrl.text} / ${_cityReorgCtrl.text}',
+        'উপজেলা/থানা শাখা': '${_upazilaCountCtrl.text} / ${_upazilaOrgCtrl.text} / ${_upazilaReorgCtrl.text}',
+        'শাখা দায়িত্বশীল বৈঠক': '${_shakhaDaitoshilCountCtrl.text} (উপস্থিতি: ${_shakhaDaitoshilPresCtrl.text})',
+        'জেলা নির্বাহী বৈঠক': '${_distExecCountCtrl.text} (উপস্থিতি: ${_distExecPresCtrl.text})',
+        'জোনাল তরবিয়ত বৈঠক': '${_zonalTorbiotCountCtrl.text} (উপস্থিতি: ${_zonalTorbiotPresCtrl.text})',
+        'জোন সফর বিবরণী': _travelDetailsCtrl.text,
+        'সফর/কেন্দ্রীয়/এককালীন আয়': '${_safarIncomeTakaCtrl.text} / ${_centralIncomeTakaCtrl.text} / ${_onetimeIncomeTakaCtrl.text}',
+        'সফর/যোগাযোগ/দফতর ব্যয়': '${_safarExpenseTakaCtrl.text} / ${_communicationExpenseTakaCtrl.text} / ${_officeExpenseTakaCtrl.text}',
+        'উপশাখার রিপোর্ট প্রাপ্তি': _shakhaReportSubCtrl.text,
+        'উপশাখার পরিকল্পনা প্রাপ্তি': _shakhaPlanSubCtrl.text,
+      },
+      comments: '${_remarksCtrl.text}\n\nপরামর্শ: ${_suggestionsCtrl.text}',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    const monthNames = [
-      'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
-      'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর',
-    ];
+    final monthStr = _monthNames[widget.month - 1];
+    final yearStr = _bn(widget.year);
 
-    return AnimatedBuilder(
-      animation: themeManager,
-      builder: (context, _) {
-        return Scaffold(
-          backgroundColor: _darkBg,
-          appBar: AppBar(
-            title: const Text('শাখা জোনাল রিপোর্ট',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
-            centerTitle: true,
-            backgroundColor: _cardBg,
-            iconTheme: IconThemeData(color: _textLight),
-            elevation: 0,
-            actions: [
-              if (_currentEntry != null && _isLocked)
-                TextButton.icon(
-                  icon: Icon(Icons.edit, color: _accentPurple, size: 16),
-                  label: Text('এডিট করুন', style: TextStyle(color: _accentPurple, fontSize: 13, fontWeight: FontWeight.bold)),
-                  onPressed: () => setState(() => _isLocked = false),
-                ),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: _cardBg,
+          elevation: 1,
+          title: Text(
+            'জোনাল রিপোর্ট — $monthStr $yearStr',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          bottom: TabBar(
+            indicatorColor: _accentPurple,
+            indicatorWeight: 3,
+            labelColor: _accentPurple,
+            labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            tabs: const [
+              Tab(icon: Icon(Icons.edit_note_rounded), text: '১. তথ্য পূরণ'),
+              Tab(icon: Icon(Icons.print_rounded), text: '২. প্রিভিউ ও PDF'),
             ],
           ),
-          body: Stack(
+        ),
+        body: AmbientBackgroundWidget(
+          primaryAccent: _accentPurple,
+          child: TabBarView(
             children: [
-              Positioned.fill(child: CustomPaint(painter: _BgPainter(isDark: _isDark))),
-              SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Banner
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: _accentPurple.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _accentPurple.withValues(alpha: 0.3)),
-                      ),
-                      child: Row(children: [
-                        Icon(Icons.map, color: _accentPurple, size: 22),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Text('${monthNames[widget.month - 1]} ${_bn(widget.year)} মাসের রিপোর্ট',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: _accentPurple)),
-                            Text(_currentEntry != null ? 'সর্বশেষ সেভ করা আছে' : 'এখনো সেভ করা হয়নি',
-                                style: TextStyle(fontSize: 12, color: _currentEntry != null ? const Color(0xFF10B981) : const Color(0xFFF59E0B))),
-                          ]),
-                        ),
-                      ]),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Zone
-                    _sectionHeader('জোনের তথ্য'),
-                    _field('জোনের নাম', 'জোনের নাম লিখুন', _zoneNameCtrl),
-                    const SizedBox(height: 20),
-
-                    // জনশক্তি
-                    _manpowerSection(),
-                    const SizedBox(height: 20),
-
-                    // সংগঠন
-                    _organizationSection(),
-                    const SizedBox(height: 20),
-
-                    // সভা/প্রশিক্ষণ
-                    _meetingsSection(),
-                    const SizedBox(height: 20),
-
-                    // সফর
-                    _sectionHeader('সফর (জোন থেকে)'),
-                    _field('সফর বিবরণী ও লক্ষ্য', 'তারিখ, শাখার নাম, উপলক্ষ ও মেহমান...', _travelDetailsCtrl, maxLines: 3),
-                    const SizedBox(height: 20),
-
-                    // আয়-ব্যয়
-                    _incomeExpenseSection(),
-                    const SizedBox(height: 20),
-
-                    // জমা রিপোর্ট
-                    _submissionCountersSection(),
-                    const SizedBox(height: 20),
-
-                    // মন্তব্য ও পরামর্শ
-                    _sectionHeader('মন্তব্য ও পরামর্শ'),
-                    _field('মন্তব্য', 'কোনো বিশেষ তথ্য...', _remarksCtrl, maxLines: 2),
-                    _field('পরামর্শ', 'কেন্দ্রীয় কার্যকরী কমিটির নিকট পরামর্শ...', _suggestionsCtrl, maxLines: 2),
-                    const SizedBox(height: 24),
-
-                    // Save button
-                    if (!_isLocked) ...[
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton.icon(
-                          onPressed: _isSaving ? null : _save,
-                          icon: _isSaving
-                              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                              : const Icon(Icons.save, color: Colors.white),
-                          label: Text(_isSaving ? 'সেভ হচ্ছে...' : 'রিপোর্ট সেভ করুন',
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _accentPurple,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                    ],
-                  ],
-                ),
-              ),
+              _buildFormTab(),
+              _buildPreviewTab(),
             ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
-  Widget _manpowerSection() {
-    return Container(
-      decoration: BoxDecoration(color: _cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: _borderColor)),
-      padding: const EdgeInsets.all(16),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('জনশক্তি', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentPurple)),
-        const SizedBox(height: 14),
-        _threeColRow('সদস্য', _sodossoCountCtrl, 'বৃদ্ধি', _sodossoBridhiCtrl, 'ঘাটতি', _sodossoGhattiCtrl),
-        _threeColRow('সদস্য প্রার্থী', _sodossoPrarthiCountCtrl, 'বৃদ্ধি', _sodossoPrarthiBridhiCtrl, 'ঘাটতি', _sodossoPrarthiGhattiCtrl),
-      ]),
-    );
-  }
-
-  Widget _organizationSection() {
-    return Container(
-      decoration: BoxDecoration(color: _cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: _borderColor)),
-      padding: const EdgeInsets.all(16),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('সংগঠন', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentPurple)),
-        const SizedBox(height: 14),
-        _threeColRow('জেলা', _distCountCtrl, 'সংগঠন', _distOrgCtrl, 'পুনর্গঠন', _distReorgCtrl),
-        _threeColRow('মহানগরী', _cityCountCtrl, 'সংগঠন', _cityOrgCtrl, 'পুনর্গঠন', _cityReorgCtrl),
-        _threeColRow('উপজেলা / থানা', _upazilaCountCtrl, 'সংগঠন', _upazilaOrgCtrl, 'পুনর্গঠন', _upazilaReorgCtrl),
-      ]),
-    );
-  }
-
-  Widget _meetingsSection() {
-    return Container(
-      decoration: BoxDecoration(color: _cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: _borderColor)),
-      padding: const EdgeInsets.all(16),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('সভা / প্রশিক্ষণ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentPurple)),
-        const SizedBox(height: 14),
-        _twoColRow('শাখা দায়িত্বশীল বৈঠক (সংখ্যা)', _shakhaDaitoshilCountCtrl, 'উপস্থিতি (গড়)', _shakhaDaitoshilPresCtrl),
-        _twoColRow('জেলা নির্বাহী বৈঠক (সংখ্যা)', _distExecCountCtrl, 'উপস্থিতি (গড়)', _distExecPresCtrl),
-        _twoColRow('জোনাল তরবিয়তী মজলিস (সংখ্যা)', _zonalTorbiotCountCtrl, 'উপস্থিতি (গড়)', _zonalTorbiotPresCtrl),
-      ]),
-    );
-  }
-
-  Widget _incomeExpenseSection() {
-    return Container(
-      decoration: BoxDecoration(color: _cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: _borderColor)),
-      padding: const EdgeInsets.all(16),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('আয়-ব্যয় সংক্ষেপ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentPurple)),
-        const SizedBox(height: 14),
-        _twoColRow('সফর আয় (৳)', _safarIncomeTakaCtrl, 'কেন্দ্র থেকে বরাদ্দ (৳)', _centralIncomeTakaCtrl),
-        _field('এককালীন আয় (৳)', 'পরিমাণ টাকা', _onetimeIncomeTakaCtrl),
-        const Divider(color: Colors.grey),
-        _twoColRow('সফর ব্যয় (৳)', _safarExpenseTakaCtrl, 'যোগাযোগ ব্যয় (৳)', _communicationExpenseTakaCtrl),
-        _twoColRow('অফিস ব্যয় (৳)', _officeExpenseTakaCtrl, 'অন্যান্য ব্যয় (৳)', _otherExpenseTakaCtrl),
-      ]),
-    );
-  }
-
-  Widget _submissionCountersSection() {
-    return Container(
-      decoration: BoxDecoration(color: _cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: _borderColor)),
-      padding: const EdgeInsets.all(16),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('জমা তথ্য বিবরণী', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _accentPurple)),
-        const SizedBox(height: 14),
-        _field('শাখা রিপোর্ট জমা হয়েছে (টি)', 'টি', _shakhaReportSubCtrl),
-        _field('শাখার পরিকল্পনা জমা হয়েছে (টি)', 'টি', _shakhaPlanSubCtrl),
-        _field('শাখার বায়তুলমাল জমা হয়েছে (টি)', 'টি', _shakhaBaytulmalSubCtrl),
-      ]),
-    );
-  }
-
-  Widget _sectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(children: [
-        Container(width: 4, height: 20, decoration: BoxDecoration(color: _accentPurple, borderRadius: BorderRadius.circular(2))),
-        const SizedBox(width: 10),
-        Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFD8B4FE))),
-      ]),
-    );
-  }
-
-  Widget _field(String label, String hint, TextEditingController ctrl, {int maxLines = 1}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+  // ==========================================
+  // TAB 1: FORM ENTRY & EDIT LOCKING
+  // ==========================================
+  Widget _buildFormTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 6),
-          TextField(
-            controller: ctrl,
-            maxLines: maxLines,
-            enabled: !_isLocked,
-            style: TextStyle(color: _textLight, fontSize: 14),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: const TextStyle(color: Color(0xFF4A5568), fontSize: 13),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: _borderColor),
+          // Lock Status Banner
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: _isLocked
+                  ? const Color(0xFF0284C7).withValues(alpha: 0.12)
+                  : const Color(0xFF059669).withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: _accentPurple, width: 1.5),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  _isLocked ? Icons.lock_rounded : Icons.edit_note_rounded,
+                  color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    _isLocked
+                        ? '🔒 জোনাল রিপোর্টটি সংরক্ষিত ও লকড অবস্থায় আছে। পরিবর্তন করতে এডিট বাটনে ক্লিক করুন।'
+                        : '📝 তথ্য পূরণ করুন এবং নিচে সংরক্ষণ বাটনে চাপ দিন।',
+                    style: TextStyle(
+                      color: _textLight,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          _buildSectionCard('১. জোনের নাম', [
+            _buildInputField('জোনের নাম', _zoneNameCtrl),
+          ]),
+          const SizedBox(height: 16),
+
+          _buildSectionCard('২. জনশক্তি সংখ্যা ও পরিবর্তন', [
+            _build3ColHeader('শ্রেণী', 'সংখ্যা', 'বৃদ্ধি', 'ঘাটতি'),
+            const SizedBox(height: 8),
+            _build3ColRow('সদস্য', _sodossoCountCtrl, _sodossoBridhiCtrl, _sodossoGhattiCtrl),
+            _build3ColRow('সদস্য প্রার্থী', _sodossoPrarthiCountCtrl, _sodossoPrarthiBridhiCtrl, _sodossoPrarthiGhattiCtrl),
+          ]),
+          const SizedBox(height: 16),
+
+          _buildSectionCard('৩. সাংগঠনিক স্তর ও শাখা বিস্তার', [
+            _build3ColHeader('স্তর', 'সংখ্যা', 'গঠন', 'পুনর্গঠন'),
+            const SizedBox(height: 8),
+            _build3ColRow('জেলা শাখা', _distCountCtrl, _distOrgCtrl, _distReorgCtrl),
+            _build3ColRow('মহানগর শাখা', _cityCountCtrl, _cityOrgCtrl, _cityReorgCtrl),
+            _build3ColRow('উপজেলা/থানা শাখা', _upazilaCountCtrl, _upazilaOrgCtrl, _upazilaReorgCtrl),
+          ]),
+          const SizedBox(height: 16),
+
+          _buildSectionCard('৪. বৈঠক ও প্রশিক্ষণ কর্মসূচি', [
+            _build2ColRow('শাখা দায়িত্বশীল বৈঠক (সংখ্যা ও উপস্থিতি)', _shakhaDaitoshilCountCtrl, _shakhaDaitoshilPresCtrl),
+            _build2ColRow('জেলা নির্বাহী বৈঠক (সংখ্যা ও উপস্থিতি)', _distExecCountCtrl, _distExecPresCtrl),
+            _build2ColRow('জোনাল তরবিয়ত বৈঠক (সংখ্যা ও উপস্থিতি)', _zonalTorbiotCountCtrl, _zonalTorbiotPresCtrl),
+          ]),
+          const SizedBox(height: 16),
+
+          _buildSectionCard('৫. সফর বিবরণী (জোন থেকে)', [
+            _buildInputField('সফরের বিবরণ ও পরিক্রমা', _travelDetailsCtrl, maxLines: 3),
+          ]),
+          const SizedBox(height: 16),
+
+          _buildSectionCard('৬. আয় ও ব্যয়ের হিসাব (টাকা)', [
+            _build2ColRow('সফর আয় ও ব্যয়', _safarIncomeTakaCtrl, _safarExpenseTakaCtrl),
+            _build2ColRow('কেন্দ্রীয় আয় ও যোগাযোগ ব্যয়', _centralIncomeTakaCtrl, _communicationExpenseTakaCtrl),
+            _build2ColRow('এককালীন আয় ও দফতর ব্যয়', _onetimeIncomeTakaCtrl, _officeExpenseTakaCtrl),
+          ]),
+          const SizedBox(height: 16),
+
+          _buildSectionCard('৭. উপশাখার রিপোর্ট ও পরিকল্পনা জমা', [
+            _buildInputField('রিপোর্ট জমাদানকারী শাখা সংখ্যা', _shakhaReportSubCtrl),
+            _buildInputField('পরিকল্পনা জমাদানকারী শাখা সংখ্যা', _shakhaPlanSubCtrl),
+          ]),
+          const SizedBox(height: 16),
+
+          _buildSectionCard('৮. পর্যবেক্ষণ ও পরামর্শ', [
+            _buildInputField('জোনের সার্বিক পর্যবেক্ষণ', _remarksCtrl, maxLines: 2),
+            _buildInputField('কেন্দ্রের জন্য পরামর্শ/সুপারিশ', _suggestionsCtrl, maxLines: 2),
+          ]),
+          const SizedBox(height: 24),
+
+          // Save / Edit Action Button
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: _isLocked
+                ? ElevatedButton.icon(
+                    onPressed: () => setState(() => _isLocked = false),
+                    icon: const Icon(Icons.edit_rounded),
+                    label: const Text('সম্পাদনা করুন (Edit)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFD97706),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  )
+                : ElevatedButton.icon(
+                    onPressed: _isSaving ? null : _save,
+                    icon: const Icon(Icons.save_rounded),
+                    label: Text(_isSaving ? 'সংরক্ষণ হচ্ছে...' : 'সংরক্ষণ করুন (Save)', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF059669),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================
+  // TAB 2: FORMATTED PREVIEW & PDF DOWNLOAD
+  // ==========================================
+  Widget _buildPreviewTab() {
+    final monthStr = _monthNames[widget.month - 1];
+    final yearStr = _bn(widget.year);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          // Top PDF Download Button
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton.icon(
+              onPressed: _exportPdf,
+              icon: const Icon(Icons.picture_as_pdf_rounded, size: 22),
+              label: const Text('PDF ডাউনলোড / প্রিন্ট করুন', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0284C7),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 3,
               ),
-              disabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: _borderColor.withValues(alpha: 0.5)),
-              ),
-              filled: true,
-              fillColor: _inputFill,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Printable Preview Card
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: _cardBg.withValues(alpha: 0.95),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: _accentPurple.withValues(alpha: 0.3)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                )
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Column(
+                    children: [
+                      const Text(
+                        'বাংলাদেশ খেলাফত মজলিস',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'জোনাল রিপোর্ট — $monthStr $yearStr',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: _textLight),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'জোন: ${_zoneNameCtrl.text.isEmpty ? "(জোনের নাম প্রদান করুন)" : _zoneNameCtrl.text}',
+                        style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: _accentPurple),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 30, thickness: 1),
+
+                _buildPreviewRow('সদস্য সংখ্যা/বৃদ্ধি/ঘাটতি', '${_sodossoCountCtrl.text} / ${_sodossoBridhiCtrl.text} / ${_sodossoGhattiCtrl.text}'),
+                _buildPreviewRow('সদস্য প্রার্থী সংখ্যা/বৃদ্ধি/ঘাটতি', '${_sodossoPrarthiCountCtrl.text} / ${_sodossoPrarthiBridhiCtrl.text} / ${_sodossoPrarthiGhattiCtrl.text}'),
+                _buildPreviewRow('জেলা শাখা গঠন/পুনর্গঠন', '${_distCountCtrl.text} / ${_distOrgCtrl.text} / ${_distReorgCtrl.text}'),
+                _buildPreviewRow('মহানগর শাখা গঠন/পুনর্গঠন', '${_cityCountCtrl.text} / ${_cityOrgCtrl.text} / ${_cityReorgCtrl.text}'),
+                _buildPreviewRow('উপজেলা/থানা শাখা', '${_upazilaCountCtrl.text} / ${_upazilaOrgCtrl.text} / ${_upazilaReorgCtrl.text}'),
+                _buildPreviewRow('শাখা দায়িত্বশীল বৈঠক', '${_shakhaDaitoshilCountCtrl.text} (উপস্থিতি: ${_shakhaDaitoshilPresCtrl.text})'),
+                _buildPreviewRow('জেলা নির্বাহী বৈঠক', '${_distExecCountCtrl.text} (উপস্থিতি: ${_distExecPresCtrl.text})'),
+                _buildPreviewRow('জোনাল তরবিয়ত বৈঠক', '${_zonalTorbiotCountCtrl.text} (উপস্থিতি: ${_zonalTorbiotPresCtrl.text})'),
+                _buildPreviewRow('জোন সফর বিবরণী', _travelDetailsCtrl.text),
+                _buildPreviewRow('সফর/কেন্দ্রীয়/এককালীন আয়', '${_safarIncomeTakaCtrl.text} / ${_centralIncomeTakaCtrl.text} / ${_onetimeIncomeTakaCtrl.text}'),
+                _buildPreviewRow('সফর/যোগাযোগ/দফতর ব্যয়', '${_safarExpenseTakaCtrl.text} / ${_communicationExpenseTakaCtrl.text} / ${_officeExpenseTakaCtrl.text}'),
+                if (_currentEntry != null)
+                  _buildPreviewRow('মোট আয় / ব্যয় / স্থিতি', '${_currentEntry!.totalIncome} / ${_currentEntry!.totalExpense} / ${_currentEntry!.balance}'),
+                _buildPreviewRow('উপশাখার রিপোর্ট প্রাপ্তি', _shakhaReportSubCtrl.text),
+                _buildPreviewRow('উপশাখার পরিকল্পনা প্রাপ্তি', _shakhaPlanSubCtrl.text),
+
+                if (_remarksCtrl.text.isNotEmpty || _suggestionsCtrl.text.isNotEmpty) ...[
+                  const Divider(height: 24),
+                  Text('পর্যবেক্ষণ ও পরামর্শ:', style: TextStyle(fontWeight: FontWeight.bold, color: _textLight, fontSize: 14)),
+                  const SizedBox(height: 4),
+                  Text('পর্যবেক্ষণ: ${_remarksCtrl.text}', style: TextStyle(color: _textLight.withValues(alpha: 0.9), fontSize: 13.5)),
+                  const SizedBox(height: 2),
+                  Text('পরামর্শ: ${_suggestionsCtrl.text}', style: TextStyle(color: _textLight.withValues(alpha: 0.9), fontSize: 13.5)),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreviewRow(String title, String value) {
+    final val = value.trim().isEmpty ? '—' : value.trim();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 155,
+            child: Text(
+              '$title:',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5, color: _textLight.withValues(alpha: 0.75)),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              val,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5, color: _textLight),
             ),
           ),
         ],
@@ -472,79 +554,83 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
     );
   }
 
-  Widget _twoColRow(String label1, TextEditingController ctrl1, String label2, TextEditingController ctrl2) {
+  Widget _buildSectionCard(String title, List<Widget> children) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _cardBg.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: _borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.5, color: _accentPurple)),
+          const SizedBox(height: 12),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputField(String label, TextEditingController ctrl, {int maxLines = 1}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 10),
+      child: TextField(
+        controller: ctrl,
+        enabled: !_isLocked,
+        maxLines: maxLines,
+        style: TextStyle(color: _textLight, fontSize: 14),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: _textMuted),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          isDense: true,
+          filled: _isLocked,
+          fillColor: Colors.black.withValues(alpha: 0.04),
+        ),
+      ),
+    );
+  }
+
+  Widget _build3ColHeader(String col1, String col2, String col3, String col4) {
+    return Row(
+      children: [
+        Expanded(flex: 3, child: Text(col1, style: TextStyle(color: _textMuted, fontWeight: FontWeight.bold, fontSize: 13))),
+        Expanded(flex: 2, child: Center(child: Text(col2, style: TextStyle(color: _textMuted, fontWeight: FontWeight.bold, fontSize: 13)))),
+        Expanded(flex: 2, child: Center(child: Text(col3, style: TextStyle(color: _textMuted, fontWeight: FontWeight.bold, fontSize: 13)))),
+        Expanded(flex: 2, child: Center(child: Text(col4, style: TextStyle(color: _textMuted, fontWeight: FontWeight.bold, fontSize: 13)))),
+      ],
+    );
+  }
+
+  Widget _build3ColRow(String title, TextEditingController c1, TextEditingController c2, TextEditingController c3) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label1, style: TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 6),
-                _miniField(ctrl1),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label2, style: TextStyle(color: _textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 6),
-                _miniField(ctrl2),
-              ],
-            ),
-          ),
+          Expanded(flex: 3, child: Text(title, style: TextStyle(color: _textLight, fontSize: 13.5))),
+          Expanded(flex: 2, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 2), child: _buildMiniField(c1))),
+          Expanded(flex: 2, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 2), child: _buildMiniField(c2))),
+          Expanded(flex: 2, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 2), child: _buildMiniField(c3))),
         ],
       ),
     );
   }
 
-  Widget _threeColRow(String sectionLabel, TextEditingController ctrl1, String label2, TextEditingController ctrl2, String label3, TextEditingController ctrl3) {
+  Widget _build2ColRow(String title, TextEditingController c1, TextEditingController c2) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(sectionLabel, style: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 13, fontWeight: FontWeight.bold)),
+          Text(title, style: TextStyle(color: _textLight, fontSize: 13.5, fontWeight: FontWeight.w500)),
           const SizedBox(height: 6),
           Row(
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('সংখ্যা', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11)),
-                    const SizedBox(height: 4),
-                    _miniField(ctrl1),
-                  ],
-                ),
-              ),
+              Expanded(child: _buildMiniField(c1)),
               const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(label2, style: TextStyle(color: _textMuted, fontSize: 11)),
-                    const SizedBox(height: 4),
-                    _miniField(ctrl2),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(label3, style: TextStyle(color: _textMuted, fontSize: 11)),
-                    const SizedBox(height: 4),
-                    _miniField(ctrl3),
-                  ],
-                ),
-              ),
+              Expanded(child: _buildMiniField(c2)),
             ],
           ),
         ],
@@ -552,71 +638,19 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
     );
   }
 
-  Widget _miniField(TextEditingController ctrl) {
+  Widget _buildMiniField(TextEditingController ctrl) {
     return TextField(
       controller: ctrl,
       enabled: !_isLocked,
-      style: TextStyle(fontSize: 13, color: _textLight),
+      textAlign: TextAlign.center,
+      style: TextStyle(color: _textLight, fontSize: 13.5),
       decoration: InputDecoration(
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: _borderColor),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: _accentPurple),
-        ),
-        disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: _borderColor.withValues(alpha: 0.4)),
-        ),
-        filled: true,
-        fillColor: _inputFill,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+        contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
         isDense: true,
+        filled: _isLocked,
+        fillColor: Colors.black.withValues(alpha: 0.04),
       ),
     );
   }
-}
-
-class _BgPainter extends CustomPainter {
-  final bool isDark;
-  _BgPainter({required this.isDark});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (!isDark) {
-      final grid = Paint()..color = Colors.grey.withValues(alpha: 0.05)..strokeWidth = 0.5..style = PaintingStyle.stroke;
-      for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
-      for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-      return;
-    }
-
-    final fill = Paint()..color = Colors.purple.withValues(alpha: 0.025)..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.05), 130, fill);
-    canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.5), 100, fill);
-
-    final grid = Paint()..color = Colors.purple.withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
-    for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
-    for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-
-    final star = Paint()..color = const Color(0xFF1E3A52)..style = PaintingStyle.fill;
-    _drawStar(canvas, Offset(size.width * 0.85, size.height * 0.12), 18, star);
-    _drawStar(canvas, Offset(size.width * 0.08, size.height * 0.3), 12, star);
-  }
-
-  void _drawStar(Canvas canvas, Offset c, double r, Paint p) {
-    final path = Path();
-    for (int i = 0; i < 8; i++) {
-      final a = i * 45 * pi / 180;
-      final rad = i % 2 == 0 ? r : r * 0.45;
-      i == 0 ? path.moveTo(c.dx + rad * cos(a), c.dy + rad * sin(a))
-             : path.lineTo(c.dx + rad * cos(a), c.dy + rad * sin(a));
-    }
-    path.close();
-    canvas.drawPath(path, p);
-  }
-
-  @override
-  bool shouldRepaint(_BgPainter _) => false;
 }
