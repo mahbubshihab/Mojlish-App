@@ -5,6 +5,7 @@ import 'package:mojlish_app/core/services/user_storage_service.dart';
 import 'package:mojlish_app/core/theme/app_theme.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/features/common/auth/presentation/screens/google_login_screen.dart';
+import 'package:mojlish_app/features/common/auth/presentation/screens/org_selection_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -23,14 +24,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _currentMajlis = 'খেলাফত মজলিস';
   bool _isLoading = false;
   bool _isSaving = false;
-
-  final List<Map<String, String>> _majlisOptions = [
-    {'title': 'খেলাফত মজলিস', 'logo': 'assets/images/khelafot_majlish.png'},
-    {'title': 'ছাত্র মজলিস', 'logo': 'assets/images/chatro_majlish.png'},
-    {'title': 'যুব মজলিস', 'logo': 'assets/images/jubo_majlish.png'},
-    {'title': 'মহিলা মজলিস', 'logo': 'assets/images/mohila-majlish.png'},
-    {'title': 'শ্রমিক মজলিস', 'logo': 'assets/images/logo.png'},
-  ];
 
   @override
   void initState() {
@@ -52,14 +45,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final photoUrl = await UserStorageService.getUserPhotoUrl();
     final majlis = await UserStorageService.getActiveMajlis();
 
-    setState(() {
-      _user = user;
-      _nameController.text = name.isNotEmpty ? name : (user?.displayName ?? 'মিজানুর রহমান');
-      _userEmail = email.isNotEmpty ? email : (user?.email ?? 'mizanur.rahman@gmail.com');
-      _photoUrl = photoUrl.isNotEmpty ? photoUrl : (user?.photoURL ?? '');
-      _currentMajlis = (majlis != null && majlis.isNotEmpty) ? majlis : 'খেলাফত মজলিস';
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _user = user;
+        _nameController.text = name.isNotEmpty ? name : (user?.displayName ?? 'মিজানুর রহমান');
+        _userEmail = email.isNotEmpty ? email : (user?.email ?? 'mizanur.rahman@gmail.com');
+        _photoUrl = photoUrl.isNotEmpty ? photoUrl : (user?.photoURL ?? '');
+        _currentMajlis = (majlis != null && majlis.isNotEmpty) ? majlis : 'খেলাফত মজলিস';
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _getLogoForMajlis(String majlisName) {
+    switch (majlisName) {
+      case 'খেলাফত মজলিস':
+        return 'assets/images/khelafot_majlish.png';
+      case 'ছাত্র মজলিস':
+        return 'assets/images/chatro_majlish.png';
+      case 'যুব মজলিস':
+        return 'assets/images/jubo_majlish.png';
+      case 'মহিলা মজলিস':
+        return 'assets/images/mohila-majlish.png';
+      case 'শ্রমিক মজলিস':
+      default:
+        return 'assets/images/logo.png';
+    }
   }
 
   Future<void> _saveProfileChanges() async {
@@ -274,59 +285,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           const SizedBox(height: 28),
 
-                          // Switch Active Majlis Section
+                          // Active Majlis & Switch Button Section
                           Text(
-                            'সক্রিয় মজলিস নির্বাচন করুন',
+                            'সক্রিয় মজলিস',
                             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textTitle),
                           ),
-                          const SizedBox(height: 12),
-                          ..._majlisOptions.map((item) {
-                            final title = item['title']!;
-                            final logoPath = item['logo']!;
-                            final isSelected = _currentMajlis == title;
-
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 10),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? AppTheme.primaryColor.withValues(alpha: 0.12)
-                                    : cardBg,
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                  color: isSelected ? AppTheme.primaryColor : borderNav,
-                                  width: isSelected ? 2 : 1,
-                                ),
-                              ),
-                              child: ListTile(
-                                onTap: () => setState(() => _currentMajlis = title),
-                                leading: Image.asset(
-                                  logoPath,
-                                  height: 36,
-                                  width: 36,
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: cardBg,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: borderNav),
+                            ),
+                            child: Row(
+                              children: [
+                                Image.asset(
+                                  _getLogoForMajlis(_currentMajlis),
+                                  height: 40,
+                                  width: 40,
                                   fit: BoxFit.contain,
                                   errorBuilder: (_, __, ___) => Icon(
                                     Icons.stars_rounded,
                                     color: AppTheme.primaryColor,
                                   ),
                                 ),
-                                title: Text(
-                                  title,
-                                  style: TextStyle(
-                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                                    color: isSelected ? AppTheme.primaryColor : textTitle,
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Text(
+                                    _currentMajlis,
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.bold,
+                                      color: textTitle,
+                                    ),
                                   ),
                                 ),
-                                trailing: Radio<String>(
-                                  value: title,
-                                  groupValue: _currentMajlis,
-                                  activeColor: AppTheme.primaryColor,
-                                  onChanged: (val) {
-                                    if (val != null) setState(() => _currentMajlis = val);
+                                OutlinedButton.icon(
+                                  onPressed: () async {
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => const OrgSelectionScreen()),
+                                    );
+                                    _loadProfileData();
                                   },
+                                  icon: const Icon(Icons.swap_horiz_rounded, size: 18),
+                                  label: const Text('সুইচ করুন'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: AppTheme.primaryColor,
+                                    side: BorderSide(color: AppTheme.primaryColor),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  ),
                                 ),
-                              ),
-                            );
-                          }),
+                              ],
+                            ),
+                          ),
                           const SizedBox(height: 28),
 
                           // Save Changes Button

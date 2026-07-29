@@ -97,50 +97,65 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen> {
                   ],
                 ),
 
-                // Center Action Section: Google Sign In Button with google_logo.png
+                // Center Action Section: Glassmorphism Google Sign In Button
                 Column(
                   children: [
                     if (_isLoading)
                       const CircularProgressIndicator(color: Colors.white)
                     else
-                      ElevatedButton(
-                        onPressed: _handleGoogleSignIn,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: const Color(0xFF1E293B),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 16,
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: Colors.white.withValues(alpha: 0.12),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.25),
+                            width: 1.5,
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 6,
-                          shadowColor: Colors.black.withValues(alpha: 0.3),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              'assets/images/google_logo.png',
-                              height: 26,
-                              width: 26,
-                              errorBuilder: (_, __, ___) => const Icon(
-                                Icons.g_mobiledata_rounded,
-                                size: 30,
-                                color: Color(0xFFEA4335),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Text(
-                              'Google দিয়ে প্রবেশ করুন',
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF1E293B),
-                              ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.2),
+                              blurRadius: 16,
+                              spreadRadius: 2,
                             ),
                           ],
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: _handleGoogleSignIn,
+                            borderRadius: BorderRadius.circular(16),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 16,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    'assets/images/google_logo.png',
+                                    height: 26,
+                                    width: 26,
+                                    errorBuilder: (_, __, ___) => const Icon(
+                                      Icons.g_mobiledata_rounded,
+                                      size: 30,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Text(
+                                    'Google দিয়ে প্রবেশ করুন',
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                   ],
