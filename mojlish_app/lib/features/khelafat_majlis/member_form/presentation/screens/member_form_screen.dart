@@ -8,8 +8,8 @@ import '../bloc/member_form_bloc.dart';
 import '../bloc/member_form_event.dart';
 import '../bloc/member_form_state.dart';
 import '../../domain/entities/member.dart';
-import '../data/datasources/member_remote_datasource.dart';
-import '../data/repositories/member_repository_impl.dart';
+import '../../data/datasources/member_remote_datasource.dart';
+import '../../data/repositories/member_repository_impl.dart';
 
 /// খেলাফত মজলিস — প্রাথমিক সদস্য ফরম (BlocProvider Wrapper + Clean Form Content)
 class MemberFormScreen extends StatelessWidget {

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
-import 'package:mojlish_app/core/services/report_sync_service.dart';
-import 'package:mojlish_app/features/common/auth/data/services/auth_service.dart';
-import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 import 'package:mojlish_app/features/common/reports/presentation/screens/personal_report_table_screen.dart';
 
 import 'package:mojlish_app/features/khelafat_majlis/branch_report/presentation/screens/khelafat_branch_report_book_screen.dart';
@@ -15,9 +12,13 @@ import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentati
 import 'package:mojlish_app/features/youth_majlis/member_form/presentation/screens/member_form_screen.dart' as youth_form;
 import 'package:mojlish_app/features/student_majlis/member_form/presentation/screens/member_form_screen.dart' as chatro_form;
 
+typedef ReportBookScreen = PersonalReportTableScreen;
+
 /// কেন্দ্রীয় রিপোর্ট ও ফরম হাব (Report & Form Hub Selection)
 class ReportSelectionScreen extends StatefulWidget {
-  const ReportSelectionScreen({super.key});
+  final String? majlisName;
+
+  const ReportSelectionScreen({super.key, this.majlisName});
 
   @override
   State<ReportSelectionScreen> createState() => _ReportSelectionScreenState();
@@ -58,7 +59,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
     final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
     const accentGreen = Color(0xFF10B981);
 
-    final activeMajlisType = ReportSyncService.activeMajlisType;
+    final activeMajlisType = widget.majlisName ?? 'khelafat';
     final isKhelafat = activeMajlisType == 'khelafat';
     final isYouth = activeMajlisType == 'youth';
     final isChatro = activeMajlisType == 'chatro';
@@ -111,7 +112,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               children: [
-                // 1. ব্যক্তিগত তৎপরতার রিপোর্ট
+                // 1. কোনটা কোন মজলিস তার উপযোগী ব্যক্তিগত তৎপরতার রিপোর্ট
                 _buildMinimalReportCard(
                   title: 'ব্যক্তিগত তৎপরতার রিপোর্ট',
                   icon: Icons.person_outline_rounded,

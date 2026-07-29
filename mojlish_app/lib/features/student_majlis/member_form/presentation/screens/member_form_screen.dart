@@ -548,6 +548,3 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
   }
 }
 
-/// Alias for ChatroMemberFormScreen
-typedef ChatroMemberFormScreen = MemberFormScreen;
-
