@@ -69,16 +69,16 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
     final isKhelafat = !isYouth && !isChatro && !isLabor && !isWomen;
 
     final majlisDisplayName = isKhelafat
-        ? 'বাংলাদেশ খেলাফত মজলিস'
+        ? 'খেলাফত মজলিস'
         : isYouth
-            ? 'বাংলাদেশ ইসলামী যুব মজলিস'
+            ? 'যুব মজলিস'
             : isChatro
-                ? 'বাংলাদেশ ইসলামী ছাত্র মজলিস'
+                ? 'ছাত্র মজলিস'
                 : isLabor
-                    ? 'বাংলাদেশ ইসলামী শ্রমিক মজলিস'
+                    ? 'শ্রমিক মজলিস'
                     : isWomen
-                        ? 'ইসলামী মহিলা মজলিস'
-                        : 'ইসলামী খেলাফত মজলিস';
+                        ? 'মহিলা মজলিস'
+                        : 'খেলাফত মজলিস';
 
     MajlisType parsedMajlisType;
     if (isYouth) {
@@ -135,7 +135,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
               children: [
                 // 1. সকল মজলিসের নিজস্ব ব্যক্তিগত তৎপরতার রিপোর্ট
                 _buildMinimalReportCard(
-                  title: 'ব্যক্তিগত তৎপরতার রিপোর্ট ($majlisDisplayName)',
+                  title: 'ব্যক্তিগত তৎপরতার রিপোর্ট',
                   icon: Icons.person_outline_rounded,
                   color: const Color(0xFF10B981),
                   cardBg: cardBg,
