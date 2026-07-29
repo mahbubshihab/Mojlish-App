@@ -60,12 +60,12 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
     final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
     const accentGreen = Color(0xFF10B981);
 
-    final rawMajlis = (widget.majlisName ?? 'khelafat').toLowerCase();
-    final isKhelafat = rawMajlis == 'khelafat';
-    final isYouth = rawMajlis == 'youth' || rawMajlis == 'jubo';
-    final isChatro = rawMajlis == 'chatro' || rawMajlis == 'student';
-    final isLabor = rawMajlis == 'sromik' || rawMajlis == 'labor';
-    final isWomen = rawMajlis == 'mohila' || rawMajlis == 'women';
+    final rawMajlis = (widget.majlisName ?? '').toLowerCase();
+    final isYouth = rawMajlis.contains('youth') || rawMajlis.contains('jubo') || rawMajlis.contains('যুব');
+    final isChatro = rawMajlis.contains('chatro') || rawMajlis.contains('student') || rawMajlis.contains('ছাত্র');
+    final isLabor = rawMajlis.contains('sromik') || rawMajlis.contains('labor') || rawMajlis.contains('শ্রমিক');
+    final isWomen = rawMajlis.contains('mohila') || rawMajlis.contains('women') || rawMajlis.contains('মহিলা');
+    final isKhelafat = !isYouth && !isChatro && !isLabor && !isWomen;
 
     final majlisDisplayName = isKhelafat
         ? 'বাংলাদেশ খেলাফত মজলিস'
