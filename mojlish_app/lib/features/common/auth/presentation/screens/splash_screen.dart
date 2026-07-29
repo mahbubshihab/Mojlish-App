@@ -60,8 +60,8 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: Main.center,
           children: [
             Image.asset(
-              'assets/images/election_symbol_wall_clock.png',
-              height: 100,
+              'assets/images/logo.png',
+              height: 120,
               errorBuilder: (_, __, ___) => Icon(Icons.mosque, size: 80, color: AppTheme.primaryColor),
             ),
             const SizedBox(height: 20),
