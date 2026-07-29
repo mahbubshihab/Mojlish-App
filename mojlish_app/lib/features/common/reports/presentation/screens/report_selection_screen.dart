@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
+import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
 import 'package:mojlish_app/features/common/reports/presentation/screens/personal_report_table_screen.dart';
 
 import 'package:mojlish_app/features/khelafat_majlis/branch_report/presentation/screens/khelafat_branch_report_book_screen.dart';
@@ -11,8 +12,6 @@ import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentati
 
 import 'package:mojlish_app/features/youth_majlis/member_form/presentation/screens/member_form_screen.dart' as youth_form;
 import 'package:mojlish_app/features/student_majlis/member_form/presentation/screens/member_form_screen.dart' as chatro_form;
-
-typedef ReportBookScreen = PersonalReportTableScreen;
 
 /// কেন্দ্রীয় রিপোর্ট ও ফরম হাব (Report & Form Hub Selection)
 class ReportSelectionScreen extends StatefulWidget {
@@ -122,10 +121,23 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                   textLight: textLight,
                   textMuted: textMuted,
                   onTap: () async {
+                    MajlisType parsedType;
+                    if (activeMajlisType == 'youth') {
+                      parsedType = MajlisType.youth;
+                    } else if (activeMajlisType == 'chatro') {
+                      parsedType = MajlisType.chatro;
+                    } else {
+                      parsedType = MajlisType.khelafat;
+                    }
+
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ReportBookScreen(majlisType: activeMajlisType),
+                        builder: (_) => PersonalReportTableScreen(
+                          year: _now.year,
+                          month: _now.month,
+                          majlisType: parsedType,
+                        ),
                       ),
                     );
                     _loadActiveMajlisAndStats();
