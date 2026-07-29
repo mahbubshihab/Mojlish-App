@@ -143,53 +143,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
                       ),
                       const SizedBox(height: 24),
                       
-                      // Sync Data Card
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: cardBg,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: borderColor),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
-                              blurRadius: 15,
-                              offset: const Offset(0, 5),
-                            )
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              'আপনার নির্বাচিত মজলিস: $_selectedMajlis\nরিপোর্ট সুরক্ষিত রাখতে ও সিঙ্ক করতে লগইন করুন',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 13, color: textMuted, height: 1.4),
-                            ),
-                            const SizedBox(height: 14),
-                            Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: borderColor),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: TextButton.icon(
-                                onPressed: () {},
-                                icon: Image.asset('assets/images/google_logo.png', height: 18),
-                                label: Text(
-                                  'ডাটা সিঙ্ক করতে গুগলে লগইন করুন',
-                                  style: TextStyle(color: textTitle, fontWeight: FontWeight.bold, fontSize: 13),
-                                ),
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 24),
 
                       // Menus Section title
                       Text(
