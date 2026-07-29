@@ -184,7 +184,7 @@ class StudentBaytulmalPdfService {
                   ),
                 ),
                 child: pw.Row(
-                  crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     // Left: কথায়
                     pw.Expanded(
@@ -292,7 +292,7 @@ class StudentBaytulmalPdfService {
                   ),
                 ),
                 child: pw.Row(
-                  crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     // Left: কথায় & Note
                     pw.Expanded(
