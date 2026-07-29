@@ -3,10 +3,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/daily_personal_entry.dart';
+import '../models/monthly_comment.dart';
+import '../models/monthly_plan.dart';
 
 /// লোকাল স্টোরেজ ও ফায়ারস্টোর সিঙ্ক সার্ভিস — SharedPreferences ও Cloud Firestore
 class ReportStorageService {
   static const String _personalReportKey = 'personal_reports';
+  static const String _personalPlanKey = 'personal_monthly_plans';
+  static const String _commentsKey = 'monthly_comments';
 
   // ===========================
   // ব্যক্তিগত রিপোর্ট — CRUD & Offline Firestore Sync
@@ -75,6 +79,75 @@ class ReportStorageService {
       } catch (_) {}
     }
     return count;
+  }
+
+  // ===========================
+  // মাসিক পরিকল্পনা — CRUD
+  // ===========================
+
+  static Future<void> saveMonthlyPlan(MonthlyPlan plan) async {
+    final prefs = await SharedPreferences.getInstance();
+    final allData = await _getAllMonthlyPlans();
+    final key = '${plan.year}-${plan.month}';
+    allData[key] = plan;
+    final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
+    await prefs.setString(_personalPlanKey, jsonEncode(encoded));
+  }
+
+  static Future<MonthlyPlan?> getMonthlyPlan(int year, int month) async {
+    final all = await _getAllMonthlyPlans();
+    final key = '$year-$month';
+    return all[key];
+  }
+
+  static Future<Map<String, MonthlyPlan>> _getAllMonthlyPlans() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_personalPlanKey);
+    if (raw == null) return {};
+    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    return decoded.map(
+      (k, v) => MapEntry(k, MonthlyPlan.fromJson(v as Map<String, dynamic>)),
+    );
+  }
+
+  // ===========================
+  // মাসিক মন্তব্য — CRUD
+  // ===========================
+
+  static Future<void> saveComment(MonthlyComment comment) async {
+    final prefs = await SharedPreferences.getInstance();
+    final all = await _getAllComments();
+    all[comment.id] = comment;
+    final encoded = all.map((k, v) => MapEntry(k, v.toJson()));
+    await prefs.setString(_commentsKey, jsonEncode(encoded));
+  }
+
+  static Future<void> deleteComment(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final all = await _getAllComments();
+    all.remove(id);
+    final encoded = all.map((k, v) => MapEntry(k, v.toJson()));
+    await prefs.setString(_commentsKey, jsonEncode(encoded));
+  }
+
+  static Future<List<MonthlyComment>> getCommentsForMonth(int year, int month) async {
+    final all = await _getAllComments();
+    final yearMonth = '$year-${month.toString().padLeft(2, '0')}';
+    final result = all.values
+        .where((c) => c.yearMonth == yearMonth)
+        .toList()
+      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    return result;
+  }
+
+  static Future<Map<String, MonthlyComment>> _getAllComments() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_commentsKey);
+    if (raw == null) return {};
+    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    return decoded.map(
+      (k, v) => MapEntry(k, MonthlyComment.fromJson(v as Map<String, dynamic>)),
+    );
   }
 
   // ===========================

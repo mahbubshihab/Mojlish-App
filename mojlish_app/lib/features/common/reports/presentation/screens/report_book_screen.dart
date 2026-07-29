@@ -3,7 +3,8 @@ import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
 import 'package:mojlish_app/features/common/reports/presentation/screens/report_download_screen.dart';
-import 'package:mojlish_app/features/common/reports/presentation/screens/daily_personal_entry_form_screen.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/personal_report_table_screen.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/daily_entry_screen.dart';
 
 /// ব্যক্তিগত রিপোর্ট বই — বছর/মাস নেভিগেশন ও কাস্টম মাল্টি-মান্থ A4 PDF ডাউনলোড
 class ReportBookScreen extends StatefulWidget {
@@ -52,14 +53,12 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
   }
 
   void _openMonth(int month) async {
-    final dayToUse = (month == _now.month && _selectedYear == _now.year) ? _now.day : 1;
-    final targetDate = DateTime(_selectedYear, month, dayToUse);
-    
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => DailyPersonalEntryFormScreen(
-          initialDate: targetDate,
+        builder: (_) => PersonalReportTableScreen(
+          year: _selectedYear,
+          month: month,
           majlisType: widget.majlisType,
         ),
       ),
@@ -74,9 +73,8 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => DailyPersonalEntryFormScreen(
-          initialDate: DateTime.now(),
-          majlisType: widget.majlisType,
+        builder: (_) => DailyEntryScreen(
+          date: DateTime.now(),
         ),
       ),
     );

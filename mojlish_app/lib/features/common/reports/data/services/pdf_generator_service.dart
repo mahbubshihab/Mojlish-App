@@ -2,10 +2,10 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:flutter/services.dart';
-import '../../../personal_report/data/models/daily_personal_entry.dart';
-import '../../../baytulmal_report/data/models/baytulmal_report_entry.dart';
-import '../../../personal_report/data/models/monthly_plan.dart';
-import '../../../personal_report/data/models/monthly_comment.dart';
+import '../models/daily_personal_entry.dart';
+import '../models/baytulmal_report_entry.dart';
+import '../models/monthly_plan.dart';
+import '../models/monthly_comment.dart';
 import 'report_storage_service.dart';
 
 /// PDF জেনারেটর সার্ভিস — রিপোর্ট থেকে PDF তৈরি ও শেয়ার করে
