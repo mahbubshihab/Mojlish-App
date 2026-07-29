@@ -10,6 +10,8 @@ import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/constants/majlis_assets.dart';
 
+typedef YouthMemberFormScreen = MemberFormScreen;
+
 class MemberFormScreen extends StatefulWidget {
   const MemberFormScreen({super.key});
 

@@ -8,15 +8,34 @@ import '../bloc/member_form_bloc.dart';
 import '../bloc/member_form_event.dart';
 import '../bloc/member_form_state.dart';
 import '../../domain/entities/member.dart';
+import '../data/datasources/member_remote_datasource.dart';
+import '../data/repositories/member_repository_impl.dart';
 
-class MemberFormScreen extends StatefulWidget {
+/// খেলাফত মজলিস — প্রাথমিক সদস্য ফরম (BlocProvider Wrapper + Clean Form Content)
+class MemberFormScreen extends StatelessWidget {
   const MemberFormScreen({super.key});
 
   @override
-  State<MemberFormScreen> createState() => _MemberFormScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider<MemberFormBloc>(
+      create: (_) => MemberFormBloc(
+        repository: KhelafatMajlisMemberRepositoryImpl(
+          MemberRemoteDataSourceImpl(),
+        ),
+      ),
+      child: const _MemberFormScreenContent(),
+    );
+  }
 }
 
-class _MemberFormScreenState extends State<MemberFormScreen> {
+class _MemberFormScreenContent extends StatefulWidget {
+  const _MemberFormScreenContent();
+
+  @override
+  State<_MemberFormScreenContent> createState() => _MemberFormScreenContentState();
+}
+
+class _MemberFormScreenContentState extends State<_MemberFormScreenContent> {
   final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();

@@ -10,6 +10,8 @@ import 'package:mojlish_app/core/constants/majlis_assets.dart';
 import '../../data/datasources/member_form_remote_datasource.dart';
 import '../../data/repositories/member_form_repository_impl.dart';
 
+typedef ChatroMemberFormScreen = MemberFormScreen;
+
 class MemberFormScreen extends StatefulWidget {
   const MemberFormScreen({super.key});
 
