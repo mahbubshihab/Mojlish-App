@@ -17,10 +17,10 @@ import 'package:mojlish_app/features/youth_majlis/call_manifesto/presentation/sc
 
 // Student Majlis Features
 import 'package:mojlish_app/features/student_majlis/member_form/presentation/screens/member_form_screen.dart' as chatro_form;
-import 'package:mojlish_app/features/student_majlis/period_report/presentation/screens/period_report_screen.dart';
-import 'package:mojlish_app/features/student_majlis/period_plan/presentation/screens/period_plan_screen.dart';
-import 'package:mojlish_app/features/student_majlis/general_plan/presentation/screens/general_plan_screen.dart';
-import 'package:mojlish_app/features/student_majlis/baytulmal_report/presentation/pages/baytulmal_report_page.dart' as chatro_baytulmal;
+import 'package:mojlish_app/features/student_majlis/period_report/presentation/screens/student_period_report_book_screen.dart';
+import 'package:mojlish_app/features/student_majlis/period_plan/presentation/screens/student_period_plan_book_screen.dart';
+import 'package:mojlish_app/features/student_majlis/personal_plan/presentation/screens/student_personal_plan_book_screen.dart';
+import 'package:mojlish_app/features/student_majlis/baytulmal_report/presentation/screens/chatro_baytulmal_report_book_screen.dart';
 
 // Labor Majlis Features
 import 'package:mojlish_app/features/labor_majlis/member_form/presentation/screens/member_form_screen.dart';
@@ -271,7 +271,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                 // ==================== STUDENT MAJLIS (CHATRO) ONLY ====================
                 if (isChatro) ...[
                   _buildMinimalReportCard(
-                    title: 'মেয়াদী/সেশনাল রিপোর্ট ফরম',
+                    title: 'বার্ষিক / ষান্মাসিক / দ্বি-মাসিক রিপোর্ট',
                     icon: Icons.date_range_rounded,
                     color: const Color(0xFF2563EB),
                     cardBg: cardBg,
@@ -280,13 +280,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                     textMuted: textMuted,
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const PeriodReportScreen()),
+                      MaterialPageRoute(builder: (_) => const StudentPeriodReportBookScreen()),
                     ),
                   ),
                   const SizedBox(height: 12),
 
                   _buildMinimalReportCard(
-                    title: 'মেয়াদী/সেশনাল পরিকল্পনা ফরম',
+                    title: 'বার্ষিক / ষান্মাসic / দ্বি-মাসিক পরিকল্পনা',
                     icon: Icons.assignment_rounded,
                     color: const Color(0xFF8B5CF6),
                     cardBg: cardBg,
@@ -295,28 +295,28 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                     textMuted: textMuted,
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const PeriodPlanScreen()),
+                      MaterialPageRoute(builder: (_) => const StudentPeriodPlanBookScreen()),
                     ),
                   ),
                   const SizedBox(height: 12),
 
                   _buildMinimalReportCard(
-                    title: 'সাধারণ পরিকল্পনা ফরম',
-                    icon: Icons.event_note_rounded,
-                    color: const Color(0xFF06B6D4),
+                    title: 'ব্যক্তিগত মাসিক পরিকল্পনা',
+                    icon: Icons.person_outline_rounded,
+                    color: const Color(0xFF0D9488),
                     cardBg: cardBg,
                     borderColor: borderColor,
                     textLight: textLight,
                     textMuted: textMuted,
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const GeneralPlanScreen()),
+                      MaterialPageRoute(builder: (_) => const StudentPersonalPlanBookScreen()),
                     ),
                   ),
                   const SizedBox(height: 12),
 
                   _buildMinimalReportCard(
-                    title: 'ছাত্র মজলিস — বায়তুলমাল রিপোর্ট',
+                    title: 'বায়তুলমাল রিপোর্ট',
                     icon: Icons.account_balance_wallet_rounded,
                     color: const Color(0xFFD97706),
                     cardBg: cardBg,
@@ -325,13 +325,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                     textMuted: textMuted,
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const chatro_baytulmal.BaytulmalReportPage()),
+                      MaterialPageRoute(builder: (_) => const ChatroBaytulmalReportBookScreen()),
                     ),
                   ),
                   const SizedBox(height: 12),
 
                   _buildMinimalReportCard(
-                    title: 'ছাত্র মজলিস — প্রাথমিক সদস্য আবেদন ফরম',
+                    title: 'প্রাথমিক সদস্য ফরম',
                     icon: Icons.badge_rounded,
                     color: const Color(0xFFEC4899),
                     cardBg: cardBg,
