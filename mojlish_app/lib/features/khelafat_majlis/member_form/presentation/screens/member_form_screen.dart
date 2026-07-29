@@ -95,6 +95,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
     final isDark = themeManager.isDarkMode;
     final bgColor = isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF1F5F9);
     final cardBg = isDark ? const Color(0xFF162032) : Colors.white;
+    final textLight = isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -133,19 +134,42 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Top Action Bar
+                    // Top Action Bar with Save/Edit at the TOP!
                     Row(
                       children: [
                         Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: _openPdfViewer,
-                            icon: const Icon(Icons.picture_as_pdf_rounded, size: 20),
-                            label: const Text('PDF প্রিভিউ ও ডাউনলোড', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0284C7),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          child: SizedBox(
+                            height: 46,
+                            child: ElevatedButton.icon(
+                              onPressed: state is MemberFormLoading ? null : _submitForm,
+                              icon: state is MemberFormLoading
+                                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                  : const Icon(Icons.save_rounded, size: 18),
+                              label: Text(
+                                state is MemberFormLoading ? 'জমা হচ্ছে...' : 'সংরক্ষণ (Save)',
+                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF059669),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: SizedBox(
+                            height: 46,
+                            child: ElevatedButton.icon(
+                              onPressed: _openPdfViewer,
+                              icon: const Icon(Icons.picture_as_pdf_rounded, size: 18),
+                              label: const Text('PDF ডাউনলোড', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF0284C7),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
                             ),
                           ),
                         ),
@@ -171,15 +195,15 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
 
                     _buildCardWrapper([
                       _buildSectionTitle('ব্যক্তিগত তথ্য'),
-                      const SizedBox(height: 12),
-                      _buildTextField(_nameController, 'নাম', 'আপনার পূর্ণ নাম লিখুন', Icons.person),
-                      _buildTextField(_fatherNameController, 'পিতার নাম', 'পিতার নাম লিখুন', Icons.person_outline),
-                      _buildTextField(_educationalQualificationController, 'শিক্ষাগত যোগ্যতা', 'যেমন: বি.এ, কামিল ইত্যাদি', Icons.school),
+                      const SizedBox(height: 14),
+                      _buildTextField(_nameController, 'নাম', 'আপনার পূর্ণ নাম লিখুন', Icons.person, textLight: textLight),
+                      _buildTextField(_fatherNameController, 'পিতার নাম', 'পিতার নাম লিখুন', Icons.person_outline, textLight: textLight),
+                      _buildTextField(_educationalQualificationController, 'শিক্ষাগত যোগ্যতা', 'যেমন: বি.এ, কামিল ইত্যাদি', Icons.school, textLight: textLight),
                       Row(
                         children: [
-                          Expanded(child: _buildTextField(_ageController, 'বয়স', 'যেমন: ২৫', Icons.cake, isNumber: true)),
+                          Expanded(child: _buildTextField(_ageController, 'বয়স', 'যেমন: ২৫', Icons.cake, isNumber: true, textLight: textLight)),
                           const SizedBox(width: 12),
-                          Expanded(child: _buildTextField(_professionController, 'পেশা', 'যেমন: ব্যবসা/চাকরি', Icons.work)),
+                          Expanded(child: _buildTextField(_professionController, 'পেশা', 'যেমন: ব্যবসা/চাকরি', Icons.work, textLight: textLight)),
                         ],
                       ),
                     ], cardBg),
@@ -187,32 +211,12 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
 
                     _buildCardWrapper([
                       _buildSectionTitle('যোগাযোগের ঠিকানা'),
-                      const SizedBox(height: 12),
-                      _buildTextField(_presentAddressController, 'বর্তমান ঠিকানা', 'গ্রাম/মহল্লা, ডাকঘর, থানা, জেলা', Icons.location_on),
-                      _buildTextField(_mobileController, 'মোবাইল নম্বর', '০১৭XXXXXXXX', Icons.phone, isNumber: true),
-                      _buildTextField(_permanentAddressController, 'স্থায়ী ঠিকানা', 'গ্রাম/মহল্লা, ডাকঘর, থানা, জেলা', Icons.home),
+                      const SizedBox(height: 14),
+                      _buildTextField(_presentAddressController, 'বর্তমান ঠিকানা', 'গ্রাম/মহল্লা, ডাকঘর, থানা, জেলা', Icons.location_on, textLight: textLight),
+                      _buildTextField(_mobileController, 'মোবাইল নম্বর', '০১৭XXXXXXXX', Icons.phone, isNumber: true, textLight: textLight),
+                      _buildTextField(_permanentAddressController, 'স্থায়ী ঠিকানা', 'গ্রাম/মহল্লা, ডাকঘর, থানা, জেলা', Icons.home, textLight: textLight),
                     ], cardBg),
                     const SizedBox(height: 24),
-
-                    SizedBox(
-                      height: 52,
-                      child: ElevatedButton.icon(
-                        onPressed: state is MemberFormLoading ? null : _submitForm,
-                        icon: state is MemberFormLoading
-                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                            : const Icon(Icons.send_rounded),
-                        label: Text(
-                          state is MemberFormLoading ? 'জমা দেওয়া হচ্ছে...' : 'ফরম সংরক্ষণ করুন',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF059669),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          elevation: 2,
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -248,25 +252,51 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, String hint, IconData icon, {bool isNumber = false}) {
+  Widget _buildTextField(TextEditingController controller, String label, String hint, IconData icon, {bool isNumber = false, required Color textLight}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-        validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return '$label দেওয়া আবশ্যক';
-          }
-          return null;
-        },
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: hint,
-          prefixIcon: Icon(icon, color: const Color(0xFF059669), size: 20),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
-          isDense: true,
-        ),
+      padding: const EdgeInsets.only(bottom: 14.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.bold,
+              color: textLight,
+            ),
+          ),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: controller,
+            keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+            style: TextStyle(fontSize: 14, color: textLight),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return '$label দেওয়া আবশ্যক';
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(color: textLight.withValues(alpha: 0.4), fontSize: 13),
+              prefixIcon: Icon(icon, color: const Color(0xFF059669), size: 20),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFF059669), width: 1.8),
+              ),
+              isDense: true,
+              filled: true,
+              fillColor: Colors.white.withValues(alpha: 0.06),
+            ),
+          ),
+        ],
       ),
     );
   }

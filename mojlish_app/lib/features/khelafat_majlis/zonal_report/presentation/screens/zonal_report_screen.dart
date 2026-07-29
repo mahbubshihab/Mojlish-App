@@ -18,7 +18,6 @@ class ZonalReportScreen extends StatefulWidget {
 class _ZonalReportScreenState extends State<ZonalReportScreen> {
   bool _isSaving = false;
   bool _isLocked = true;
-  ZonalReportEntry? _currentEntry;
 
   // Controllers
   final _zoneNameCtrl = TextEditingController();
@@ -115,7 +114,6 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
       if (entry != null && mounted) {
         setState(() {
           _isLocked = true;
-          _currentEntry = entry;
           _zoneNameCtrl.text = entry.zoneName;
           _sodossoCountCtrl.text = entry.sodossoCount;
           _sodossoBridhiCtrl.text = entry.sodossoBridhi;
@@ -155,7 +153,6 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
       } else {
         setState(() {
           _isLocked = false;
-          _currentEntry = null;
         });
       }
     } catch (_) {}
@@ -291,14 +288,63 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Top Action Bar with Save/Edit at the TOP!
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 46,
+                      child: _isLocked
+                          ? ElevatedButton.icon(
+                              onPressed: () => setState(() => _isLocked = false),
+                              icon: const Icon(Icons.edit_rounded, size: 18),
+                              label: const Text('সম্পাদনা (Edit)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFD97706),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                            )
+                          : ElevatedButton.icon(
+                              onPressed: _isSaving ? null : _save,
+                              icon: const Icon(Icons.save_rounded, size: 18),
+                              label: Text(_isSaving ? 'সেভ হচ্ছে...' : 'সংরক্ষণ (Save)', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF059669),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: SizedBox(
+                      height: 46,
+                      child: ElevatedButton.icon(
+                        onPressed: _openPdfViewer,
+                        icon: const Icon(Icons.picture_as_pdf_rounded, size: 18),
+                        label: const Text('PDF ডাউনলোড', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0284C7),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+
               // Lock Status Banner
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: _isLocked
                       ? const Color(0xFF0284C7).withValues(alpha: 0.12)
                       : const Color(0xFF059669).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
                   ),
@@ -308,42 +354,23 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
                     Icon(
                       _isLocked ? Icons.lock_rounded : Icons.edit_note_rounded,
                       color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
+                      size: 20,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         _isLocked
                             ? '🔒 জোনাল রিপোর্টটি সংরক্ষিত ও লকড অবস্থায় আছে।'
-                            : '📝 তথ্য পূরণ করুন এবং নিচে সংরক্ষণ বাটনে চাপ দিন।',
+                            : '📝 তথ্য পূরণ করুন এবং ওপরে সংরক্ষণ বাটনে চাপ দিন।',
                         style: TextStyle(
                           color: _textLight,
                           fontWeight: FontWeight.w600,
-                          fontSize: 13.5,
+                          fontSize: 13,
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 16),
-
-              // Top Action Bar
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _openPdfViewer,
-                      icon: const Icon(Icons.picture_as_pdf_rounded, size: 20),
-                      label: const Text('PDF প্রিভিউ ও ডাউনলোড', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0284C7),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                    ),
-                  ),
-                ],
               ),
               const SizedBox(height: 16),
 
@@ -399,34 +426,6 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
                 _buildInputField('কেন্দ্রের জন্য পরামর্শ/সুপারিশ', _suggestionsCtrl, maxLines: 2),
               ]),
               const SizedBox(height: 24),
-
-              // Save / Edit Action Button
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: _isLocked
-                    ? ElevatedButton.icon(
-                        onPressed: () => setState(() => _isLocked = false),
-                        icon: const Icon(Icons.edit_rounded),
-                        label: const Text('সম্পাদনা করুন (Edit)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFD97706),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      )
-                    : ElevatedButton.icon(
-                        onPressed: _isSaving ? null : _save,
-                        icon: const Icon(Icons.save_rounded),
-                        label: Text(_isSaving ? 'সংরক্ষণ হচ্ছে...' : 'সংরক্ষণ করুন (Save)', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF059669),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      ),
-              ),
-              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -446,7 +445,7 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.5, color: _accentPurple)),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           ...children,
         ],
       ),
@@ -455,20 +454,51 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
 
   Widget _buildInputField(String label, TextEditingController ctrl, {int maxLines = 1}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: TextField(
-        controller: ctrl,
-        enabled: !_isLocked,
-        maxLines: maxLines,
-        style: TextStyle(color: _textLight, fontSize: 14),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(color: _textMuted),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          isDense: true,
-          filled: _isLocked,
-          fillColor: Colors.black.withValues(alpha: 0.04),
-        ),
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.bold,
+              color: _textLight,
+            ),
+          ),
+          const SizedBox(height: 6),
+          TextField(
+            controller: ctrl,
+            enabled: !_isLocked,
+            maxLines: maxLines,
+            style: TextStyle(color: _textLight, fontSize: 14),
+            decoration: InputDecoration(
+              hintText: '$label ইনপুট দিন...',
+              hintStyle: TextStyle(color: _textMuted.withValues(alpha: 0.5), fontSize: 13),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              filled: true,
+              fillColor: _isLocked
+                  ? Colors.black.withValues(alpha: 0.15)
+                  : Colors.white.withValues(alpha: 0.05),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: _borderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: _borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: _accentPurple, width: 1.8),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: _borderColor.withValues(alpha: 0.5)),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -525,11 +555,19 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
       textAlign: TextAlign.center,
       style: TextStyle(color: _textLight, fontSize: 13.5),
       decoration: InputDecoration(
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
-        contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: _borderColor),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: _borderColor.withValues(alpha: 0.5)),
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
         isDense: true,
-        filled: _isLocked,
-        fillColor: Colors.black.withValues(alpha: 0.04),
+        filled: true,
+        fillColor: _isLocked ? Colors.black.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.05),
       ),
     );
   }

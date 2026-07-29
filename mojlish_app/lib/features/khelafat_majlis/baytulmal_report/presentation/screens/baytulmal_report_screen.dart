@@ -6,7 +6,7 @@ import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import 'package:mojlish_app/features/common/reports/data/models/baytulmal_report_entry.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 
-/// খেলাফত মজলিস — বায়তুলমাল রিপোর্ট ফরম (সিঙ্গেল স্ক্রিন ফরম + ফুলস্ক্রিন জুমড PDF প্রিভিউ/ডাউনলোড)
+/// খেলাফত মজলিস — বায়তুলমাল রিপোর্ট ফরম (উপরে এডিট/সেভ ও ডাউনলোড বাটন + পৃথক টাইটেল ও ইনপুট ফিল্ড)
 class BaytulmalReportScreen extends StatefulWidget {
   final int? year;
   final int? month;
@@ -259,14 +259,63 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Top Action Bar with Save/Edit at the TOP!
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height: 46,
+                              child: _isLocked
+                                  ? ElevatedButton.icon(
+                                      onPressed: () => setState(() => _isLocked = false),
+                                      icon: const Icon(Icons.edit_rounded, size: 18),
+                                      label: const Text('সম্পাদনা (Edit)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFFD97706),
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                      ),
+                                    )
+                                  : ElevatedButton.icon(
+                                      onPressed: _isSaving ? null : _save,
+                                      icon: const Icon(Icons.save_rounded, size: 18),
+                                      label: Text(_isSaving ? 'সেভ হচ্ছে...' : 'সংরক্ষণ (Save)', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF059669),
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                      ),
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: SizedBox(
+                              height: 46,
+                              child: ElevatedButton.icon(
+                                onPressed: _openPdfViewer,
+                                icon: const Icon(Icons.picture_as_pdf_rounded, size: 18),
+                                label: const Text('PDF ডাউনলোড', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF0284C7),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+
                       // Lock Status Banner
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
                           color: _isLocked
                               ? const Color(0xFF0284C7).withValues(alpha: 0.12)
                               : const Color(0xFF059669).withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
                           ),
@@ -276,42 +325,23 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
                             Icon(
                               _isLocked ? Icons.lock_rounded : Icons.edit_note_rounded,
                               color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
+                              size: 20,
                             ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 _isLocked
-                                    ? '🔒 বায়তুলমাল হিসাব সংরক্ষিত ও লকড অবস্থায় আছে।'
-                                    : '📝 তথ্য পূরণ করুন এবং নিচে সংরক্ষণ বাটনে চাপ দিন।',
+                                    ? '🔒 বায়তুলমাল হিসাব লকড অবস্থায় আছে। পরিবর্তন করতে ওপরে এডিটে চাপুন।'
+                                    : '📝 তথ্য পূরণ করুন এবং ওপরে সংরক্ষণ বাটনে চাপ দিন।',
                                 style: TextStyle(
                                   color: textLight,
                                   fontWeight: FontWeight.w600,
-                                  fontSize: 13.5,
+                                  fontSize: 13,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Top Action Bar
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: _openPdfViewer,
-                              icon: const Icon(Icons.picture_as_pdf_rounded, size: 20),
-                              label: const Text('PDF প্রিভিউ ও ডাউনলোড', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF0284C7),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              ),
-                            ),
-                          ),
-                        ],
                       ),
                       const SizedBox(height: 16),
 
@@ -329,16 +359,8 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
                               'খেলাফত মজলিস — শাখার বায়তুলমাল রিপোর্ট',
                               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.5, color: accentAmber),
                             ),
-                            const SizedBox(height: 12),
-                            TextFormField(
-                              controller: _branchCtrl,
-                              enabled: !_isLocked,
-                              decoration: InputDecoration(
-                                labelText: 'শাখার নাম',
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                isDense: true,
-                              ),
-                            ),
+                            const SizedBox(height: 14),
+                            _buildSingleInput('শাখার নাম', _branchCtrl, textLight: textLight),
                           ],
                         ),
                       ),
@@ -352,13 +374,13 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
                         borderColor: borderColor,
                         textLight: textLight,
                         children: [
-                          _buildRowInput('নির্বাহী সদস্যদের এয়ানত', _nirbahiIyanatCtrl, 'সংখ্যা', _nirbahiCountCtrl),
-                          _buildRowInput('অধস্তন শাখা এয়ানত', _subBranchIyanatCtrl, 'সংখ্যা', _subBranchCountCtrl),
-                          _buildRowInput('সুধী/শুভাকাঙ্ক্ষী এয়ানত', _shudhiIyanatCtrl, 'সংখ্যা', _shudhiCountCtrl),
-                          _buildSingleInput('সফর আয় (শাখা থেকে)', _safarIncomeCtrl),
-                          _buildSingleInput('প্রকাশনা আয়', _publicationIncomeCtrl),
-                          _buildSingleInput('এককালীন আয়', _oneTimeIncomeCtrl),
-                          _buildSingleInput('বিগত মাসের উদ্বৃত্ত', _previousBalanceCtrl),
+                          _buildRowInput('নির্বাহী সদস্যদের এয়ানত', _nirbahiIyanatCtrl, 'সংখ্যা', _nirbahiCountCtrl, textLight: textLight),
+                          _buildRowInput('অধস্তন শাখা এয়ানত', _subBranchIyanatCtrl, 'সংখ্যা', _subBranchCountCtrl, textLight: textLight),
+                          _buildRowInput('সুধী/শুভাকাঙ্ক্ষী এয়ানত', _shudhiIyanatCtrl, 'সংখ্যা', _shudhiCountCtrl, textLight: textLight),
+                          _buildSingleInput('সফর আয় (শাখা থেকে)', _safarIncomeCtrl, textLight: textLight),
+                          _buildSingleInput('প্রকাশনা আয়', _publicationIncomeCtrl, textLight: textLight),
+                          _buildSingleInput('এককালীন আয়', _oneTimeIncomeCtrl, textLight: textLight),
+                          _buildSingleInput('বিগত মাসের উদ্বৃত্ত', _previousBalanceCtrl, textLight: textLight),
                           const Divider(height: 24),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -380,15 +402,15 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
                         borderColor: borderColor,
                         textLight: textLight,
                         children: [
-                          _buildSingleInput('উর্ধ্বতন শাখা এয়ানত', _upperIyanatCtrl),
-                          _buildSingleInput('অফিস ভাড়া ও বিল', _officeRentCtrl),
-                          _buildSingleInput('দফতর খরচ', _officeExpenseCtrl),
-                          _buildSingleInput('যাতায়াত খরচ', _transportExpenseCtrl),
-                          _buildSingleInput('দাওয়াত ও গণসংযোগ ব্যয়', _dawahExpenseCtrl),
-                          _buildSingleInput('প্রকাশনা ব্যয়', _publicationExpenseCtrl),
-                          _buildSingleInput('দিবস পালন', _dayObservanceExpenseCtrl),
-                          _buildSingleInput('আপ্যায়ন', _entertainmentExpenseCtrl),
-                          _buildSingleInput('বৈঠক ও সমাবেশ ব্যয়', _meetingAssemblyCostCtrl),
+                          _buildSingleInput('উর্ধ্বতন শাখা এয়ানত', _upperIyanatCtrl, textLight: textLight),
+                          _buildSingleInput('অফিস ভাড়া ও বিল', _officeRentCtrl, textLight: textLight),
+                          _buildSingleInput('দফতর খরচ', _officeExpenseCtrl, textLight: textLight),
+                          _buildSingleInput('যাতায়াত খরচ', _transportExpenseCtrl, textLight: textLight),
+                          _buildSingleInput('দাওয়াত ও গণসংযোগ ব্যয়', _dawahExpenseCtrl, textLight: textLight),
+                          _buildSingleInput('প্রকাশনা ব্যয়', _publicationExpenseCtrl, textLight: textLight),
+                          _buildSingleInput('দিবস পালন', _dayObservanceExpenseCtrl, textLight: textLight),
+                          _buildSingleInput('আপ্যায়ন', _entertainmentExpenseCtrl, textLight: textLight),
+                          _buildSingleInput('বৈঠক ও সমাবেশ ব্যয়', _meetingAssemblyCostCtrl, textLight: textLight),
                           const Divider(height: 24),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -437,73 +459,21 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
                         ),
                         child: Column(
                           children: [
-                            TextFormField(
-                              controller: _takaInWordsCtrl,
-                              enabled: !_isLocked,
-                              decoration: InputDecoration(
-                                labelText: 'মোট অবশিষ্ট টাকা (কথায়)',
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                isDense: true,
-                              ),
-                            ),
-                            const SizedBox(height: 14),
+                            _buildSingleInput('মোট অবশিষ্ট টাকা (কথায়)', _takaInWordsCtrl, textLight: textLight, isTaka: false),
+                            const SizedBox(height: 10),
                             Row(
                               children: [
                                 Expanded(
-                                  child: TextFormField(
-                                    controller: _secretarySigCtrl,
-                                    enabled: !_isLocked,
-                                    decoration: InputDecoration(
-                                      labelText: 'বায়তুলমাল সম্পাদক স্বাক্ষর',
-                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                      isDense: true,
-                                    ),
-                                  ),
+                                  child: _buildSingleInput('বায়তুলমাল সম্পাদক স্বাক্ষর', _secretarySigCtrl, textLight: textLight, isTaka: false),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
-                                  child: TextFormField(
-                                    controller: _presidentSigCtrl,
-                                    enabled: !_isLocked,
-                                    decoration: InputDecoration(
-                                      labelText: 'সভাপতি স্বাক্ষর',
-                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                      isDense: true,
-                                    ),
-                                  ),
+                                  child: _buildSingleInput('সভাপতি স্বাক্ষর', _presidentSigCtrl, textLight: textLight, isTaka: false),
                                 ),
                               ],
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Save / Edit Action Button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: _isLocked
-                            ? ElevatedButton.icon(
-                                onPressed: () => setState(() => _isLocked = false),
-                                icon: const Icon(Icons.edit_rounded),
-                                label: const Text('সম্পাদনা করুন (Edit)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFD97706),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                              )
-                            : ElevatedButton.icon(
-                                onPressed: _isSaving ? null : _save,
-                                icon: const Icon(Icons.save_rounded),
-                                label: Text(_isSaving ? 'সংরক্ষণ হচ্ছে...' : 'সংরক্ষণ করুন (Save)', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF059669),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                              ),
                       ),
                       const SizedBox(height: 24),
                     ],
@@ -533,63 +503,106 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.5, color: color)),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           ...children,
         ],
       ),
     );
   }
 
-  Widget _buildSingleInput(String label, TextEditingController ctrl) {
+  Widget _buildSingleInput(String label, TextEditingController ctrl, {required Color textLight, bool isTaka = true}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: TextFormField(
-        controller: ctrl,
-        enabled: !_isLocked,
-        keyboardType: TextInputType.number,
-        onChanged: (_) => setState(() {}),
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          isDense: true,
-          suffixText: 'টাকা',
-        ),
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: textLight),
+          ),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: ctrl,
+            enabled: !_isLocked,
+            keyboardType: isTaka ? TextInputType.number : TextInputType.text,
+            onChanged: (_) => setState(() {}),
+            style: TextStyle(fontSize: 14, color: textLight),
+            decoration: InputDecoration(
+              hintText: '$label ইনপুট দিন...',
+              hintStyle: TextStyle(color: textLight.withValues(alpha: 0.4), fontSize: 13),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              isDense: true,
+              suffixText: isTaka ? 'টাকা' : null,
+              filled: true,
+              fillColor: _isLocked ? Colors.black.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.06),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildRowInput(String label, TextEditingController takaCtrl, String countLabel, TextEditingController countCtrl) {
+  Widget _buildRowInput(String label, TextEditingController takaCtrl, String countLabel, TextEditingController countCtrl, {required Color textLight}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           Expanded(
             flex: 3,
-            child: TextFormField(
-              controller: takaCtrl,
-              enabled: !_isLocked,
-              keyboardType: TextInputType.number,
-              onChanged: (_) => setState(() {}),
-              decoration: InputDecoration(
-                labelText: label,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                isDense: true,
-                suffixText: 'টাকা',
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: textLight),
+                ),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: takaCtrl,
+                  enabled: !_isLocked,
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => setState(() {}),
+                  style: TextStyle(fontSize: 14, color: textLight),
+                  decoration: InputDecoration(
+                    hintText: 'টাকা...',
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    isDense: true,
+                    suffixText: 'টাকা',
+                    filled: true,
+                    fillColor: _isLocked ? Colors.black.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.06),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Expanded(
             flex: 2,
-            child: TextFormField(
-              controller: countCtrl,
-              enabled: !_isLocked,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: countLabel,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                isDense: true,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  countLabel,
+                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: textLight),
+                ),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: countCtrl,
+                  enabled: !_isLocked,
+                  keyboardType: TextInputType.number,
+                  style: TextStyle(fontSize: 14, color: textLight),
+                  decoration: InputDecoration(
+                    hintText: 'সংখ্যা...',
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    isDense: true,
+                    filled: true,
+                    fillColor: _isLocked ? Colors.black.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.06),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

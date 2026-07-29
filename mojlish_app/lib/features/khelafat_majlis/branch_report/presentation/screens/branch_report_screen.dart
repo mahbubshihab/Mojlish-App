@@ -5,7 +5,7 @@ import 'package:mojlish_app/core/widgets/pdf_viewer_screen.dart';
 import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 
-/// খেলাফত মজলিস — শাখা সাংগঠনিক রিপোর্ট ফরম (সিঙ্গেল স্ক্রিন ফরম + ফুলস্ক্রিন জুমড PDF প্রিভিউ/ডাউনলোড)
+/// খেলাফত মজলিস — শাখা সাংগঠনিক রিপোর্ট ফরম (উপরে এডিট/সেভ ও ডাউনলোড বাটন + পৃথক টাইটেল ও ইনপুট ফিল্ড)
 class BranchReportScreen extends StatefulWidget {
   final int? year;
   final int? month;
@@ -174,14 +174,63 @@ class _BranchReportScreenState extends State<BranchReportScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Top Action Bar with Save/Edit at the TOP!
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 46,
+                            child: _isLocked
+                                ? ElevatedButton.icon(
+                                    onPressed: () => setState(() => _isLocked = false),
+                                    icon: const Icon(Icons.edit_rounded, size: 18),
+                                    label: const Text('সম্পাদনা (Edit)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFFD97706),
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    ),
+                                  )
+                                : ElevatedButton.icon(
+                                    onPressed: _saveReport,
+                                    icon: const Icon(Icons.save_rounded, size: 18),
+                                    label: const Text('সংরক্ষণ (Save)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF059669),
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: SizedBox(
+                            height: 46,
+                            child: ElevatedButton.icon(
+                              onPressed: _openPdfViewer,
+                              icon: const Icon(Icons.picture_as_pdf_rounded, size: 18),
+                              label: const Text('PDF ডাউনলোড', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF0284C7),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+
                     // Lock Status Banner
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       decoration: BoxDecoration(
                         color: _isLocked
                             ? const Color(0xFF0284C7).withValues(alpha: 0.12)
                             : const Color(0xFF059669).withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
                         ),
@@ -191,17 +240,18 @@ class _BranchReportScreenState extends State<BranchReportScreen> {
                           Icon(
                             _isLocked ? Icons.lock_rounded : Icons.edit_note_rounded,
                             color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
+                            size: 20,
                           ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               _isLocked
-                                  ? '🔒 রিপোর্টটি সংরক্ষিত ও লকড অবস্থায় আছে।'
-                                  : '📝 তথ্য পূরণ করুন এবং নিচে সংরক্ষণ বাটনে চাপ দিন।',
+                                  ? '🔒 রিপোর্টটি লকড অবস্থায় আছে। পরিবর্তন করতে ওপরে এডিটে চাপুন।'
+                                  : '📝 তথ্য পূরণ করুন এবং ওপরে সংরক্ষণ বাটনে চাপ দিন।',
                               style: TextStyle(
                                 color: textLight,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 13.5,
+                                fontSize: 13,
                               ),
                             ),
                           ),
@@ -210,77 +260,29 @@ class _BranchReportScreenState extends State<BranchReportScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Top Action Bar
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: _openPdfViewer,
-                            icon: const Icon(Icons.picture_as_pdf_rounded, size: 20),
-                            label: const Text('PDF প্রিভিউ ও ডাউনলোড', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0284C7),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
                     _buildCard('শাখার বিবরণ', [
-                      _buildTextField(_shakhaNameController, 'শাখার নাম'),
+                      _buildTextField(_shakhaNameController, 'শাখার নাম', textLight: textLight),
                     ], cardBg, textLight),
                     const SizedBox(height: 16),
 
                     _buildCard('সাংগঠনিক রিপোর্ট তথ্য', [
-                      _buildTextField(_manpowerController, 'জনশক্তি বিবরণী'),
-                      _buildTextField(_dawahController, 'দাওয়াত ও গণসংযোগ'),
-                      _buildTextField(_organizationController, 'সংগঠন'),
-                      _buildTextField(_meetingsController, 'সভাসমূহ'),
-                      _buildTextField(_baytulmalController, 'বায়তুলমাল'),
-                      _buildTextField(_tourController, 'সফর'),
-                      _buildTextField(_trainingController, 'প্রশিক্ষণ'),
-                      _buildTextField(_officeController, 'দফতর'),
-                      _buildTextField(_publicityController, 'প্রচার'),
-                      _buildTextField(_libraryController, 'পাঠাগার'),
-                      _buildTextField(_welfareController, 'সমাজকল্যাণ'),
+                      _buildTextField(_manpowerController, 'জনশক্তি বিবরণী', textLight: textLight),
+                      _buildTextField(_dawahController, 'দাওয়াত ও গণসংযোগ', textLight: textLight),
+                      _buildTextField(_organizationController, 'সংগঠন', textLight: textLight),
+                      _buildTextField(_meetingsController, 'সভাসমূহ', textLight: textLight),
+                      _buildTextField(_baytulmalController, 'বায়তুলমাল', textLight: textLight),
+                      _buildTextField(_tourController, 'সফর', textLight: textLight),
+                      _buildTextField(_trainingController, 'প্রশিক্ষণ', textLight: textLight),
+                      _buildTextField(_officeController, 'দফতর', textLight: textLight),
+                      _buildTextField(_publicityController, 'প্রচার', textLight: textLight),
+                      _buildTextField(_libraryController, 'পাঠাগার', textLight: textLight),
+                      _buildTextField(_welfareController, 'সমাজকল্যাণ', textLight: textLight),
                     ], cardBg, textLight),
                     const SizedBox(height: 16),
 
                     _buildCard('মন্তব্য (সমস্যা ও সম্ভাবনা)', [
-                      _buildTextField(_commentsController, 'মন্তব্য ও সুপারিশ', maxLines: 3),
+                      _buildTextField(_commentsController, 'মন্তব্য ও সুপারিশ', maxLines: 3, textLight: textLight),
                     ], cardBg, textLight),
-                    const SizedBox(height: 24),
-
-                    // Save / Edit Action Bar
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: _isLocked
-                          ? ElevatedButton.icon(
-                              onPressed: () => setState(() => _isLocked = false),
-                              icon: const Icon(Icons.edit_rounded),
-                              label: const Text('সম্পাদনা করুন (Edit)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFD97706),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                            )
-                          : ElevatedButton.icon(
-                              onPressed: _saveReport,
-                              icon: const Icon(Icons.save_rounded),
-                              label: const Text('সংরক্ষণ করুন (Save)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF059669),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                            ),
-                    ),
                     const SizedBox(height: 24),
                   ],
                 ),
@@ -301,27 +303,60 @@ class _BranchReportScreenState extends State<BranchReportScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.5, color: textColor)),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           ...children,
         ],
       ),
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, {int maxLines = 1}) {
+  Widget _buildTextField(TextEditingController controller, String label, {int maxLines = 1, required Color textLight}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextField(
-        controller: controller,
-        enabled: !_isLocked,
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-          isDense: true,
-          filled: _isLocked,
-          fillColor: Colors.black.withValues(alpha: 0.04),
-        ),
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.bold,
+              color: textLight,
+            ),
+          ),
+          const SizedBox(height: 6),
+          TextField(
+            controller: controller,
+            enabled: !_isLocked,
+            maxLines: maxLines,
+            style: TextStyle(fontSize: 14, color: textLight),
+            decoration: InputDecoration(
+              hintText: '$label ইনপুট দিন...',
+              hintStyle: TextStyle(color: textLight.withValues(alpha: 0.4), fontSize: 13),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              filled: true,
+              fillColor: _isLocked
+                  ? Colors.black.withValues(alpha: 0.05)
+                  : Colors.white.withValues(alpha: 0.06),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFF059669), width: 1.8),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
