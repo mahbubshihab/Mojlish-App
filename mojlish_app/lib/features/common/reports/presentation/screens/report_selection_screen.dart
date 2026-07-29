@@ -60,7 +60,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
 
     final activeMajlisType = widget.majlisName ?? 'khelafat';
     final isKhelafat = activeMajlisType == 'khelafat';
-    final isYouth = activeMajlisType == 'youth';
+    final isYouth = activeMajlisType == 'youth' || activeMajlisType == 'jubo';
     final isChatro = activeMajlisType == 'chatro';
 
     final majlisDisplayName = isKhelafat
@@ -122,8 +122,8 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                   textMuted: textMuted,
                   onTap: () async {
                     MajlisType parsedType;
-                    if (activeMajlisType == 'youth') {
-                      parsedType = MajlisType.youth;
+                    if (activeMajlisType == 'youth' || activeMajlisType == 'jubo') {
+                      parsedType = MajlisType.jubo;
                     } else if (activeMajlisType == 'chatro') {
                       parsedType = MajlisType.chatro;
                     } else {
