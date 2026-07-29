@@ -9,7 +9,7 @@ import 'package:mojlish_app/features/khelafat_majlis/branch_report/presentation/
 import 'package:mojlish_app/features/khelafat_majlis/branch_plan/presentation/screens/khelafat_branch_plan_book_screen.dart';
 import 'package:mojlish_app/features/khelafat_majlis/zonal_report/presentation/screens/zonal_report_book_screen.dart';
 import 'package:mojlish_app/features/khelafat_majlis/member_form/presentation/screens/member_form_screen.dart';
-import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentation/pages/baytulmal_report_page.dart';
+import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentation/screens/khelafat_baytulmal_report_book_screen.dart';
 
 // Youth Majlis Features
 import 'package:mojlish_app/features/youth_majlis/member_form/presentation/screens/member_form_screen.dart' as youth_form;
@@ -20,6 +20,7 @@ import 'package:mojlish_app/features/student_majlis/member_form/presentation/scr
 import 'package:mojlish_app/features/student_majlis/period_report/presentation/screens/period_report_screen.dart';
 import 'package:mojlish_app/features/student_majlis/period_plan/presentation/screens/period_plan_screen.dart';
 import 'package:mojlish_app/features/student_majlis/general_plan/presentation/screens/general_plan_screen.dart';
+import 'package:mojlish_app/features/student_majlis/baytulmal_report/presentation/pages/baytulmal_report_page.dart' as chatro_baytulmal;
 
 // Labor Majlis Features
 import 'package:mojlish_app/features/labor_majlis/member_form/presentation/screens/member_form_screen.dart';
@@ -198,7 +199,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                     textMuted: textMuted,
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const BaytulmalReportPage()),
+                      MaterialPageRoute(builder: (_) => const KhelafatBaytulmalReportBookScreen()),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -324,7 +325,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                     textMuted: textMuted,
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const BaytulmalReportPage()),
+                      MaterialPageRoute(builder: (_) => const chatro_baytulmal.BaytulmalReportPage()),
                     ),
                   ),
                   const SizedBox(height: 12),
