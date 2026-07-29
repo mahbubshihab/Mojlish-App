@@ -1,36 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
-import 'package:mojlish_app/core/services/user_storage_service.dart';
+import 'package:mojlish_app/core/services/report_sync_service.dart';
+import 'package:mojlish_app/features/common/auth/data/services/auth_service.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
-import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
-import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentation/pages/baytulmal_report_page.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/personal_report_table_screen.dart';
+
 import 'package:mojlish_app/features/khelafat_majlis/branch_report/presentation/screens/khelafat_branch_report_book_screen.dart';
 import 'package:mojlish_app/features/khelafat_majlis/branch_plan/presentation/screens/khelafat_branch_plan_book_screen.dart';
 import 'package:mojlish_app/features/khelafat_majlis/zonal_report/presentation/screens/zonal_report_book_screen.dart';
 import 'package:mojlish_app/features/khelafat_majlis/member_form/presentation/screens/member_form_screen.dart';
-import 'report_book_screen.dart';
+import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentation/pages/baytulmal_report_page.dart';
 
-/// রিপোর্ট হাব স্ক্রিন — খেলাফত মজলিসসহ সকল মজলিসের ডাইনামিক ও সম্পূর্ণ রিপোর্ট ও ফরম কেন্দ্র
+import 'package:mojlish_app/features/youth_majlis/member_form/presentation/screens/member_form_screen.dart' as youth_form;
+import 'package:mojlish_app/features/student_majlis/member_form/presentation/screens/member_form_screen.dart' as chatro_form;
+
+/// কেন্দ্রীয় রিপোর্ট ও ফরম হাব (Report & Form Hub Selection)
 class ReportSelectionScreen extends StatefulWidget {
-  final String? majlisName;
-  final MajlisType? majlisType;
-
-  const ReportSelectionScreen({super.key, this.majlisName, this.majlisType});
+  const ReportSelectionScreen({super.key});
 
   @override
   State<ReportSelectionScreen> createState() => _ReportSelectionScreenState();
 }
 
 class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
-  int _personalFilledDays = 0;
-  int _daysInMonth = 30;
-  String _activeMajlisName = 'খেলাফত মজলিস';
-  final _now = DateTime.now();
+  final DateTime _now = DateTime.now();
 
   static const _monthNames = [
-    'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
-    'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর',
+    'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
+    'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'
   ];
 
   @override
@@ -40,36 +38,9 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
   }
 
   Future<void> _loadActiveMajlisAndStats() async {
-    try {
-      final savedMajlis = await UserStorageService.getActiveMajlis();
-      final days = await ReportStorageService.getFilledDaysCount(_now.year, _now.month);
-      final dim = DateTime(_now.year, _now.month + 1, 0).day;
-
-      if (mounted) {
-        setState(() {
-          if (savedMajlis != null && savedMajlis.isNotEmpty) {
-            _activeMajlisName = savedMajlis;
-          }
-          _personalFilledDays = days;
-          _daysInMonth = dim;
-        });
-      }
-    } catch (_) {}
-  }
-
-  MajlisType _resolveMajlisType() {
-    if (widget.majlisType != null) return widget.majlisType!;
-    if (widget.majlisName != null && widget.majlisName!.isNotEmpty) {
-      return MajlisTypeExtension.fromString(widget.majlisName!);
+    if (mounted) {
+      setState(() {});
     }
-    return MajlisTypeExtension.fromString(_activeMajlisName);
-  }
-
-  String _getEffectiveMajlisName() {
-    if (widget.majlisName != null && widget.majlisName!.isNotEmpty) {
-      return widget.majlisName!;
-    }
-    return _activeMajlisName;
   }
 
   String _bn(int n) {
@@ -79,22 +50,30 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final activeMajlisType = _resolveMajlisType();
-    final majlisDisplayName = _getEffectiveMajlisName();
-    final isKhelafat = activeMajlisType == MajlisType.khelafat || majlisDisplayName.contains('খেলাফত');
+    final isDark = themeManager.isDarkMode;
+    final appBarBg = isDark ? const Color(0xFF162032) : Colors.white;
+    final cardBg = isDark ? const Color(0xFF162032) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF2A3F58) : const Color(0xFFE2E8F0);
+    final textLight = isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
+    final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    const accentGreen = Color(0xFF10B981);
+
+    final activeMajlisType = ReportSyncService.activeMajlisType;
+    final isKhelafat = activeMajlisType == 'khelafat';
+    final isYouth = activeMajlisType == 'youth';
+    final isChatro = activeMajlisType == 'chatro';
+
+    final majlisDisplayName = isKhelafat
+        ? 'খেলাফত মজলিস'
+        : isYouth
+            ? 'ইসলামী যুব মজলিস'
+            : isChatro
+                ? 'ইসলামী ছাত্র মজলিস'
+                : 'ইসলামী খেলাফত মজলিস';
 
     return AnimatedBuilder(
       animation: themeManager,
       builder: (context, _) {
-        final isDark = themeManager.isDarkMode;
-
-        final appBarBg = isDark ? const Color(0xFF162032) : Colors.white;
-        final cardBg = isDark ? const Color(0xFF162032) : Colors.white;
-        final borderColor = isDark ? const Color(0xFF2A3F58) : const Color(0xFFE2E8F0);
-        final textLight = isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
-        final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
-        const accentGreen = Color(0xFF10B981);
-
         return Scaffold(
           appBar: AppBar(
             backgroundColor: appBarBg,
@@ -132,12 +111,9 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               children: [
-                // 1. কোনটা কোন মজলিস তার উপযোগী ব্যক্তিগত তৎপরতার রিপোর্ট
-                _buildReportCard(
+                // 1. ব্যক্তিগত তৎপরতার রিপোর্ট
+                _buildMinimalReportCard(
                   title: 'ব্যক্তিগত তৎপরতার রিপোর্ট',
-                  subtitle: '$majlisDisplayName — ${_monthNames[_now.month - 1]} ${_bn(_now.year)} মাস',
-                  badge: '$_personalFilledDays/$_daysInMonth দিন আপডেট',
-                  badgeColor: _personalFilledDays >= _now.day ? const Color(0xFF059669) : const Color(0xFFF59E0B),
                   icon: Icons.person_outline_rounded,
                   color: const Color(0xFF10B981),
                   cardBg: cardBg,
@@ -154,14 +130,11 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                     _loadActiveMajlisAndStats();
                   },
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 12),
 
                 // 2. সাংগঠনিক শাখা রিপোর্ট
-                _buildReportCard(
+                _buildMinimalReportCard(
                   title: 'শাখার সাংগঠনিক রিপোর্ট',
-                  subtitle: '$majlisDisplayName — শাখা ও প্রশাসনিক বিবরণী',
-                  badge: 'নিয়মিত সিঙ্ক',
-                  badgeColor: const Color(0xFF2563EB),
                   icon: Icons.corporate_fare_rounded,
                   color: const Color(0xFF2563EB),
                   cardBg: cardBg,
@@ -177,14 +150,11 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                     );
                   },
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 12),
 
                 // 3. শাখার বার্ষিক/মাসিক পরিকল্পনা ফরম
-                _buildReportCard(
+                _buildMinimalReportCard(
                   title: 'শাখার বার্ষিক/মাসিক পরিকল্পনা',
-                  subtitle: '$majlisDisplayName — পরিকল্পনা ও লক্ষ্যমাত্রা ফরম',
-                  badge: 'পরিকল্পনা',
-                  badgeColor: const Color(0xFF8B5CF6),
                   icon: Icons.assignment_turned_in_rounded,
                   color: const Color(0xFF8B5CF6),
                   cardBg: cardBg,
@@ -200,14 +170,11 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                     );
                   },
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 12),
 
                 // 4. বায়তুলমাল ও হিসাব
-                _buildReportCard(
+                _buildMinimalReportCard(
                   title: 'বায়তুলমাল ও আর্থিক হিসাব',
-                  subtitle: '$majlisDisplayName — আয় ও ব্যয়ের হিসাব',
-                  badge: 'আর্থিক মডিউল',
-                  badgeColor: const Color(0xFFD97706),
                   icon: Icons.account_balance_wallet_rounded,
                   color: const Color(0xFFD97706),
                   cardBg: cardBg,
@@ -223,15 +190,12 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                     );
                   },
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 12),
 
                 // 5. জোনাল রিপোর্ট ফরম (Khelafat Majlis special)
                 if (isKhelafat) ...[
-                  _buildReportCard(
+                  _buildMinimalReportCard(
                     title: 'জোনাল রিপোর্ট ফরম',
-                    subtitle: 'খেলাফত মজলিস — জোনাল সাংগঠনিক প্রতিবেদন',
-                    badge: 'জোনাল শাখা',
-                    badgeColor: const Color(0xFF0284C7),
                     icon: Icons.map_rounded,
                     color: const Color(0xFF0284C7),
                     cardBg: cardBg,
@@ -247,15 +211,12 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                       );
                     },
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                 ],
 
                 // 6. প্রাথমিক সদস্য আবেদন ফরম
-                _buildReportCard(
+                _buildMinimalReportCard(
                   title: 'প্রাথমিক সদস্য ফরম (আবেদন)',
-                  subtitle: '$majlisDisplayName — সদস্যপদ ফরম ও প্রত্যয়নপত্র',
-                  badge: 'সদস্য আবেদন',
-                  badgeColor: const Color(0xFFEC4899),
                   icon: Icons.badge_rounded,
                   color: const Color(0xFFEC4899),
                   cardBg: cardBg,
@@ -263,11 +224,18 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                   textLight: textLight,
                   textMuted: textMuted,
                   onTap: () async {
+                    Widget destination;
+                    if (isYouth) {
+                      destination = const youth_form.YouthMemberFormScreen();
+                    } else if (isChatro) {
+                      destination = const chatro_form.ChatroMemberFormScreen();
+                    } else {
+                      destination = const MemberFormScreen();
+                    }
+
                     await Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => const MemberFormScreen(),
-                      ),
+                      MaterialPageRoute(builder: (_) => destination),
                     );
                   },
                 ),
@@ -280,11 +248,9 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
     );
   }
 
-  Widget _buildReportCard({
+  /// Minimal Clean Card Layout containing ONLY Title/Name
+  Widget _buildMinimalReportCard({
     required String title,
-    required String subtitle,
-    required String badge,
-    required Color badgeColor,
     required IconData icon,
     required Color color,
     required Color cardBg,
@@ -298,59 +264,40 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: cardBg.withValues(alpha: 0.9),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(color: borderColor),
           boxShadow: [
             BoxShadow(
-              color: color.withValues(alpha: 0.1),
-              blurRadius: 14,
-              offset: const Offset(0, 4),
+              color: color.withValues(alpha: 0.08),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
             Container(
-              width: 52,
-              height: 52,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: color.withValues(alpha: 0.25)),
               ),
-              child: Icon(icon, color: color, size: 26),
+              child: Icon(icon, color: color, size: 22),
             ),
             const SizedBox(width: 14),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: textLight,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15.5,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(subtitle, style: TextStyle(color: textMuted, fontSize: 12)),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: badgeColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: badgeColor.withValues(alpha: 0.3)),
-                    ),
-                    child: Text(badge,
-                        style: TextStyle(color: badgeColor, fontSize: 11, fontWeight: FontWeight.w600)),
-                  ),
-                ],
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: textLight,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
               ),
             ),
-            const SizedBox(width: 8),
             Icon(
               Icons.arrow_forward_ios,
               size: 14,
