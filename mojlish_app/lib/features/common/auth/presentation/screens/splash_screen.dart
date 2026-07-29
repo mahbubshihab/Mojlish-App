@@ -23,7 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkAuthAndNavigate() async {
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(milliseconds: 800));
     if (!mounted) return;
 
     final user = _authService.currentUser;
@@ -54,27 +54,77 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/images/logo.png',
-              height: 120,
-              errorBuilder: (_, __, ___) => Icon(Icons.mosque, size: 80, color: AppTheme.primaryColor),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'মজলিশ অ্যাপ',
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 26, color: AppTheme.primaryDark),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'সংগঠনের সকল রিপোর্ট ও পরিকল্পনার ডিজিটাল সমাধান',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppTheme.primaryColor.withValues(alpha: 0.85),
+              const Color(0xFF0F172A),
+            ],
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.1),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    width: 2,
+                  ),
+                ),
+                child: Image.asset(
+                  'assets/images/election_symbol_wall_clock.png',
+                  height: 90,
+                  width: 90,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.mosque_outlined,
+                    size: 70,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'মজলিশ অ্যাপ',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                child: Text(
+                  'সংগঠনের সকল রিপোর্ট ও পরিকল্পনার ডিজিটাল সমাধান',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.white.withValues(alpha: 0.8),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40),
+              const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.5,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -20,21 +20,13 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen> {
   Future<void> _handleGoogleSignIn() async {
     setState(() => _isLoading = true);
     try {
-      final user = await _authService.signInWithGoogle();
-      if (user != null && mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const OrgSelectionScreen()),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('সাইন-ইন ব্যর্থ হয়েছে: $e')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+      await _authService.signInWithGoogle();
+    } catch (_) {}
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const OrgSelectionScreen()),
+      );
     }
   }
 
