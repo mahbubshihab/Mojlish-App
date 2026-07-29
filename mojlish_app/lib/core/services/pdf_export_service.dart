@@ -204,6 +204,33 @@ class PdfExportService {
     }
   }
 
+  /// Generates a standardized PDF document bytes for any report or form data
+  static Future<Uint8List> generateSingleFormPdfBytes({
+    required String title,
+    required String majlisName,
+    required String userName,
+    required String period,
+    required Map<String, dynamic> dataFields,
+    List<List<String>>? tableData,
+    List<String>? tableHeaders,
+    String? comments,
+    String? logoAssetPath,
+    String? address,
+  }) async {
+    return generateReportPdf(
+      title: title,
+      majlisName: majlisName,
+      userName: userName,
+      period: period,
+      dataFields: dataFields,
+      tableData: tableData,
+      tableHeaders: tableHeaders,
+      comments: comments,
+      logoAssetPath: logoAssetPath,
+      address: address,
+    );
+  }
+
   /// Generates a standardized PDF document for any report or form data
   static Future<Uint8List> generateReportPdf({
     required String title,
