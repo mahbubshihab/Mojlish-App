@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
+import 'package:mojlish_app/core/widgets/pdf_viewer_screen.dart';
 import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import 'package:mojlish_app/features/common/reports/data/models/zonal_report_entry.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
@@ -229,32 +230,36 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
     return n.toString().split('').map((c) => digits[int.parse(c)]).join();
   }
 
-  Future<void> _exportPdf() async {
+  void _openPdfViewer() {
     final yearStr = _bn(widget.year);
     final monthStr = _monthNames[widget.month - 1];
 
-    await PdfExportService.printOrDownloadPdf(
-      title: 'জোনাল রিপোর্ট ফরম',
-      majlisName: 'বাংলাদেশ খেলাফত মজলিস',
-      userName: _zoneNameCtrl.text.isEmpty ? 'জোন পরিচালক' : _zoneNameCtrl.text,
-      period: '$monthStr $yearStr',
-      dataFields: {
-        'জোনের নাম': _zoneNameCtrl.text,
-        'সদস্য সংখ্যা/বৃদ্ধি/ঘাটতি': '${_sodossoCountCtrl.text} / ${_sodossoBridhiCtrl.text} / ${_sodossoGhattiCtrl.text}',
-        'সদস্য প্রার্থী সংখ্যা/বৃদ্ধি/ঘাটতি': '${_sodossoPrarthiCountCtrl.text} / ${_sodossoPrarthiBridhiCtrl.text} / ${_sodossoPrarthiGhattiCtrl.text}',
-        'জেলা শাখা গঠন/পুনর্গঠন': '${_distCountCtrl.text} / ${_distOrgCtrl.text} / ${_distReorgCtrl.text}',
-        'মহানগর শাখা গঠন/পুনর্গঠন': '${_cityCountCtrl.text} / ${_cityOrgCtrl.text} / ${_cityReorgCtrl.text}',
-        'উপজেলা/থানা শাখা': '${_upazilaCountCtrl.text} / ${_upazilaOrgCtrl.text} / ${_upazilaReorgCtrl.text}',
-        'শাখা দায়িত্বশীল বৈঠক': '${_shakhaDaitoshilCountCtrl.text} (উপস্থিতি: ${_shakhaDaitoshilPresCtrl.text})',
-        'জেলা নির্বাহী বৈঠক': '${_distExecCountCtrl.text} (উপস্থিতি: ${_distExecPresCtrl.text})',
-        'জোনাল তরবিয়ত বৈঠক': '${_zonalTorbiotCountCtrl.text} (উপস্থিতি: ${_zonalTorbiotPresCtrl.text})',
-        'জোন সফর বিবরণী': _travelDetailsCtrl.text,
-        'সফর/কেন্দ্রীয়/এককালীন আয়': '${_safarIncomeTakaCtrl.text} / ${_centralIncomeTakaCtrl.text} / ${_onetimeIncomeTakaCtrl.text}',
-        'সফর/যোগাযোগ/দফতর ব্যয়': '${_safarExpenseTakaCtrl.text} / ${_communicationExpenseTakaCtrl.text} / ${_officeExpenseTakaCtrl.text}',
-        'উপশাখার রিপোর্ট প্রাপ্তি': _shakhaReportSubCtrl.text,
-        'উপশাখার পরিকল্পনা প্রাপ্তি': _shakhaPlanSubCtrl.text,
-      },
-      comments: '${_remarksCtrl.text}\n\nপরামর্শ: ${_suggestionsCtrl.text}',
+    PdfViewerScreen.open(
+      context,
+      title: 'জোনাল রিপোর্ট — $monthStr $yearStr',
+      buildPdf: (format) => PdfExportService.generateSingleFormPdfBytes(
+        title: 'জোনাল রিপোর্ট ফরম',
+        majlisName: 'বাংলাদেশ খেলাফত মজলিস',
+        userName: _zoneNameCtrl.text.isEmpty ? 'জোন পরিচালক' : _zoneNameCtrl.text,
+        period: '$monthStr $yearStr',
+        dataFields: {
+          'জোনের নাম': _zoneNameCtrl.text,
+          'সদস্য সংখ্যা/বৃদ্ধি/ঘাটতি': '${_sodossoCountCtrl.text} / ${_sodossoBridhiCtrl.text} / ${_sodossoGhattiCtrl.text}',
+          'সদস্য প্রার্থী সংখ্যা/বৃদ্ধি/ঘাটতি': '${_sodossoPrarthiCountCtrl.text} / ${_sodossoPrarthiBridhiCtrl.text} / ${_sodossoPrarthiGhattiCtrl.text}',
+          'জেলা শাখা গঠন/পুনর্গঠন': '${_distCountCtrl.text} / ${_distOrgCtrl.text} / ${_distReorgCtrl.text}',
+          'মহানগর শাখা গঠন/পুনর্গঠন': '${_cityCountCtrl.text} / ${_cityOrgCtrl.text} / ${_cityReorgCtrl.text}',
+          'উপজেলা/থানা শাখা': '${_upazilaCountCtrl.text} / ${_upazilaOrgCtrl.text} / ${_upazilaReorgCtrl.text}',
+          'শাখা দায়িত্বশীল বৈঠক': '${_shakhaDaitoshilCountCtrl.text} (উপস্থিতি: ${_shakhaDaitoshilPresCtrl.text})',
+          'জেলা নির্বাহী বৈঠক': '${_distExecCountCtrl.text} (উপস্থিতি: ${_distExecPresCtrl.text})',
+          'জোনাল তরবিয়ত বৈঠক': '${_zonalTorbiotCountCtrl.text} (উপস্থিতি: ${_zonalTorbiotPresCtrl.text})',
+          'জোন সফর বিবরণী': _travelDetailsCtrl.text,
+          'সফর/কেন্দ্রীয়/এককালীন আয়': '${_safarIncomeTakaCtrl.text} / ${_centralIncomeTakaCtrl.text} / ${_onetimeIncomeTakaCtrl.text}',
+          'সফর/যোগাযোগ/দফতর ব্যয়': '${_safarExpenseTakaCtrl.text} / ${_communicationExpenseTakaCtrl.text} / ${_officeExpenseTakaCtrl.text}',
+          'উপশাখার রিপোর্ট প্রাপ্তি': _shakhaReportSubCtrl.text,
+          'উপশাখার পরিকল্পনা প্রাপ্তি': _shakhaPlanSubCtrl.text,
+        },
+        comments: '${_remarksCtrl.text}\n\nপরামর্শ: ${_suggestionsCtrl.text}',
+      ),
     );
   }
 
@@ -263,293 +268,168 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
     final monthStr = _monthNames[widget.month - 1];
     final yearStr = _bn(widget.year);
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: _cardBg,
-          elevation: 1,
-          title: Text(
-            'জোনাল রিপোর্ট — $monthStr $yearStr',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          bottom: TabBar(
-            indicatorColor: _accentPurple,
-            indicatorWeight: 3,
-            labelColor: _accentPurple,
-            tabs: const [
-              Tab(icon: Icon(Icons.edit_note_rounded, size: 26)),
-              Tab(icon: Icon(Icons.picture_as_pdf_rounded, size: 26)),
-            ],
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: _cardBg,
+        elevation: 1,
+        title: Text(
+          'জোনাল রিপোর্ট — $monthStr $yearStr',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
-        body: AmbientBackgroundWidget(
-          primaryAccent: _accentPurple,
-          child: TabBarView(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf_rounded, color: Color(0xFF0284C7)),
+            tooltip: 'PDF প্রিভিউ ও ডাউনলোড',
+            onPressed: _openPdfViewer,
+          ),
+        ],
+      ),
+      body: AmbientBackgroundWidget(
+        primaryAccent: _accentPurple,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildFormTab(),
-              _buildPreviewTab(),
+              // Lock Status Banner
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: _isLocked
+                      ? const Color(0xFF0284C7).withValues(alpha: 0.12)
+                      : const Color(0xFF059669).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _isLocked ? Icons.lock_rounded : Icons.edit_note_rounded,
+                      color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _isLocked
+                            ? '🔒 জোনাল রিপোর্টটি সংরক্ষিত ও লকড অবস্থায় আছে।'
+                            : '📝 তথ্য পূরণ করুন এবং নিচে সংরক্ষণ বাটনে চাপ দিন।',
+                        style: TextStyle(
+                          color: _textLight,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Top Action Bar
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _openPdfViewer,
+                      icon: const Icon(Icons.picture_as_pdf_rounded, size: 20),
+                      label: const Text('PDF প্রিভিউ ও ডাউনলোড', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0284C7),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              _buildSectionCard('১. জোনের নাম', [
+                _buildInputField('জোনের নাম', _zoneNameCtrl),
+              ]),
+              const SizedBox(height: 16),
+
+              _buildSectionCard('২. জনশক্তি সংখ্যা ও পরিবর্তন', [
+                _build3ColHeader('শ্রেণী', 'সংখ্যা', 'বৃদ্ধি', 'ঘাটতি'),
+                const SizedBox(height: 8),
+                _build3ColRow('সদস্য', _sodossoCountCtrl, _sodossoBridhiCtrl, _sodossoGhattiCtrl),
+                _build3ColRow('সদস্য প্রার্থী', _sodossoPrarthiCountCtrl, _sodossoPrarthiBridhiCtrl, _sodossoPrarthiGhattiCtrl),
+              ]),
+              const SizedBox(height: 16),
+
+              _buildSectionCard('৩. সাংগঠনিক স্তর ও শাখা বিস্তার', [
+                _build3ColHeader('স্তর', 'সংখ্যা', 'গঠন', 'পুনর্গঠন'),
+                const SizedBox(height: 8),
+                _build3ColRow('জেলা শাখা', _distCountCtrl, _distOrgCtrl, _distReorgCtrl),
+                _build3ColRow('মহানগর শাখা', _cityCountCtrl, _cityOrgCtrl, _cityReorgCtrl),
+                _build3ColRow('উপজেলা/থানা শাখা', _upazilaCountCtrl, _upazilaOrgCtrl, _upazilaReorgCtrl),
+              ]),
+              const SizedBox(height: 16),
+
+              _buildSectionCard('৪. বৈঠক ও প্রশিক্ষণ কর্মসূচি', [
+                _build2ColRow('শাখা দায়িত্বশীল বৈঠক (সংখ্যা ও উপস্থিতি)', _shakhaDaitoshilCountCtrl, _shakhaDaitoshilPresCtrl),
+                _build2ColRow('জেলা নির্বাহী বৈঠক (সংখ্যা ও উপস্থিতি)', _distExecCountCtrl, _distExecPresCtrl),
+                _build2ColRow('জোনাল তরবিয়ত বৈঠক (সংখ্যা ও উপস্থিতি)', _zonalTorbiotCountCtrl, _zonalTorbiotPresCtrl),
+              ]),
+              const SizedBox(height: 16),
+
+              _buildSectionCard('৫. সফর বিবরণী (জোন থেকে)', [
+                _buildInputField('সফরের বিবরণ ও পরিক্রমা', _travelDetailsCtrl, maxLines: 3),
+              ]),
+              const SizedBox(height: 16),
+
+              _buildSectionCard('৬. আয় ও ব্যয়ের হিসাব (টাকা)', [
+                _build2ColRow('সফর আয় ও ব্যয়', _safarIncomeTakaCtrl, _safarExpenseTakaCtrl),
+                _build2ColRow('কেন্দ্রীয় আয় ও যোগাযোগ ব্যয়', _centralIncomeTakaCtrl, _communicationExpenseTakaCtrl),
+                _build2ColRow('এককালীন আয় ও দফতর ব্যয়', _onetimeIncomeTakaCtrl, _officeExpenseTakaCtrl),
+              ]),
+              const SizedBox(height: 16),
+
+              _buildSectionCard('৭. উপশাখার রিপোর্ট ও পরিকল্পনা জমা', [
+                _buildInputField('রিপোর্ট জমাদানকারী শাখা সংখ্যা', _shakhaReportSubCtrl),
+                _buildInputField('পরিকল্পনা জমাদানকারী শাখা সংখ্যা', _shakhaPlanSubCtrl),
+              ]),
+              const SizedBox(height: 16),
+
+              _buildSectionCard('৮. পর্যবেক্ষণ ও পরামর্শ', [
+                _buildInputField('জোনের সার্বিক পর্যবেক্ষণ', _remarksCtrl, maxLines: 2),
+                _buildInputField('কেন্দ্রের জন্য পরামর্শ/সুপারিশ', _suggestionsCtrl, maxLines: 2),
+              ]),
+              const SizedBox(height: 24),
+
+              // Save / Edit Action Button
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: _isLocked
+                    ? ElevatedButton.icon(
+                        onPressed: () => setState(() => _isLocked = false),
+                        icon: const Icon(Icons.edit_rounded),
+                        label: const Text('সম্পাদনা করুন (Edit)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFD97706),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      )
+                    : ElevatedButton.icon(
+                        onPressed: _isSaving ? null : _save,
+                        icon: const Icon(Icons.save_rounded),
+                        label: Text(_isSaving ? 'সংরক্ষণ হচ্ছে...' : 'সংরক্ষণ করুন (Save)', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF059669),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  // ==========================================
-  // TAB 1: FORM ENTRY & EDIT LOCKING
-  // ==========================================
-  Widget _buildFormTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Lock Status Banner
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: _isLocked
-                  ? const Color(0xFF0284C7).withValues(alpha: 0.12)
-                  : const Color(0xFF059669).withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  _isLocked ? Icons.lock_rounded : Icons.edit_note_rounded,
-                  color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    _isLocked
-                        ? '🔒 জোনাল রিপোর্টটি সংরক্ষিত ও লকড অবস্থায় আছে। পরিবর্তন করতে এডিট বাটনে ক্লিক করুন।'
-                        : '📝 তথ্য পূরণ করুন এবং নিচে সংরক্ষণ বাটনে চাপ দিন।',
-                    style: TextStyle(
-                      color: _textLight,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13.5,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          _buildSectionCard('১. জোনের নাম', [
-            _buildInputField('জোনের নাম', _zoneNameCtrl),
-          ]),
-          const SizedBox(height: 16),
-
-          _buildSectionCard('২. জনশক্তি সংখ্যা ও পরিবর্তন', [
-            _build3ColHeader('শ্রেণী', 'সংখ্যা', 'বৃদ্ধি', 'ঘাটতি'),
-            const SizedBox(height: 8),
-            _build3ColRow('সদস্য', _sodossoCountCtrl, _sodossoBridhiCtrl, _sodossoGhattiCtrl),
-            _build3ColRow('সদস্য প্রার্থী', _sodossoPrarthiCountCtrl, _sodossoPrarthiBridhiCtrl, _sodossoPrarthiGhattiCtrl),
-          ]),
-          const SizedBox(height: 16),
-
-          _buildSectionCard('৩. সাংগঠনিক স্তর ও শাখা বিস্তার', [
-            _build3ColHeader('স্তর', 'সংখ্যা', 'গঠন', 'পুনর্গঠন'),
-            const SizedBox(height: 8),
-            _build3ColRow('জেলা শাখা', _distCountCtrl, _distOrgCtrl, _distReorgCtrl),
-            _build3ColRow('মহানগর শাখা', _cityCountCtrl, _cityOrgCtrl, _cityReorgCtrl),
-            _build3ColRow('উপজেলা/থানা শাখা', _upazilaCountCtrl, _upazilaOrgCtrl, _upazilaReorgCtrl),
-          ]),
-          const SizedBox(height: 16),
-
-          _buildSectionCard('৪. বৈঠক ও প্রশিক্ষণ কর্মসূচি', [
-            _build2ColRow('শাখা দায়িত্বশীল বৈঠক (সংখ্যা ও উপস্থিতি)', _shakhaDaitoshilCountCtrl, _shakhaDaitoshilPresCtrl),
-            _build2ColRow('জেলা নির্বাহী বৈঠক (সংখ্যা ও উপস্থিতি)', _distExecCountCtrl, _distExecPresCtrl),
-            _build2ColRow('জোনাল তরবিয়ত বৈঠক (সংখ্যা ও উপস্থিতি)', _zonalTorbiotCountCtrl, _zonalTorbiotPresCtrl),
-          ]),
-          const SizedBox(height: 16),
-
-          _buildSectionCard('৫. সফর বিবরণী (জোন থেকে)', [
-            _buildInputField('সফরের বিবরণ ও পরিক্রমা', _travelDetailsCtrl, maxLines: 3),
-          ]),
-          const SizedBox(height: 16),
-
-          _buildSectionCard('৬. আয় ও ব্যয়ের হিসাব (টাকা)', [
-            _build2ColRow('সফর আয় ও ব্যয়', _safarIncomeTakaCtrl, _safarExpenseTakaCtrl),
-            _build2ColRow('কেন্দ্রীয় আয় ও যোগাযোগ ব্যয়', _centralIncomeTakaCtrl, _communicationExpenseTakaCtrl),
-            _build2ColRow('এককালীন আয় ও দফতর ব্যয়', _onetimeIncomeTakaCtrl, _officeExpenseTakaCtrl),
-          ]),
-          const SizedBox(height: 16),
-
-          _buildSectionCard('৭. উপশাখার রিপোর্ট ও পরিকল্পনা জমা', [
-            _buildInputField('রিপোর্ট জমাদানকারী শাখা সংখ্যা', _shakhaReportSubCtrl),
-            _buildInputField('পরিকল্পনা জমাদানকারী শাখা সংখ্যা', _shakhaPlanSubCtrl),
-          ]),
-          const SizedBox(height: 16),
-
-          _buildSectionCard('৮. পর্যবেক্ষণ ও পরামর্শ', [
-            _buildInputField('জোনের সার্বিক পর্যবেক্ষণ', _remarksCtrl, maxLines: 2),
-            _buildInputField('কেন্দ্রের জন্য পরামর্শ/সুপারিশ', _suggestionsCtrl, maxLines: 2),
-          ]),
-          const SizedBox(height: 24),
-
-          // Save / Edit Action Button
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: _isLocked
-                ? ElevatedButton.icon(
-                    onPressed: () => setState(() => _isLocked = false),
-                    icon: const Icon(Icons.edit_rounded),
-                    label: const Text('সম্পাদনা করুন (Edit)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFD97706),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  )
-                : ElevatedButton.icon(
-                    onPressed: _isSaving ? null : _save,
-                    icon: const Icon(Icons.save_rounded),
-                    label: Text(_isSaving ? 'সংরক্ষণ হচ্ছে...' : 'সংরক্ষণ করুন (Save)', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF059669),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
-
-  // ==========================================
-  // TAB 2: EXACT WHITE A4 PDF PREVIEW & DOWNLOAD
-  // ==========================================
-  Widget _buildPreviewTab() {
-    final monthStr = _monthNames[widget.month - 1];
-    final yearStr = _bn(widget.year);
-    const paperTextColor = Color(0xFF0F172A);
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          // 1. Exact A4 White Paper PDF Preview Card FIRST
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade300),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
-                )
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Column(
-                    children: [
-                      const Text(
-                        'বাংলাদেশ খেলাফত মজলিস',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'জোনাল রিপোর্ট — $monthStr $yearStr',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: paperTextColor),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'জোন: ${_zoneNameCtrl.text.isEmpty ? "(জোনের নাম প্রদান করুন)" : _zoneNameCtrl.text}',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: _accentPurple),
-                      ),
-                    ],
-                  ),
-                ),
-                const Divider(height: 32, thickness: 1.5, color: Colors.grey),
-
-                _buildPreviewRow('সদস্য সংখ্যা/বৃদ্ধি/ঘাটতি', '${_sodossoCountCtrl.text} / ${_sodossoBridhiCtrl.text} / ${_sodossoGhattiCtrl.text}', paperTextColor),
-                _buildPreviewRow('সদস্য প্রার্থী সংখ্যা/বৃদ্ধি/ঘাটতি', '${_sodossoPrarthiCountCtrl.text} / ${_sodossoPrarthiBridhiCtrl.text} / ${_sodossoPrarthiGhattiCtrl.text}', paperTextColor),
-                _buildPreviewRow('জেলা শাখা গঠন/পুনর্গঠন', '${_distCountCtrl.text} / ${_distOrgCtrl.text} / ${_distReorgCtrl.text}', paperTextColor),
-                _buildPreviewRow('মহানগর শাখা গঠন/পুনর্গঠন', '${_cityCountCtrl.text} / ${_cityOrgCtrl.text} / ${_cityReorgCtrl.text}', paperTextColor),
-                _buildPreviewRow('উপজেলা/থানা শাখা', '${_upazilaCountCtrl.text} / ${_upazilaOrgCtrl.text} / ${_upazilaReorgCtrl.text}', paperTextColor),
-                _buildPreviewRow('শাখা দায়িত্বশীল বৈঠক', '${_shakhaDaitoshilCountCtrl.text} (উপস্থিতি: ${_shakhaDaitoshilPresCtrl.text})', paperTextColor),
-                _buildPreviewRow('জেলা নির্বাহী বৈঠক', '${_distExecCountCtrl.text} (উপস্থিতি: ${_distExecPresCtrl.text})', paperTextColor),
-                _buildPreviewRow('জোনাল তরবিয়ত বৈঠক', '${_zonalTorbiotCountCtrl.text} (উপস্থিতি: ${_zonalTorbiotPresCtrl.text})', paperTextColor),
-                _buildPreviewRow('জোন সফর বিবরণী', _travelDetailsCtrl.text, paperTextColor),
-                _buildPreviewRow('সফর/কেন্দ্রীয়/এককালীন আয়', '${_safarIncomeTakaCtrl.text} / ${_centralIncomeTakaCtrl.text} / ${_onetimeIncomeTakaCtrl.text}', paperTextColor),
-                _buildPreviewRow('সফর/যোগাযোগ/দফতর ব্যয়', '${_safarExpenseTakaCtrl.text} / ${_communicationExpenseTakaCtrl.text} / ${_officeExpenseTakaCtrl.text}', paperTextColor),
-                if (_currentEntry != null)
-                  _buildPreviewRow('মোট আয় / ব্যয় / স্থিতি', '${_currentEntry!.totalIncome} / ${_currentEntry!.totalExpense} / ${_currentEntry!.balance}', paperTextColor),
-                _buildPreviewRow('উপশাখার রিপোর্ট প্রাপ্তি', _shakhaReportSubCtrl.text, paperTextColor),
-                _buildPreviewRow('উপশাখার পরিকল্পনা প্রাপ্তি', _shakhaPlanSubCtrl.text, paperTextColor),
-
-                if (_remarksCtrl.text.isNotEmpty || _suggestionsCtrl.text.isNotEmpty) ...[
-                  const Divider(height: 24, thickness: 1, color: Colors.grey),
-                  const Text('পর্যবেক্ষণ ও পরামর্শ:', style: TextStyle(fontWeight: FontWeight.bold, color: paperTextColor, fontSize: 14)),
-                  const SizedBox(height: 4),
-                  Text('পর্যবেক্ষণ: ${_remarksCtrl.text}', style: const TextStyle(color: paperTextColor, fontSize: 13.5)),
-                  const SizedBox(height: 2),
-                  Text('পরামর্শ: ${_suggestionsCtrl.text}', style: const TextStyle(color: paperTextColor, fontSize: 13.5)),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // 2. Download Button Placed BELOW the PDF Preview Card
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton.icon(
-              onPressed: _exportPdf,
-              icon: const Icon(Icons.picture_as_pdf_rounded, size: 24),
-              label: const Text('PDF ডাউনলোড / প্রিন্ট করুন', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0284C7),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                elevation: 4,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPreviewRow(String title, String value, Color textColor) {
-    final val = value.trim().isEmpty ? '—' : value.trim();
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 155,
-            child: Text(
-              '$title:',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5, color: textColor.withValues(alpha: 0.75)),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              val,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5, color: textColor),
-            ),
-          ),
-        ],
       ),
     );
   }

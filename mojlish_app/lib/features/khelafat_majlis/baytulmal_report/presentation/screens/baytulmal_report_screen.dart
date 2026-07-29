@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
+import 'package:mojlish_app/core/widgets/pdf_viewer_screen.dart';
 import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import 'package:mojlish_app/features/common/reports/data/models/baytulmal_report_entry.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 
-/// খেলাফত মজলিস — বায়তুলমাল রিপোর্ট ফরম (২-ট্যাব: আইকন-অনলি ও হোয়াইট A4 পেপার প্রিভিউ + নিচের ডাউনলোড বাটন)
+/// খেলাফত মজলিস — বায়তুলমাল রিপোর্ট ফরম (সিঙ্গেল স্ক্রিন ফরম + ফুলস্ক্রিন জুমড PDF প্রিভিউ/ডাউনলোড)
 class BaytulmalReportScreen extends StatefulWidget {
   final int? year;
   final int? month;
@@ -194,24 +195,28 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
     }
   }
 
-  Future<void> _exportPdf() async {
+  void _openPdfViewer() {
     final yearStr = _bn(_selectedYear);
     final monthStr = _monthNames[_selectedMonth - 1];
 
-    await PdfExportService.printOrDownloadPdf(
-      title: 'শাখার বায়তুলমাল রিপোর্ট ফরম',
-      majlisName: 'বাংলাদেশ খেলাফত মজলিস',
-      userName: _branchCtrl.text.isEmpty ? 'বায়তুলমাল সম্পাদক' : _branchCtrl.text,
-      period: '$monthStr $yearStr',
-      dataFields: {
-        'শাখার নাম': _branchCtrl.text,
-        'সর্বমোট আয়': '৳ ${_bn(_grandTotalIncome.toInt())}',
-        'সর্বমোট ব্যয়': '৳ ${_bn(_totalExpense.toInt())}',
-        'অবশিষ্ট জের (উদ্বৃত্ত)': '৳ ${_bn(_netBalance.toInt())}',
-        'কথায় (মোট টাকা)': _takaInWordsCtrl.text,
-        'বায়তুলমাল সম্পাদক স্বাক্ষর': _secretarySigCtrl.text,
-        'সভাপতি স্বাক্ষর': _presidentSigCtrl.text,
-      },
+    PdfViewerScreen.open(
+      context,
+      title: 'বায়তুলমাল রিপোর্ট — $monthStr $yearStr',
+      buildPdf: (format) => PdfExportService.generateSingleFormPdfBytes(
+        title: 'শাখার বায়তুলমাল রিপোর্ট ফরম',
+        majlisName: 'বাংলাদেশ খেলাফত মজলিস',
+        userName: _branchCtrl.text.isEmpty ? 'বায়তুলমাল সম্পাদক' : _branchCtrl.text,
+        period: '$monthStr $yearStr',
+        dataFields: {
+          'শাখার নাম': _branchCtrl.text,
+          'সর্বমোট আয়': '৳ ${_bn(_grandTotalIncome.toInt())}',
+          'সর্বমোট ব্যয়': '৳ ${_bn(_totalExpense.toInt())}',
+          'অবশিষ্ট জের (উদ্বৃত্ত)': '৳ ${_bn(_netBalance.toInt())}',
+          'কথায় (মোট টাকা)': _takaInWordsCtrl.text,
+          'বায়তুলমাল সম্পাদক স্বাক্ষর': _secretarySigCtrl.text,
+          'সভাপতি স্বাক্ষর': _presidentSigCtrl.text,
+        },
+      ),
     );
   }
 
@@ -227,391 +232,284 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
     final monthStr = _monthNames[_selectedMonth - 1];
     final yearStr = _bn(_selectedYear);
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: appBarBg,
-          elevation: 1,
-          title: Text(
-            'বায়তুলমাল — $monthStr $yearStr',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: appBarBg,
+        elevation: 1,
+        title: Text(
+          'বায়তুলমাল — $monthStr $yearStr',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf_rounded, color: Color(0xFF0284C7)),
+            tooltip: 'PDF প্রিভিউ ও ডাউনলোড',
+            onPressed: _openPdfViewer,
           ),
-          bottom: const TabBar(
-            indicatorColor: accentAmber,
-            indicatorWeight: 3,
-            labelColor: accentAmber,
-            tabs: [
-              Tab(icon: Icon(Icons.edit_note_rounded, size: 26)),
-              Tab(icon: Icon(Icons.picture_as_pdf_rounded, size: 26)),
-            ],
-          ),
-        ),
-        body: AmbientBackgroundWidget(
-          primaryAccent: accentAmber,
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : TabBarView(
-                  children: [
-                    _buildFormTab(cardBg, borderColor, textLight, accentAmber),
-                    _buildPreviewTab(cardBg, textLight, accentAmber),
-                  ],
-                ),
-        ),
+        ],
       ),
-    );
-  }
-
-  // ==========================================
-  // TAB 1: FORM ENTRY & EDIT LOCKING
-  // ==========================================
-  Widget _buildFormTab(Color cardBg, Color borderColor, Color textLight, Color accentAmber) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Lock Status Banner
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: _isLocked
-                    ? const Color(0xFF0284C7).withValues(alpha: 0.12)
-                    : const Color(0xFF059669).withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    _isLocked ? Icons.lock_rounded : Icons.edit_note_rounded,
-                    color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      _isLocked
-                          ? '🔒 বায়তুলমাল হিসাব লকড অবস্থায় আছে। পরিবর্তন করতে এডিট করুন।'
-                          : '📝 তথ্য পূরণ করুন এবং নিচে সংরক্ষণ বাটনে চাপ দিন।',
-                      style: TextStyle(
-                        color: textLight,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13.5,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Header card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: cardBg.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: borderColor),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'খেলাফত মজলিস — শাখার বায়তুলমাল রিপোর্ট',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.5, color: accentAmber),
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _branchCtrl,
-                    enabled: !_isLocked,
-                    decoration: InputDecoration(
-                      labelText: 'শাখার নাম',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                      isDense: true,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 18),
-
-            // 1. আয় (Income Card)
-            _buildSectionCard(
-              title: '১. আয় হিসাব (টাকা)',
-              color: const Color(0xFF10B981),
-              cardBg: cardBg,
-              borderColor: borderColor,
-              textLight: textLight,
-              children: [
-                _buildRowInput('নির্বাহী সদস্যদের এয়ানত', _nirbahiIyanatCtrl, 'সংখ্যা', _nirbahiCountCtrl),
-                _buildRowInput('অধস্তন শাখা এয়ানত', _subBranchIyanatCtrl, 'সংখ্যা', _subBranchCountCtrl),
-                _buildRowInput('সুধী/শুভাকাঙ্ক্ষী এয়ানত', _shudhiIyanatCtrl, 'সংখ্যা', _shudhiCountCtrl),
-                _buildSingleInput('সফর আয় (শাখা থেকে)', _safarIncomeCtrl),
-                _buildSingleInput('প্রকাশনা আয়', _publicationIncomeCtrl),
-                _buildSingleInput('এককালীন আয়', _oneTimeIncomeCtrl),
-                _buildSingleInput('বিগত মাসের উদ্বৃত্ত', _previousBalanceCtrl),
-                const Divider(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('সর্বমোট আয়:', style: TextStyle(fontWeight: FontWeight.bold, color: textLight)),
-                    Text('৳ ${_bn(_grandTotalIncome.toInt())}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF10B981), fontSize: 16)),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-
-            // 2. ব্যয় (Expense Card)
-            _buildSectionCard(
-              title: '২. ব্যয় হিসাব (টাকা)',
-              color: const Color(0xFFEF4444),
-              cardBg: cardBg,
-              borderColor: borderColor,
-              textLight: textLight,
-              children: [
-                _buildSingleInput('উর্ধ্বতন শাখা এয়ানত', _upperIyanatCtrl),
-                _buildSingleInput('অফিস ভাড়া ও বিল', _officeRentCtrl),
-                _buildSingleInput('দফতর খরচ', _officeExpenseCtrl),
-                _buildSingleInput('যাতায়াত খরচ', _transportExpenseCtrl),
-                _buildSingleInput('দাওয়াত ও গণসংযোগ ব্যয়', _dawahExpenseCtrl),
-                _buildSingleInput('প্রকাশনা ব্যয়', _publicationExpenseCtrl),
-                _buildSingleInput('দিবস পালন', _dayObservanceExpenseCtrl),
-                _buildSingleInput('আপ্যায়ন', _entertainmentExpenseCtrl),
-                _buildSingleInput('বৈঠক ও সমাবেশ ব্যয়', _meetingAssemblyCostCtrl),
-                const Divider(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('সর্বমোট ব্যয়:', style: TextStyle(fontWeight: FontWeight.bold, color: textLight)),
-                    Text('৳ ${_bn(_totalExpense.toInt())}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFEF4444), fontSize: 16)),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-
-            // Net balance card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: cardBg.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: _netBalance >= 0 ? const Color(0xFF10B981) : Colors.red),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('অবশিষ্ট জের (উদ্বৃত্ত/ঘাটতি):', style: TextStyle(fontWeight: FontWeight.bold, color: textLight, fontSize: 15)),
-                  Text(
-                    '৳ ${_bn(_netBalance.toInt())}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: _netBalance >= 0 ? const Color(0xFF10B981) : Colors.red,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 18),
-
-            // Taka in words & signatures
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: cardBg.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: borderColor),
-              ),
-              child: Column(
-                children: [
-                  TextFormField(
-                    controller: _takaInWordsCtrl,
-                    enabled: !_isLocked,
-                    decoration: InputDecoration(
-                      labelText: 'মোট অবশিষ্ট টাকা (কথায়)',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                      isDense: true,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _secretarySigCtrl,
-                          enabled: !_isLocked,
-                          decoration: InputDecoration(
-                            labelText: 'বায়তুলমাল সম্পাদক স্বাক্ষর',
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                            isDense: true,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextFormField(
-                          controller: _presidentSigCtrl,
-                          enabled: !_isLocked,
-                          decoration: InputDecoration(
-                            labelText: 'সভাপতি স্বাক্ষর',
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                            isDense: true,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Save / Edit Action Button
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: _isLocked
-                  ? ElevatedButton.icon(
-                      onPressed: () => setState(() => _isLocked = false),
-                      icon: const Icon(Icons.edit_rounded),
-                      label: const Text('সম্পাদনা করুন (Edit)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFD97706),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    )
-                  : ElevatedButton.icon(
-                      onPressed: _isSaving ? null : _save,
-                      icon: const Icon(Icons.save_rounded),
-                      label: Text(_isSaving ? 'সংরক্ষণ হচ্ছে...' : 'সংরক্ষণ করুন (Save)', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF059669),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
-            ),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ==========================================
-  // TAB 2: EXACT WHITE A4 PDF PREVIEW & DOWNLOAD
-  // ==========================================
-  Widget _buildPreviewTab(Color cardBg, Color textLight, Color accentAmber) {
-    final monthStr = _monthNames[_selectedMonth - 1];
-    final yearStr = _bn(_selectedYear);
-    const paperTextColor = Color(0xFF0F172A);
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          // 1. Exact A4 White Paper PDF Preview Card FIRST
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade300),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
-                )
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
+      body: AmbientBackgroundWidget(
+        primaryAccent: accentAmber,
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Form(
+                  key: _formKey,
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'বাংলাদেশ খেলাফত মজলিস',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
+                      // Lock Status Banner
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: _isLocked
+                              ? const Color(0xFF0284C7).withValues(alpha: 0.12)
+                              : const Color(0xFF059669).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              _isLocked ? Icons.lock_rounded : Icons.edit_note_rounded,
+                              color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                _isLocked
+                                    ? '🔒 বায়তুলমাল হিসাব সংরক্ষিত ও লকড অবস্থায় আছে।'
+                                    : '📝 তথ্য পূরণ করুন এবং নিচে সংরক্ষণ বাটনে চাপ দিন।',
+                                style: TextStyle(
+                                  color: textLight,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'শাখার বায়তুলমাল রিপোর্ট — $monthStr $yearStr',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: paperTextColor),
+                      const SizedBox(height: 16),
+
+                      // Top Action Bar
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: _openPdfViewer,
+                              icon: const Icon(Icons.picture_as_pdf_rounded, size: 20),
+                              label: const Text('PDF প্রিভিউ ও ডাউনলোড', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF0284C7),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'শাখা: ${_branchCtrl.text.isEmpty ? "(শাখার নাম প্রদান করুন)" : _branchCtrl.text}',
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFFD97706)),
+                      const SizedBox(height: 16),
+
+                      // Header card
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: cardBg.withValues(alpha: 0.9),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: borderColor),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              'খেলাফত মজলিস — শাখার বায়তুলমাল রিপোর্ট',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.5, color: accentAmber),
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _branchCtrl,
+                              enabled: !_isLocked,
+                              decoration: InputDecoration(
+                                labelText: 'শাখার নাম',
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                                isDense: true,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                      const SizedBox(height: 18),
+
+                      // 1. আয় (Income Card)
+                      _buildSectionCard(
+                        title: '১. আয় হিসাব (টাকা)',
+                        color: const Color(0xFF10B981),
+                        cardBg: cardBg,
+                        borderColor: borderColor,
+                        textLight: textLight,
+                        children: [
+                          _buildRowInput('নির্বাহী সদস্যদের এয়ানত', _nirbahiIyanatCtrl, 'সংখ্যা', _nirbahiCountCtrl),
+                          _buildRowInput('অধস্তন শাখা এয়ানত', _subBranchIyanatCtrl, 'সংখ্যা', _subBranchCountCtrl),
+                          _buildRowInput('সুধী/শুভাকাঙ্ক্ষী এয়ানত', _shudhiIyanatCtrl, 'সংখ্যা', _shudhiCountCtrl),
+                          _buildSingleInput('সফর আয় (শাখা থেকে)', _safarIncomeCtrl),
+                          _buildSingleInput('প্রকাশনা আয়', _publicationIncomeCtrl),
+                          _buildSingleInput('এককালীন আয়', _oneTimeIncomeCtrl),
+                          _buildSingleInput('বিগত মাসের উদ্বৃত্ত', _previousBalanceCtrl),
+                          const Divider(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('সর্বমোট আয়:', style: TextStyle(fontWeight: FontWeight.bold, color: textLight)),
+                              Text('৳ ${_bn(_grandTotalIncome.toInt())}',
+                                  style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF10B981), fontSize: 16)),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+
+                      // 2. ব্যয় (Expense Card)
+                      _buildSectionCard(
+                        title: '২. ব্যয় হিসাব (টাকা)',
+                        color: const Color(0xFFEF4444),
+                        cardBg: cardBg,
+                        borderColor: borderColor,
+                        textLight: textLight,
+                        children: [
+                          _buildSingleInput('উর্ধ্বতন শাখা এয়ানত', _upperIyanatCtrl),
+                          _buildSingleInput('অফিস ভাড়া ও বিল', _officeRentCtrl),
+                          _buildSingleInput('দফতর খরচ', _officeExpenseCtrl),
+                          _buildSingleInput('যাতায়াত খরচ', _transportExpenseCtrl),
+                          _buildSingleInput('দাওয়াত ও গণসংযোগ ব্যয়', _dawahExpenseCtrl),
+                          _buildSingleInput('প্রকাশনা ব্যয়', _publicationExpenseCtrl),
+                          _buildSingleInput('দিবস পালন', _dayObservanceExpenseCtrl),
+                          _buildSingleInput('আপ্যায়ন', _entertainmentExpenseCtrl),
+                          _buildSingleInput('বৈঠক ও সমাবেশ ব্যয়', _meetingAssemblyCostCtrl),
+                          const Divider(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('সর্বমোট ব্যয়:', style: TextStyle(fontWeight: FontWeight.bold, color: textLight)),
+                              Text('৳ ${_bn(_totalExpense.toInt())}',
+                                  style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFEF4444), fontSize: 16)),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+
+                      // Net balance card
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: cardBg.withValues(alpha: 0.9),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: _netBalance >= 0 ? const Color(0xFF10B981) : Colors.red),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('অবশিষ্ট জের (উদ্বৃত্ত/ঘাটতি):', style: TextStyle(fontWeight: FontWeight.bold, color: textLight, fontSize: 15)),
+                            Text(
+                              '৳ ${_bn(_netBalance.toInt())}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                color: _netBalance >= 0 ? const Color(0xFF10B981) : Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+
+                      // Taka in words & signatures
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: cardBg.withValues(alpha: 0.9),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: borderColor),
+                        ),
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              controller: _takaInWordsCtrl,
+                              enabled: !_isLocked,
+                              decoration: InputDecoration(
+                                labelText: 'মোট অবশিষ্ট টাকা (কথায়)',
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                                isDense: true,
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _secretarySigCtrl,
+                                    enabled: !_isLocked,
+                                    decoration: InputDecoration(
+                                      labelText: 'বায়তুলমাল সম্পাদক স্বাক্ষর',
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                                      isDense: true,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _presidentSigCtrl,
+                                    enabled: !_isLocked,
+                                    decoration: InputDecoration(
+                                      labelText: 'সভাপতি স্বাক্ষর',
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                                      isDense: true,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Save / Edit Action Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: _isLocked
+                            ? ElevatedButton.icon(
+                                onPressed: () => setState(() => _isLocked = false),
+                                icon: const Icon(Icons.edit_rounded),
+                                label: const Text('সম্পাদনা করুন (Edit)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFD97706),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                              )
+                            : ElevatedButton.icon(
+                                onPressed: _isSaving ? null : _save,
+                                icon: const Icon(Icons.save_rounded),
+                                label: Text(_isSaving ? 'সংরক্ষণ হচ্ছে...' : 'সংরক্ষণ করুন (Save)', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF059669),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                              ),
+                      ),
+                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
-                const Divider(height: 32, thickness: 1.5, color: Colors.grey),
-
-                _buildPreviewRow('সর্বমোট আয়', '৳ ${_bn(_grandTotalIncome.toInt())}', paperTextColor),
-                _buildPreviewRow('সর্বমোট ব্যয়', '৳ ${_bn(_totalExpense.toInt())}', paperTextColor),
-                _buildPreviewRow('অবশিষ্ট জের (উদ্বৃত্ত)', '৳ ${_bn(_netBalance.toInt())}', paperTextColor),
-                _buildPreviewRow('কথায় (মোট টাকা)', _takaInWordsCtrl.text, paperTextColor),
-                _buildPreviewRow('বায়তুলমাল সম্পাদক স্বাক্ষর', _secretarySigCtrl.text, paperTextColor),
-                _buildPreviewRow('সভাপতি স্বাক্ষর', _presidentSigCtrl.text, paperTextColor),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // 2. Download Button Placed BELOW the PDF Preview Card
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton.icon(
-              onPressed: _exportPdf,
-              icon: const Icon(Icons.picture_as_pdf_rounded, size: 24),
-              label: const Text('PDF ডাউনলোড / প্রিন্ট করুন', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0284C7),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                elevation: 4,
               ),
-            ),
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPreviewRow(String title, String value, Color textColor) {
-    final val = value.trim().isEmpty ? '—' : value.trim();
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 155,
-            child: Text(
-              '$title:',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5, color: textColor.withValues(alpha: 0.75)),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              val,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5, color: textColor),
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
+import 'package:mojlish_app/core/widgets/pdf_viewer_screen.dart';
 import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 
-/// খেলাফত মজলিস — শাখা পরিকল্পনা ফরম (২-ট্যাব: তথ্য পূরণ/লক ও ফরম্যাট প্রিভিউ/ডাউনলোড)
+/// খেলাফত মজলিস — শাখা পরিকল্পনা ফরম (সিঙ্গেল স্ক্রিন ফরম + ফুলস্ক্রিন জুমড PDF প্রিভিউ/ডাউনলোড)
 class KhelafatBranchPlanScreen extends StatefulWidget {
   final int? year;
   final int? month;
 
-  const KhelafatBranchPlanScreen({Key? key, this.year, this.month}) : super(key: key);
+  const KhelafatBranchPlanScreen({super.key, this.year, this.month});
 
   @override
   State<KhelafatBranchPlanScreen> createState() => _KhelafatBranchPlanScreenState();
@@ -94,26 +95,30 @@ class _KhelafatBranchPlanScreenState extends State<KhelafatBranchPlanScreen> {
     return n.toString().split('').map((c) => digits[int.parse(c)]).join();
   }
 
-  Future<void> _exportPdf() async {
+  void _openPdfViewer() {
     final yearStr = widget.year != null ? _bn(widget.year!) : '';
     final monthStr = widget.month != null ? _monthNames[widget.month! - 1] : '';
 
-    await PdfExportService.printOrDownloadPdf(
-      title: 'শাখা পরিকল্পনা ফরম',
-      majlisName: 'বাংলাদেশ খেলাফত মজলিস',
-      userName: _shakhaNameController.text.isEmpty ? 'শাখা সভাপতি/সম্পাদক' : _shakhaNameController.text,
-      period: '$monthStr $yearStr',
-      dataFields: {
-        'শাখার নাম': _shakhaNameController.text,
-        'জনশক্তি বৃদ্ধির লক্ষ্যমাত্রা': _manpowerTargetController.text,
-        'দাওয়াত ও গণসংযোগ পরিকল্পনা': _dawahScheduleController.text,
-        'শাখা বিস্তার ও পুনর্গঠন': _unitReorganizationController.text,
-        'বায়তুলমাল সংগ্রহের লক্ষ্যমাত্রা': _baytulmalTargetController.text,
-        'সাংগঠনিক সফর সূচি': _safarScheduleController.text,
-        'প্রশিক্ষণ বৈঠক পরিকল্পনা': _trainingPlanController.text,
-        'প্রচার ও প্রকাশনা পরিকল্পনা': _publicationPlanController.text,
-      },
-      comments: _commentsController.text,
+    PdfViewerScreen.open(
+      context,
+      title: 'শাখা পরিকল্পনা — $monthStr $yearStr',
+      buildPdf: (format) => PdfExportService.generateSingleFormPdfBytes(
+        title: 'শাখা পরিকল্পনা ফরম',
+        majlisName: 'বাংলাদেশ খেলাফত মজলিস',
+        userName: _shakhaNameController.text.isEmpty ? 'শাখা সভাপতি/সম্পাদক' : _shakhaNameController.text,
+        period: '$monthStr $yearStr',
+        dataFields: {
+          'শাখার নাম': _shakhaNameController.text,
+          'জনশক্তি বৃদ্ধির লক্ষ্যমাত্রা': _manpowerTargetController.text,
+          'দাওয়াত ও গণসংযোগ পরিকল্পনা': _dawahScheduleController.text,
+          'শাখা বিস্তার ও পুনর্গঠন': _unitReorganizationController.text,
+          'বায়তুলমাল সংগ্রহের লক্ষ্যমাত্রা': _baytulmalTargetController.text,
+          'সাংগঠনিক সফর সূচি': _safarScheduleController.text,
+          'প্রশিক্ষণ বৈঠক পরিকল্পনা': _trainingPlanController.text,
+          'প্রচার ও প্রকাশনা পরিকল্পনা': _publicationPlanController.text,
+        },
+        comments: _commentsController.text,
+      ),
     );
   }
 
@@ -128,253 +133,138 @@ class _KhelafatBranchPlanScreenState extends State<KhelafatBranchPlanScreen> {
     final monthStr = widget.month != null ? _monthNames[widget.month! - 1] : '';
     final yearStr = widget.year != null ? _bn(widget.year!) : '';
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: appBarBg,
-          elevation: 1,
-          title: Text(
-            'শাখা পরিকল্পনা — $monthStr $yearStr',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          bottom: const TabBar(
-            indicatorColor: accentCyan,
-            indicatorWeight: 3,
-            labelColor: accentCyan,
-            tabs: [
-              Tab(icon: Icon(Icons.edit_note_rounded, size: 26)),
-              Tab(icon: Icon(Icons.picture_as_pdf_rounded, size: 26)),
-            ],
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: appBarBg,
+        elevation: 1,
+        title: Text(
+          'শাখা পরিকল্পনা — $monthStr $yearStr',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
-        body: AmbientBackgroundWidget(
-          primaryAccent: accentCyan,
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : TabBarView(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf_rounded, color: Color(0xFF0284C7)),
+            tooltip: 'PDF প্রিভিউ ও ডাউনলোড',
+            onPressed: _openPdfViewer,
+          ),
+        ],
+      ),
+      body: AmbientBackgroundWidget(
+        primaryAccent: accentCyan,
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildFormTab(cardBg, textLight, accentCyan),
-                    _buildPreviewTab(cardBg, textLight, accentCyan),
+                    // Lock Status Banner
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: _isLocked
+                            ? const Color(0xFF0284C7).withValues(alpha: 0.12)
+                            : const Color(0xFF059669).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            _isLocked ? Icons.lock_rounded : Icons.edit_note_rounded,
+                            color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              _isLocked
+                                  ? '🔒 পরিকল্পনাটি সংরক্ষিত ও লকড অবস্থায় আছে।'
+                                  : '📝 তথ্য পূরণ করুন এবং নিচে সংরক্ষণ বাটনে চাপ দিন।',
+                              style: TextStyle(
+                                color: textLight,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Top Action Bar
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _openPdfViewer,
+                            icon: const Icon(Icons.picture_as_pdf_rounded, size: 20),
+                            label: const Text('PDF প্রিভিউ ও ডাউনলোড', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0284C7),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    _buildCard('শাখার বিবরণ', [
+                      _buildTextField(_shakhaNameController, 'শাখার নাম'),
+                    ], cardBg, textLight),
+                    const SizedBox(height: 16),
+
+                    _buildCard('মাসিক পরিকল্পনা বিষয়াবলী', [
+                      _buildTextField(_manpowerTargetController, 'জনশক্তি বৃদ্ধির লক্ষ্যমাত্রা'),
+                      _buildTextField(_dawahScheduleController, 'দাওয়াত ও গণসংযোগ পরিকল্পনা'),
+                      _buildTextField(_unitReorganizationController, 'শাখা বিস্তার ও পুনর্গঠন'),
+                      _buildTextField(_baytulmalTargetController, 'বায়তুলমাল সংগ্রহের লক্ষ্যমাত্রা'),
+                      _buildTextField(_safarScheduleController, 'সাংগঠনিক সফর সূচি'),
+                      _buildTextField(_trainingPlanController, 'প্রশিক্ষণ বৈঠক পরিকল্পনা'),
+                      _buildTextField(_publicationPlanController, 'প্রচার ও প্রকাশনা পরিকল্পনা'),
+                    ], cardBg, textLight),
+                    const SizedBox(height: 16),
+
+                    _buildCard('বিশেষ মন্তব্য ও নোট', [
+                      _buildTextField(_commentsController, 'মন্তব্য ও দিকনির্দেশনা', maxLines: 3),
+                    ], cardBg, textLight),
+                    const SizedBox(height: 24),
+
+                    // Save / Edit Action Bar
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: _isLocked
+                          ? ElevatedButton.icon(
+                              onPressed: () => setState(() => _isLocked = false),
+                              icon: const Icon(Icons.edit_rounded),
+                              label: const Text('সম্পাদনা করুন (Edit)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFD97706),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            )
+                          : ElevatedButton.icon(
+                              onPressed: _savePlan,
+                              icon: const Icon(Icons.save_rounded),
+                              label: const Text('সংরক্ষণ করুন (Save)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF059669),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                    ),
+                    const SizedBox(height: 24),
                   ],
                 ),
-        ),
-      ),
-    );
-  }
-
-  // ==========================================
-  // TAB 1: FORM ENTRY & EDIT LOCKING
-  // ==========================================
-  Widget _buildFormTab(Color cardBg, Color textLight, Color accentCyan) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Lock Status Banner
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: _isLocked
-                  ? const Color(0xFF0284C7).withValues(alpha: 0.12)
-                  : const Color(0xFF059669).withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
               ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  _isLocked ? Icons.lock_rounded : Icons.edit_note_rounded,
-                  color: _isLocked ? const Color(0xFF0284C7) : const Color(0xFF059669),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    _isLocked
-                        ? '🔒 পরিকল্পনাটি লকড অবস্থায় আছে। পরিবর্তন করতে এডিট করুন।'
-                        : '📝 তথ্য পূরণ করুন এবং নিচে সংরক্ষণ বাটনে চাপ দিন।',
-                    style: TextStyle(
-                      color: textLight,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13.5,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          _buildCard('শাখার বিবরণ', [
-            _buildTextField(_shakhaNameController, 'শাখার নাম'),
-          ], cardBg, textLight),
-          const SizedBox(height: 16),
-
-          _buildCard('মাসিক পরিকল্পনা বিষয়াবলী', [
-            _buildTextField(_manpowerTargetController, 'জনশক্তি বৃদ্ধির লক্ষ্যমাত্রা'),
-            _buildTextField(_dawahScheduleController, 'দাওয়াত ও গণসংযোগ পরিকল্পনা'),
-            _buildTextField(_unitReorganizationController, 'শাখা বিস্তার ও পুনর্গঠন'),
-            _buildTextField(_baytulmalTargetController, 'বায়তুলমাল সংগ্রহের লক্ষ্যমাত্রা'),
-            _buildTextField(_safarScheduleController, 'সাংগঠনিক সফর সূচি'),
-            _buildTextField(_trainingPlanController, 'প্রশিক্ষণ বৈঠক পরিকল্পনা'),
-            _buildTextField(_publicationPlanController, 'প্রচার ও প্রকাশনা পরিকল্পনা'),
-          ], cardBg, textLight),
-          const SizedBox(height: 16),
-
-          _buildCard('বিশেষ মন্তব্য ও নোট', [
-            _buildTextField(_commentsController, 'মন্তব্য ও দিকনির্দেশনা', maxLines: 3),
-          ], cardBg, textLight),
-          const SizedBox(height: 24),
-
-          // Save / Edit Action Bar
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: _isLocked
-                ? ElevatedButton.icon(
-                    onPressed: () => setState(() => _isLocked = false),
-                    icon: const Icon(Icons.edit_rounded),
-                    label: const Text('সম্পাদনা করুন (Edit)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFD97706),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  )
-                : ElevatedButton.icon(
-                    onPressed: _savePlan,
-                    icon: const Icon(Icons.save_rounded),
-                    label: const Text('সংরক্ষণ করুন (Save)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF059669),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
-
-  // ==========================================
-  // TAB 2: EXACT WHITE A4 PDF PREVIEW & DOWNLOAD
-  // ==========================================
-  Widget _buildPreviewTab(Color cardBg, Color textLight, Color accentCyan) {
-    final monthStr = widget.month != null ? _monthNames[widget.month! - 1] : '';
-    final yearStr = widget.year != null ? _bn(widget.year!) : '';
-    const paperTextColor = Color(0xFF0F172A);
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          // 1. Exact A4 White Paper PDF Preview Card FIRST
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade300),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
-                )
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Column(
-                    children: [
-                      const Text(
-                        'বাংলাদেশ খেলাফত মজলিস',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'শাখা পরিকল্পনা ফরম — $monthStr $yearStr',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: paperTextColor),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'শাখা: ${_shakhaNameController.text.isEmpty ? "(শাখার নাম প্রদান করুন)" : _shakhaNameController.text}',
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF06B6D4)),
-                      ),
-                    ],
-                  ),
-                ),
-                const Divider(height: 32, thickness: 1.5, color: Colors.grey),
-
-                _buildPreviewRow('জনশক্তি লক্ষ্যমাত্রা', _manpowerTargetController.text, paperTextColor),
-                _buildPreviewRow('দাওয়াত ও গণসংযোগ', _dawahScheduleController.text, paperTextColor),
-                _buildPreviewRow('শাখা বিস্তার ও পুনর্গঠন', _unitReorganizationController.text, paperTextColor),
-                _buildPreviewRow('বায়তুলমাল সংগ্রহের লক্ষ্য', _baytulmalTargetController.text, paperTextColor),
-                _buildPreviewRow('সাংগঠনিক সফর সূচি', _safarScheduleController.text, paperTextColor),
-                _buildPreviewRow('প্রশিক্ষণ বৈঠক পরিকল্পনা', _trainingPlanController.text, paperTextColor),
-                _buildPreviewRow('প্রচার ও প্রকাশনা পরিকল্পনা', _publicationPlanController.text, paperTextColor),
-
-                if (_commentsController.text.isNotEmpty) ...[
-                  const Divider(height: 24, thickness: 1, color: Colors.grey),
-                  const Text('বিশেষ নির্দেশনা:', style: TextStyle(fontWeight: FontWeight.bold, color: paperTextColor, fontSize: 14)),
-                  const SizedBox(height: 4),
-                  Text(_commentsController.text, style: const TextStyle(color: paperTextColor, fontSize: 13.5)),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // 2. Download Button Placed BELOW the PDF Preview Card
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton.icon(
-              onPressed: _exportPdf,
-              icon: const Icon(Icons.picture_as_pdf_rounded, size: 24),
-              label: const Text('PDF ডাউনলোড / প্রিন্ট করুন', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0284C7),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                elevation: 4,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPreviewRow(String title, String value, Color textColor) {
-    final val = value.trim().isEmpty ? '—' : value.trim();
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 145,
-            child: Text(
-              '$title:',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5, color: textColor.withValues(alpha: 0.75)),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              val,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5, color: textColor),
-            ),
-          ),
-        ],
       ),
     );
   }
