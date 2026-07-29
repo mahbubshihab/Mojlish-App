@@ -125,15 +125,8 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'আসসালামু আলাইকুম,',
-                                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: textTitle),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _userName,
-                                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
+                                  'আসসালামু আলাইকুম, $_userName',
+                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: textTitle),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),

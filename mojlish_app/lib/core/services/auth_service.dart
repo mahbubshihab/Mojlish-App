@@ -32,44 +32,48 @@ class AuthService {
       print('Google sign in bypassed: $e');
     }
     await UserStorageService.saveUserName('মিজানুর রহমান');
+    await UserStorageService.saveUserEmail('mizanur.rahman@gmail.com');
+    await UserStorageService.saveUserPhotoUrl('');
     return null;
   }
 
-  /// Sync Google User profile into Firestore users/{uid}
+  /// Sync Google User profile into Firestore users/{uid} collection
   Future<void> syncUserProfile(User user) async {
     try {
       final userRef = _firestore.collection('users').doc(user.uid);
       final userDoc = await userRef.get();
 
       final currentMajlis = await UserStorageService.getActiveMajlis();
-      final displayName = user.displayName ?? 'ব্যবহারকারী';
+      final displayName = user.displayName ?? 'মিজানুর রহমান';
+      final email = user.email ?? '';
+      final photoUrl = user.photoURL ?? '';
+
+      final Map<String, dynamic> userData = {
+        'uid': user.uid,
+        'name': displayName,
+        'email': email,
+        'photoUrl': photoUrl,
+        'selectedMajlis': currentMajlis ?? '',
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
 
       if (!userDoc.exists) {
-        await userRef.set({
-          'uid': user.uid,
-          'name': displayName,
-          'email': user.email ?? '',
-          'photoUrl': user.photoURL ?? '',
-          'selectedMajlis': currentMajlis ?? '',
-          'createdAt': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true));
-        await UserStorageService.saveUserName(displayName);
+        userData['createdAt'] = FieldValue.serverTimestamp();
+        await userRef.set(userData, SetOptions(merge: true));
       } else {
-        final data = userDoc.data() ?? {};
-        final savedName = data['name'] ?? displayName;
-        final savedMajlis = data['selectedMajlis'] ?? currentMajlis ?? '';
-
-        await UserStorageService.saveUserName(savedName);
-        if (savedMajlis.isNotEmpty) {
-          await UserStorageService.saveActiveMajlis(savedMajlis);
+        final existingData = userDoc.data() ?? {};
+        if (existingData['name'] != null && existingData['name'].toString().isNotEmpty) {
+          userData['name'] = existingData['name'];
         }
-
-        await userRef.set({
-          'photoUrl': user.photoURL ?? data['photoUrl'] ?? '',
-          'updatedAt': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true));
+        if (existingData['selectedMajlis'] != null && existingData['selectedMajlis'].toString().isNotEmpty) {
+          userData['selectedMajlis'] = existingData['selectedMajlis'];
+        }
+        await userRef.set(userData, SetOptions(merge: true));
       }
+
+      await UserStorageService.saveUserName(userData['name'] as String);
+      await UserStorageService.saveUserEmail(email);
+      await UserStorageService.saveUserPhotoUrl(photoUrl);
     } catch (e) {
       print('Firestore syncUserProfile exception: $e');
     }

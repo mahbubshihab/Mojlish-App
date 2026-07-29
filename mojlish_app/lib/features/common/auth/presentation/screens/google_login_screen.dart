@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mojlish_app/core/services/auth_service.dart';
-import 'package:mojlish_app/core/services/user_storage_service.dart';
 import 'package:mojlish_app/core/theme/app_theme.dart';
 import 'package:mojlish_app/features/common/auth/presentation/screens/org_selection_screen.dart';
-import 'package:mojlish_app/features/common/dashboard/presentation/screens/main_dashboard_screen.dart';
 
 class GoogleLoginScreen extends StatefulWidget {
   const GoogleLoginScreen({super.key});
@@ -68,7 +65,7 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen> {
                         ),
                       ),
                       child: Image.asset(
-                        'assets/images/election_symbol_wall_clock.png',
+                        'assets/images/logo.png',
                         height: 90,
                         width: 90,
                         errorBuilder: (_, __, ___) => const Icon(
@@ -90,7 +87,7 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'সংগঠনের সকল রিপোর্ট ও পরিকলাপনার ডিজিটাল প্ল্যাটফর্ম',
+                      'সংগঠনের সকল রিপোর্ট ও পরিকল্পনার ডিজিটাল প্ল্যাটফর্ম',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 15,
@@ -100,7 +97,7 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen> {
                   ],
                 ),
 
-                // Center Action Section: Google Sign In Button
+                // Center Action Section: Google Sign In Button with google_logo.png
                 Column(
                   children: [
                     if (_isLoading)
@@ -124,15 +121,13 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                              ),
-                              child: const Icon(
+                            Image.asset(
+                              'assets/images/google_logo.png',
+                              height: 26,
+                              width: 26,
+                              errorBuilder: (_, __, ___) => const Icon(
                                 Icons.g_mobiledata_rounded,
-                                size: 32,
+                                size: 30,
                                 color: Color(0xFFEA4335),
                               ),
                             ),
