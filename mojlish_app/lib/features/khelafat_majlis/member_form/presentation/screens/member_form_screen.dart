@@ -3,15 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 import 'package:mojlish_app/core/widgets/pdf_viewer_screen.dart';
-import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import '../bloc/member_form_bloc.dart';
 import '../bloc/member_form_event.dart';
 import '../bloc/member_form_state.dart';
 import '../../domain/entities/member.dart';
 import '../../data/datasources/member_remote_datasource.dart';
 import '../../data/repositories/member_repository_impl.dart';
+import '../../data/services/khelafat_member_form_pdf_service.dart';
 
-/// খেলাফত মজলিস — প্রাথমিক সদস্য ফরম (BlocProvider Wrapper + Clean Form Content)
+/// খেলাফত মজলিস — প্রাথমিক সদস্য ফরম (আধুনিক ডিজাইন ও মডুলার সার্ভিস)
 class MemberFormScreen extends StatelessWidget {
   const MemberFormScreen({super.key});
 
@@ -47,7 +47,7 @@ class _MemberFormScreenContentState extends State<_MemberFormScreenContent> {
   final _mobileController = TextEditingController();
   final _permanentAddressController = TextEditingController();
 
-  String _serialNumber = '০০১';
+  String _serialNumber = '০৩৮';
 
   @override
   void initState() {
@@ -86,25 +86,23 @@ class _MemberFormScreenContentState extends State<_MemberFormScreenContent> {
   }
 
   void _openPdfViewer() {
+    final now = DateTime.now();
+    final dateStr = '${now.day}/${now.month}/${now.year}';
+
     PdfViewerScreen.open(
       context,
       title: 'খেলাফত মজলিস — প্রাথমিক সদস্য ফরম',
-      buildPdf: (format) => PdfExportService.generateSingleFormPdfBytes(
-        title: 'প্রাথমিক সদস্য ফরম',
-        majlisName: 'বাংলাদেশ খেলাফত মজলিস',
-        userName: _nameController.text.isEmpty ? 'সদস্য' : _nameController.text,
-        period: 'ফরম নং: $_serialNumber',
-        dataFields: {
-          'ক্রমিক নং': _serialNumber,
-          'নাম': _nameController.text,
-          'পিতা': _fatherNameController.text,
-          'শিক্ষাগত যোগ্যতা': _educationalQualificationController.text,
-          'বয়স ও পেশা': '${_ageController.text} (${_professionController.text})',
-          'বর্তমান ঠিকানা': _presentAddressController.text,
-          'মোবাইল': _mobileController.text,
-          'স্থায়ী ঠিকানা': _permanentAddressController.text,
-        },
-        comments: 'ইসলামই আল্লাহর একমাত্র মনোনীত জীবনব্যবস্থা। ইসলামী আদর্শের আলোকে যুবসমাজের নেতৃত্বে একটি কল্যাণমুখী সমাজ গড়ার লক্ষ্যে ইসলামী খেলাফত মজলিসের সাথে একমত হয়ে এ সংগঠনে যোগদান করছি।',
+      buildPdf: (format) => KhelafatMemberFormPdfService.generatePdfBytes(
+        regNo: _serialNumber,
+        name: _nameController.text,
+        fatherName: _fatherNameController.text,
+        educationalQualification: _educationalQualificationController.text,
+        age: _ageController.text,
+        profession: _professionController.text,
+        presentAddress: _presentAddressController.text,
+        mobile: _mobileController.text,
+        permanentAddress: _permanentAddressController.text,
+        dateStr: dateStr,
       ),
     );
   }
@@ -112,132 +110,318 @@ class _MemberFormScreenContentState extends State<_MemberFormScreenContent> {
   @override
   Widget build(BuildContext context) {
     final isDark = themeManager.isDarkMode;
-    final bgColor = isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF1F5F9);
-    final cardBg = isDark ? const Color(0xFF162032) : Colors.white;
-    final textLight = isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
+    final appBarBg = isDark ? const Color(0xFF0F172A) : Colors.white;
+    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final textLight = isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A);
+    const accentPink = Color(0xFFEC4899);
+    const accentEmerald = Color(0xFF10B981);
+    const accentBlue = Color(0xFF0284C7);
 
     return Scaffold(
-      backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: cardBg,
-        elevation: 1,
-        title: const Text('খেলাফত মজলিস — সদস্য ফরম', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        backgroundColor: appBarBg,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new, color: textLight, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'প্রাথমিক সদস্য ফরম',
+          style: TextStyle(color: textLight, fontSize: 16, fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.picture_as_pdf_rounded, color: Color(0xFF0284C7)),
-            tooltip: 'PDF প্রিভিউ ও ডাউনলোড',
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: accentBlue.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.picture_as_pdf_rounded, color: accentBlue, size: 20),
+            ),
             onPressed: _openPdfViewer,
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: AmbientBackgroundWidget(
-        primaryAccent: const Color(0xFFEC4899),
+        primaryAccent: accentPink,
         child: BlocConsumer<MemberFormBloc, MemberFormState>(
           listener: (context, state) {
             if (state is MemberFormSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('ফরম সফলভাবে জমা দেওয়া হয়েছে!')),
+                const SnackBar(
+                  content: Text('সদস্য ফরম সফলভাবে জমা দেওয়া হয়েছে!'),
+                  backgroundColor: Color(0xFF10B981),
+                ),
               );
               Navigator.pop(context);
             } else if (state is MemberFormError) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error: ${state.message}')),
+                SnackBar(content: Text('ত্রুটি: ${state.message}')),
               );
             }
           },
           builder: (context, state) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Top Action Bar with Save/Edit at the TOP!
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SizedBox(
-                            height: 46,
-                            child: ElevatedButton.icon(
-                              onPressed: state is MemberFormLoading ? null : _submitForm,
-                              icon: state is MemberFormLoading
-                                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                                  : const Icon(Icons.save_rounded, size: 18),
-                              label: Text(
-                                state is MemberFormLoading ? 'জমা হচ্ছে...' : 'সংরক্ষণ (Save)',
-                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            final isSubmitting = state is MemberFormLoading;
+
+            return Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  // Top Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF059669), Color(0xFF10B981)],
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: accentEmerald.withValues(alpha: 0.25),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
                               ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF059669),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(14),
+                              onTap: isSubmitting ? null : _submitForm,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  isSubmitting
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                        )
+                                      : const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    'ফরম জমা দিন',
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: SizedBox(
-                            height: 46,
-                            child: ElevatedButton.icon(
-                              onPressed: _openPdfViewer,
-                              icon: const Icon(Icons.picture_as_pdf_rounded, size: 18),
-                              label: const Text('PDF ডাউনলোড', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF0284C7),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF0284C7), Color(0xFF38BDF8)],
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: accentBlue.withValues(alpha: 0.25),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(14),
+                              onTap: _openPdfViewer,
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.file_download_outlined, color: Colors.white, size: 20),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'PDF প্রিভিউ',
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                                  ),
+                                ],
                               ),
                             ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Reg Box Banner
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: accentPink.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: accentPink.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.badge_rounded, color: accentPink, size: 20),
+                            const SizedBox(width: 8),
+                            Text(
+                              'প্রাথমিক সদস্য ফরম',
+                              style: TextStyle(color: textLight, fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: accentPink,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'নিবন্ধন নং: $_serialNumber',
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                  ),
+                  const SizedBox(height: 16),
 
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [Color(0xFF059669), Color(0xFF0284C7)]),
-                        borderRadius: BorderRadius.circular(12),
+                  // Personal Information Section Card
+                  _buildSectionCard(
+                    title: 'ব্যক্তিগত তথ্যাবলী',
+                    icon: Icons.person_rounded,
+                    color: accentPink,
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    children: [
+                      _buildInputField(
+                        controller: _nameController,
+                        label: 'নাম',
+                        hint: 'আপনার পূর্ণ নাম লিখুন',
+                        icon: Icons.person_outline_rounded,
+                        isDark: isDark,
+                        accentColor: accentPink,
+                        validator: (v) => (v == null || v.trim().isEmpty) ? 'নাম প্রদান করুন' : null,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('প্রাথমিক সদস্য তথ্য', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                          Text('ফরম নং: $_serialNumber', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                        ],
+                      const SizedBox(height: 12),
+                      _buildInputField(
+                        controller: _fatherNameController,
+                        label: 'পিতার নাম',
+                        hint: 'পিতার নাম লিখুন',
+                        icon: Icons.family_restroom_rounded,
+                        isDark: isDark,
+                        accentColor: accentPink,
                       ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    _buildCardWrapper([
-                      _buildSectionTitle('ব্যক্তিগত তথ্য'),
-                      const SizedBox(height: 14),
-                      _buildTextField(_nameController, 'নাম', 'আপনার পূর্ণ নাম লিখুন', Icons.person, textLight: textLight),
-                      _buildTextField(_fatherNameController, 'পিতার নাম', 'পিতার নাম লিখুন', Icons.person_outline, textLight: textLight),
-                      _buildTextField(_educationalQualificationController, 'শিক্ষাগত যোগ্যতা', 'যেমন: বি.এ, কামিল ইত্যাদি', Icons.school, textLight: textLight),
+                      const SizedBox(height: 12),
+                      _buildInputField(
+                        controller: _educationalQualificationController,
+                        label: 'শিক্ষাগত যোগ্যতা',
+                        hint: 'যেমন: কামিল / বিএ / মাস্টার্স...',
+                        icon: Icons.school_rounded,
+                        isDark: isDark,
+                        accentColor: accentPink,
+                      ),
+                      const SizedBox(height: 12),
                       Row(
                         children: [
-                          Expanded(child: _buildTextField(_ageController, 'বয়স', 'যেমন: ২৫', Icons.cake, isNumber: true, textLight: textLight)),
+                          Expanded(
+                            child: _buildInputField(
+                              controller: _ageController,
+                              label: 'বয়স',
+                              hint: '২৫',
+                              icon: Icons.cake_rounded,
+                              suffix: 'বছর',
+                              isDark: isDark,
+                              accentColor: accentPink,
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
                           const SizedBox(width: 12),
-                          Expanded(child: _buildTextField(_professionController, 'পেশা', 'যেমন: ব্যবসা/চাকরি', Icons.work, textLight: textLight)),
+                          Expanded(
+                            child: _buildInputField(
+                              controller: _professionController,
+                              label: 'পেশা',
+                              hint: 'যেমন: ব্যবসা / শিক্ষকতা',
+                              icon: Icons.work_rounded,
+                              isDark: isDark,
+                              accentColor: accentPink,
+                            ),
+                          ),
                         ],
                       ),
-                    ], cardBg),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 12),
+                      _buildInputField(
+                        controller: _mobileController,
+                        label: 'মোবাইল নম্বর',
+                        hint: '০১৭................',
+                        icon: Icons.phone_android_rounded,
+                        isDark: isDark,
+                        accentColor: accentPink,
+                        keyboardType: TextInputType.phone,
+                        validator: (v) => (v == null || v.trim().isEmpty) ? 'মোবাইল নম্বর প্রদান করুন' : null,
+                      ),
+                      const SizedBox(height: 12),
+                      _buildInputField(
+                        controller: _presentAddressController,
+                        label: 'বর্তমান ঠিকানা',
+                        hint: 'বাসা/রোড, থানা, জেলা...',
+                        icon: Icons.home_rounded,
+                        isDark: isDark,
+                        accentColor: accentPink,
+                      ),
+                      const SizedBox(height: 12),
+                      _buildInputField(
+                        controller: _permanentAddressController,
+                        label: 'স্থায়ী ঠিকানা',
+                        hint: 'গ্রাম, ডাকঘর, থানা, জেলা...',
+                        icon: Icons.location_on_rounded,
+                        isDark: isDark,
+                        accentColor: accentPink,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
 
-                    _buildCardWrapper([
-                      _buildSectionTitle('যোগাযোগের ঠিকানা'),
-                      const SizedBox(height: 14),
-                      _buildTextField(_presentAddressController, 'বর্তমান ঠিকানা', 'গ্রাম/মহল্লা, ডাকঘর, থানা, জেলা', Icons.location_on, textLight: textLight),
-                      _buildTextField(_mobileController, 'মোবাইল নম্বর', '০১৭XXXXXXXX', Icons.phone, isNumber: true, textLight: textLight),
-                      _buildTextField(_permanentAddressController, 'স্থায়ী ঠিকানা', 'গ্রাম/মহল্লা, ডাকঘর, থানা, জেলা', Icons.home, textLight: textLight),
-                    ], cardBg),
-                    const SizedBox(height: 24),
-                  ],
-                ),
+                  // Pledge & Declaration Card
+                  _buildSectionCard(
+                    title: 'শপথ ও অঙ্গীকারনামা',
+                    icon: Icons.verified_user_rounded,
+                    color: accentEmerald,
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: borderColor),
+                        ),
+                        child: Text(
+                          'বিশ্বাস করি যে কুরআন, সুন্নাহ ও খেলাফতে রাশেদার অনুসরণের মধ্যেই ইহকালীন কল্যাণ ও পরকালীন মুক্তি নিহিত। এ দেশে খেলাফত প্রতিষ্ঠার লক্ষ্যে খেলাফত মজলিসের গৃহীত কর্মসূচীর সাথে একমত হয়ে একমাত্র আল্লাহর সন্তুষ্টির জন্যই এ সংগঠনে যোগদান করছি। আমি এর যাবতীয় কর্মকাণ্ডে সম্ভাব্য সহযোগিতা করতে সচেষ্ট থাকবো, ইনশাআল্লাহ।',
+                          style: TextStyle(
+                            color: textLight,
+                            fontSize: 13,
+                            height: 1.5,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.justify,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 30),
+                ],
               ),
             );
           },
@@ -246,77 +430,89 @@ class _MemberFormScreenContentState extends State<_MemberFormScreenContent> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
+  Widget _buildSectionCard({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required Color cardBg,
+    required Color borderColor,
+    required Color textLight,
+    required List<Widget> children,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(9)),
+              child: Icon(icon, color: color, size: 18),
+            ),
+            const SizedBox(width: 8),
+            Text(title, style: TextStyle(color: textLight, fontWeight: FontWeight.bold, fontSize: 14.5)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: borderColor),
+          ),
+          child: Column(children: children),
+        ),
+      ],
     );
   }
 
-  Widget _buildCardWrapper(List<Widget> children, Color cardBg) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 2)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: children,
-      ),
-    );
-  }
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    String? suffix,
+    required bool isDark,
+    required Color accentColor,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    final fieldBg = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
+    final fieldBorder = isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1);
+    final textColor = isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A);
 
-  Widget _buildTextField(TextEditingController controller, String label, String hint, IconData icon, {bool isNumber = false, required Color textLight}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 13.5,
-              fontWeight: FontWeight.bold,
-              color: textLight,
-            ),
-          ),
-          const SizedBox(height: 6),
-          TextFormField(
-            controller: controller,
-            keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-            style: TextStyle(fontSize: 14, color: textLight),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return '$label দেওয়া আবশ্যক';
-              }
-              return null;
-            },
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(color: textLight.withValues(alpha: 0.4), fontSize: 13),
-              prefixIcon: Icon(icon, color: const Color(0xFF059669), size: 20),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Color(0xFF059669), width: 1.8),
-              ),
-              isDense: true,
-              filled: true,
-              fillColor: Colors.white.withValues(alpha: 0.06),
-            ),
-          ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (label.isNotEmpty) ...[
+          Text(label, style: TextStyle(color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF334155), fontWeight: FontWeight.w600, fontSize: 13)),
+          const SizedBox(height: 5),
         ],
-      ),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          validator: validator,
+          onChanged: (_) => setState(() {}),
+          style: TextStyle(color: textColor, fontWeight: FontWeight.w600, fontSize: 13.5),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8), fontSize: 12.5),
+            prefixIcon: Icon(icon, color: accentColor, size: 17),
+            suffixIcon: suffix != null
+                ? Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    child: Text(suffix, style: TextStyle(color: accentColor, fontWeight: FontWeight.bold, fontSize: 12.5)),
+                  )
+                : null,
+            filled: true,
+            fillColor: fieldBg,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: fieldBorder)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: accentColor, width: 1.8)),
+          ),
+        ),
+      ],
     );
   }
 }
