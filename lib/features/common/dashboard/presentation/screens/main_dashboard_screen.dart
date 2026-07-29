@@ -13,6 +13,8 @@ import 'package:mojlish_app/features/youth_majlis/overview/presentation/pages/ov
 import 'package:mojlish_app/features/student_majlis/period_plan/presentation/screens/student_period_plan_book_screen.dart' as student_plan;
 import 'package:mojlish_app/features/common/profile/presentation/screens/profile_screen.dart';
 
+import 'package:mojlish_app/core/constants/majlis_assets.dart';
+
 class MainDashboardScreen extends StatefulWidget {
   const MainDashboardScreen({super.key});
 
@@ -76,9 +78,30 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
             centerTitle: true,
             leading: null,
             automaticallyImplyLeading: false,
-            title: const Text(
-              'ড্যাশবোর্ড',
-              style: TextStyle(color: Color(0xFF059669), fontWeight: FontWeight.bold, fontSize: 20),
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  MajlisAssets.defaultLogo,
+                  height: 28,
+                  width: 28,
+                  errorBuilder: (_, __, ___) => Image.asset(
+                    MajlisAssets.khelafatLogo,
+                    height: 28,
+                    width: 28,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'মজলিস',
+                  style: TextStyle(
+                    color: Color(0xFF059669),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 21,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
             ),
             actions: [
               IconButton(
