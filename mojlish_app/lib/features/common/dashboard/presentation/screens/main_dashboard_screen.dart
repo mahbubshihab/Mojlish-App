@@ -25,6 +25,7 @@ class MainDashboardScreen extends StatefulWidget {
 class _MainDashboardScreenState extends State<MainDashboardScreen> {
   String _selectedMajlis = 'খেলাফত মজলিস';
   String _userName = 'মিজানুর রহমান';
+  String _userPhotoUrl = '';
   bool _isLoading = true;
 
   @override
@@ -36,10 +37,12 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
   Future<void> _loadUserData() async {
     final majlis = await UserStorageService.getActiveMajlis();
     final userName = await UserStorageService.getUserName();
+    final photoUrl = await UserStorageService.getUserPhotoUrl();
     if (mounted) {
       setState(() {
         _selectedMajlis = (majlis != null && majlis.isNotEmpty) ? majlis : 'খেলাফত মজলিস';
         _userName = userName.isNotEmpty ? userName : 'সম্মানিত সদস্য';
+        _userPhotoUrl = photoUrl;
         _isLoading = false;
       });
     }
@@ -96,16 +99,32 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
                 },
               ),
-              IconButton(
-                icon: const Icon(Icons.account_circle_rounded, color: Color(0xFF059669), size: 28),
-                tooltip: 'প্রোফাইল',
-                onPressed: () async {
+              GestureDetector(
+                onTap: () async {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const ProfileScreen()),
                   );
                   _loadUserData();
                 },
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 16.0, left: 8.0),
+                  child: CircleAvatar(
+                    radius: 16,
+                    backgroundColor: const Color(0xFF059669).withValues(alpha: 0.15),
+                    backgroundImage: _userPhotoUrl.isNotEmpty ? NetworkImage(_userPhotoUrl) : null,
+                    child: _userPhotoUrl.isEmpty
+                        ? Text(
+                            _userName.isNotEmpty ? _userName[0] : 'ম',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF059669),
+                            ),
+                          )
+                        : null,
+                  ),
+                ),
               ),
             ],
           ),
