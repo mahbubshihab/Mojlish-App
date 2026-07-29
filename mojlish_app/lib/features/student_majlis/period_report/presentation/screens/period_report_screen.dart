@@ -1,9 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entities/period_report.dart';
 import '../bloc/period_report_bloc.dart';
 import '../bloc/period_report_event.dart';
 import '../bloc/period_report_state.dart';
+import '../../data/datasources/period_report_remote_datasource.dart';
+import '../../data/repositories/period_report_repository_impl.dart';
+
+class PeriodReportScreen extends StatelessWidget {
+  const PeriodReportScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<PeriodReportBloc>(
+      create: (_) => PeriodReportBloc(
+        repository: PeriodReportRepositoryImpl(
+          remoteDataSource: PeriodReportRemoteDataSourceImpl(),
+        ),
+      ),
+      child: const PeriodReportPage(),
+    );
+  }
+}
 
 class PeriodReportPage extends StatefulWidget {
   const PeriodReportPage({super.key});
@@ -23,18 +40,17 @@ class _PeriodReportPageState extends State<PeriodReportPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Period Report'),
+        title: const Text('মেয়াদী/সেশনাল রিপোর্ট'),
       ),
       body: BlocConsumer<PeriodReportBloc, PeriodReportState>(
         listener: (context, state) {
           if (state is PeriodReportSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Report submitted successfully!')),
+              const SnackBar(content: Text('রিপোর্ট সফলভাবে জমা হয়েছে')),
             );
-            Navigator.of(context).pop();
           } else if (state is PeriodReportFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Failed: ${state.message}')),
+              SnackBar(content: Text('Error: ${state.message}')),
             );
           }
         },
@@ -47,42 +63,28 @@ class _PeriodReportPageState extends State<PeriodReportPage> {
             padding: const EdgeInsets.all(16.0),
             child: Form(
               key: _formKey,
-              child: ListView(
+              child: Column(
                 children: [
                   TextFormField(
-                    decoration: const InputDecoration(labelText: 'Branch Name'),
+                    decoration: const InputDecoration(labelText: 'শাখা'),
                     onSaved: (value) => branch = value ?? '',
                   ),
                   TextFormField(
-                    decoration: const InputDecoration(labelText: 'Month'),
+                    decoration: const InputDecoration(labelText: 'মাস/মেয়াদ'),
                     onSaved: (value) => month = value ?? '',
                   ),
                   TextFormField(
-                    decoration: const InputDecoration(labelText: 'Session'),
+                    decoration: const InputDecoration(labelText: 'সেশন'),
                     onSaved: (value) => session = value ?? '',
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
-                      _formKey.currentState?.save();
-                      
-                      final report = PeriodReport(
-                        id: DateTime.now().toString(),
-                        branch: branch,
-                        month: month,
-                        session: session,
-                        manpower: const Manpower(),
-                        dawah: const Dawah(),
-                        organization: const Organization(),
-                        meetings: const Meetings(),
-                        training: const Training(),
-                        library: const Library(),
-                        baytulmal: const Baytulmal(),
-                      );
-                      
-                      context.read<PeriodReportBloc>().add(SubmitPeriodReportEvent(report: report));
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
+                      }
                     },
-                    child: const Text('Submit Report'),
+                    child: const Text('সংরক্ষণ করুন'),
                   ),
                 ],
               ),

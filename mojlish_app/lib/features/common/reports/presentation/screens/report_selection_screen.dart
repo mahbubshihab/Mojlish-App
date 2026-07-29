@@ -4,16 +4,30 @@ import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
 import 'package:mojlish_app/features/common/reports/presentation/screens/personal_report_table_screen.dart';
 
+// Khelafat Majlis Features
 import 'package:mojlish_app/features/khelafat_majlis/branch_report/presentation/screens/khelafat_branch_report_book_screen.dart';
 import 'package:mojlish_app/features/khelafat_majlis/branch_plan/presentation/screens/khelafat_branch_plan_book_screen.dart';
 import 'package:mojlish_app/features/khelafat_majlis/zonal_report/presentation/screens/zonal_report_book_screen.dart';
 import 'package:mojlish_app/features/khelafat_majlis/member_form/presentation/screens/member_form_screen.dart';
 import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentation/pages/baytulmal_report_page.dart';
 
+// Youth Majlis Features
 import 'package:mojlish_app/features/youth_majlis/member_form/presentation/screens/member_form_screen.dart' as youth_form;
-import 'package:mojlish_app/features/student_majlis/member_form/presentation/screens/member_form_screen.dart' as chatro_form;
+import 'package:mojlish_app/features/youth_majlis/call_manifesto/presentation/screens/call_manifesto_screen.dart';
 
-/// কেন্দ্রীয় রিপোর্ট ও ফরম হাব (Report & Form Hub Selection)
+// Student Majlis Features
+import 'package:mojlish_app/features/student_majlis/member_form/presentation/screens/member_form_screen.dart' as chatro_form;
+import 'package:mojlish_app/features/student_majlis/period_report/presentation/screens/period_report_screen.dart';
+import 'package:mojlish_app/features/student_majlis/period_plan/presentation/screens/period_plan_screen.dart';
+import 'package:mojlish_app/features/student_majlis/general_plan/presentation/screens/general_plan_screen.dart';
+
+// Labor Majlis Features
+import 'package:mojlish_app/features/labor_majlis/member_form/presentation/screens/member_form_screen.dart';
+
+// Women Majlis Features
+import 'package:mojlish_app/features/women_majlis/resources/ahobban_mohila/presentation/screens/ahobban_screen.dart';
+
+/// কেন্দ্রীয় রিপোর্ট ও ফরম হাব (Majlis-Specific Report & Form Hub Selection)
 class ReportSelectionScreen extends StatefulWidget {
   final String? majlisName;
 
@@ -31,18 +45,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
     'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _loadActiveMajlisAndStats();
-  }
-
-  Future<void> _loadActiveMajlisAndStats() async {
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
   String _bn(int n) {
     const digits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
     return n.toString().split('').map((c) => digits[int.parse(c)]).join();
@@ -58,18 +60,37 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
     final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
     const accentGreen = Color(0xFF10B981);
 
-    final activeMajlisType = widget.majlisName ?? 'khelafat';
-    final isKhelafat = activeMajlisType == 'khelafat';
-    final isYouth = activeMajlisType == 'youth' || activeMajlisType == 'jubo';
-    final isChatro = activeMajlisType == 'chatro';
+    final rawMajlis = (widget.majlisName ?? 'khelafat').toLowerCase();
+    final isKhelafat = rawMajlis == 'khelafat';
+    final isYouth = rawMajlis == 'youth' || rawMajlis == 'jubo';
+    final isChatro = rawMajlis == 'chatro' || rawMajlis == 'student';
+    final isLabor = rawMajlis == 'sromik' || rawMajlis == 'labor';
+    final isWomen = rawMajlis == 'mohila' || rawMajlis == 'women';
 
     final majlisDisplayName = isKhelafat
-        ? 'খেলাফত মজলিস'
+        ? 'বাংলাদেশ খেলাফত মজলিস'
         : isYouth
-            ? 'ইসলামী যুব মজলিস'
+            ? 'বাংলাদেশ ইসলামী যুব মজলিস'
             : isChatro
-                ? 'ইসলামী ছাত্র মজলিস'
-                : 'ইসলামী খেলাফত মজলিস';
+                ? 'বাংলাদেশ ইসলামী ছাত্র মজলিস'
+                : isLabor
+                    ? 'বাংলাদেশ ইসলামী শ্রমিক মজলিস'
+                    : isWomen
+                        ? 'ইসলামী মহিলা মজলিস'
+                        : 'ইসলামী খেলাফত মজলিস';
+
+    MajlisType parsedMajlisType;
+    if (isYouth) {
+      parsedMajlisType = MajlisType.jubo;
+    } else if (isChatro) {
+      parsedMajlisType = MajlisType.chatro;
+    } else if (isLabor) {
+      parsedMajlisType = MajlisType.sromik;
+    } else if (isWomen) {
+      parsedMajlisType = MajlisType.mohila;
+    } else {
+      parsedMajlisType = MajlisType.khelafat;
+    }
 
     return AnimatedBuilder(
       animation: themeManager,
@@ -88,7 +109,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
               children: [
                 Text(
                   '$majlisDisplayName — রিপোর্ট ও ফরম হাব',
-                  style: const TextStyle(color: accentGreen, fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: accentGreen, fontSize: 15, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   '${_monthNames[_now.month - 1]} ${_bn(_now.year)}',
@@ -111,9 +132,9 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               children: [
-                // 1. কোনটা কোন মজলিস তার উপযোগী ব্যক্তিগত তৎপরতার রিপোর্ট
+                // 1. সকল মজলিসের নিজস্ব ব্যক্তিগত তৎপরতার রিপোর্ট
                 _buildMinimalReportCard(
-                  title: 'ব্যক্তিগত তৎপরতার রিপোর্ট',
+                  title: 'ব্যক্তিগত তৎপরতার রিপোর্ট ($majlisDisplayName)',
                   icon: Icons.person_outline_rounded,
                   color: const Color(0xFF10B981),
                   cardBg: cardBg,
@@ -121,92 +142,67 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                   textLight: textLight,
                   textMuted: textMuted,
                   onTap: () async {
-                    MajlisType parsedType;
-                    if (activeMajlisType == 'youth' || activeMajlisType == 'jubo') {
-                      parsedType = MajlisType.jubo;
-                    } else if (activeMajlisType == 'chatro') {
-                      parsedType = MajlisType.chatro;
-                    } else {
-                      parsedType = MajlisType.khelafat;
-                    }
-
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => PersonalReportTableScreen(
                           year: _now.year,
                           month: _now.month,
-                          majlisType: parsedType,
+                          majlisType: parsedMajlisType,
                         ),
                       ),
                     );
-                    _loadActiveMajlisAndStats();
                   },
                 ),
                 const SizedBox(height: 12),
 
-                // 2. সাংগঠনিক শাখা রিপোর্ট
-                _buildMinimalReportCard(
-                  title: 'শাখার সাংগঠনিক রিপোর্ট',
-                  icon: Icons.corporate_fare_rounded,
-                  color: const Color(0xFF2563EB),
-                  cardBg: cardBg,
-                  borderColor: borderColor,
-                  textLight: textLight,
-                  textMuted: textMuted,
-                  onTap: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const KhelafatBranchReportBookScreen(),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-
-                // 3. শাখার বার্ষিক/মাসিক পরিকল্পনা ফরম
-                _buildMinimalReportCard(
-                  title: 'শাখার বার্ষিক/মাসিক পরিকল্পনা',
-                  icon: Icons.assignment_turned_in_rounded,
-                  color: const Color(0xFF8B5CF6),
-                  cardBg: cardBg,
-                  borderColor: borderColor,
-                  textLight: textLight,
-                  textMuted: textMuted,
-                  onTap: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const KhelafatBranchPlanBookScreen(),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-
-                // 4. বায়তুলমাল ও হিসাব
-                _buildMinimalReportCard(
-                  title: 'বায়তুলমাল ও আর্থিক হিসাব',
-                  icon: Icons.account_balance_wallet_rounded,
-                  color: const Color(0xFFD97706),
-                  cardBg: cardBg,
-                  borderColor: borderColor,
-                  textLight: textLight,
-                  textMuted: textMuted,
-                  onTap: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const BaytulmalReportPage(),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-
-                // 5. জোনাল রিপোর্ট ফরম (Khelafat Majlis special)
+                // ==================== KHELAFAT MAJLIS ONLY ====================
                 if (isKhelafat) ...[
+                  _buildMinimalReportCard(
+                    title: 'শাখার সাংগঠনিক রিপোর্ট',
+                    icon: Icons.corporate_fare_rounded,
+                    color: const Color(0xFF2563EB),
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    textMuted: textMuted,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const KhelafatBranchReportBookScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  _buildMinimalReportCard(
+                    title: 'শাখার বার্ষিক/মাসিক পরিকল্পনা',
+                    icon: Icons.assignment_turned_in_rounded,
+                    color: const Color(0xFF8B5CF6),
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    textMuted: textMuted,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const KhelafatBranchPlanBookScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  _buildMinimalReportCard(
+                    title: 'বায়তুলমাল ও আর্থিক হিসাব',
+                    icon: Icons.account_balance_wallet_rounded,
+                    color: const Color(0xFFD97706),
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    textMuted: textMuted,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const BaytulmalReportPage()),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
                   _buildMinimalReportCard(
                     title: 'জোনাল রিপোর্ট ফরম',
                     icon: Icons.map_rounded,
@@ -215,43 +211,176 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                     borderColor: borderColor,
                     textLight: textLight,
                     textMuted: textMuted,
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const ZonalReportBookScreen(),
-                        ),
-                      );
-                    },
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ZonalReportBookScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  _buildMinimalReportCard(
+                    title: 'প্রাথমিক সদস্য ফরম (আবেদন)',
+                    icon: Icons.badge_rounded,
+                    color: const Color(0xFFEC4899),
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    textMuted: textMuted,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const MemberFormScreen()),
+                    ),
                   ),
                   const SizedBox(height: 12),
                 ],
 
-                // 6. প্রাথমিক সদস্য আবেদন ফরম
-                _buildMinimalReportCard(
-                  title: 'প্রাথমিক সদস্য ফরম (আবেদন)',
-                  icon: Icons.badge_rounded,
-                  color: const Color(0xFFEC4899),
-                  cardBg: cardBg,
-                  borderColor: borderColor,
-                  textLight: textLight,
-                  textMuted: textMuted,
-                  onTap: () async {
-                    Widget destination;
-                    if (isYouth) {
-                      destination = const youth_form.YouthMemberFormScreen();
-                    } else if (isChatro) {
-                      destination = const chatro_form.ChatroMemberFormScreen();
-                    } else {
-                      destination = const MemberFormScreen();
-                    }
-
-                    await Navigator.push(
+                // ==================== YOUTH MAJLIS (JUBO) ONLY ====================
+                if (isYouth) ...[
+                  _buildMinimalReportCard(
+                    title: 'দাওয়াতী ইশতেহার ও ম্যানিফেস্টো',
+                    icon: Icons.auto_stories_rounded,
+                    color: const Color(0xFF0284C7),
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    textMuted: textMuted,
+                    onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => destination),
-                    );
-                  },
-                ),
+                      MaterialPageRoute(builder: (_) => const YouthCallManifestoScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  _buildMinimalReportCard(
+                    title: 'যুব মজলিস — প্রাথমিক সদস্য আবেদন ফরম',
+                    icon: Icons.badge_rounded,
+                    color: const Color(0xFFEC4899),
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    textMuted: textMuted,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const youth_form.YouthMemberFormScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+
+                // ==================== STUDENT MAJLIS (CHATRO) ONLY ====================
+                if (isChatro) ...[
+                  _buildMinimalReportCard(
+                    title: 'মেয়াদী/সেশনাল রিপোর্ট ফরম',
+                    icon: Icons.date_range_rounded,
+                    color: const Color(0xFF2563EB),
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    textMuted: textMuted,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const PeriodReportScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  _buildMinimalReportCard(
+                    title: 'মেয়াদী/সেশনাল পরিকল্পনা ফরম',
+                    icon: Icons.assignment_rounded,
+                    color: const Color(0xFF8B5CF6),
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    textMuted: textMuted,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const PeriodPlanScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  _buildMinimalReportCard(
+                    title: 'সাধারণ পরিকল্পনা ফরম',
+                    icon: Icons.event_note_rounded,
+                    color: const Color(0xFF06B6D4),
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    textMuted: textMuted,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const GeneralPlanScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  _buildMinimalReportCard(
+                    title: 'ছাত্র মজলিস — বায়তুলমাল রিপোর্ট',
+                    icon: Icons.account_balance_wallet_rounded,
+                    color: const Color(0xFFD97706),
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    textMuted: textMuted,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const BaytulmalReportPage()),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  _buildMinimalReportCard(
+                    title: 'ছাত্র মজলিস — প্রাথমিক সদস্য আবেদন ফরম',
+                    icon: Icons.badge_rounded,
+                    color: const Color(0xFFEC4899),
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    textMuted: textMuted,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const chatro_form.ChatroMemberFormScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+
+                // ==================== LABOR MAJLIS (SROMIK) ONLY ====================
+                if (isLabor) ...[
+                  _buildMinimalReportCard(
+                    title: 'শ্রমিক মজলিস — প্রাথমিক সদস্য আবেদন ফরম',
+                    icon: Icons.badge_rounded,
+                    color: const Color(0xFFEC4899),
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    textMuted: textMuted,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LaborMemberFormScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+
+                // ==================== WOMEN MAJLIS (MOHILA) ONLY ====================
+                if (isWomen) ...[
+                  _buildMinimalReportCard(
+                    title: 'মহিলা মজলিস — আমাদের আহ্বান ও ম্যানিফেস্টো',
+                    icon: Icons.auto_stories_rounded,
+                    color: const Color(0xFFE11D48),
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    textMuted: textMuted,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AhobbanMohilaScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+
                 const SizedBox(height: 24),
               ],
             ),
