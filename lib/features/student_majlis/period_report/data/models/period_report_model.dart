@@ -15,6 +15,27 @@ class PeriodReportModel extends PeriodReport {
     required super.baytulmal,
   });
 
+  factory PeriodReportModel.empty({
+    String periodType = '',
+    int year = 2026,
+    String periodName = '',
+  }) {
+    final keyId = '${periodType}_${year}_${periodName.replaceAll(' ', '_')}';
+    return PeriodReportModel(
+      id: keyId,
+      branch: '',
+      month: periodName,
+      session: '$year',
+      manpower: const ManpowerModel(),
+      dawah: const DawahModel(),
+      organization: const OrganizationModel(),
+      meetings: const MeetingsModel(),
+      training: const TrainingModel(),
+      library: const LibraryModel(),
+      baytulmal: const BaytulmalModel(),
+    );
+  }
+
   factory PeriodReportModel.fromJson(Map<String, dynamic> json) {
     return PeriodReportModel(
       id: json['id'] ?? '',

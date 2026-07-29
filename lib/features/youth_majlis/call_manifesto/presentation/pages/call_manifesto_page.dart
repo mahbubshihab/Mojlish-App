@@ -5,7 +5,7 @@ import '../bloc/call_manifesto_event.dart';
 import '../bloc/call_manifesto_state.dart';
 
 class CallManifestoPage extends StatefulWidget {
-  const CallManifestoPage({Key? key}) : super(key: key);
+  const CallManifestoPage({super.key});
 
   @override
   State<CallManifestoPage> createState() => _CallManifestoPageState();

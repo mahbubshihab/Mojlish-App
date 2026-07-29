@@ -10,7 +10,7 @@ import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 
 class MemberFormScreen extends StatefulWidget {
-  const MemberFormScreen({Key? key}) : super(key: key);
+  const MemberFormScreen({super.key});
 
   @override
   State<MemberFormScreen> createState() => _MemberFormScreenState();
@@ -166,7 +166,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
                                 const Text('প্রাথমিক সদস্য ফরম', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(20)),
+                                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
                                   child: Text('ফরম নং: $_serialNumber', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
                                 ),
                               ],
@@ -377,9 +377,9 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 2)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 2)),
         ],
       ),
       child: Column(
@@ -396,7 +396,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey.shade400, width: 1.5),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 12, offset: const Offset(0, 4)),
         ],
       ),
       padding: const EdgeInsets.all(16),

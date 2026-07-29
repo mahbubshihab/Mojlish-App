@@ -6,7 +6,7 @@ import '../bloc/member_form_event.dart';
 import '../bloc/member_form_state.dart';
 
 class MemberFormScreen extends StatefulWidget {
-  const MemberFormScreen({Key? key}) : super(key: key);
+  const MemberFormScreen({super.key});
 
   @override
   State<MemberFormScreen> createState() => _MemberFormScreenState();

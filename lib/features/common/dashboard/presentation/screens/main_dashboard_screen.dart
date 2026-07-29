@@ -1,33 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:mojlish_app/core/theme/theme_manager.dart';
-import '../../../reports/presentation/screens/report_selection_screen.dart';
-import '../../../notifications/presentation/screens/notifications_screen.dart';
-import 'about/about_screen.dart';
-import 'social_media/social_media_screen.dart';
-import 'resources/resources_screen.dart';
-import 'package:mojlish_app/features/common/syllabi/khelafot_syllabus/presentation/pages/khelafot_syllabus_page.dart';
-import 'package:mojlish_app/features/common/resources/ahobban_mohila/presentation/screens/ahobban_screen.dart';
-import 'package:mojlish_app/features/khelafat_majlis/executive_rules/presentation/pages/executive_rules_page.dart';
-import 'package:mojlish_app/features/khelafat_majlis/overview/presentation/pages/overview_page.dart' as khelafat_overview;
-
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/services/user_storage_service.dart';
 import '../../../reports/presentation/screens/report_selection_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
-import 'about/about_screen.dart';
 import 'social_media/social_media_screen.dart';
-import 'resources/resources_screen.dart';
-import 'package:mojlish_app/features/common/syllabi/khelafot_syllabus/presentation/pages/khelafot_syllabus_page.dart';
-import 'package:mojlish_app/features/common/resources/ahobban_mohila/presentation/screens/ahobban_screen.dart';
+import 'package:mojlish_app/features/khelafat_majlis/syllabi/khelafot_syllabus/presentation/pages/khelafot_syllabus_page.dart';
+import 'package:mojlish_app/features/women_majlis/call_manifesto/presentation/pages/call_manifesto_page.dart' as women_manifesto;
 import 'package:mojlish_app/features/khelafat_majlis/executive_rules/presentation/pages/executive_rules_page.dart';
 import 'package:mojlish_app/features/khelafat_majlis/overview/presentation/pages/overview_page.dart' as khelafat_overview;
 import 'package:mojlish_app/features/women_majlis/overview/presentation/pages/overview_page.dart' as women_overview;
 import 'package:mojlish_app/features/youth_majlis/overview/presentation/pages/overview_screen.dart' as youth_overview;
 import 'package:mojlish_app/features/student_majlis/general_plan/presentation/pages/general_plan_screen.dart' as student_plan;
-import 'package:mojlish_app/features/common/auth/presentation/screens/org_selection_screen.dart';
+import 'package:mojlish_app/features/common/profile/presentation/screens/profile_screen.dart';
 
 class MainDashboardScreen extends StatefulWidget {
   const MainDashboardScreen({super.key});
@@ -38,19 +22,25 @@ class MainDashboardScreen extends StatefulWidget {
 
 class _MainDashboardScreenState extends State<MainDashboardScreen> {
   String _selectedMajlis = 'খেলাফত মজলিস';
+  String _userName = 'মিজানুর রহমান';
+  String _userPhotoUrl = '';
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadSelectedMajlis();
+    _loadUserData();
   }
 
-  Future<void> _loadSelectedMajlis() async {
-    final majlis = await UserStorageService.getSelectedMajlis();
+  Future<void> _loadUserData() async {
+    final majlis = await UserStorageService.getActiveMajlis();
+    final userName = await UserStorageService.getUserName();
+    final photoUrl = await UserStorageService.getUserPhotoUrl();
     if (mounted) {
       setState(() {
-        _selectedMajlis = majlis;
+        _selectedMajlis = (majlis != null && majlis.isNotEmpty) ? majlis : 'খেলাফত মজলিস';
+        _userName = userName.isNotEmpty ? userName : 'সম্মানিত সদস্য';
+        _userPhotoUrl = photoUrl;
         _isLoading = false;
       });
     }
@@ -106,7 +96,34 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
                 },
-              )
+              ),
+              GestureDetector(
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                  );
+                  _loadUserData();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 16.0, left: 8.0),
+                  child: CircleAvatar(
+                    radius: 16,
+                    backgroundColor: const Color(0xFF059669).withValues(alpha: 0.15),
+                    backgroundImage: _userPhotoUrl.isNotEmpty ? NetworkImage(_userPhotoUrl) : null,
+                    child: _userPhotoUrl.isEmpty
+                        ? Text(
+                            _userName.isNotEmpty ? _userName[0] : 'ম',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF059669),
+                            ),
+                          )
+                        : null,
+                  ),
+                ),
+              ),
             ],
           ),
           body: _isLoading
@@ -117,105 +134,33 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Greeting & Active Majlis Badge
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'আসসালামু আলাইকুম,',
-                                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: textTitle),
-                              ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'মিজানুর রহমান',
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
-                              ),
-                            ],
-                          ),
-                          GestureDetector(
-                            onTap: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const OrgSelectionScreen()),
-                              );
-                              _loadSelectedMajlis();
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF059669).withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: const Color(0xFF059669)),
-                              ),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    _selectedMajlis,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF059669),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  const Icon(Icons.swap_horiz_rounded, size: 16, color: Color(0xFF059669)),
-                                ],
-                              ),
+                          Text(
+                            'আসসালামু আলাইকুম',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: textMuted,
                             ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _userName,
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                              color: textTitle,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
                       const SizedBox(height: 24),
                       
-                      // Sync Data Card
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: cardBg,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: borderColor),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
-                              blurRadius: 15,
-                              offset: const Offset(0, 5),
-                            )
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              'আপনার নির্বাচিত মজলিস: $_selectedMajlis\nরিপোর্ট সুরক্ষিত রাখতে ও সিঙ্ক করতে লগইন করুন',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 13, color: textMuted, height: 1.4),
-                            ),
-                            const SizedBox(height: 14),
-                            Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: borderColor),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: TextButton.icon(
-                                onPressed: () {},
-                                icon: Image.asset('assets/images/google_logo.png', height: 18),
-                                label: Text(
-                                  'ডাটা সিঙ্ক করতে গুগলে লগইন করুন',
-                                  style: TextStyle(color: textTitle, fontWeight: FontWeight.bold, fontSize: 13),
-                                ),
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 24),
 
                       // Menus Section title
                       Text(
@@ -328,11 +273,11 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           },
         ),
       );
-    } else {
+    } else if (selectedMajlis == 'মহিলা মজলিস') {
       cards.add(
         _buildMenuCard(
           context,
-          title: 'আহ্বান ও ম্যানিফেস্টো',
+          title: 'আমাদের আহ্বান',
           icon: Icons.campaign_rounded,
           iconColor: const Color(0xFFE11D48),
           iconBgColor: pPurpleBg,
@@ -340,7 +285,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           borderColor: borderColor,
           textTitle: textTitle,
           onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const AhobbanMohilaScreen()));
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const women_manifesto.CallManifestoPage()));
           },
         ),
       );
@@ -366,7 +311,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
       cards.add(
         _buildMenuCard(
           context,
-          title: 'কর্মপ্রণালী নির্দেশিকা',
+          title: 'কার্যপ্রণালী',
           icon: Icons.gavel_rounded,
           iconColor: const Color(0xFF9333EA),
           iconBgColor: pPurpleBg,

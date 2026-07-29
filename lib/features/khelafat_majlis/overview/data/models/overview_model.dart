@@ -3,26 +3,16 @@ import '../../domain/entities/overview_entity.dart';
 class OverviewModel extends OverviewEntity {
   const OverviewModel({
     required super.title,
-    required super.description,
+    required super.subtitle,
+    required super.bismillah,
+    required super.introductionParagraphs,
+    required super.organizationalGoal,
     required super.basicPrograms,
-    required super.membershipConditions,
+    required super.membershipInfo,
+    required super.structureInfo,
+    required super.baytulmalInfo,
+    required super.implementationPrinciples,
+    required super.politicalCommitments,
+    required super.callToAction,
   });
-
-  factory OverviewModel.fromJson(Map<String, dynamic> json) {
-    return OverviewModel(
-      title: json['title'] ?? '',
-      description: json['description'] ?? '',
-      basicPrograms: List<String>.from(json['basicPrograms'] ?? []),
-      membershipConditions: List<String>.from(json['membershipConditions'] ?? []),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'description': description,
-      'basicPrograms': basicPrograms,
-      'membershipConditions': membershipConditions,
-    };
-  }
 }

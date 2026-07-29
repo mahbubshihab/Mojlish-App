@@ -1,6 +1,5 @@
 import 'package:mojlish_app/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:mojlish_app/core/theme/app_theme.dart';
 
 class ResourcesScreen extends StatelessWidget {
   const ResourcesScreen({super.key});

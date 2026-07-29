@@ -1,0 +1,7 @@
+import 'package:dartz/dartz.dart';
+import '../../../../../../core/error/failures.dart';
+import '../entities/khelafot_syllabus_entity.dart';
+
+abstract class KhelafotSyllabusRepository {
+  Future<Either<Failure, List<KhelafotSyllabusEntity>>> getSyllabi();
+}

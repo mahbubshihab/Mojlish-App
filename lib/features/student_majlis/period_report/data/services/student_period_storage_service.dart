@@ -7,7 +7,7 @@ class StudentPeriodStorageService {
   static const String _storageKey = 'student_period_reports';
 
   /// নির্দিষ্ট সময়ের রিপোর্ট লোড করা
-  static Future<StudentPeriodReportModel> getReport({
+  static Future<PeriodReportModel> getReport({
     required String periodType,
     required int year,
     required String periodName,
@@ -17,7 +17,7 @@ class StudentPeriodStorageService {
     if (all.containsKey(keyId)) {
       return all[keyId]!;
     }
-    return StudentPeriodReportModel.empty(
+    return PeriodReportModel.empty(
       periodType: periodType,
       year: year,
       periodName: periodName,
@@ -25,7 +25,7 @@ class StudentPeriodStorageService {
   }
 
   /// রিপোর্ট সংরক্ষণ করা
-  static Future<void> saveReport(StudentPeriodReportModel report) async {
+  static Future<void> saveReport(PeriodReportModel report) async {
     final prefs = await SharedPreferences.getInstance();
     final all = await getAllReports();
     all[report.id] = report;
@@ -34,7 +34,7 @@ class StudentPeriodStorageService {
   }
 
   /// সকল সংরক্ষিত রিপোর্ট পাওয়া
-  static Future<Map<String, StudentPeriodReportModel>> getAllReports() async {
+  static Future<Map<String, PeriodReportModel>> getAllReports() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_storageKey);
     if (raw == null || raw.isEmpty) return {};
@@ -43,7 +43,7 @@ class StudentPeriodStorageService {
       return decoded.map(
         (key, value) => MapEntry(
           key,
-          StudentPeriodReportModel.fromJson(value as Map<String, dynamic>),
+          PeriodReportModel.fromJson(value as Map<String, dynamic>),
         ),
       );
     } catch (_) {

@@ -1,5 +1,6 @@
+import 'package:dartz/dartz.dart';
 import '../entities/overview_entity.dart';
 
 abstract class OverviewRepository {
-  Future<OverviewEntity> getOverview();
+  Future<Either<String, OverviewEntity>> getOverview();
 }
