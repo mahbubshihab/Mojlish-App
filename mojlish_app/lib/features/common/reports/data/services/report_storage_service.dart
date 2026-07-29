@@ -2,15 +2,19 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../models/baytulmal_report_entry.dart';
 import '../models/daily_personal_entry.dart';
 import '../models/monthly_comment.dart';
 import '../models/monthly_plan.dart';
+import '../models/zonal_report_entry.dart';
 
 /// লোকাল স্টোরেজ ও ফায়ারস্টোর সিঙ্ক সার্ভিস — SharedPreferences ও Cloud Firestore
 class ReportStorageService {
   static const String _personalReportKey = 'personal_reports';
   static const String _personalPlanKey = 'personal_monthly_plans';
   static const String _commentsKey = 'monthly_comments';
+  static const String _zonalReportKey = 'zonal_reports';
+  static const String _baytulmalReportKey = 'baytulmal_reports';
 
   // ===========================
   // ব্যক্তিগত রিপোর্ট — CRUD & Offline Firestore Sync
@@ -148,6 +152,64 @@ class ReportStorageService {
     return decoded.map(
       (k, v) => MapEntry(k, MonthlyComment.fromJson(v as Map<String, dynamic>)),
     );
+  }
+
+  // ===========================
+  // জোনাল রিপোর্ট — CRUD
+  // ===========================
+
+  static Future<void> saveZonalEntry(ZonalReportEntry entry) async {
+    final prefs = await SharedPreferences.getInstance();
+    final allData = await getAllZonalEntries();
+    final key = '${entry.year}-${entry.month}';
+    allData[key] = entry;
+    final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
+    await prefs.setString(_zonalReportKey, jsonEncode(encoded));
+  }
+
+  static Future<Map<String, ZonalReportEntry>> getAllZonalEntries() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_zonalReportKey);
+    if (raw == null) return {};
+    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    return decoded.map(
+      (k, v) => MapEntry(k, ZonalReportEntry.fromJson(v as Map<String, dynamic>)),
+    );
+  }
+
+  static Future<ZonalReportEntry?> getZonalEntry(int year, int month) async {
+    final all = await getAllZonalEntries();
+    final key = '$year-${month.toString().padLeft(2, '0')}';
+    return all[key];
+  }
+
+  // ===========================
+  // বায়তুলমাল রিপোর্ট — CRUD
+  // ===========================
+
+  static Future<void> saveBaytulmalReportEntry(BaytulmalReportEntry entry) async {
+    final prefs = await SharedPreferences.getInstance();
+    final allData = await getAllBaytulmalEntries();
+    final key = '${entry.year}-${entry.month}';
+    allData[key] = entry;
+    final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
+    await prefs.setString(_baytulmalReportKey, jsonEncode(encoded));
+  }
+
+  static Future<Map<String, BaytulmalReportEntry>> getAllBaytulmalEntries() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_baytulmalReportKey);
+    if (raw == null) return {};
+    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    return decoded.map(
+      (k, v) => MapEntry(k, BaytulmalReportEntry.fromJson(v as Map<String, dynamic>)),
+    );
+  }
+
+  static Future<BaytulmalReportEntry?> getBaytulmalReportEntry(String year, String month) async {
+    final all = await getAllBaytulmalEntries();
+    final key = '$year-$month';
+    return all[key];
   }
 
   // ===========================

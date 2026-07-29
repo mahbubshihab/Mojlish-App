@@ -1,14 +1,17 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
+import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 import 'package:mojlish_app/core/services/user_storage_service.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
-import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentation/screens/baytulmal_report_screen.dart';
+import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentation/pages/baytulmal_report_page.dart';
 import 'package:mojlish_app/features/khelafat_majlis/branch_report/presentation/screens/khelafat_branch_report_book_screen.dart';
+import 'package:mojlish_app/features/khelafat_majlis/branch_plan/presentation/screens/khelafat_branch_plan_book_screen.dart';
+import 'package:mojlish_app/features/khelafat_majlis/zonal_report/presentation/screens/zonal_report_book_screen.dart';
+import 'package:mojlish_app/features/khelafat_majlis/member_form/presentation/screens/member_form_screen.dart';
 import 'report_book_screen.dart';
 
-/// রিপোর্টসমূহ — মূল হাব স্ক্রিন, সক্রিয় মজলিসের সব রিপোর্টের কার্ড দেখায়
+/// রিপোর্ট হাব স্ক্রিন — খেলাফত মজলিসসহ সকল মজলিসের ডাইনামিক ও সম্পূর্ণ রিপোর্ট ও ফরম কেন্দ্র
 class ReportSelectionScreen extends StatefulWidget {
   final String? majlisName;
   final MajlisType? majlisType;
@@ -78,13 +81,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
   Widget build(BuildContext context) {
     final activeMajlisType = _resolveMajlisType();
     final majlisDisplayName = _getEffectiveMajlisName();
+    final isKhelafat = activeMajlisType == MajlisType.khelafat || majlisDisplayName.contains('খেলাফত');
 
     return AnimatedBuilder(
       animation: themeManager,
       builder: (context, _) {
         final isDark = themeManager.isDarkMode;
 
-        final bg = isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF8FAFC);
         final appBarBg = isDark ? const Color(0xFF162032) : Colors.white;
         final cardBg = isDark ? const Color(0xFF162032) : Colors.white;
         final borderColor = isDark ? const Color(0xFF2A3F58) : const Color(0xFFE2E8F0);
@@ -93,7 +96,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
         const accentGreen = Color(0xFF10B981);
 
         return Scaffold(
-          backgroundColor: bg,
           appBar: AppBar(
             backgroundColor: appBarBg,
             elevation: 0,
@@ -106,7 +108,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '$majlisDisplayName — রিপোর্ট হাব',
+                  '$majlisDisplayName — রিপোর্ট ও ফরম হাব',
                   style: const TextStyle(color: accentGreen, fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 Text(
@@ -125,92 +127,153 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
               ),
             ],
           ),
-          body: Stack(
-            children: [
-              Positioned.fill(child: CustomPaint(painter: _HubBgPainter(isDark: isDark))),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: ListView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      children: [
-                        // 1. কোনটা কোন মজলিস তার উপযোগী ব্যক্তিগত তৎপরতার রিপোর্ট
-                        _buildReportCard(
-                          title: 'ব্যক্তিগত তৎপরতার রিপোর্ট',
-                          subtitle: '$majlisDisplayName — ${_monthNames[_now.month - 1]} ${_bn(_now.year)} মাস',
-                          badge: '$_personalFilledDays/$_daysInMonth দিন আপডেট',
-                          badgeColor: _personalFilledDays >= _now.day ? const Color(0xFF059669) : const Color(0xFFF59E0B),
-                          icon: Icons.person_outline_rounded,
-                          color: const Color(0xFF10B981),
-                          cardBg: cardBg,
-                          borderColor: borderColor,
-                          textLight: textLight,
-                          textMuted: textMuted,
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ReportBookScreen(majlisType: activeMajlisType),
-                              ),
-                            );
-                            _loadActiveMajlisAndStats();
-                          },
-                        ),
-                        const SizedBox(height: 14),
+          body: AmbientBackgroundWidget(
+            primaryAccent: accentGreen,
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              children: [
+                // 1. কোনটা কোন মজলিস তার উপযোগী ব্যক্তিগত তৎপরতার রিপোর্ট
+                _buildReportCard(
+                  title: 'ব্যক্তিগত তৎপরতার রিপোর্ট',
+                  subtitle: '$majlisDisplayName — ${_monthNames[_now.month - 1]} ${_bn(_now.year)} মাস',
+                  badge: '$_personalFilledDays/$_daysInMonth দিন আপডেট',
+                  badgeColor: _personalFilledDays >= _now.day ? const Color(0xFF059669) : const Color(0xFFF59E0B),
+                  icon: Icons.person_outline_rounded,
+                  color: const Color(0xFF10B981),
+                  cardBg: cardBg,
+                  borderColor: borderColor,
+                  textLight: textLight,
+                  textMuted: textMuted,
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ReportBookScreen(majlisType: activeMajlisType),
+                      ),
+                    );
+                    _loadActiveMajlisAndStats();
+                  },
+                ),
+                const SizedBox(height: 14),
 
-                        // 2. সাংগঠনিক রিপোর্ট
-                        _buildReportCard(
-                          title: 'সাংগঠনিক শাখা রিপোর্ট',
-                          subtitle: '$majlisDisplayName — শাখা ও প্রশাসনিক রিপোর্ট',
-                          badge: 'নিয়মিত সিঙ্ক',
-                          badgeColor: const Color(0xFF2563EB),
-                          icon: Icons.corporate_fare_rounded,
-                          color: const Color(0xFF2563EB),
-                          cardBg: cardBg,
-                          borderColor: borderColor,
-                          textLight: textLight,
-                          textMuted: textMuted,
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const KhelafatBranchReportBookScreen(),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 14),
+                // 2. সাংগঠনিক শাখা রিপোর্ট
+                _buildReportCard(
+                  title: 'শাখার সাংগঠনিক রিপোর্ট',
+                  subtitle: '$majlisDisplayName — শাখা ও প্রশাসনিক বিবরণী',
+                  badge: 'নিয়মিত সিঙ্ক',
+                  badgeColor: const Color(0xFF2563EB),
+                  icon: Icons.corporate_fare_rounded,
+                  color: const Color(0xFF2563EB),
+                  cardBg: cardBg,
+                  borderColor: borderColor,
+                  textLight: textLight,
+                  textMuted: textMuted,
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const KhelafatBranchReportBookScreen(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 14),
 
-                        // 3. বায়তুলমাল ও হিসাব
-                        _buildReportCard(
-                          title: 'বায়তুলমাল ও আর্থিক হিসাব',
-                          subtitle: '$majlisDisplayName — আয় ও ব্যয়ের হিসাব',
-                          badge: 'আর্থিক মডিউল',
-                          badgeColor: const Color(0xFFD97706),
-                          icon: Icons.account_balance_wallet_rounded,
-                          color: const Color(0xFFD97706),
-                          cardBg: cardBg,
-                          borderColor: borderColor,
-                          textLight: textLight,
-                          textMuted: textMuted,
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const BaytulmalReportPage(),
-                              ),
-                            );
-                          },
+                // 3. শাখার বার্ষিক/মাসিক পরিকল্পনা ফরম
+                _buildReportCard(
+                  title: 'শাখার বার্ষিক/মাসিক পরিকল্পনা',
+                  subtitle: '$majlisDisplayName — পরিকল্পনা ও লক্ষ্যমাত্রা ফরম',
+                  badge: 'পরিকল্পনা',
+                  badgeColor: const Color(0xFF8B5CF6),
+                  icon: Icons.assignment_turned_in_rounded,
+                  color: const Color(0xFF8B5CF6),
+                  cardBg: cardBg,
+                  borderColor: borderColor,
+                  textLight: textLight,
+                  textMuted: textMuted,
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const KhelafatBranchPlanBookScreen(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 14),
+
+                // 4. বায়তুলমাল ও হিসাব
+                _buildReportCard(
+                  title: 'বায়তুলমাল ও আর্থিক হিসাব',
+                  subtitle: '$majlisDisplayName — আয় ও ব্যয়ের হিসাব',
+                  badge: 'আর্থিক মডিউল',
+                  badgeColor: const Color(0xFFD97706),
+                  icon: Icons.account_balance_wallet_rounded,
+                  color: const Color(0xFFD97706),
+                  cardBg: cardBg,
+                  borderColor: borderColor,
+                  textLight: textLight,
+                  textMuted: textMuted,
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const BaytulmalReportPage(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 14),
+
+                // 5. জোনাল রিপোর্ট ফরম (Khelafat Majlis special)
+                if (isKhelafat) ...[
+                  _buildReportCard(
+                    title: 'জোনাল রিপোর্ট ফরম',
+                    subtitle: 'খেলাফত মজলিস — জোনাল সাংগঠনিক প্রতিবেদন',
+                    badge: 'জোনাল শাখা',
+                    badgeColor: const Color(0xFF0284C7),
+                    icon: Icons.map_rounded,
+                    color: const Color(0xFF0284C7),
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    textMuted: textMuted,
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ZonalReportBookScreen(),
                         ),
-                        const SizedBox(height: 24),
-                      ],
-                    ),
+                      );
+                    },
                   ),
+                  const SizedBox(height: 14),
                 ],
-              ),
-            ],
+
+                // 6. প্রাথমিক সদস্য আবেদন ফরম
+                _buildReportCard(
+                  title: 'প্রাথমিক সদস্য ফরম (আবেদন)',
+                  subtitle: '$majlisDisplayName — সদস্যপদ ফরম ও প্রত্যয়নপত্র',
+                  badge: 'সদস্য আবেদন',
+                  badgeColor: const Color(0xFFEC4899),
+                  icon: Icons.badge_rounded,
+                  color: const Color(0xFFEC4899),
+                  cardBg: cardBg,
+                  borderColor: borderColor,
+                  textLight: textLight,
+                  textMuted: textMuted,
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const MemberFormScreen(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         );
       },
@@ -234,13 +297,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: cardBg,
+          color: cardBg.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: borderColor),
           boxShadow: [
             BoxShadow(
-              color: color.withValues(alpha: 0.08),
-              blurRadius: 12,
+              color: color.withValues(alpha: 0.1),
+              blurRadius: 14,
               offset: const Offset(0, 4),
             ),
           ],
@@ -268,14 +331,14 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                     style: TextStyle(
                       color: textLight,
                       fontWeight: FontWeight.bold,
-                      fontSize: 15,
+                      fontSize: 15.5,
                     ),
                   ),
                   const SizedBox(height: 3),
                   Text(subtitle, style: TextStyle(color: textMuted, fontSize: 12)),
                   const SizedBox(height: 6),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
                     decoration: BoxDecoration(
                       color: badgeColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
@@ -298,46 +361,4 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
       ),
     );
   }
-}
-
-class _HubBgPainter extends CustomPainter {
-  final bool isDark;
-  _HubBgPainter({required this.isDark});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (!isDark) {
-      final grid = Paint()..color = Colors.grey.withValues(alpha: 0.05)..strokeWidth = 0.5..style = PaintingStyle.stroke;
-      for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
-      for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-      return;
-    }
-
-    final fill = Paint()..color = const Color(0xFF10B981).withValues(alpha: 0.025)..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.05), 130, fill);
-    canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.5), 100, fill);
-
-    final grid = Paint()..color = const Color(0xFF10B981).withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
-    for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
-    for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-
-    final star = Paint()..color = const Color(0xFF1E3A52)..style = PaintingStyle.fill;
-    _drawStar(canvas, Offset(size.width * 0.85, size.height * 0.12), 18, star);
-    _drawStar(canvas, Offset(size.width * 0.08, size.height * 0.3), 12, star);
-  }
-
-  void _drawStar(Canvas canvas, Offset c, double r, Paint p) {
-    final path = Path();
-    for (int i = 0; i < 8; i++) {
-      final a = i * 45 * pi / 180;
-      final rad = i % 2 == 0 ? r : r * 0.45;
-      i == 0 ? path.moveTo(c.dx + rad * cos(a), c.dy + rad * sin(a))
-             : path.lineTo(c.dx + rad * cos(a), c.dy + rad * sin(a));
-    }
-    path.close();
-    canvas.drawPath(path, p);
-  }
-
-  @override
-  bool shouldRepaint(_HubBgPainter _) => false;
 }

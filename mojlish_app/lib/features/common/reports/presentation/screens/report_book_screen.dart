@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
+import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
 import 'package:mojlish_app/features/common/reports/presentation/screens/report_download_screen.dart';
@@ -108,7 +109,6 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
       builder: (context, _) {
         final isDark = themeManager.isDarkMode;
 
-        final bg = isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF8FAFC);
         final appBarBg = isDark ? const Color(0xFF162032) : Colors.white;
         final cardBg = isDark ? const Color(0xFF162032) : Colors.white;
         final borderColor = isDark ? const Color(0xFF2A3F58) : const Color(0xFFE2E8F0);
@@ -117,7 +117,6 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
         const accentGreen = Color(0xFF10B981);
 
         return Scaffold(
-          backgroundColor: bg,
           appBar: AppBar(
             backgroundColor: appBarBg,
             elevation: 0,
@@ -127,7 +126,7 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
               onPressed: () => Navigator.pop(context),
             ),
             title: const Text(
-              'রিপোর্ট বই',
+              'ব্যক্তিগত রিপোর্ট বই',
               style: TextStyle(color: accentGreen, fontSize: 16, fontWeight: FontWeight.bold),
             ),
             actions: [
@@ -142,42 +141,45 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
               ),
             ],
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              children: [
-                const SizedBox(height: 12),
-                _buildReportBookCard(cardBg, borderColor, textLight, accentGreen),
-                const SizedBox(height: 16),
-                _buildYearSelector(cardBg, borderColor, textLight),
-                const SizedBox(height: 16),
-                _buildMonthGrid(cardBg, borderColor, textLight, textMuted, accentGreen),
-                const SizedBox(height: 24),
+          body: AmbientBackgroundWidget(
+            primaryAccent: accentGreen,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  const SizedBox(height: 12),
+                  _buildReportBookCard(cardBg, borderColor, textLight, accentGreen),
+                  const SizedBox(height: 16),
+                  _buildYearSelector(cardBg, borderColor, textLight),
+                  const SizedBox(height: 16),
+                  _buildMonthGrid(cardBg, borderColor, textLight, textMuted, accentGreen),
+                  const SizedBox(height: 24),
 
-                // Report Download Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton.icon(
-                    onPressed: _openDownloadDialog,
-                    icon: const Icon(Icons.file_download_outlined, size: 24),
-                    label: const Text(
-                      'রিপোর্ট ডাউনলোড',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0284C7),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      elevation: 3,
+                  // Report Download Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton.icon(
+                      onPressed: _openDownloadDialog,
+                      icon: const Icon(Icons.file_download_outlined, size: 24),
+                      label: const Text(
+                        'রিপোর্ট ডাউনলোড',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0284C7),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        elevation: 3,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-                _buildTodayButton(accentGreen),
-                const SizedBox(height: 24),
-              ],
+                  _buildTodayButton(accentGreen),
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
         );
@@ -194,7 +196,7 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: cardBg,
+        color: cardBg.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: borderColor),
         boxShadow: [
@@ -257,7 +259,7 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: cardBg,
+        color: cardBg.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(30),
         border: Border.all(color: borderColor),
       ),
@@ -313,7 +315,7 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isSelected ? purpleColor.withValues(alpha: 0.15) : cardBg,
+                    color: isSelected ? purpleColor.withValues(alpha: 0.15) : cardBg.withValues(alpha: 0.9),
                     border: Border.all(
                       color: isSelected ? purpleColor : borderColor,
                       width: isSelected ? 2.0 : 1.0,

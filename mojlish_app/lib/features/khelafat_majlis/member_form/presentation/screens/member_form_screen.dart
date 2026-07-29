@@ -6,6 +6,7 @@ import '../bloc/member_form_event.dart';
 import '../bloc/member_form_state.dart';
 import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
+import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 
 class MemberFormScreen extends StatefulWidget {
   const MemberFormScreen({Key? key}) : super(key: key);
@@ -104,8 +105,10 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
+        body: AmbientBackgroundWidget(
+          primaryAccent: const Color(0xFFEC4899),
+          child: TabBarView(
+            children: [
             // Tab 1: Edit Form
             BlocConsumer<MemberFormBloc, MemberFormState>(
               listener: (context, state) {
@@ -261,8 +264,9 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildSectionTitle(String title) {
     return Text(

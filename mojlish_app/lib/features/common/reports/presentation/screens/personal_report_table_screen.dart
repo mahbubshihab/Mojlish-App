@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
+import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 import 'package:mojlish_app/features/common/reports/data/models/daily_personal_entry.dart';
 import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
 import 'package:mojlish_app/features/common/reports/data/models/monthly_comment.dart';
@@ -568,18 +569,16 @@ class _PersonalReportTableScreenState extends State<PersonalReportTableScreen>
             ),
             elevation: 0,
           ),
-          body: Stack(
-            children: [
-              Positioned.fill(child: CustomPaint(painter: _PersonalBgPainter(isDark: _isDark))),
-              TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildReportTab(),
-                  _buildSummaryTab(),
-                  _buildCommentsTab(),
-                ],
-              ),
-            ],
+          body: AmbientBackgroundWidget(
+            primaryAccent: _accentGreen,
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildReportTab(),
+                _buildSummaryTab(),
+                _buildCommentsTab(),
+              ],
+            ),
           ),
         );
       },

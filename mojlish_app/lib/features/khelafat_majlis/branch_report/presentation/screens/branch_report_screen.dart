@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
+import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 import 'package:mojlish_app/core/services/pdf_export_service.dart';
 
 /// খেলাফত মজলিস — শাখা সাংগঠনিক রিপোর্ট ফরম
@@ -89,11 +90,13 @@ class _BranchReportScreenState extends State<BranchReportScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      body: AmbientBackgroundWidget(
+        primaryAccent: accentPurple,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             _buildCard('শাখার তথ্য', [
               _buildTextField(_shakhaNameController, 'শাখার নাম'),
             ], cardBg, textLight),
@@ -153,8 +156,9 @@ class _BranchReportScreenState extends State<BranchReportScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildCard(String title, List<Widget> children, Color cardBg, Color textColor) {
     return Container(
