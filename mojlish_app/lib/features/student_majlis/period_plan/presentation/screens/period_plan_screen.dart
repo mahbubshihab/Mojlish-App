@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/period_plan_bloc.dart';
-import '../bloc/period_plan_event.dart';
 import '../bloc/period_plan_state.dart';
-import '../../data/datasources/period_plan_remote_datasource.dart';
+import '../../data/datasources/period_plan_datasource.dart';
 import '../../data/repositories/period_plan_repository_impl.dart';
 
 class PeriodPlanScreen extends StatelessWidget {
@@ -14,7 +13,7 @@ class PeriodPlanScreen extends StatelessWidget {
     return BlocProvider<PeriodPlanBloc>(
       create: (_) => PeriodPlanBloc(
         repository: PeriodPlanRepositoryImpl(
-          remoteDataSource: PeriodPlanRemoteDataSourceImpl(),
+          dataSource: PeriodPlanDataSourceImpl(),
         ),
       ),
       child: const PeriodPlanPage(),
@@ -48,7 +47,7 @@ class _PeriodPlanPageState extends State<PeriodPlanPage> {
             );
           } else if (state is PeriodPlanFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: ${state.message}')),
+              SnackBar(content: Text('Error: ${state.error}')),
             );
           }
         },

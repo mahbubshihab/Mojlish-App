@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/call_manifesto_bloc.dart';
-import '../data/datasources/call_manifesto_datasource.dart';
-import '../data/repositories/call_manifesto_repository_impl.dart';
+import '../../data/datasources/call_manifesto_datasource.dart';
+import '../../data/repositories/call_manifesto_repository_impl.dart';
 import '../pages/call_manifesto_page.dart';
 
 class YouthCallManifestoScreen extends StatelessWidget {
