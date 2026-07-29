@@ -158,10 +158,9 @@ class _BranchReportScreenState extends State<BranchReportScreen> {
             indicatorColor: accentPurple,
             indicatorWeight: 3,
             labelColor: accentPurple,
-            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             tabs: [
-              Tab(icon: Icon(Icons.edit_note_rounded), text: '১. তথ্য পূরণ'),
-              Tab(icon: Icon(Icons.print_rounded), text: '২. প্রিভিউ ও PDF'),
+              Tab(icon: Icon(Icons.edit_note_rounded, size: 26)),
+              Tab(icon: Icon(Icons.picture_as_pdf_rounded, size: 26)),
             ],
           ),
         ),
@@ -283,46 +282,29 @@ class _BranchReportScreenState extends State<BranchReportScreen> {
   }
 
   // ==========================================
-  // TAB 2: FORMATTED PREVIEW & PDF DOWNLOAD
+  // TAB 2: EXACT WHITE A4 PDF PREVIEW & DOWNLOAD
   // ==========================================
   Widget _buildPreviewTab(Color cardBg, Color textLight, Color accentPurple) {
     final monthStr = widget.month != null ? _monthNames[widget.month! - 1] : '';
     final yearStr = widget.year != null ? _bn(widget.year!) : '';
+    const paperTextColor = Color(0xFF0F172A);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // Top PDF Download Banner
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton.icon(
-              onPressed: _exportPdf,
-              icon: const Icon(Icons.picture_as_pdf_rounded, size: 22),
-              label: const Text('PDF ডাউনলোড / প্রিন্ট করুন', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0284C7),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 3,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Printable Report Card Preview
+          // 1. Exact A4 White Paper PDF Preview Card
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: cardBg.withValues(alpha: 0.95),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: accentPurple.withValues(alpha: 0.3)),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
                 )
               ],
             ),
@@ -334,45 +316,64 @@ class _BranchReportScreenState extends State<BranchReportScreen> {
                     children: [
                       const Text(
                         'বাংলাদেশ খেলাফত মজলিস',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'শাখা সাংগঠনিক রিপোর্ট — $monthStr $yearStr',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: textLight),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: paperTextColor),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'শাখা: ${_shakhaNameController.text.isEmpty ? "(শাখার নাম প্রদান করুন)" : _shakhaNameController.text}',
-                        style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: accentPurple),
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF0284C7)),
                       ),
                     ],
                   ),
                 ),
-                const Divider(height: 30, thickness: 1),
+                const Divider(height: 32, thickness: 1.5, color: Colors.grey),
 
-                _buildPreviewRow('জনশক্তি বিবরণী', _manpowerController.text, textLight),
-                _buildPreviewRow('দাওয়াত ও গণসংযোগ', _dawahController.text, textLight),
-                _buildPreviewRow('সংগঠন ও শাখা বিস্তার', _organizationController.text, textLight),
-                _buildPreviewRow('সভাসমূহ ও মিটিং', _meetingsController.text, textLight),
-                _buildPreviewRow('বায়তুলমাল ও তহবিল', _baytulmalController.text, textLight),
-                _buildPreviewRow('সফর সংখ্যা', _tourController.text, textLight),
-                _buildPreviewRow('প্রশিক্ষণ কর্মসূচি', _trainingController.text, textLight),
-                _buildPreviewRow('দফতর সম্পাদক রিপোর্ট', _officeController.text, textLight),
-                _buildPreviewRow('প্রচার ও প্রকাশনা', _publicityController.text, textLight),
-                _buildPreviewRow('পাঠাগার বিবরণী', _libraryController.text, textLight),
-                _buildPreviewRow('সমাজকল্যাণ মূলক কাজ', _welfareController.text, textLight),
+                _buildPreviewRow('শাখার নাম', _shakhaNameController.text, paperTextColor),
+                _buildPreviewRow('জনশক্তি বিবরণী', _manpowerController.text, paperTextColor),
+                _buildPreviewRow('দাওয়াত ও গণসংযোগ', _dawahController.text, paperTextColor),
+                _buildPreviewRow('সংগঠন ও শাখা বিস্তার', _organizationController.text, paperTextColor),
+                _buildPreviewRow('সভাসমূহ ও মিটিং', _meetingsController.text, paperTextColor),
+                _buildPreviewRow('বায়তুলমাল ও তহবিল', _baytulmalController.text, paperTextColor),
+                _buildPreviewRow('সফর সংখ্যা', _tourController.text, paperTextColor),
+                _buildPreviewRow('প্রশিক্ষণ কর্মসূচি', _trainingController.text, paperTextColor),
+                _buildPreviewRow('দফতর সম্পাদক রিপোর্ট', _officeController.text, paperTextColor),
+                _buildPreviewRow('প্রচার ও প্রকাশনা', _publicityController.text, paperTextColor),
+                _buildPreviewRow('পাঠাগার বিবরণী', _libraryController.text, paperTextColor),
+                _buildPreviewRow('সমাজকল্যাণ মূলক কাজ', _welfareController.text, paperTextColor),
 
                 if (_commentsController.text.isNotEmpty) ...[
-                  const Divider(height: 24),
-                  Text('মন্তব্য ও সুপারিশ:', style: TextStyle(fontWeight: FontWeight.bold, color: textLight, fontSize: 14)),
+                  const Divider(height: 24, thickness: 1, color: Colors.grey),
+                  const Text('মন্তব্য ও সুপারিশ:', style: TextStyle(fontWeight: FontWeight.bold, color: paperTextColor, fontSize: 14)),
                   const SizedBox(height: 4),
-                  Text(_commentsController.text, style: TextStyle(color: textLight.withValues(alpha: 0.9), fontSize: 13.5)),
+                  Text(_commentsController.text, style: const TextStyle(color: paperTextColor, fontSize: 13.5)),
                 ],
               ],
             ),
           ),
           const SizedBox(height: 20),
+
+          // 2. Download Button Placed BELOW the PDF Preview Card
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: _exportPdf,
+              icon: const Icon(Icons.picture_as_pdf_rounded, size: 24),
+              label: const Text('PDF ডাউনলোড / প্রিন্ট করুন', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0284C7),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                elevation: 4,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -381,12 +382,12 @@ class _BranchReportScreenState extends State<BranchReportScreen> {
   Widget _buildPreviewRow(String title, String value, Color textColor) {
     final val = value.trim().isEmpty ? '—' : value.trim();
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 140,
+            width: 145,
             child: Text(
               '$title:',
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5, color: textColor.withValues(alpha: 0.75)),

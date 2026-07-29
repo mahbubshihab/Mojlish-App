@@ -9,7 +9,7 @@ class KhelafatBranchPlanScreen extends StatefulWidget {
   final int? year;
   final int? month;
 
-  const KhelafatBranchPlanScreen({super.key, this.year, this.month});
+  const KhelafatBranchPlanScreen({Key? key, this.year, this.month}) : super(key: key);
 
   @override
   State<KhelafatBranchPlanScreen> createState() => _KhelafatBranchPlanScreenState();
@@ -142,10 +142,9 @@ class _KhelafatBranchPlanScreenState extends State<KhelafatBranchPlanScreen> {
             indicatorColor: accentCyan,
             indicatorWeight: 3,
             labelColor: accentCyan,
-            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             tabs: [
-              Tab(icon: Icon(Icons.edit_note_rounded), text: '১. তথ্য পূরণ'),
-              Tab(icon: Icon(Icons.print_rounded), text: '২. প্রিভিউ ও PDF'),
+              Tab(icon: Icon(Icons.edit_note_rounded, size: 26)),
+              Tab(icon: Icon(Icons.picture_as_pdf_rounded, size: 26)),
             ],
           ),
         ),
@@ -263,46 +262,29 @@ class _KhelafatBranchPlanScreenState extends State<KhelafatBranchPlanScreen> {
   }
 
   // ==========================================
-  // TAB 2: FORMATTED PREVIEW & PDF DOWNLOAD
+  // TAB 2: EXACT WHITE A4 PDF PREVIEW & DOWNLOAD
   // ==========================================
   Widget _buildPreviewTab(Color cardBg, Color textLight, Color accentCyan) {
     final monthStr = widget.month != null ? _monthNames[widget.month! - 1] : '';
     final yearStr = widget.year != null ? _bn(widget.year!) : '';
+    const paperTextColor = Color(0xFF0F172A);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // Top PDF Download Banner
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton.icon(
-              onPressed: _exportPdf,
-              icon: const Icon(Icons.picture_as_pdf_rounded, size: 22),
-              label: const Text('PDF ডাউনলোড / প্রিন্ট করুন', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0284C7),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 3,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Printable Plan Card Preview
+          // 1. Exact A4 White Paper PDF Preview Card FIRST
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: cardBg.withValues(alpha: 0.95),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: accentCyan.withValues(alpha: 0.3)),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
                 )
               ],
             ),
@@ -314,41 +296,59 @@ class _KhelafatBranchPlanScreenState extends State<KhelafatBranchPlanScreen> {
                     children: [
                       const Text(
                         'বাংলাদেশ খেলাফত মজলিস',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'শাখা পরিকল্পনা ফরম — $monthStr $yearStr',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: textLight),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: paperTextColor),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'শাখা: ${_shakhaNameController.text.isEmpty ? "(শাখার নাম প্রদান করুন)" : _shakhaNameController.text}',
-                        style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: accentCyan),
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF06B6D4)),
                       ),
                     ],
                   ),
                 ),
-                const Divider(height: 30, thickness: 1),
+                const Divider(height: 32, thickness: 1.5, color: Colors.grey),
 
-                _buildPreviewRow('জনশক্তি লক্ষ্যমাত্রা', _manpowerTargetController.text, textLight),
-                _buildPreviewRow('দাওয়াত ও গণসংযোগ', _dawahScheduleController.text, textLight),
-                _buildPreviewRow('শাখা বিস্তার ও পুনর্গঠন', _unitReorganizationController.text, textLight),
-                _buildPreviewRow('বায়তুলমাল সংগ্রহের লক্ষ্য', _baytulmalTargetController.text, textLight),
-                _buildPreviewRow('সাংগঠনিক সফর সূচি', _safarScheduleController.text, textLight),
-                _buildPreviewRow('প্রশিক্ষণ বৈঠক পরিকল্পনা', _trainingPlanController.text, textLight),
-                _buildPreviewRow('প্রচার ও প্রকাশনা পরিকল্পনা', _publicationPlanController.text, textLight),
+                _buildPreviewRow('জনশক্তি লক্ষ্যমাত্রা', _manpowerTargetController.text, paperTextColor),
+                _buildPreviewRow('দাওয়াত ও গণসংযোগ', _dawahScheduleController.text, paperTextColor),
+                _buildPreviewRow('শাখা বিস্তার ও পুনর্গঠন', _unitReorganizationController.text, paperTextColor),
+                _buildPreviewRow('বায়তুলমাল সংগ্রহের লক্ষ্য', _baytulmalTargetController.text, paperTextColor),
+                _buildPreviewRow('সাংগঠনিক সফর সূচি', _safarScheduleController.text, paperTextColor),
+                _buildPreviewRow('প্রশিক্ষণ বৈঠক পরিকল্পনা', _trainingPlanController.text, paperTextColor),
+                _buildPreviewRow('প্রচার ও প্রকাশনা পরিকল্পনা', _publicationPlanController.text, paperTextColor),
 
                 if (_commentsController.text.isNotEmpty) ...[
-                  const Divider(height: 24),
-                  Text('বিশেষ নির্দেশনা:', style: TextStyle(fontWeight: FontWeight.bold, color: textLight, fontSize: 14)),
+                  const Divider(height: 24, thickness: 1, color: Colors.grey),
+                  const Text('বিশেষ নির্দেশনা:', style: TextStyle(fontWeight: FontWeight.bold, color: paperTextColor, fontSize: 14)),
                   const SizedBox(height: 4),
-                  Text(_commentsController.text, style: TextStyle(color: textLight.withValues(alpha: 0.9), fontSize: 13.5)),
+                  Text(_commentsController.text, style: const TextStyle(color: paperTextColor, fontSize: 13.5)),
                 ],
               ],
             ),
           ),
           const SizedBox(height: 20),
+
+          // 2. Download Button Placed BELOW the PDF Preview Card
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: _exportPdf,
+              icon: const Icon(Icons.picture_as_pdf_rounded, size: 24),
+              label: const Text('PDF ডাউনলোড / প্রিন্ট করুন', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0284C7),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                elevation: 4,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -357,12 +357,12 @@ class _KhelafatBranchPlanScreenState extends State<KhelafatBranchPlanScreen> {
   Widget _buildPreviewRow(String title, String value, Color textColor) {
     final val = value.trim().isEmpty ? '—' : value.trim();
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 140,
+            width: 145,
             child: Text(
               '$title:',
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5, color: textColor.withValues(alpha: 0.75)),

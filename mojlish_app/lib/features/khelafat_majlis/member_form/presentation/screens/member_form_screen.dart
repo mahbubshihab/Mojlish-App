@@ -98,10 +98,9 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
             indicatorColor: Color(0xFF059669),
             indicatorWeight: 3,
             labelColor: Color(0xFF059669),
-            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             tabs: [
-              Tab(icon: Icon(Icons.edit_note_rounded), text: '১. তথ্য পূরণ'),
-              Tab(icon: Icon(Icons.print_rounded), text: '২. প্রিভিউ ও PDF'),
+              Tab(icon: Icon(Icons.edit_note_rounded, size: 26)),
+              Tab(icon: Icon(Icons.picture_as_pdf_rounded, size: 26)),
             ],
           ),
         ),

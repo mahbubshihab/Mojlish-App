@@ -277,10 +277,9 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
             indicatorColor: _accentPurple,
             indicatorWeight: 3,
             labelColor: _accentPurple,
-            labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             tabs: const [
-              Tab(icon: Icon(Icons.edit_note_rounded), text: '১. তথ্য পূরণ'),
-              Tab(icon: Icon(Icons.print_rounded), text: '২. প্রিভিউ ও PDF'),
+              Tab(icon: Icon(Icons.edit_note_rounded, size: 26)),
+              Tab(icon: Icon(Icons.picture_as_pdf_rounded, size: 26)),
             ],
           ),
         ),
@@ -428,46 +427,29 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
   }
 
   // ==========================================
-  // TAB 2: FORMATTED PREVIEW & PDF DOWNLOAD
+  // TAB 2: EXACT WHITE A4 PDF PREVIEW & DOWNLOAD
   // ==========================================
   Widget _buildPreviewTab() {
     final monthStr = _monthNames[widget.month - 1];
     final yearStr = _bn(widget.year);
+    const paperTextColor = Color(0xFF0F172A);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // Top PDF Download Button
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton.icon(
-              onPressed: _exportPdf,
-              icon: const Icon(Icons.picture_as_pdf_rounded, size: 22),
-              label: const Text('PDF ডাউনলোড / প্রিন্ট করুন', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0284C7),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 3,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Printable Preview Card
+          // 1. Exact A4 White Paper PDF Preview Card FIRST
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: _cardBg.withValues(alpha: 0.95),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: _accentPurple.withValues(alpha: 0.3)),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
                 )
               ],
             ),
@@ -479,60 +461,78 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
                     children: [
                       const Text(
                         'বাংলাদেশ খেলাফত মজলিস',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'জোনাল রিপোর্ট — $monthStr $yearStr',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: _textLight),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: paperTextColor),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'জোন: ${_zoneNameCtrl.text.isEmpty ? "(জোনের নাম প্রদান করুন)" : _zoneNameCtrl.text}',
-                        style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: _accentPurple),
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: _accentPurple),
                       ),
                     ],
                   ),
                 ),
-                const Divider(height: 30, thickness: 1),
+                const Divider(height: 32, thickness: 1.5, color: Colors.grey),
 
-                _buildPreviewRow('সদস্য সংখ্যা/বৃদ্ধি/ঘাটতি', '${_sodossoCountCtrl.text} / ${_sodossoBridhiCtrl.text} / ${_sodossoGhattiCtrl.text}'),
-                _buildPreviewRow('সদস্য প্রার্থী সংখ্যা/বৃদ্ধি/ঘাটতি', '${_sodossoPrarthiCountCtrl.text} / ${_sodossoPrarthiBridhiCtrl.text} / ${_sodossoPrarthiGhattiCtrl.text}'),
-                _buildPreviewRow('জেলা শাখা গঠন/পুনর্গঠন', '${_distCountCtrl.text} / ${_distOrgCtrl.text} / ${_distReorgCtrl.text}'),
-                _buildPreviewRow('মহানগর শাখা গঠন/পুনর্গঠন', '${_cityCountCtrl.text} / ${_cityOrgCtrl.text} / ${_cityReorgCtrl.text}'),
-                _buildPreviewRow('উপজেলা/থানা শাখা', '${_upazilaCountCtrl.text} / ${_upazilaOrgCtrl.text} / ${_upazilaReorgCtrl.text}'),
-                _buildPreviewRow('শাখা দায়িত্বশীল বৈঠক', '${_shakhaDaitoshilCountCtrl.text} (উপস্থিতি: ${_shakhaDaitoshilPresCtrl.text})'),
-                _buildPreviewRow('জেলা নির্বাহী বৈঠক', '${_distExecCountCtrl.text} (উপস্থিতি: ${_distExecPresCtrl.text})'),
-                _buildPreviewRow('জোনাল তরবিয়ত বৈঠক', '${_zonalTorbiotCountCtrl.text} (উপস্থিতি: ${_zonalTorbiotPresCtrl.text})'),
-                _buildPreviewRow('জোন সফর বিবরণী', _travelDetailsCtrl.text),
-                _buildPreviewRow('সফর/কেন্দ্রীয়/এককালীন আয়', '${_safarIncomeTakaCtrl.text} / ${_centralIncomeTakaCtrl.text} / ${_onetimeIncomeTakaCtrl.text}'),
-                _buildPreviewRow('সফর/যোগাযোগ/দফতর ব্যয়', '${_safarExpenseTakaCtrl.text} / ${_communicationExpenseTakaCtrl.text} / ${_officeExpenseTakaCtrl.text}'),
+                _buildPreviewRow('সদস্য সংখ্যা/বৃদ্ধি/ঘাটতি', '${_sodossoCountCtrl.text} / ${_sodossoBridhiCtrl.text} / ${_sodossoGhattiCtrl.text}', paperTextColor),
+                _buildPreviewRow('সদস্য প্রার্থী সংখ্যা/বৃদ্ধি/ঘাটতি', '${_sodossoPrarthiCountCtrl.text} / ${_sodossoPrarthiBridhiCtrl.text} / ${_sodossoPrarthiGhattiCtrl.text}', paperTextColor),
+                _buildPreviewRow('জেলা শাখা গঠন/পুনর্গঠন', '${_distCountCtrl.text} / ${_distOrgCtrl.text} / ${_distReorgCtrl.text}', paperTextColor),
+                _buildPreviewRow('মহানগর শাখা গঠন/পুনর্গঠন', '${_cityCountCtrl.text} / ${_cityOrgCtrl.text} / ${_cityReorgCtrl.text}', paperTextColor),
+                _buildPreviewRow('উপজেলা/থানা শাখা', '${_upazilaCountCtrl.text} / ${_upazilaOrgCtrl.text} / ${_upazilaReorgCtrl.text}', paperTextColor),
+                _buildPreviewRow('শাখা দায়িত্বশীল বৈঠক', '${_shakhaDaitoshilCountCtrl.text} (উপস্থিতি: ${_shakhaDaitoshilPresCtrl.text})', paperTextColor),
+                _buildPreviewRow('জেলা নির্বাহী বৈঠক', '${_distExecCountCtrl.text} (উপস্থিতি: ${_distExecPresCtrl.text})', paperTextColor),
+                _buildPreviewRow('জোনাল তরবিয়ত বৈঠক', '${_zonalTorbiotCountCtrl.text} (উপস্থিতি: ${_zonalTorbiotPresCtrl.text})', paperTextColor),
+                _buildPreviewRow('জোন সফর বিবরণী', _travelDetailsCtrl.text, paperTextColor),
+                _buildPreviewRow('সফর/কেন্দ্রীয়/এককালীন আয়', '${_safarIncomeTakaCtrl.text} / ${_centralIncomeTakaCtrl.text} / ${_onetimeIncomeTakaCtrl.text}', paperTextColor),
+                _buildPreviewRow('সফর/যোগাযোগ/দফতর ব্যয়', '${_safarExpenseTakaCtrl.text} / ${_communicationExpenseTakaCtrl.text} / ${_officeExpenseTakaCtrl.text}', paperTextColor),
                 if (_currentEntry != null)
-                  _buildPreviewRow('মোট আয় / ব্যয় / স্থিতি', '${_currentEntry!.totalIncome} / ${_currentEntry!.totalExpense} / ${_currentEntry!.balance}'),
-                _buildPreviewRow('উপশাখার রিপোর্ট প্রাপ্তি', _shakhaReportSubCtrl.text),
-                _buildPreviewRow('উপশাখার পরিকল্পনা প্রাপ্তি', _shakhaPlanSubCtrl.text),
+                  _buildPreviewRow('মোট আয় / ব্যয় / স্থিতি', '${_currentEntry!.totalIncome} / ${_currentEntry!.totalExpense} / ${_currentEntry!.balance}', paperTextColor),
+                _buildPreviewRow('উপশাখার রিপোর্ট প্রাপ্তি', _shakhaReportSubCtrl.text, paperTextColor),
+                _buildPreviewRow('উপশাখার পরিকল্পনা প্রাপ্তি', _shakhaPlanSubCtrl.text, paperTextColor),
 
                 if (_remarksCtrl.text.isNotEmpty || _suggestionsCtrl.text.isNotEmpty) ...[
-                  const Divider(height: 24),
-                  Text('পর্যবেক্ষণ ও পরামর্শ:', style: TextStyle(fontWeight: FontWeight.bold, color: _textLight, fontSize: 14)),
+                  const Divider(height: 24, thickness: 1, color: Colors.grey),
+                  const Text('পর্যবেক্ষণ ও পরামর্শ:', style: TextStyle(fontWeight: FontWeight.bold, color: paperTextColor, fontSize: 14)),
                   const SizedBox(height: 4),
-                  Text('পর্যবেক্ষণ: ${_remarksCtrl.text}', style: TextStyle(color: _textLight.withValues(alpha: 0.9), fontSize: 13.5)),
+                  Text('পর্যবেক্ষণ: ${_remarksCtrl.text}', style: const TextStyle(color: paperTextColor, fontSize: 13.5)),
                   const SizedBox(height: 2),
-                  Text('পরামর্শ: ${_suggestionsCtrl.text}', style: TextStyle(color: _textLight.withValues(alpha: 0.9), fontSize: 13.5)),
+                  Text('পরামর্শ: ${_suggestionsCtrl.text}', style: const TextStyle(color: paperTextColor, fontSize: 13.5)),
                 ],
               ],
             ),
           ),
           const SizedBox(height: 20),
+
+          // 2. Download Button Placed BELOW the PDF Preview Card
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: _exportPdf,
+              icon: const Icon(Icons.picture_as_pdf_rounded, size: 24),
+              label: const Text('PDF ডাউনলোড / প্রিন্ট করুন', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0284C7),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                elevation: 4,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
         ],
       ),
     );
   }
 
-  Widget _buildPreviewRow(String title, String value) {
+  Widget _buildPreviewRow(String title, String value, Color textColor) {
     final val = value.trim().isEmpty ? '—' : value.trim();
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -540,13 +540,13 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
             width: 155,
             child: Text(
               '$title:',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5, color: _textLight.withValues(alpha: 0.75)),
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5, color: textColor.withValues(alpha: 0.75)),
             ),
           ),
           Expanded(
             child: Text(
               val,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5, color: _textLight),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5, color: textColor),
             ),
           ),
         ],
