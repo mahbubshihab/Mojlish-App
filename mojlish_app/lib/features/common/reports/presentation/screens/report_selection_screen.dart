@@ -1,12 +1,14 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
+import 'package:mojlish_app/core/services/user_storage_service.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
+import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
+import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentation/screens/baytulmal_report_screen.dart';
+import 'package:mojlish_app/features/khelafat_majlis/branch_report/presentation/screens/khelafat_branch_report_book_screen.dart';
 import 'report_book_screen.dart';
 
-import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
-
-/// রিপোর্টসমূহ — মূল হাব স্ক্রিন, সব রিপোর্টের কার্ড দেখায়
+/// রিপোর্টসমূহ — মূল হাব স্ক্রিন, সক্রিয় মজলিসের সব রিপোর্টের কার্ড দেখায়
 class ReportSelectionScreen extends StatefulWidget {
   final String? majlisName;
   final MajlisType? majlisType;
@@ -20,6 +22,7 @@ class ReportSelectionScreen extends StatefulWidget {
 class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
   int _personalFilledDays = 0;
   int _daysInMonth = 30;
+  String _activeMajlisName = 'খেলাফত মজলিস';
   final _now = DateTime.now();
 
   static const _monthNames = [
@@ -30,15 +33,20 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
   @override
   void initState() {
     super.initState();
-    _loadStats();
+    _loadActiveMajlisAndStats();
   }
 
-  Future<void> _loadStats() async {
+  Future<void> _loadActiveMajlisAndStats() async {
     try {
+      final savedMajlis = await UserStorageService.getActiveMajlis();
       final days = await ReportStorageService.getFilledDaysCount(_now.year, _now.month);
       final dim = DateTime(_now.year, _now.month + 1, 0).day;
+
       if (mounted) {
         setState(() {
+          if (savedMajlis != null && savedMajlis.isNotEmpty) {
+            _activeMajlisName = savedMajlis;
+          }
           _personalFilledDays = days;
           _daysInMonth = dim;
         });
@@ -46,30 +54,36 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
     } catch (_) {}
   }
 
-  String _bn(int n) {
-    const digits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-    return n.toString().split('').map((c) => digits[int.parse(c)]).join();
-  }
-
   MajlisType _resolveMajlisType() {
     if (widget.majlisType != null) return widget.majlisType!;
     if (widget.majlisName != null && widget.majlisName!.isNotEmpty) {
       return MajlisTypeExtension.fromString(widget.majlisName!);
     }
-    return MajlisType.khelafat;
+    return MajlisTypeExtension.fromString(_activeMajlisName);
+  }
+
+  String _getEffectiveMajlisName() {
+    if (widget.majlisName != null && widget.majlisName!.isNotEmpty) {
+      return widget.majlisName!;
+    }
+    return _activeMajlisName;
+  }
+
+  String _bn(int n) {
+    const digits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+    return n.toString().split('').map((c) => digits[int.parse(c)]).join();
   }
 
   @override
   Widget build(BuildContext context) {
     final activeMajlisType = _resolveMajlisType();
-    final bool isSromik = activeMajlisType == MajlisType.sromik;
+    final majlisDisplayName = _getEffectiveMajlisName();
 
     return AnimatedBuilder(
       animation: themeManager,
       builder: (context, _) {
         final isDark = themeManager.isDarkMode;
 
-        // Theme colors
         final bg = isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF8FAFC);
         final appBarBg = isDark ? const Color(0xFF162032) : Colors.white;
         final cardBg = isDark ? const Color(0xFF162032) : Colors.white;
@@ -92,8 +106,8 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  isSromik ? 'শ্রমিক মজলিস রিপোর্ট' : 'রিপোর্টসমূহ',
-                  style: const TextStyle(color: accentGreen, fontSize: 18, fontWeight: FontWeight.bold),
+                  '$majlisDisplayName — রিপোর্ট হাব',
+                  style: const TextStyle(color: accentGreen, fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   '${_monthNames[_now.month - 1]} ${_bn(_now.year)}',
@@ -107,9 +121,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                   isDark ? Icons.wb_sunny : Icons.nightlight_round,
                   color: isDark ? Colors.yellow : Colors.black87,
                 ),
-                onPressed: () {
-                  themeManager.toggleTheme();
-                },
+                onPressed: () => themeManager.toggleTheme(),
               ),
             ],
           ),
@@ -120,18 +132,17 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16),
-                  // Cards list
                   Expanded(
                     child: ListView(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       children: [
-                        // ব্যক্তিগত রিপোর্ট (Personal Report Book & Form)
+                        // 1. কোনটা কোন মজলিস তার উপযোগী ব্যক্তিগত তৎপরতার রিপোর্ট
                         _buildReportCard(
                           title: 'ব্যক্তিগত তৎপরতার রিপোর্ট',
-                          subtitle: '${_monthNames[_now.month - 1]} ${_bn(_now.year)} মাস',
+                          subtitle: '$majlisDisplayName — ${_monthNames[_now.month - 1]} ${_bn(_now.year)} মাস',
                           badge: '$_personalFilledDays/$_daysInMonth দিন আপডেট',
                           badgeColor: _personalFilledDays >= _now.day ? const Color(0xFF059669) : const Color(0xFFF59E0B),
-                          icon: Icons.person_outline,
+                          icon: Icons.person_outline_rounded,
                           color: const Color(0xFF10B981),
                           cardBg: cardBg,
                           borderColor: borderColor,
@@ -144,7 +155,53 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                                 builder: (_) => ReportBookScreen(majlisType: activeMajlisType),
                               ),
                             );
-                            _loadStats();
+                            _loadActiveMajlisAndStats();
+                          },
+                        ),
+                        const SizedBox(height: 14),
+
+                        // 2. সাংগঠনিক রিপোর্ট
+                        _buildReportCard(
+                          title: 'সাংগঠনিক শাখা রিপোর্ট',
+                          subtitle: '$majlisDisplayName — শাখা ও প্রশাসনিক রিপোর্ট',
+                          badge: 'নিয়মিত সিঙ্ক',
+                          badgeColor: const Color(0xFF2563EB),
+                          icon: Icons.corporate_fare_rounded,
+                          color: const Color(0xFF2563EB),
+                          cardBg: cardBg,
+                          borderColor: borderColor,
+                          textLight: textLight,
+                          textMuted: textMuted,
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const KhelafatBranchReportBookScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 14),
+
+                        // 3. বায়তুলমাল ও হিসাব
+                        _buildReportCard(
+                          title: 'বায়তুলমাল ও আর্থিক হিসাব',
+                          subtitle: '$majlisDisplayName — আয় ও ব্যয়ের হিসাব',
+                          badge: 'আর্থিক মডিউল',
+                          badgeColor: const Color(0xFFD97706),
+                          icon: Icons.account_balance_wallet_rounded,
+                          color: const Color(0xFFD97706),
+                          cardBg: cardBg,
+                          borderColor: borderColor,
+                          textLight: textLight,
+                          textMuted: textMuted,
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const BaytulmalReportPage(),
+                              ),
+                            );
                           },
                         ),
                         const SizedBox(height: 24),
@@ -172,18 +229,15 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
     required Color textLight,
     required Color textMuted,
     required VoidCallback onTap,
-    bool disabled = false,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: disabled ? cardBg.withValues(alpha: 0.5) : cardBg,
+          color: cardBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: disabled ? borderColor.withValues(alpha: 0.5) : borderColor,
-          ),
-          boxShadow: disabled ? [] : [
+          border: Border.all(color: borderColor),
+          boxShadow: [
             BoxShadow(
               color: color.withValues(alpha: 0.08),
               blurRadius: 12,
@@ -194,19 +248,17 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Icon
             Container(
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: disabled ? 0.05 : 0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: color.withValues(alpha: disabled ? 0.1 : 0.25)),
+                border: Border.all(color: color.withValues(alpha: 0.25)),
               ),
-              child: Icon(icon, color: disabled ? color.withValues(alpha: 0.4) : color, size: 26),
+              child: Icon(icon, color: color, size: 26),
             ),
             const SizedBox(width: 14),
-            // Text
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,7 +266,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                   Text(
                     title,
                     style: TextStyle(
-                      color: disabled ? textMuted : textLight,
+                      color: textLight,
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                     ),
@@ -239,7 +291,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
             Icon(
               Icons.arrow_forward_ios,
               size: 14,
-              color: disabled ? borderColor : textMuted,
+              color: textMuted,
             ),
           ],
         ),
@@ -255,7 +307,6 @@ class _HubBgPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (!isDark) {
-      // Light background grid
       final grid = Paint()..color = Colors.grey.withValues(alpha: 0.05)..strokeWidth = 0.5..style = PaintingStyle.stroke;
       for (double x = 0; x < size.width; x += 40) canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
       for (double y = 0; y < size.height; y += 40) canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);

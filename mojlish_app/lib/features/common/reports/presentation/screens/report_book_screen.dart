@@ -3,11 +3,7 @@ import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
 import 'package:mojlish_app/features/common/reports/presentation/screens/report_download_screen.dart';
-import 'package:mojlish_app/features/khelafat_majlis/personal_report/presentation/screens/personal_report_screen.dart';
-import 'package:mojlish_app/features/student_majlis/personal_report/presentation/screens/personal_report_screen.dart';
-import 'package:mojlish_app/features/youth_majlis/personal_report/presentation/screens/personal_report_screen.dart';
-import 'package:mojlish_app/features/women_majlis/personal_report/presentation/screens/personal_report_screen.dart';
-
+import 'package:mojlish_app/features/common/reports/presentation/screens/daily_personal_entry_form_screen.dart';
 
 /// ব্যক্তিগত রিপোর্ট বই — বছর/মাস নেভিগেশন ও কাস্টম মাল্টি-মান্থ A4 PDF ডাউনলোড
 class ReportBookScreen extends StatefulWidget {
@@ -56,34 +52,41 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
   }
 
   void _openMonth(int month) async {
-    Widget page;
-    switch (widget.majlisType) {
-      case MajlisType.khelafat:
-        page = const KhelafatPersonalReportScreen();
-        break;
-      case MajlisType.chatro:
-        page = const StudentPersonalReportScreen();
-        break;
-      case MajlisType.jubo:
-        page = const YouthPersonalReportScreen();
-        break;
-      case MajlisType.mohila:
-        page = const WomenMajlisPersonalReportScreen();
-        break;
-      default:
-        page = const KhelafatPersonalReportScreen();
-    }
-
+    final dayToUse = (month == _now.month && _selectedYear == _now.year) ? _now.day : 1;
+    final targetDate = DateTime(_selectedYear, month, dayToUse);
+    
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => page),
+      MaterialPageRoute(
+        builder: (_) => DailyPersonalEntryFormScreen(
+          initialDate: targetDate,
+          majlisType: widget.majlisType,
+        ),
+      ),
     );
-    setState(() => _selectedMonth = month);
-    _loadStats();
+    if (mounted) {
+      setState(() => _selectedMonth = month);
+      _loadStats();
+    }
   }
 
   void _openToday() async {
-    _openMonth(_now.month);
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => DailyPersonalEntryFormScreen(
+          initialDate: DateTime.now(),
+          majlisType: widget.majlisType,
+        ),
+      ),
+    );
+    if (mounted) {
+      setState(() {
+        _selectedYear = DateTime.now().year;
+        _selectedMonth = DateTime.now().month;
+      });
+      _loadStats();
+    }
   }
 
   /// Opens Dedicated Multi-Month PDF Export Screen
@@ -348,7 +351,7 @@ class _ReportBookScreenState extends State<ReportBookScreen> {
   Widget _buildTodayButton(Color accentPurple) {
     final purpleColor = const Color(0xFFC084FC);
     return Center(
-      child: Container(
+      child: SizedBox(
         width: 220,
         height: 48,
         child: OutlinedButton(
