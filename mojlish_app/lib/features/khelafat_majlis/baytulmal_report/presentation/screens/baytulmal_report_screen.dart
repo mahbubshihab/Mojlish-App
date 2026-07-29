@@ -199,23 +199,40 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
     final yearStr = _bn(_selectedYear);
     final monthStr = _monthNames[_selectedMonth - 1];
 
+    final entry = BaytulmalReportEntry(
+      year: _selectedYear.toString(),
+      month: _selectedMonth.toString().padLeft(2, '0'),
+      branchName: _branchCtrl.text.trim(),
+      executiveMemberAyanat: _nirbahiCountCtrl.text,
+      executiveMemberAyanatTaka: _nirbahiIyanatCtrl.text,
+      subBranchAyanat: _subBranchCountCtrl.text,
+      subBranchAyanatTaka: _subBranchIyanatCtrl.text,
+      suhridAyanat: _shudhiCountCtrl.text,
+      suhridAyanatTaka: _shudhiIyanatCtrl.text,
+      safarIncomeTaka: _safarIncomeCtrl.text,
+      prokashnaIncomeTaka: _publicationIncomeCtrl.text,
+      onetimeIncomeTaka: _oneTimeIncomeCtrl.text,
+      previousBalance: _previousBalanceCtrl.text,
+      upwardAyanatTaka: _upperIyanatCtrl.text,
+      officeRentTaka: _officeRentCtrl.text,
+      officeCostTaka: _officeExpenseCtrl.text,
+      safarExpenseTaka: _transportExpenseCtrl.text,
+      transportTaka: _transportExpenseCtrl.text,
+      communicationTaka: _dawahExpenseCtrl.text,
+      prokashnaExpenseTaka: _publicationExpenseCtrl.text,
+      dibosPatanTaka: _dayObservanceExpenseCtrl.text,
+      appayanTaka: _entertainmentExpenseCtrl.text,
+      sovaTaka: _meetingAssemblyCostCtrl.text,
+      remarks: _takaInWordsCtrl.text,
+    );
+
     PdfViewerScreen.open(
       context,
       title: 'বায়তুলমাল রিপোর্ট — $monthStr $yearStr',
-      buildPdf: (format) => PdfExportService.generateSingleFormPdfBytes(
-        title: 'শাখার বায়তুলমাল রিপোর্ট ফরম',
-        majlisName: 'বাংলাদেশ খেলাফত মজলিস',
-        userName: _branchCtrl.text.isEmpty ? 'বায়তুলমাল সম্পাদক' : _branchCtrl.text,
-        period: '$monthStr $yearStr',
-        dataFields: {
-          'শাখার নাম': _branchCtrl.text,
-          'সর্বমোট আয়': '৳ ${_bn(_grandTotalIncome.toInt())}',
-          'সর্বমোট ব্যয়': '৳ ${_bn(_totalExpense.toInt())}',
-          'অবশিষ্ট জের (উদ্বৃত্ত)': '৳ ${_bn(_netBalance.toInt())}',
-          'কথায় (মোট টাকা)': _takaInWordsCtrl.text,
-          'বায়তুলমাল সম্পাদক স্বাক্ষর': _secretarySigCtrl.text,
-          'সভাপতি স্বাক্ষর': _presidentSigCtrl.text,
-        },
+      buildPdf: (format) => PdfExportService.generateKhelafatBaytulmalPdfBytes(
+        entry: entry,
+        incomeInWords: _takaInWordsCtrl.text,
+        expenseInWords: _takaInWordsCtrl.text,
       ),
     );
   }
