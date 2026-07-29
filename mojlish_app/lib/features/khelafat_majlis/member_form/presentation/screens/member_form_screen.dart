@@ -7,6 +7,7 @@ import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import '../bloc/member_form_bloc.dart';
 import '../bloc/member_form_event.dart';
 import '../bloc/member_form_state.dart';
+import '../../domain/entities/member.dart';
 
 class MemberFormScreen extends StatefulWidget {
   const MemberFormScreen({super.key});
@@ -50,18 +51,18 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      context.read<MemberFormBloc>().add(
-            SubmitMemberFormEvent(
-              name: _nameController.text,
-              fatherName: _fatherNameController.text,
-              educationalQualification: _educationalQualificationController.text,
-              age: _ageController.text,
-              profession: _professionController.text,
-              presentAddress: _presentAddressController.text,
-              mobile: _mobileController.text,
-              permanentAddress: _permanentAddressController.text,
-            ),
-          );
+      final member = KhelafatMajlisMember(
+        name: _nameController.text.trim(),
+        fatherName: _fatherNameController.text.trim(),
+        educationalQualification: _educationalQualificationController.text.trim(),
+        age: _ageController.text.trim(),
+        profession: _professionController.text.trim(),
+        presentAddress: _presentAddressController.text.trim(),
+        mobile: _mobileController.text.trim(),
+        permanentAddress: _permanentAddressController.text.trim(),
+        date: DateTime.now(),
+      );
+      context.read<MemberFormBloc>().add(SubmitMemberForm(member));
     }
   }
 
