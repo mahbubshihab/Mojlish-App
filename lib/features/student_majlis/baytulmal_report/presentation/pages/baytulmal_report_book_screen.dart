@@ -7,7 +7,7 @@ import '../../../../common/widgets/staggered_month_grid_book.dart';
 import 'baytulmal_report_page.dart';
 
 class BaytulmalReportBookScreen extends StatelessWidget {
-  const BaytulmalReportBookScreen({Key? key}) : super(key: key);
+  const BaytulmalReportBookScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

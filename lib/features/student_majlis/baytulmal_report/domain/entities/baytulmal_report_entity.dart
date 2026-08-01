@@ -1,3 +1,24 @@
+class BaytulmalItemEntity {
+  final String title;
+  final double amount;
+
+  const BaytulmalItemEntity({
+    required this.title,
+    required this.amount,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'amount': amount,
+      };
+
+  factory BaytulmalItemEntity.fromJson(Map<String, dynamic> json) =>
+      BaytulmalItemEntity(
+        title: json['title'] ?? '',
+        amount: (json['amount'] ?? 0).toDouble(),
+      );
+}
+
 class BaytulmalReportEntity {
   final String branch;
   final String month;
@@ -7,6 +28,8 @@ class BaytulmalReportEntity {
   final double shakhaIyanot;
   final double shuvakangkhiIyanot;
   final double ekkalinAy;
+  final List<BaytulmalItemEntity> customIncomes;
+
   final double motAy;
   final double bigotoSeshonMasherUdbritto;
   final double sorbomotAy;
@@ -18,6 +41,8 @@ class BaytulmalReportEntity {
   final double jatayat;
   final double jogajog;
   final double prochar;
+  final List<BaytulmalItemEntity> customExpenses;
+
   final double motBay;
   final double bigotoSeshonMasherGhatti;
   final double sorbomotBay;
@@ -34,6 +59,7 @@ class BaytulmalReportEntity {
     required this.shakhaIyanot,
     required this.shuvakangkhiIyanot,
     required this.ekkalinAy,
+    this.customIncomes = const [],
     required this.motAy,
     required this.bigotoSeshonMasherUdbritto,
     required this.sorbomotAy,
@@ -44,6 +70,7 @@ class BaytulmalReportEntity {
     required this.jatayat,
     required this.jogajog,
     required this.prochar,
+    this.customExpenses = const [],
     required this.motBay,
     required this.bigotoSeshonMasherGhatti,
     required this.sorbomotBay,
@@ -52,3 +79,4 @@ class BaytulmalReportEntity {
     required this.presidentSignature,
   });
 }
+

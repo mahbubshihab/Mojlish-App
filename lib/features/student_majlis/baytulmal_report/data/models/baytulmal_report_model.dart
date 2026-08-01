@@ -9,6 +9,7 @@ class BaytulmalReportModel extends BaytulmalReportEntity {
     required super.shakhaIyanot,
     required super.shuvakangkhiIyanot,
     required super.ekkalinAy,
+    super.customIncomes = const [],
     required super.motAy,
     required super.bigotoSeshonMasherUdbritto,
     required super.sorbomotAy,
@@ -19,6 +20,7 @@ class BaytulmalReportModel extends BaytulmalReportEntity {
     required super.jatayat,
     required super.jogajog,
     required super.prochar,
+    super.customExpenses = const [],
     required super.motBay,
     required super.bigotoSeshonMasherGhatti,
     required super.sorbomotBay,
@@ -28,6 +30,15 @@ class BaytulmalReportModel extends BaytulmalReportEntity {
   });
 
   factory BaytulmalReportModel.fromJson(Map<String, dynamic> json) {
+    List<BaytulmalItemEntity> parseCustomItems(String key) {
+      if (json[key] is List) {
+        return (json[key] as List)
+            .map((e) => BaytulmalItemEntity.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    }
+
     return BaytulmalReportModel(
       branch: json['branch'] ?? '',
       month: json['month'] ?? '',
@@ -36,6 +47,7 @@ class BaytulmalReportModel extends BaytulmalReportEntity {
       shakhaIyanot: (json['shakhaIyanot'] ?? 0).toDouble(),
       shuvakangkhiIyanot: (json['shuvakangkhiIyanot'] ?? 0).toDouble(),
       ekkalinAy: (json['ekkalinAy'] ?? 0).toDouble(),
+      customIncomes: parseCustomItems('customIncomes'),
       motAy: (json['motAy'] ?? 0).toDouble(),
       bigotoSeshonMasherUdbritto: (json['bigotoSeshonMasherUdbritto'] ?? 0).toDouble(),
       sorbomotAy: (json['sorbomotAy'] ?? 0).toDouble(),
@@ -46,6 +58,7 @@ class BaytulmalReportModel extends BaytulmalReportEntity {
       jatayat: (json['jatayat'] ?? 0).toDouble(),
       jogajog: (json['jogajog'] ?? 0).toDouble(),
       prochar: (json['prochar'] ?? 0).toDouble(),
+      customExpenses: parseCustomItems('customExpenses'),
       motBay: (json['motBay'] ?? 0).toDouble(),
       bigotoSeshonMasherGhatti: (json['bigotoSeshonMasherGhatti'] ?? 0).toDouble(),
       sorbomotBay: (json['sorbomotBay'] ?? 0).toDouble(),
@@ -64,6 +77,7 @@ class BaytulmalReportModel extends BaytulmalReportEntity {
       'shakhaIyanot': shakhaIyanot,
       'shuvakangkhiIyanot': shuvakangkhiIyanot,
       'ekkalinAy': ekkalinAy,
+      'customIncomes': customIncomes.map((e) => e.toJson()).toList(),
       'motAy': motAy,
       'bigotoSeshonMasherUdbritto': bigotoSeshonMasherUdbritto,
       'sorbomotAy': sorbomotAy,
@@ -74,6 +88,7 @@ class BaytulmalReportModel extends BaytulmalReportEntity {
       'jatayat': jatayat,
       'jogajog': jogajog,
       'prochar': prochar,
+      'customExpenses': customExpenses.map((e) => e.toJson()).toList(),
       'motBay': motBay,
       'bigotoSeshonMasherGhatti': bigotoSeshonMasherGhatti,
       'sorbomotBay': sorbomotBay,
@@ -83,3 +98,4 @@ class BaytulmalReportModel extends BaytulmalReportEntity {
     };
   }
 }
+
