@@ -64,7 +64,7 @@ class _PeriodPlanScreenState extends State<PeriodPlanScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.picture_as_pdf_rounded, color: Color(0xFF2563EB)),
+            icon: const Icon(Icons.picture_as_pdf_rounded, color: Color(0xFF8B5CF6)),
             tooltip: 'PDF এক্সপোর্ট',
             onPressed: _exportPdf,
           ),

@@ -14,7 +14,7 @@ class PersonalPlanBookScreen extends StatelessWidget {
     return StaggeredMonthGridBook(
       title: 'ব্যক্তিগত পরিকল্পনা বই',
       subtitle: 'বাংলাদেশ ইসলামী ছাত্র মজলিস — ব্যক্তিগত মাসিক পরিকল্পনা বই',
-      primaryColor: const Color(0xFF7C3AED),
+      primaryColor: const Color(0xFF0077B6),
       onMonthSelected: (String monthName, String year) {
         Navigator.push(
           context,
