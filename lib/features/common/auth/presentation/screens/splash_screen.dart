@@ -23,7 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkAuthAndNavigate() async {
-    await Future.delayed(const Duration(milliseconds: 600));
+    await Future.delayed(const Duration(milliseconds: 200));
     if (!mounted) return;
 
     final user = _authService.currentUser;
@@ -37,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
       );
     } else {
-      await _authService.syncUserProfile(user);
+      _authService.syncUserProfile(user);
       final activeMajlis = await UserStorageService.getActiveMajlis();
 
       if (activeMajlis == null || activeMajlis.isEmpty) {
