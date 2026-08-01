@@ -186,5 +186,7 @@ class DailyPersonalEntry {
       newspaperTime.isEmpty &&
       physicalExerciseTime.isEmpty &&
       familyWelfareTime.isEmpty &&
-      jobBusinessTime.isEmpty;
+      jobBusinessTime.isEmpty &&
+      dawah.isEmpty &&
+      socialService.isEmpty;
 }

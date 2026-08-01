@@ -122,7 +122,10 @@ class _PersonalReportTableScreenState extends State<PersonalReportTableScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+      length: widget.majlisType == MajlisType.chatro ? 3 : 2,
+      vsync: this,
+    );
 
     _dateVerController = ScrollController();
     _dataVerController = ScrollController();
@@ -562,11 +565,16 @@ class _PersonalReportTableScreenState extends State<PersonalReportTableScreen>
               labelColor: _accentGreen,
               unselectedLabelColor: _textMuted,
               labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-              tabs: const [
-                Tab(text: 'রিপোর্ট টেবিল'),
-                Tab(text: 'রিপোর্ট সামারি'),
-                Tab(text: 'মন্তব্য সমূহ'),
-              ],
+              tabs: widget.majlisType == MajlisType.chatro
+                  ? const [
+                      Tab(text: 'রিপোর্ট টেবিল'),
+                      Tab(text: 'রিপোর্ট সামারি'),
+                      Tab(text: 'মন্তব্য সমূহ'),
+                    ]
+                  : const [
+                      Tab(text: 'রিপোর্ট টেবিল'),
+                      Tab(text: 'মন্তব্য সমূহ'),
+                    ],
             ),
             elevation: 0,
           ),
@@ -574,11 +582,16 @@ class _PersonalReportTableScreenState extends State<PersonalReportTableScreen>
             primaryAccent: _accentGreen,
             child: TabBarView(
               controller: _tabController,
-              children: [
-                _buildReportTab(),
-                _buildSummaryTab(),
-                _buildCommentsTab(),
-              ],
+              children: widget.majlisType == MajlisType.chatro
+                  ? [
+                      _buildReportTab(),
+                      _buildSummaryTab(),
+                      _buildCommentsTab(),
+                    ]
+                  : [
+                      _buildReportTab(),
+                      _buildCommentsTab(),
+                    ],
             ),
           ),
         );

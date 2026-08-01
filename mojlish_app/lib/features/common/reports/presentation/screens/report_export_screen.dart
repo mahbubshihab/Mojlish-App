@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 import 'package:mojlish_app/features/common/reports/data/services/pdf_generator_service.dart';
+import 'package:mojlish_app/core/services/user_storage_service.dart';
 
 /// PDF এক্সপোর্ট স্ক্রিন — তারিখ রেঞ্জ সিলেক্ট করে রিপোর্ট এক্সপোর্ট করা যায়
 class ReportExportScreen extends StatefulWidget {
@@ -107,6 +108,19 @@ class _ReportExportScreenState extends State<ReportExportScreen> {
 
     try {
       if (widget.reportType == 'personal') {
+        final majlisName = await UserStorageService.getSelectedMajlis();
+        final String majlisTitle;
+        if (majlisName.contains('ছাত্র')) {
+          majlisTitle = 'বাংলাদেশ খেলাফত ছাত্র মজলিস';
+        } else if (majlisName.contains('যুব')) {
+          majlisTitle = 'বাংলাদেশ ইসলামী যুব মজলিস';
+        } else if (majlisName.contains('মহিলা')) {
+          majlisTitle = 'বাংলাদেশ ইসলামী মহিলা মজলিস';
+        } else if (majlisName.contains('শ্রমিক')) {
+          majlisTitle = 'বাংলাদেশ ইসলামী শ্রমিক মজলিস';
+        } else {
+          majlisTitle = 'বাংলাদেশ খেলাফত মজলিস';
+        }
         final entries = await ReportStorageService.getPersonalEntriesInRange(_fromDate!, _toDate!);
         await PdfGeneratorService.generatePersonalReportPdf(
           entries: entries,
@@ -114,6 +128,7 @@ class _ReportExportScreenState extends State<ReportExportScreen> {
           toDate: _toDate!,
           userName: _userNameCtrl.text.trim().isEmpty ? 'অজানা' : _userNameCtrl.text.trim(),
           branchName: _branchCtrl.text.trim().isEmpty ? 'অজানা' : _branchCtrl.text.trim(),
+          majlisTitle: majlisTitle,
         );
       }
     } catch (e) {

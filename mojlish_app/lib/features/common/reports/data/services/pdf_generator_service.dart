@@ -16,6 +16,7 @@ class PdfGeneratorService {
     required DateTime toDate,
     required String userName,
     required String branchName,
+    String? majlisTitle,
   }) async {
     final font = await PdfGoogleFonts.notoSansBengaliRegular();
     final boldFont = await PdfGoogleFonts.notoSansBengaliBold();
@@ -196,7 +197,7 @@ class PdfGeneratorService {
                 children: [
                   pw.Text('বিসমিল্লাহির রাহমানির রাহীম', style: pw.TextStyle(font: font, fontSize: 8)),
                   pw.SizedBox(height: 2),
-                  pw.Text('বাংলাদেশ ইসলামী যুব মজলিস', style: pw.TextStyle(font: boldFont, fontSize: 18, color: PdfColors.blue900)),
+                  pw.Text(majlisTitle ?? 'বাংলাদেশ খেলাফত মজলিস', style: pw.TextStyle(font: boldFont, fontSize: 18, color: PdfColors.blue900)),
                   pw.Text('ব্যক্তিগত তৎপরতার দৈনিক রিপোর্ট টেবিল', style: pw.TextStyle(font: boldFont, fontSize: 11)),
                   pw.SizedBox(height: 4),
                 ],
@@ -362,7 +363,7 @@ class PdfGeneratorService {
               pw.Center(
                 child: pw.Column(
                   children: [
-                    pw.Text('বাংলাদেশ ইসলামী যুব মজলিস', style: pw.TextStyle(font: boldFont, fontSize: 18, color: PdfColors.blue900)),
+                    pw.Text(majlisTitle ?? 'বাংলাদেশ খেলাফত মজলিস', style: pw.TextStyle(font: boldFont, fontSize: 18, color: PdfColors.blue900)),
                     pw.Text('ব্যক্তিগত মাসিক তৎপরতা রিপোর্ট সামারি (পরিকল্পনা বনাম অর্জন)', style: pw.TextStyle(font: boldFont, fontSize: 11)),
                     pw.SizedBox(height: 12),
                   ],
