@@ -32,16 +32,8 @@ class ZonalReportBookScreen extends StatelessWidget {
               majlisType: MajlisType.khelafat,
               initialYear: DateTime.now().year,
               initialMonth: DateTime.now().month,
+              reportCategory: ReportCategory.zonalReport,
             ),
-          ),
-        );
-      },
-      onTodayPressed: () {
-        final now = DateTime.now();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ZonalReportScreen(year: now.year, month: now.month),
           ),
         );
       },

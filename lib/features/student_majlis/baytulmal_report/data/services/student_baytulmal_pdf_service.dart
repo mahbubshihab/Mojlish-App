@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -5,6 +6,7 @@ import 'package:printing/printing.dart';
 import 'package:mojlish_app/core/constants/majlis_assets.dart';
 import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import 'package:mojlish_app/features/student_majlis/baytulmal_report/domain/entities/baytulmal_report_entity.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/pdf_preview_screen.dart';
 
 /// বাংলাদেশ ইসলামী ছাত্র মজলিস — বায়তুলমাল রিপোর্ট ডেডিকেটেড পিডিএফ সার্ভিস
 /// ডেমো ফরম্যাটের (chatro_baytulmal_p1.png) শতভাগ হুবহু ২-কলাম টেবিল ও সামারি লেআউট
@@ -13,7 +15,8 @@ class StudentBaytulmalPdfService {
   static Future<Uint8List> generatePdfBytes({
     required BaytulmalReportEntity report,
   }) async {
-    final font = await PdfExportService.loadSutonnyFont();
+    final fontRegular = await PdfExportService.loadSutonnyFont();
+    final fontBold = await PdfExportService.loadBengaliBoldFont();
 
     pw.MemoryImage? logoImage;
     try {
@@ -23,8 +26,8 @@ class StudentBaytulmalPdfService {
 
     final pdf = pw.Document(
       theme: pw.ThemeData.withFont(
-        base: font,
-        bold: font,
+        base: fontRegular,
+        bold: fontBold,
       ),
     );
 
@@ -351,7 +354,7 @@ class StudentBaytulmalPdfService {
                 ),
               ),
 
-              pw.Spacer(),
+              pw.SizedBox(height: 6),
 
               // ================= FOOTER SIGNATURE =================
               pw.Align(
@@ -383,13 +386,22 @@ class StudentBaytulmalPdfService {
   }
 
   /// শেয়ার / প্রিন্ট করার অ্যাকশন সুবিধা
-  static Future<void> generateAndSharePdf(BaytulmalReportEntity report) async {
+  static Future<void> generateAndSharePdf(BaytulmalReportEntity report, {BuildContext? context}) async {
     final bytes = await generatePdfBytes(report: report);
-    await Printing.sharePdf(
-      bytes: bytes,
-      filename:
-          'chatro_baytulmal_report_${report.branch.isEmpty ? "shakha" : report.branch}_${report.month.isEmpty ? "month" : report.month}.pdf',
-    );
+    final fileName = 'chatro_baytulmal_report_${report.branch.isEmpty ? "shakha" : report.branch}_${report.month.isEmpty ? "month" : report.month}.pdf';
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        bytes,
+        'বায়তুলমাল রিপোর্ট',
+        fileName: fileName,
+      );
+    } else {
+      await Printing.sharePdf(
+        bytes: bytes,
+        filename: fileName,
+      );
+    }
   }
 
   // Helper row builder for main tables (Taka & Poisa split)

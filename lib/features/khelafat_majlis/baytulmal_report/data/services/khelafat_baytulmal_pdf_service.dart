@@ -12,8 +12,10 @@ class KhelafatBaytulmalPdfService {
     required BaytulmalReportEntry entry,
     String? incomeInWords,
     String? expenseInWords,
+    pw.Document? pdfDocument,
   }) async {
-    final font = await PdfExportService.loadSutonnyFont();
+    final fontRegular = await PdfExportService.loadSutonnyFont();
+    final fontBold = await PdfExportService.loadBengaliBoldFont();
 
     pw.MemoryImage? logoImage;
     try {
@@ -21,12 +23,13 @@ class KhelafatBaytulmalPdfService {
       logoImage = pw.MemoryImage(bytes.buffer.asUint8List());
     } catch (_) {}
 
-    final pdf = pw.Document(
-      theme: pw.ThemeData.withFont(
-        base: font,
-        bold: font,
-      ),
-    );
+    final pdf = pdfDocument ??
+        pw.Document(
+          theme: pw.ThemeData.withFont(
+            base: fontRegular,
+            bold: fontBold,
+          ),
+        );
 
     double directIncomeSum = (double.tryParse(entry.executiveMemberAyanatTaka) ?? 0) +
         (double.tryParse(entry.subBranchAyanatTaka) ?? 0) +
@@ -108,7 +111,7 @@ class KhelafatBaytulmalPdfService {
                 child: PdfExportService.bWidget('আয়', fontSize: 11, fontWeight: pw.FontWeight.bold),
               ),
               pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                 columnWidths: const {
                   0: pw.FlexColumnWidth(6),
                   1: pw.FlexColumnWidth(2),
@@ -151,7 +154,7 @@ class KhelafatBaytulmalPdfService {
                 child: PdfExportService.bWidget('ব্যয়', fontSize: 11, fontWeight: pw.FontWeight.bold),
               ),
               pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                 columnWidths: const {
                   0: pw.FlexColumnWidth(6),
                   1: pw.FlexColumnWidth(2),
@@ -189,7 +192,7 @@ class KhelafatBaytulmalPdfService {
                 child: PdfExportService.bWidget('কথায়: ${expenseInWords ?? "........................................................................................................"}', fontSize: 9),
               ),
 
-              pw.Spacer(),
+              pw.SizedBox(height: 6),
 
               // ================= FOOTER SIGNATURES =================
               pw.Row(
@@ -208,6 +211,7 @@ class KhelafatBaytulmalPdfService {
       ),
     );
 
+    if (pdfDocument != null) return Uint8List(0);
     return pdf.save();
   }
 

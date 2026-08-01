@@ -1,20 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 import 'package:mojlish_app/features/common/reports/data/models/daily_personal_entry.dart';
 import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
+import 'package:mojlish_app/features/common/reports/data/models/baytulmal_report_entry.dart';
+import 'package:mojlish_app/features/common/reports/data/models/zonal_report_entry.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/pdf_preview_screen.dart';
+import 'package:mojlish_app/features/khelafat_majlis/branch_report/data/services/khelafat_branch_report_pdf_service.dart';
+import 'package:mojlish_app/features/khelafat_majlis/branch_plan/data/services/khelafat_branch_plan_pdf_service.dart';
+import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/data/services/khelafat_baytulmal_pdf_service.dart';
+import 'package:mojlish_app/features/khelafat_majlis/zonal_report/data/services/khelafat_zonal_pdf_service.dart';
+import 'package:mojlish_app/features/student_majlis/period_report/data/services/student_period_pdf_service.dart';
+
+/// Categories of report for dynamic header metadata fields
+enum ReportCategory {
+  personal,
+  branchReport,
+  branchPlan,
+  baytulmalReport,
+  zonalReport,
+  studentPeriodReport,
+}
 
 /// Dedicated Full-Screen Page for Report Download & Selection
 class ReportDownloadScreen extends StatefulWidget {
   final MajlisType majlisType;
   final int initialYear;
   final int initialMonth;
+  final ReportCategory? reportCategory;
 
   const ReportDownloadScreen({
     super.key,
     required this.majlisType,
     required this.initialYear,
     required this.initialMonth,
+    this.reportCategory,
   });
 
   @override
@@ -23,10 +45,20 @@ class ReportDownloadScreen extends StatefulWidget {
 
 class _ReportDownloadScreenState extends State<ReportDownloadScreen> {
   late int _year;
+  late ReportCategory _selectedCategory;
   final Set<int> _selectedMonths = {};
   bool _isGenerating = false;
   bool _useCustomAddress = false;
   final TextEditingController _customAddressController = TextEditingController();
+
+  // Header info controllers
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _branchController = TextEditingController();
+  final TextEditingController _presidentNameController = TextEditingController();
+  final TextEditingController _sessionController = TextEditingController();
+  final TextEditingController _treasurerNameController = TextEditingController();
+  final TextEditingController _zoneNameController = TextEditingController();
+  final TextEditingController _directorNameController = TextEditingController();
 
   static const _monthNames = [
     'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
@@ -38,17 +70,103 @@ class _ReportDownloadScreenState extends State<ReportDownloadScreen> {
     super.initState();
     _year = widget.initialYear;
     _selectedMonths.add(widget.initialMonth);
+    _selectedCategory = widget.reportCategory ?? ReportCategory.personal;
   }
 
   @override
   void dispose() {
     _customAddressController.dispose();
+    _nameController.dispose();
+    _branchController.dispose();
+    _presidentNameController.dispose();
+    _sessionController.dispose();
+    _treasurerNameController.dispose();
+    _zoneNameController.dispose();
+    _directorNameController.dispose();
     super.dispose();
+  }
+
+  Color get _categoryAccentColor {
+    switch (_selectedCategory) {
+      case ReportCategory.personal:
+        return const Color(0xFF10B981);
+      case ReportCategory.branchReport:
+        return const Color(0xFF2563EB);
+      case ReportCategory.branchPlan:
+        return const Color(0xFF8B5CF6);
+      case ReportCategory.baytulmalReport:
+        return const Color(0xFFD97706);
+      case ReportCategory.zonalReport:
+        return const Color(0xFF0284C7);
+      case ReportCategory.studentPeriodReport:
+        return const Color(0xFF2563EB);
+    }
   }
 
   String _bn(int n) {
     const digits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
     return n.toString().split('').map((c) => digits[int.parse(c)]).join();
+  }
+
+  String _formatMonthRange(List<int> sortedMonths) {
+    if (sortedMonths.isEmpty) return '';
+    if (sortedMonths.length == 1) return _monthNames[sortedMonths.first - 1];
+
+    bool isConsecutive = true;
+    for (int i = 0; i < sortedMonths.length - 1; i++) {
+      if (sortedMonths[i + 1] != sortedMonths[i] + 1) {
+        isConsecutive = false;
+        break;
+      }
+    }
+    if (isConsecutive) {
+      return '${_monthNames[sortedMonths.first - 1]} - ${_monthNames[sortedMonths.last - 1]}';
+    }
+    if (sortedMonths.length == 2) {
+      return '${_monthNames[sortedMonths[0] - 1]} ও ${_monthNames[sortedMonths[1] - 1]}';
+    }
+    final leading = sortedMonths.sublist(0, sortedMonths.length - 1).map((m) => _monthNames[m - 1]).join(', ');
+    final last = _monthNames[sortedMonths.last - 1];
+    return '$leading ও $last';
+  }
+
+  Map<String, String> _buildHeaderMetadata() {
+    final Map<String, String> meta = {};
+    switch (_selectedCategory) {
+      case ReportCategory.personal:
+        if (_nameController.text.trim().isNotEmpty) {
+          meta['কর্মীর নাম'] = _nameController.text.trim();
+        }
+        if (_branchController.text.trim().isNotEmpty) {
+          meta['শাখা'] = _branchController.text.trim();
+        }
+        break;
+      case ReportCategory.branchReport:
+      case ReportCategory.branchPlan:
+        if (_branchController.text.trim().isNotEmpty) {
+          meta['শাখা'] = _branchController.text.trim();
+        }
+        break;
+      case ReportCategory.baytulmalReport:
+        if (_branchController.text.trim().isNotEmpty) {
+          meta['শাখা'] = _branchController.text.trim();
+        }
+        break;
+      case ReportCategory.zonalReport:
+        if (_zoneNameController.text.trim().isNotEmpty) {
+          meta['জোন'] = _zoneNameController.text.trim();
+        }
+        break;
+      case ReportCategory.studentPeriodReport:
+        if (_branchController.text.trim().isNotEmpty) {
+          meta['শাখা'] = _branchController.text.trim();
+        }
+        if (_sessionController.text.trim().isNotEmpty) {
+          meta['সেশন'] = _sessionController.text.trim();
+        }
+        break;
+    }
+    return meta;
   }
 
   Future<void> _startPdfExport() async {
@@ -65,8 +183,136 @@ class _ReportDownloadScreenState extends State<ReportDownloadScreen> {
     setState(() => _isGenerating = true);
 
     try {
-      final config = MajlisPersonalReportConfig.getConfig(widget.majlisType);
       final sortedMonths = _selectedMonths.toList()..sort();
+      final monthRangeStr = _formatMonthRange(sortedMonths);
+
+      switch (_selectedCategory) {
+        case ReportCategory.branchReport:
+          final pdf = pw.Document(
+            theme: pw.ThemeData.withFont(
+              base: await PdfExportService.loadSutonnyFont(),
+              bold: await PdfExportService.loadBengaliBoldFont(),
+            ),
+          );
+          for (final m in sortedMonths) {
+            final branchData = await ReportStorageService.getBranchReport(_year, m);
+            final mapData = Map<String, dynamic>.from(branchData ?? {});
+            if (_branchController.text.trim().isNotEmpty) {
+              mapData['shakhaName'] = _branchController.text.trim();
+            }
+            mapData['month'] = _monthNames[m - 1];
+            mapData['year'] = _bn(_year);
+            await KhelafatBranchReportPdfService.generatePdfBytes(mapData, pdfDocument: pdf);
+          }
+          final pdfBytes = await pdf.save();
+          if (mounted) {
+            await PdfPreviewScreen.open(
+              context,
+              pdfBytes,
+              'শাখার রিপোর্ট — $monthRangeStr ${_bn(_year)}',
+            );
+          }
+          return;
+
+        case ReportCategory.branchPlan:
+          final pdf = pw.Document(
+            theme: pw.ThemeData.withFont(
+              base: await PdfExportService.loadSutonnyFont(),
+              bold: await PdfExportService.loadBengaliBoldFont(),
+            ),
+          );
+          for (final m in sortedMonths) {
+            final planData = await ReportStorageService.getBranchPlan(_year, m);
+            await KhelafatBranchPlanPdfService.generatePdfBytes(
+              shakhaName: _branchController.text.trim(),
+              month: _monthNames[m - 1],
+              year: _bn(_year),
+              data: planData ?? {},
+              pdfDocument: pdf,
+            );
+          }
+          final pdfBytes = await pdf.save();
+          if (mounted) {
+            await PdfPreviewScreen.open(
+              context,
+              pdfBytes,
+              'শাখা পরিকল্পনা — $monthRangeStr ${_bn(_year)}',
+            );
+          }
+          return;
+
+        case ReportCategory.baytulmalReport:
+          final pdf = pw.Document(
+            theme: pw.ThemeData.withFont(
+              base: await PdfExportService.loadSutonnyFont(),
+              bold: await PdfExportService.loadBengaliBoldFont(),
+            ),
+          );
+          for (final m in sortedMonths) {
+            final mapData = await ReportStorageService.getBaytulmalReport(_year, m);
+            final entry = BaytulmalReportEntry.fromMap(mapData, _year, m).copyWith(
+              branchName: _branchController.text.trim(),
+              month: _monthNames[m - 1],
+              year: _bn(_year),
+            );
+            await KhelafatBaytulmalPdfService.generatePdfBytes(entry: entry, pdfDocument: pdf);
+          }
+          final pdfBytes = await pdf.save();
+          if (mounted) {
+            await PdfPreviewScreen.open(
+              context,
+              pdfBytes,
+              'বায়তুলমাল রিপোর্ট — $monthRangeStr ${_bn(_year)}',
+            );
+          }
+          return;
+
+        case ReportCategory.zonalReport:
+          final pdf = pw.Document(
+            theme: pw.ThemeData.withFont(
+              base: await PdfExportService.loadSutonnyFont(),
+              bold: await PdfExportService.loadBengaliBoldFont(),
+            ),
+          );
+          for (final m in sortedMonths) {
+            final mapData = await ReportStorageService.getZonalReport(_year, m);
+            final entry = ZonalReportEntry.fromMap(mapData, _year, m).copyWith(
+              zoneName: _zoneNameController.text.trim(),
+              month: _monthNames[m - 1],
+              year: _bn(_year),
+            );
+            await KhelafatZonalPdfService.generatePdfBytes(entry: entry, pdfDocument: pdf);
+          }
+          final pdfBytes = await pdf.save();
+          if (mounted) {
+            await PdfPreviewScreen.open(
+              context,
+              pdfBytes,
+              'জোনাল রিপোর্ট — $monthRangeStr ${_bn(_year)}',
+            );
+          }
+          return;
+
+        case ReportCategory.studentPeriodReport:
+          final pdfBytes = await StudentPeriodPdfService.generatePdfBytes(
+            shakhaName: _branchController.text.trim(),
+            periodName: _sessionController.text.trim().isNotEmpty ? _sessionController.text.trim() : monthRangeStr,
+            data: {},
+          );
+          if (mounted) {
+            await PdfPreviewScreen.open(
+              context,
+              pdfBytes,
+              'মেয়াদী রিপোর্ট — $monthRangeStr',
+            );
+          }
+          return;
+
+        case ReportCategory.personal:
+          break;
+      }
+
+      final config = MajlisPersonalReportConfig.getConfig(widget.majlisType);
       final allEntries = await ReportStorageService.getAllPersonalEntries();
       final List<MonthReportPdfData> monthsPdfDataList = [];
 
@@ -202,13 +448,28 @@ class _ReportDownloadScreenState extends State<ReportDownloadScreen> {
           ? _customAddressController.text.trim()
           : config.address;
 
+      final headerMetadata = _buildHeaderMetadata();
+      final userNameToUse = _nameController.text.trim().isNotEmpty
+          ? _nameController.text.trim()
+          : _presidentNameController.text.trim().isNotEmpty
+              ? _presidentNameController.text.trim()
+              : _directorNameController.text.trim().isNotEmpty
+                  ? _directorNameController.text.trim()
+                  : _treasurerNameController.text.trim().isNotEmpty
+                      ? _treasurerNameController.text.trim()
+                      : 'রিপোর্ট প্রদানকারী';
+
+      if (!mounted) return;
+
       await PdfExportService.printOrDownloadMultiMonthPdf(
         majlisName: config.name,
         title: config.subtitle,
-        userName: 'রিপোর্ট প্রদানকারী',
+        userName: userNameToUse,
         monthsData: monthsPdfDataList,
         logoAssetPath: config.logoPath,
         address: addressToUse,
+        headerMetadata: headerMetadata,
+        context: context,
       );
 
       if (mounted) {
@@ -231,6 +492,180 @@ class _ReportDownloadScreenState extends State<ReportDownloadScreen> {
     } finally {
       if (mounted) setState(() => _isGenerating = false);
     }
+  }
+
+  Widget _buildHeaderInfoCard(Color cardBg, Color borderColor, Color textColor, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'রিপোর্ট হেডার ও তথ্যাবলী',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: textColor),
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryInputFields(textColor, isDark),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryInputFields(Color textColor, bool isDark) {
+    switch (_selectedCategory) {
+      case ReportCategory.personal:
+        return Column(
+          children: [
+            _buildTextField(
+              controller: _nameController,
+              label: 'কর্মীর নাম',
+              hintText: 'যেমন: আব্দুল্লাহ',
+              textColor: textColor,
+              isDark: isDark,
+              prefixIcon: Icon(Icons.person_outline_rounded, size: 18, color: _categoryAccentColor),
+            ),
+            const SizedBox(height: 12),
+            _buildTextField(
+              controller: _branchController,
+              label: 'শাখা',
+              hintText: 'যেমন: ঢাকা উত্তর শাখা',
+              textColor: textColor,
+              isDark: isDark,
+              prefixIcon: Icon(Icons.business_outlined, size: 18, color: _categoryAccentColor),
+            ),
+          ],
+        );
+      case ReportCategory.branchReport:
+      case ReportCategory.branchPlan:
+        return Column(
+          children: [
+            _buildTextField(
+              controller: _branchController,
+              label: 'শাখার নাম',
+              hintText: 'যেমন: মিরপুর শাখা',
+              textColor: textColor,
+              isDark: isDark,
+              prefixIcon: Icon(Icons.business_outlined, size: 18, color: _categoryAccentColor),
+            ),
+          ],
+        );
+      case ReportCategory.baytulmalReport:
+        return Column(
+          children: [
+            _buildTextField(
+              controller: _branchController,
+              label: 'শাখার নাম',
+              hintText: 'যেমন: মিরপুর শাখা',
+              textColor: textColor,
+              isDark: isDark,
+              prefixIcon: Icon(Icons.business_outlined, size: 18, color: _categoryAccentColor),
+            ),
+          ],
+        );
+      case ReportCategory.zonalReport:
+        return Column(
+          children: [
+            _buildTextField(
+              controller: _zoneNameController,
+              label: 'জোনের নাম',
+              hintText: 'যেমন: ঢাকা উত্তর জোন',
+              textColor: textColor,
+              isDark: isDark,
+              prefixIcon: Icon(Icons.business_outlined, size: 18, color: _categoryAccentColor),
+            ),
+          ],
+        );
+      case ReportCategory.studentPeriodReport:
+        return Column(
+          children: [
+            _buildTextField(
+              controller: _branchController,
+              label: 'শাখার নাম',
+              hintText: 'যেমন: মিরপুর শাখা',
+              textColor: textColor,
+              isDark: isDark,
+              prefixIcon: Icon(Icons.business_outlined, size: 18, color: _categoryAccentColor),
+            ),
+            const SizedBox(height: 12),
+            _buildTextField(
+              controller: _sessionController,
+              label: 'সেশন / মেয়াদ',
+              hintText: 'যেমন: ২০২৫-২০২৬',
+              textColor: textColor,
+              isDark: isDark,
+              prefixIcon: Icon(Icons.date_range_outlined, size: 18, color: _categoryAccentColor),
+            ),
+          ],
+        );
+    }
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hintText,
+    required Color textColor,
+    required bool isDark,
+    Widget? prefixIcon,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: textColor.withValues(alpha: 0.9),
+          ),
+        ),
+        const SizedBox(height: 6),
+        TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: TextStyle(
+              color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+              fontSize: 13,
+            ),
+            prefixIcon: prefixIcon,
+            filled: true,
+            fillColor: isDark
+                ? const Color(0xFF0F172A).withValues(alpha: 0.7)
+                : const Color(0xFFF1F5F9),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                width: 1.0,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                width: 1.0,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: _categoryAccentColor,
+                width: 1.8,
+              ),
+            ),
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          ),
+          style: TextStyle(fontSize: 13.5, color: textColor),
+        ),
+      ],
+    );
   }
 
   @override
@@ -256,218 +691,223 @@ class _ReportDownloadScreenState extends State<ReportDownloadScreen> {
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor),
         ),
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Year Selector Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: borderColor),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('বছর নির্বাচন', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: textColor)),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.chevron_left_rounded, size: 24),
-                        onPressed: () => setState(() => _year--),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0284C7).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
+      body: AmbientBackgroundWidget(
+        primaryAccent: _categoryAccentColor,
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Year Selector Card
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: borderColor),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('বছর নির্বাচন', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: textColor)),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.chevron_left_rounded, size: 24),
+                          onPressed: () => setState(() => _year--),
                         ),
-                        child: Text(
-                          _bn(_year),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0284C7)),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.chevron_right_rounded, size: 24),
-                        onPressed: () => setState(() => _year++),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Month Selection Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: borderColor),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'মাস নির্বাচন (${_selectedMonths.length} টি মাস)',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: textColor),
-                      ),
-                      Row(
-                        children: [
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _selectedMonths.addAll(List.generate(12, (i) => i + 1));
-                              });
-                            },
-                            child: const Text('সবগুলো', style: TextStyle(fontSize: 12.5)),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: _categoryAccentColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          TextButton(
-                            onPressed: () {
-                              setState(() => _selectedMonths.clear());
-                            },
-                            child: const Text('মুছুন', style: TextStyle(fontSize: 12.5, color: Colors.redAccent)),
+                          child: Text(
+                            _bn(_year),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _categoryAccentColor),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: List.generate(12, (index) {
-                      final m = index + 1;
-                      final isSelected = _selectedMonths.contains(m);
-                      return ChoiceChip(
-                        label: Text(_monthNames[index]),
-                        selected: isSelected,
-                        selectedColor: const Color(0xFF0284C7),
-                        labelStyle: TextStyle(
-                          fontSize: 13,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          color: isSelected ? Colors.white : textColor,
                         ),
-                        onSelected: (selected) {
-                          setState(() {
-                            if (selected) {
-                              _selectedMonths.add(m);
-                            } else {
-                              _selectedMonths.remove(m);
-                            }
-                          });
-                        },
-                      );
-                    }),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Address Selection Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: borderColor),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'পিডিএফ হেডার ঠিকানা নির্বাচন',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: textColor),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ChoiceChip(
-                          label: const Text('কেন্দ্রীয় কার্যালয়'),
-                          selected: !_useCustomAddress,
-                          selectedColor: const Color(0xFF0284C7),
-                          labelStyle: TextStyle(
-                            fontSize: 13,
-                            fontWeight: !_useCustomAddress ? FontWeight.bold : FontWeight.normal,
-                            color: !_useCustomAddress ? Colors.white : textColor,
-                          ),
-                          onSelected: (val) {
-                            if (val) setState(() => _useCustomAddress = false);
-                          },
+                        IconButton(
+                          icon: const Icon(Icons.chevron_right_rounded, size: 24),
+                          onPressed: () => setState(() => _year++),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: ChoiceChip(
-                          label: const Text('কাস্টম ঠিকানা'),
-                          selected: _useCustomAddress,
-                          selectedColor: const Color(0xFF0284C7),
-                          labelStyle: TextStyle(
-                            fontSize: 13,
-                            fontWeight: _useCustomAddress ? FontWeight.bold : FontWeight.normal,
-                            color: _useCustomAddress ? Colors.white : textColor,
-                          ),
-                          onSelected: (val) {
-                            if (val) setState(() => _useCustomAddress = true);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (_useCustomAddress) ...[
-                    const SizedBox(height: 14),
-                    TextField(
-                      controller: _customAddressController,
-                      decoration: InputDecoration(
-                        labelText: 'কাস্টম কার্যালয়ের ঠিকানা লিখুন',
-                        hintText: 'যেমন: ঢাকা উত্তর শাখা কার্যালয়, মিরপুর-১০, ঢাকা',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        isDense: true,
-                      ),
-                      style: TextStyle(fontSize: 13.5, color: textColor),
+                      ],
                     ),
                   ],
-                ],
+                ),
               ),
-            ),
-            const SizedBox(height: 28),
+              const SizedBox(height: 16),
 
-            // Minimalist Action Download Button
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton.icon(
-                onPressed: _isGenerating ? null : _startPdfExport,
-                icon: _isGenerating
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                      )
-                    : const Icon(Icons.picture_as_pdf_rounded, size: 22),
-                label: Text(
-                  _isGenerating ? 'পিডিএফ তৈরি হচ্ছে...' : 'পিডিএফ ডাউনলোড করুন',
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              // Month Selection Card
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: borderColor),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0284C7),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  elevation: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'মাস নির্বাচন (${_selectedMonths.length} টি মাস)',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: textColor),
+                        ),
+                        Row(
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _selectedMonths.addAll(List.generate(12, (i) => i + 1));
+                                });
+                              },
+                              child: const Text('সবগুলো', style: TextStyle(fontSize: 12.5)),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                setState(() => _selectedMonths.clear());
+                              },
+                              child: const Text('মুছুন', style: TextStyle(fontSize: 12.5, color: Colors.redAccent)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: List.generate(12, (index) {
+                        final m = index + 1;
+                        final isSelected = _selectedMonths.contains(m);
+                        return ChoiceChip(
+                          label: Text(_monthNames[index]),
+                          selected: isSelected,
+                          selectedColor: _categoryAccentColor,
+                          labelStyle: TextStyle(
+                            fontSize: 13,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            color: isSelected ? Colors.white : textColor,
+                          ),
+                          onSelected: (selected) {
+                            setState(() {
+                              if (selected) {
+                                _selectedMonths.add(m);
+                              } else {
+                                _selectedMonths.remove(m);
+                              }
+                            });
+                          },
+                        );
+                      }),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+
+              // Report Header & Metadata Information Card
+              _buildHeaderInfoCard(cardBg, borderColor, textColor, isDark),
+              const SizedBox(height: 16),
+
+              // Address Selection Card
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: borderColor),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'পিডিএফ হেডার ঠিকানা নির্বাচন',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: textColor),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ChoiceChip(
+                            label: const Text('কেন্দ্রীয় কার্যালয়'),
+                            selected: !_useCustomAddress,
+                            selectedColor: _categoryAccentColor,
+                            labelStyle: TextStyle(
+                              fontSize: 13,
+                              fontWeight: !_useCustomAddress ? FontWeight.bold : FontWeight.normal,
+                              color: !_useCustomAddress ? Colors.white : textColor,
+                            ),
+                            onSelected: (val) {
+                              if (val) setState(() => _useCustomAddress = false);
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: ChoiceChip(
+                            label: const Text('কাস্টম ঠিকানা'),
+                            selected: _useCustomAddress,
+                            selectedColor: _categoryAccentColor,
+                            labelStyle: TextStyle(
+                              fontSize: 13,
+                              fontWeight: _useCustomAddress ? FontWeight.bold : FontWeight.normal,
+                              color: _useCustomAddress ? Colors.white : textColor,
+                            ),
+                            onSelected: (val) {
+                              if (val) setState(() => _useCustomAddress = true);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_useCustomAddress) ...[
+                      const SizedBox(height: 14),
+                      _buildTextField(
+                        controller: _customAddressController,
+                        label: 'কাস্টম কার্যালয়ের ঠিকানা লিখুন',
+                        hintText: 'যেমন: ঢাকা উত্তর শাখা কার্যালয়, মিরপুর-১০, ঢাকা',
+                        textColor: textColor,
+                        isDark: isDark,
+                        prefixIcon: Icon(Icons.location_on_outlined, size: 18, color: _categoryAccentColor),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 28),
+
+              // Minimalist Action Download Button
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: _isGenerating ? null : _startPdfExport,
+                  icon: _isGenerating
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Icon(Icons.picture_as_pdf_rounded, size: 22),
+                  label: Text(
+                    _isGenerating ? 'পিডিএফ তৈরি হচ্ছে...' : 'পিডিএফ ডাউনলোড করুন',
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _categoryAccentColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    elevation: 2,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

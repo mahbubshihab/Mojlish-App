@@ -304,6 +304,7 @@ class _JoinOrganizationScreenState extends State<JoinOrganizationScreen> {
                                   'বর্তমান ঠিকানা': _currentAddrCtrl.text.trim(),
                                   'জেলা': _districtCtrl.text.trim(),
                                 },
+                                context: context,
                               );
                             },
                             icon: const Icon(Icons.picture_as_pdf, color: Colors.black, size: 16),
@@ -571,9 +572,10 @@ class _JoinOrganizationScreenState extends State<JoinOrganizationScreen> {
               ),
             ),
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
   }
 
   Widget _buildBloodGroupDropdown(Color textLight, Color textMuted, Color borderColor, Color primary) {

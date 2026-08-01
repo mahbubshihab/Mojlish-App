@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:mojlish_app/core/error/failures.dart';
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/general_plan_entity.dart';
 import '../../domain/repositories/general_plan_repository.dart';
 import '../datasources/general_plan_remote_datasource.dart';

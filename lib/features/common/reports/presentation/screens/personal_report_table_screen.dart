@@ -2,13 +2,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
-import 'package:mojlish_app/core/widgets/unsaved_changes_dialog.dart';
 import 'package:mojlish_app/features/common/reports/data/models/daily_personal_entry.dart';
 import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
 import 'package:mojlish_app/features/common/reports/data/models/monthly_comment.dart';
 import 'package:mojlish_app/features/common/reports/data/models/monthly_plan.dart';
-import 'package:mojlish_app/features/common/reports/data/services/pdf_generator_service.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/report_download_screen.dart';
 import 'daily_entry_screen.dart';
 
 /// মাসিক রিপোর্ট টেবিল স্ক্রিন — এক্সেল শিটের মতো ১ থেকে ৩১ তারিখের কলাম বিবরণ ও ইনপুট
@@ -420,7 +419,12 @@ class _PersonalReportTableScreenState extends State<PersonalReportTableScreen>
     final date = DateTime(widget.year, widget.month, day);
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => DailyEntryScreen(date: date)),
+      MaterialPageRoute(
+        builder: (_) => DailyEntryScreen(
+          date: date,
+          majlisType: widget.majlisType,
+        ),
+      ),
     );
     if (result == true) _loadData();
   }
@@ -945,63 +949,18 @@ class _PersonalReportTableScreenState extends State<PersonalReportTableScreen>
                 child: SizedBox(
                   height: 52,
                   child: ElevatedButton.icon(
-                    onPressed: () async {
+                    onPressed: () {
                       _savePlan();
-                      final plan = MonthlyPlan(
-                        year: widget.year,
-                        month: widget.month,
-                        quranAyahCount: _quranAyahCountCtrl.text.trim(),
-                        quranSuraPara: _quranSuraParaCtrl.text.trim(),
-                        quranDarsCount: _quranDarsCountCtrl.text.trim(),
-                        quranDarsTopic: _quranDarsTopicCtrl.text.trim(),
-                        quranMemorizeAyah: _quranMemorizeAyahCtrl.text.trim(),
-                        hadithCount: _hadithCountCtrl.text.trim(),
-                        hadithTopic: _hadithTopicCtrl.text.trim(),
-                        hadithDarsCount: _hadithDarsCountCtrl.text.trim(),
-                        hadithDarsTopic: _hadithDarsTopicCtrl.text.trim(),
-                        hadithMemorizeCount: _hadithMemorizeCountCtrl.text.trim(),
-                        hadithMemorizeTopic: _hadithMemorizeTopicCtrl.text.trim(),
-                        litPages: _litPagesCtrl.text.trim(),
-                        litBook: _litBookCtrl.text.trim(),
-                        litNotes: _litNotesCtrl.text.trim(),
-                        academicHours: _academicHoursCtrl.text.trim(),
-                        jamaatPrayerWaqt: _jamaatPrayerWaqtCtrl.text.trim(),
-                        selfAnalysisDays: _selfAnalysisDaysCtrl.text.trim(),
-                        naflPrayer: _naflPrayerCtrl.text.trim(),
-                        friendTargetCount: _friendTargetCountCtrl.text.trim(),
-                        friendTargetNames: _friendTargetNamesCtrl.text.trim(),
-                        primaryMemberTargetCount: _primaryMemberTargetCountCtrl.text.trim(),
-                        primaryMemberTargetNames: _primaryMemberTargetNamesCtrl.text.trim(),
-                        dawahBookletCount: _dawahBookletCountCtrl.text.trim(),
-                        studentReviewCount: _studentReviewCountCtrl.text.trim(),
-                        supporterTargetCount: _supporterTargetCountCtrl.text.trim(),
-                        supporterTargetNames: _supporterTargetNamesCtrl.text.trim(),
-                        giftSmsCount: _giftSmsCountCtrl.text.trim(),
-                        groupDawahCount: _groupDawahCountCtrl.text.trim(),
-                        otherDawahMaterials: _otherDawahMaterialsCtrl.text.trim(),
-                        upgradeWorkerCount: _upgradeWorkerCountCtrl.text.trim(),
-                        upgradeWorkerNames: _upgradeWorkerNamesCtrl.text.trim(),
-                        meetingsCount: _meetingsCountCtrl.text.trim(),
-                        orgHours: _orgHoursCtrl.text.trim(),
-                        baytulmalAmount: _baytulmalAmountCtrl.text.trim(),
-                        workerContactsCount: _workerContactsCountCtrl.text.trim(),
-                        workerContactsNames: _workerContactsNamesCtrl.text.trim(),
-                        newspaperMinutes: _newspaperMinutesCtrl.text.trim(),
-                        physicalExerciseDays: _physicalExerciseDaysCtrl.text.trim(),
-                        technicalSkillHours: _technicalSkillHoursCtrl.text.trim(),
-                        familyTimeHours: _familyTimeHoursCtrl.text.trim(),
-                        otherNotes: _otherNotesCtrl.text.trim(),
-                        memberUpgradeTargetCount: _memberUpgradeTargetCountCtrl.text.trim(),
-                        memberUpgradeTargetNames: _memberUpgradeTargetNamesCtrl.text.trim(),
-                        associateUpgradeTargetCount: _associateUpgradeTargetCountCtrl.text.trim(),
-                        associateUpgradeTargetNames: _associateUpgradeTargetNamesCtrl.text.trim(),
-                      );
-                      await PdfGeneratorService.generatePersonalPlanPdf(
-                        plan: plan,
-                        userName: 'ব্যবহারকারী',
-                        branchName: 'শাখা কার্যালয়',
-                        year: widget.year,
-                        month: widget.month,
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ReportDownloadScreen(
+                            majlisType: widget.majlisType,
+                            reportCategory: ReportCategory.personal,
+                            initialYear: widget.year,
+                            initialMonth: widget.month,
+                          ),
+                        ),
                       );
                     },
                     icon: const Icon(Icons.picture_as_pdf, color: Colors.black, size: 18),

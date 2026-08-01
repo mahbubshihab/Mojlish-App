@@ -1,11 +1,19 @@
+import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:bijoy_helper/bijoy_helper.dart';
 import '../models/daily_personal_entry.dart';
 import '../models/baytulmal_report_entry.dart';
 import '../models/monthly_plan.dart';
 import 'report_storage_service.dart';
 import 'package:mojlish_app/core/services/pdf_export_service.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/pdf_preview_screen.dart';
+
+String b(String text) {
+  if (text.isEmpty || text == '-') return text;
+  return text.replaceAll('_', '.').replaceAll('✓', '√').toBijoy;
+}
 
 /// PDF জেনারেটর সার্ভিস — রিপোর্ট থেকে PDF তৈরি ও শেয়ার করে
 class PdfGeneratorService {
@@ -17,9 +25,10 @@ class PdfGeneratorService {
     required String userName,
     required String branchName,
     String? majlisTitle,
+    BuildContext? context,
   }) async {
-    final font = await PdfGoogleFonts.notoSansBengaliRegular();
-    final boldFont = await PdfGoogleFonts.notoSansBengaliBold();
+    final font = await PdfExportService.loadSutonnyFont();
+    final boldFont = await PdfExportService.loadBengaliBoldFont();
 
     final pdf = pw.Document(
       theme: pw.ThemeData.withFont(
@@ -195,10 +204,10 @@ class PdfGeneratorService {
             pw.Center(
               child: pw.Column(
                 children: [
-                  pw.Text('বিসমিল্লাহির রাহমানির রাহীম', style: pw.TextStyle(font: font, fontSize: 8)),
+                  pw.Text(b('বিসমিল্লাহির রাহমানির রাহীম'), style: pw.TextStyle(font: font, fontSize: 8)),
                   pw.SizedBox(height: 2),
-                  pw.Text(majlisTitle ?? 'বাংলাদেশ খেলাফত মজলিস', style: pw.TextStyle(font: boldFont, fontSize: 18, color: PdfColors.blue900)),
-                  pw.Text('ব্যক্তিগত তৎপরতার দৈনিক রিপোর্ট টেবিল', style: pw.TextStyle(font: boldFont, fontSize: 11)),
+                  pw.Text(b(majlisTitle ?? 'বাংলাদেশ খেলাফত মজলিস'), style: pw.TextStyle(font: boldFont, fontSize: 18, color: PdfColors.blue900)),
+                  pw.Text(b('ব্যক্তিগত তৎপরতার দৈনিক রিপোর্ট টেবিল'), style: pw.TextStyle(font: boldFont, fontSize: 11)),
                   pw.SizedBox(height: 4),
                 ],
               ),
@@ -207,29 +216,29 @@ class PdfGeneratorService {
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('কর্মীর নাম: $userName', style: pw.TextStyle(font: font, fontSize: 8)),
-                pw.Text('শাখা: $branchName', style: pw.TextStyle(font: font, fontSize: 8)),
-                pw.Text('রিপোর্ট মাস: ${_formatDateMonth(fromDate)}', style: pw.TextStyle(font: font, fontSize: 8)),
+                pw.Text(b('কর্মীর নাম: $userName'), style: pw.TextStyle(font: font, fontSize: 8)),
+                pw.Text(b('শাখা: $branchName'), style: pw.TextStyle(font: font, fontSize: 8)),
+                pw.Text(b('রিপোর্ট মাস: ${_formatDateMonth(fromDate)}'), style: pw.TextStyle(font: font, fontSize: 8)),
               ],
             ),
             pw.SizedBox(height: 6),
             // Table
             pw.Table(
               border: pw.TableBorder.all(color: PdfColors.grey500, width: 0.5),
-              columnWidths: {
-                0: const pw.FixedColumnWidth(26), // Date
-                1: const pw.FlexColumnWidth(1.2), // Quran
-                2: const pw.FlexColumnWidth(1.1), // Hadith
-                3: const pw.FlexColumnWidth(1.1), // Lit
-                4: const pw.FlexColumnWidth(0.8), // Textbook
-                5: const pw.FlexColumnWidth(0.8), // Prayer
-                6: const pw.FlexColumnWidth(0.7), // Self analysis
-                7: const pw.FlexColumnWidth(0.8), // Friend Contact
-                8: const pw.FlexColumnWidth(0.8), // Dawah materials
-                9: const pw.FlexColumnWidth(1.0), // Meetings
-                10: const pw.FlexColumnWidth(0.8), // Worker contact
-                11: const pw.FlexColumnWidth(0.8), // Org time
-                12: const pw.FlexColumnWidth(1.0), // Misc
+              columnWidths: const {
+                0: pw.FixedColumnWidth(28), // Date
+                1: pw.FlexColumnWidth(1.3), // Quran
+                2: pw.FlexColumnWidth(1.3), // Hadith
+                3: pw.FlexColumnWidth(1.2), // Lit
+                4: pw.FlexColumnWidth(0.9), // Textbook
+                5: pw.FlexColumnWidth(0.8), // Prayer
+                6: pw.FlexColumnWidth(1.1), // Self analysis
+                7: pw.FlexColumnWidth(0.9), // Friend Contact
+                8: pw.FlexColumnWidth(0.9), // Dawah materials
+                9: pw.FlexColumnWidth(1.1), // Meetings
+                10: pw.FlexColumnWidth(0.9), // Worker contact
+                11: pw.FlexColumnWidth(0.9), // Org time
+                12: pw.FlexColumnWidth(1.1), // Misc
               },
               children: [
                 // Header row
@@ -238,7 +247,7 @@ class PdfGeneratorService {
                   children: headers.map((h) => pw.Container(
                     alignment: pw.Alignment.center,
                     padding: const pw.EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-                    child: pw.Text(h, style: pw.TextStyle(font: boldFont, fontSize: 6), textAlign: pw.TextAlign.center),
+                    child: pw.Text(b(h), style: pw.TextStyle(font: boldFont, fontSize: 8), textAlign: pw.TextAlign.center),
                   )).toList(),
                 ),
                 // Data rows
@@ -419,7 +428,7 @@ class PdfGeneratorService {
               else
                 pw.Text('কোনো মন্তব্য পাওয়া যায়নি।', style: pw.TextStyle(font: font, fontSize: 9, color: PdfColors.grey600)),
 
-              pw.Spacer(),
+              pw.SizedBox(height: 6),
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
@@ -445,22 +454,42 @@ class PdfGeneratorService {
       ),
     );
 
-    await Printing.sharePdf(
-      bytes: await pdf.save(),
-      filename: 'personal_report_${_formatDateFile(fromDate)}_to_${_formatDateFile(toDate)}.pdf',
-    );
+    final pdfBytes = await pdf.save();
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        'ব্যক্তিগত রিপোর্ট',
+        fileName: 'personal_report_${_formatDateFile(fromDate)}_to_${_formatDateFile(toDate)}.pdf',
+      );
+    } else {
+      await Printing.sharePdf(
+        bytes: pdfBytes,
+        filename: 'personal_report_${_formatDateFile(fromDate)}_to_${_formatDateFile(toDate)}.pdf',
+      );
+    }
   }
 
   /// বায়তুলমাল রিপোর্ট PDF তৈরি করা
   static Future<void> generateBaytulmalReportPdf({
     required BaytulmalReportEntry entry,
+    BuildContext? context,
   }) async {
     final pdfBytes = await PdfExportService.generateKhelafatBaytulmalPdfBytes(entry: entry);
 
-    await Printing.sharePdf(
-      bytes: pdfBytes,
-      filename: 'baytulmal_report_${entry.year}_${entry.month}.pdf',
-    );
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        'বায়তুলমাল রিপোর্ট',
+        fileName: 'baytulmal_report_${entry.year}_${entry.month}.pdf',
+      );
+    } else {
+      await Printing.sharePdf(
+        bytes: pdfBytes,
+        filename: 'baytulmal_report_${entry.year}_${entry.month}.pdf',
+      );
+    }
   }
 
   // Helper widgets
@@ -468,7 +497,7 @@ class PdfGeneratorService {
     return pw.Padding(
       padding: const pw.EdgeInsets.all(3),
       child: pw.Text(
-        text,
+        b(text),
         style: pw.TextStyle(
           font: font,
           fontSize: fontSize,
@@ -482,7 +511,7 @@ class PdfGeneratorService {
   static pw.Widget _headerCell(String text, pw.Font font) {
     return pw.Padding(
       padding: const pw.EdgeInsets.all(5),
-      child: pw.Text(text, style: pw.TextStyle(font: font, fontSize: 10)),
+      child: pw.Text(b(text), style: pw.TextStyle(font: font, fontSize: 10)),
     );
   }
 
@@ -491,7 +520,7 @@ class PdfGeneratorService {
       width: double.infinity,
       color: PdfColors.blue100,
       padding: const pw.EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      child: pw.Text(title, style: pw.TextStyle(font: boldFont, fontSize: 11)),
+      child: pw.Text(b(title), style: pw.TextStyle(font: boldFont, fontSize: 11)),
     );
   }
 
@@ -499,11 +528,11 @@ class PdfGeneratorService {
     return pw.TableRow(children: [
       pw.Padding(
         padding: const pw.EdgeInsets.all(3),
-        child: pw.Text(label, style: pw.TextStyle(font: font, fontSize: 8)),
+        child: pw.Text(b(label), style: pw.TextStyle(font: font, fontSize: 8)),
       ),
       pw.Padding(
         padding: const pw.EdgeInsets.all(3),
-        child: pw.Text(amount, style: pw.TextStyle(font: font, fontSize: 8), textAlign: pw.TextAlign.right),
+        child: pw.Text(b(amount), style: pw.TextStyle(font: font, fontSize: 8), textAlign: pw.TextAlign.right),
       ),
       pw.Padding(padding: const pw.EdgeInsets.all(3), child: pw.Text('', style: pw.TextStyle(font: font, fontSize: 8))),
     ]);
@@ -527,9 +556,10 @@ class PdfGeneratorService {
     required String district,
     required String joinDate,
     required String fbLink,
+    BuildContext? context,
   }) async {
-    final font = await PdfGoogleFonts.notoSansBengaliRegular();
-    final boldFont = await PdfGoogleFonts.notoSansBengaliBold();
+    final font = await PdfExportService.loadSutonnyFont();
+    final boldFont = await PdfExportService.loadBengaliBoldFont();
 
     final pdf = pw.Document(
       theme: pw.ThemeData.withFont(
@@ -674,9 +704,18 @@ class PdfGeneratorService {
       ),
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save(),
-    );
+    final pdfBytes = await pdf.save();
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        'প্রাথমিক সদস্য ফরম',
+      );
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+      );
+    }
   }
 
   static pw.Widget _pdfRow(pw.Font font, pw.Font boldFont, String label, String value) {
@@ -684,11 +723,11 @@ class PdfGeneratorService {
       padding: const pw.EdgeInsets.symmetric(vertical: 4),
       child: pw.Row(
         children: [
-          pw.Text(label, style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.grey800)),
+          pw.Text(b(label), style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.grey800)),
           pw.SizedBox(width: 6),
           pw.Expanded(
             child: pw.Text(
-              value,
+              b(value),
               style: pw.TextStyle(font: font, fontSize: 10, color: PdfColors.black),
             ),
           ),
@@ -703,14 +742,14 @@ class PdfGeneratorService {
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text(label, style: pw.TextStyle(font: font, fontSize: 9)),
+          pw.Text(b(label), style: pw.TextStyle(font: font, fontSize: 9)),
           pw.Row(
             children: [
-              pw.Text('পরিকল্পনা: ', style: pw.TextStyle(font: font, fontSize: 8, color: PdfColors.grey700)),
-              pw.Text(target, style: pw.TextStyle(font: boldFont, fontSize: 8.5)),
+              pw.Text(b('পরিকল্পনা: '), style: pw.TextStyle(font: font, fontSize: 8, color: PdfColors.grey700)),
+              pw.Text(b(target), style: pw.TextStyle(font: boldFont, fontSize: 8.5)),
               pw.SizedBox(width: 12),
-              pw.Text('অর্জিত: ', style: pw.TextStyle(font: font, fontSize: 8, color: PdfColors.grey700)),
-              pw.Text(actual, style: pw.TextStyle(font: boldFont, fontSize: 8.5, color: PdfColors.green800)),
+              pw.Text(b('অর্জিত: '), style: pw.TextStyle(font: font, fontSize: 8, color: PdfColors.grey700)),
+              pw.Text(b(actual), style: pw.TextStyle(font: boldFont, fontSize: 8.5, color: PdfColors.green800)),
             ],
           ),
         ],
@@ -735,9 +774,10 @@ class PdfGeneratorService {
     required String branchName,
     required int year,
     required int month,
+    BuildContext? context,
   }) async {
-    final font = await PdfGoogleFonts.notoSansBengaliRegular();
-    final boldFont = await PdfGoogleFonts.notoSansBengaliBold();
+    final font = await PdfExportService.loadSutonnyFont();
+    final boldFont = await PdfExportService.loadBengaliBoldFont();
 
     final pdf = pw.Document(
       theme: pw.ThemeData.withFont(
@@ -757,10 +797,10 @@ class PdfGeneratorService {
               pw.Center(
                 child: pw.Column(
                   children: [
-                    pw.Text('বিসমিল্লাহির রাহমানির রাহীম', style: pw.TextStyle(font: font, fontSize: 10)),
+                    pw.Text(b('বিসমিল্লাহির রাহমানির রাহীম'), style: pw.TextStyle(font: font, fontSize: 10)),
                     pw.SizedBox(height: 4),
-                    pw.Text('বাংলাদেশ ইসলামী যুব মজলিস', style: pw.TextStyle(font: boldFont, fontSize: 20, color: PdfColors.blue900)),
-                    pw.Text('ব্যক্তিগত মাসিক পরিকল্পনা (টার্গেট)', style: pw.TextStyle(font: boldFont, fontSize: 12)),
+                    pw.Text(b('বাংলাদেশ ইসলামী যুব মজলিস'), style: pw.TextStyle(font: boldFont, fontSize: 20, color: PdfColors.blue900)),
+                    pw.Text(b('ব্যক্তিগত মাসিক পরিকল্পনা (টার্গেট)'), style: pw.TextStyle(font: boldFont, fontSize: 12)),
                     pw.SizedBox(height: 10),
                   ],
                 ),
@@ -769,9 +809,9 @@ class PdfGeneratorService {
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text('কর্মীর নাম: $userName', style: pw.TextStyle(font: font, fontSize: 9)),
-                  pw.Text('শাখা: $branchName', style: pw.TextStyle(font: font, fontSize: 9)),
-                  pw.Text('মাস: ${_formatDateMonth(DateTime(year, month))}', style: pw.TextStyle(font: font, fontSize: 9)),
+                  pw.Text(b('কর্মীর নাম: $userName'), style: pw.TextStyle(font: font, fontSize: 9)),
+                  pw.Text(b('শাখা: $branchName'), style: pw.TextStyle(font: font, fontSize: 9)),
+                  pw.Text(b('মাস: ${_formatDateMonth(DateTime(year, month))}'), style: pw.TextStyle(font: font, fontSize: 9)),
                 ],
               ),
               pw.SizedBox(height: 12),
@@ -834,16 +874,16 @@ class PdfGeneratorService {
                 _pdfKeyValue('সহযোগী সদস্য স্তরে উন্নীতকরণ:', plan.associateUpgradeTargetCount),
               ]),
 
-              pw.Spacer(),
+              pw.SizedBox(height: 6),
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text('তারিখ: ________________', style: pw.TextStyle(font: font, fontSize: 9)),
+                  pw.Text(b('তারিখ: ________________'), style: pw.TextStyle(font: font, fontSize: 9)),
                   pw.Column(
                     children: [
                       pw.Container(width: 120, height: 0.5, color: PdfColors.black),
                       pw.SizedBox(height: 4),
-                      pw.Text('কর্মীর স্বাক্ষর', style: pw.TextStyle(font: font, fontSize: 9)),
+                      pw.Text(b('কর্মীর স্বাক্ষর'), style: pw.TextStyle(font: font, fontSize: 9)),
                     ],
                   ),
                 ],
@@ -854,9 +894,18 @@ class PdfGeneratorService {
       ),
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save(),
-    );
+    final pdfBytes = await pdf.save();
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        'ব্যক্তিগত মাসিক পরিকল্পনা',
+      );
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+      );
+    }
   }
 
   static pw.Widget _pdfPlanRowGroup(pw.Font boldFont, pw.Font font, String title, List<pw.Widget> items) {
@@ -865,7 +914,7 @@ class PdfGeneratorService {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(title, style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.blue800)),
+          pw.Text(b(title), style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.blue800)),
           pw.SizedBox(height: 4),
           pw.Wrap(
             spacing: 12,
@@ -883,9 +932,9 @@ class PdfGeneratorService {
       child: pw.Row(
         mainAxisSize: pw.MainAxisSize.min,
         children: [
-          pw.Text(key, style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700)),
+          pw.Text(b(key), style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700)),
           pw.SizedBox(width: 3),
-          pw.Text(value.isEmpty ? '-' : value, style: const pw.TextStyle(fontSize: 8, color: PdfColors.black)),
+          pw.Text(b(value.isEmpty ? '-' : value), style: const pw.TextStyle(fontSize: 8, color: PdfColors.black)),
         ],
       ),
     );

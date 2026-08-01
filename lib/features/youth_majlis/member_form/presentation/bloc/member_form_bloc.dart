@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'member_form_event.dart';
 import 'member_form_state.dart';
-import 'package:mojlish_app/features/youth_majlis/member_form/domain/repositories/member_form_repository.dart';
+import '../../domain/repositories/member_form_repository.dart';
 
 class MemberFormBloc extends Bloc<MemberFormEvent, MemberFormState> {
   final MemberFormRepository repository;

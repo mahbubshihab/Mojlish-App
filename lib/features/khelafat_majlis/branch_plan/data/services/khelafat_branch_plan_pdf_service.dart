@@ -11,8 +11,10 @@ class KhelafatBranchPlanPdfService {
     required String month,
     required String year,
     required Map<String, dynamic> data,
+    pw.Document? pdfDocument,
   }) async {
-    final font = await PdfExportService.loadSutonnyFont();
+    final fontRegular = await PdfExportService.loadSutonnyFont();
+    final fontBold = await PdfExportService.loadBengaliBoldFont();
 
     pw.MemoryImage? logoImage;
     try {
@@ -20,12 +22,13 @@ class KhelafatBranchPlanPdfService {
       logoImage = pw.MemoryImage(bytes.buffer.asUint8List());
     } catch (_) {}
 
-    final pdf = pw.Document(
-      theme: pw.ThemeData.withFont(
-        base: font,
-        bold: font,
-      ),
-    );
+    final pdf = pdfDocument ??
+        pw.Document(
+          theme: pw.ThemeData.withFont(
+            base: fontRegular,
+            bold: fontBold,
+          ),
+        );
 
     // PAGE 1: শাখার পরিকল্পনা ফরম (পৃষ্ঠা ১)
     pdf.addPage(
@@ -75,7 +78,7 @@ class KhelafatBranchPlanPdfService {
 
               // 1. জনশক্তি (Table)
               pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                 columnWidths: const {
                   0: pw.FlexColumnWidth(3.5),
                   1: pw.FlexColumnWidth(2),
@@ -95,7 +98,7 @@ class KhelafatBranchPlanPdfService {
 
               // 2. দাওয়াত ও গণসংযোগ (Table)
               pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                 columnWidths: const {
                   0: pw.FlexColumnWidth(3),
                   1: pw.FlexColumnWidth(1.2),
@@ -124,7 +127,7 @@ class KhelafatBranchPlanPdfService {
 
               // 3. সংগঠন (Table)
               pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                 columnWidths: const {
                   0: pw.FlexColumnWidth(2.5),
                   1: pw.FlexColumnWidth(1.5),
@@ -148,7 +151,7 @@ class KhelafatBranchPlanPdfService {
 
               // 4. বায়তুলমাল (Table)
               pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                 columnWidths: const {
                   0: pw.FlexColumnWidth(2.5),
                   1: pw.FlexColumnWidth(2.5),
@@ -171,7 +174,7 @@ class KhelafatBranchPlanPdfService {
 
               // 5. সফর (Table)
               pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                 columnWidths: const {
                   0: pw.FlexColumnWidth(1.5),
                   1: pw.FlexColumnWidth(1.5),
@@ -204,7 +207,7 @@ class KhelafatBranchPlanPdfService {
               // 1. সভাসমূহ (Table)
               _buildSectionTitle('সভাসমূহ'),
               pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                 columnWidths: const {
                   0: pw.FlexColumnWidth(3.5),
                   1: pw.FlexColumnWidth(1),
@@ -231,7 +234,7 @@ class KhelafatBranchPlanPdfService {
               // 2. প্রশিক্ষণ (Table)
               _buildSectionTitle('প্রশিক্ষণ'),
               pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                 columnWidths: const {
                   0: pw.FlexColumnWidth(3.5),
                   1: pw.FlexColumnWidth(1),
@@ -265,7 +268,7 @@ class KhelafatBranchPlanPdfService {
                       children: [
                         _buildSectionTitle('দফতর'),
                         pw.Table(
-                          border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                          border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                           columnWidths: const {
                             0: pw.FlexColumnWidth(3),
                             1: pw.FlexColumnWidth(1),
@@ -273,7 +276,7 @@ class KhelafatBranchPlanPdfService {
                           },
                           children: [
                             _buildTableHeader(['বিবরণ', 'সংখ্যা', 'বিষয়']),
-                            _buildSimpleRow('সার্কুলার প্রেরণ', data['circularCount'] ?? ''),
+                            _buildSimpleRow('সার্কুলার প্রেরণ', data['circularRec'] ?? data['circularCount'] ?? ''),
                             _buildSimpleRow('চিঠি প্রেরণ', data['letterCount'] ?? ''),
                           ],
                         ),
@@ -286,14 +289,14 @@ class KhelafatBranchPlanPdfService {
                       children: [
                         _buildSectionTitle('প্রচার'),
                         pw.Table(
-                          border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                          border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                           columnWidths: const {
                             0: pw.FlexColumnWidth(3),
                             1: pw.FlexColumnWidth(2),
                           },
                           children: [
                             _buildTableHeader(['বিবরণ', 'মিডিয়ায় প্রেরিত']),
-                            _buildSimple2ColRow('সংবাদ বিজ্ঞপ্তি', data['pressReleaseCount'] ?? ''),
+                            _buildSimple2ColRow('সংবাদ বিজ্ঞপ্তি', data['pressRelease'] ?? data['pressReleaseCount'] ?? ''),
                             _buildSimple2ColRow('বিবৃতি / বাণী', data['statementCount'] ?? ''),
                           ],
                         ),
@@ -307,7 +310,7 @@ class KhelafatBranchPlanPdfService {
               // 4. প্রকাশনা ও পাঠাগার
               _buildSectionTitle('প্রকাশনা ও পাঠাগার'),
               pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                 columnWidths: const {
                   0: pw.FlexColumnWidth(3),
                   1: pw.FlexColumnWidth(2),
@@ -316,7 +319,7 @@ class KhelafatBranchPlanPdfService {
                 children: [
                   _buildTableHeader(['বিবরণ', 'সংখ্যা', 'উপলক্ষ']),
                   _buildSimpleRow('প্রকাশনা বিক্রি ও বিতরণ', data['publicationSale'] ?? ''),
-                  _buildSimpleRow('পাঠাগার বই বৃদ্ধি', data['libraryBookAdd'] ?? ''),
+                  _buildSimpleRow('পাঠাগার বই বৃদ্ধি', data['libraryTarget'] ?? data['libraryBookAdd'] ?? ''),
                 ],
               ),
               pw.SizedBox(height: 8),
@@ -324,7 +327,7 @@ class KhelafatBranchPlanPdfService {
               // 5. সমাজকল্যাণ (Table)
               _buildSectionTitle('সমাজকল্যাণ'),
               pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                 columnWidths: const {
                   0: pw.FlexColumnWidth(3),
                   1: pw.FlexColumnWidth(2),
@@ -336,11 +339,11 @@ class KhelafatBranchPlanPdfService {
                   _buildIncomeExpenseRow('নিয়মিত অনুদান', data['regDonation'] ?? '', 'চিকিৎসা সেবা', data['medService'] ?? ''),
                   _buildIncomeExpenseRow('এককালীন অনুদান', data['onetimeDonation'] ?? '', 'পুনর্বাসন সহায়তা', data['rehabSupport'] ?? ''),
                   _buildIncomeExpenseRow('যাকাত', data['zakatDonation'] ?? '', 'ত্রাণ তৎপরতা', data['reliefSupport'] ?? ''),
-                  _buildIncomeExpenseRow('মোট আয়', data['socialTotalIncome'] ?? '', 'মোট ব্যয়', data['socialTotalExpense'] ?? '', isBold: true),
+                  _buildIncomeExpenseRow('মোট আয়', data['socialWelfareTarget'] ?? data['socialTotalIncome'] ?? '', 'মোট ব্যয়', data['socialTotalExpense'] ?? '', isBold: true),
                 ],
               ),
 
-              pw.Spacer(),
+              pw.SizedBox(height: 6),
 
               // Footer
               pw.Row(
@@ -357,6 +360,7 @@ class KhelafatBranchPlanPdfService {
       ),
     );
 
+    if (pdfDocument != null) return Uint8List(0);
     return pdf.save();
   }
 

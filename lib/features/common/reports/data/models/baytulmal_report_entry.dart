@@ -156,6 +156,16 @@ class BaytulmalReportEntry {
     'remarks': remarks,
   };
 
+  factory BaytulmalReportEntry.fromMap(Map<String, dynamic>? map, [int? year, int? month]) {
+    if (map == null) {
+      return BaytulmalReportEntry(
+        year: year?.toString() ?? '',
+        month: month?.toString() ?? '',
+      );
+    }
+    return BaytulmalReportEntry.fromJson(map);
+  }
+
   factory BaytulmalReportEntry.fromJson(Map<String, dynamic> json) {
     return BaytulmalReportEntry(
       month: json['month'] ?? '',
@@ -197,6 +207,90 @@ class BaytulmalReportEntry {
       sova: json['sova'] ?? '',
       sovaTaka: json['sovaTaka'] ?? '',
       remarks: json['remarks'] ?? '',
+    );
+  }
+
+  BaytulmalReportEntry copyWith({
+    String? month,
+    String? year,
+    String? branchName,
+    String? executiveMemberAyanat,
+    String? executiveMemberAyanatTaka,
+    String? subBranchAyanat,
+    String? subBranchAyanatTaka,
+    String? suhridAyanat,
+    String? suhridAyanatTaka,
+    String? safarIncome,
+    String? safarIncomeTaka,
+    String? prokashnaIncome,
+    String? prokashnaIncomeTaka,
+    String? onetimeIncome,
+    String? onetimeIncomeTaka,
+    String? previousBalance,
+    String? upwardAyanat,
+    String? upwardAyanatTaka,
+    String? officeRent,
+    String? officeRentTaka,
+    String? officeCost,
+    String? officeCostTaka,
+    String? safarExpense,
+    String? safarExpenseTaka,
+    String? transport,
+    String? transportTaka,
+    String? communication,
+    String? communicationTaka,
+    String? prochar,
+    String? procharTaka,
+    String? prokashnaExpense,
+    String? prokashnaExpenseTaka,
+    String? dibosPalan,
+    String? dibosPatanTaka,
+    String? appayan,
+    String? appayanTaka,
+    String? sova,
+    String? sovaTaka,
+    String? remarks,
+  }) {
+    return BaytulmalReportEntry(
+      month: month ?? this.month,
+      year: year ?? this.year,
+      branchName: branchName ?? this.branchName,
+      executiveMemberAyanat: executiveMemberAyanat ?? this.executiveMemberAyanat,
+      executiveMemberAyanatTaka: executiveMemberAyanatTaka ?? this.executiveMemberAyanatTaka,
+      subBranchAyanat: subBranchAyanat ?? this.subBranchAyanat,
+      subBranchAyanatTaka: subBranchAyanatTaka ?? this.subBranchAyanatTaka,
+      suhridAyanat: suhridAyanat ?? this.suhridAyanat,
+      suhridAyanatTaka: suhridAyanatTaka ?? this.suhridAyanatTaka,
+      safarIncome: safarIncome ?? this.safarIncome,
+      safarIncomeTaka: safarIncomeTaka ?? this.safarIncomeTaka,
+      prokashnaIncome: prokashnaIncome ?? this.prokashnaIncome,
+      prokashnaIncomeTaka: prokashnaIncomeTaka ?? this.prokashnaIncomeTaka,
+      onetimeIncome: onetimeIncome ?? this.onetimeIncome,
+      onetimeIncomeTaka: onetimeIncomeTaka ?? this.onetimeIncomeTaka,
+      previousBalance: previousBalance ?? this.previousBalance,
+      upwardAyanat: upwardAyanat ?? this.upwardAyanat,
+      upwardAyanatTaka: upwardAyanatTaka ?? this.upwardAyanatTaka,
+      officeRent: officeRent ?? this.officeRent,
+      officeRentTaka: officeRentTaka ?? this.officeRentTaka,
+      officeCost: officeCost ?? this.officeCost,
+      officeCostTaka: officeCostTaka ?? this.officeCostTaka,
+      safarExpense: safarExpense ?? this.safarExpense,
+      safarExpenseTaka: safarExpenseTaka ?? this.safarExpenseTaka,
+      transport: transport ?? this.transport,
+      transportTaka: transportTaka ?? this.transportTaka,
+      communication: communication ?? this.communication,
+      communicationTaka: communicationTaka ?? this.communicationTaka,
+      prochar: prochar ?? this.prochar,
+      procharTaka: procharTaka ?? this.procharTaka,
+      prokashnaExpense: prokashnaExpense ?? this.prokashnaExpense,
+      prokashnaExpenseTaka: prokashnaExpenseTaka ?? this.prokashnaExpenseTaka,
+      dibosPalan: dibosPalan ?? this.dibosPalan,
+      dibosPatanTaka: dibosPatanTaka ?? this.dibosPatanTaka,
+      appayan: appayan ?? this.appayan,
+      appayanTaka: appayanTaka ?? this.appayanTaka,
+      sova: sova ?? this.sova,
+      sovaTaka: sovaTaka ?? this.sovaTaka,
+      remarks: remarks ?? this.remarks,
     );
   }
 }

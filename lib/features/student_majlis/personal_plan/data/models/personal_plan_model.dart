@@ -1,4 +1,4 @@
-import '../../domain/entities/personal_plan_entity.dart';
+import '../entities/personal_plan_entity.dart';
 
 class PersonalPlanModel extends PersonalPlanEntity {
   PersonalPlanModel({

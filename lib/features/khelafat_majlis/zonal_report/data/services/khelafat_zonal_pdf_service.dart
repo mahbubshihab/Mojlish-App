@@ -9,8 +9,10 @@ import 'package:mojlish_app/features/common/reports/data/models/zonal_report_ent
 class KhelafatZonalPdfService {
   static Future<Uint8List> generatePdfBytes({
     required ZonalReportEntry entry,
+    pw.Document? pdfDocument,
   }) async {
-    final font = await PdfExportService.loadSutonnyFont();
+    final fontRegular = await PdfExportService.loadSutonnyFont();
+    final fontBold = await PdfExportService.loadBengaliBoldFont();
 
     pw.MemoryImage? logoImage;
     try {
@@ -18,12 +20,13 @@ class KhelafatZonalPdfService {
       logoImage = pw.MemoryImage(bytes.buffer.asUint8List());
     } catch (_) {}
 
-    final pdf = pw.Document(
-      theme: pw.ThemeData.withFont(
-        base: font,
-        bold: font,
-      ),
-    );
+    final pdf = pdfDocument ??
+        pw.Document(
+          theme: pw.ThemeData.withFont(
+            base: fontRegular,
+            bold: fontBold,
+          ),
+        );
 
     double totalIncome = entry.totalIncome;
     double totalExpense = entry.totalExpense;
@@ -78,7 +81,7 @@ class KhelafatZonalPdfService {
               // 1. জনশক্তি (Table)
               _buildSectionHeader('জনশক্তি'),
               pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                 columnWidths: const {
                   0: pw.FlexColumnWidth(2.5),
                   1: pw.FlexColumnWidth(1.5),
@@ -97,7 +100,7 @@ class KhelafatZonalPdfService {
               // 2. সংগঠন (Table)
               _buildSectionHeader('সংগঠন'),
               pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                 columnWidths: const {
                   0: pw.FlexColumnWidth(2.5),
                   1: pw.FlexColumnWidth(1.5),
@@ -123,7 +126,7 @@ class KhelafatZonalPdfService {
                 children: [
                   pw.Expanded(
                     child: pw.Table(
-                      border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                      border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                       columnWidths: const {
                         0: pw.FlexColumnWidth(4),
                         1: pw.FlexColumnWidth(1.5),
@@ -139,7 +142,7 @@ class KhelafatZonalPdfService {
                   pw.SizedBox(width: 6),
                   pw.Expanded(
                     child: pw.Table(
-                      border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                      border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                       columnWidths: const {
                         0: pw.FlexColumnWidth(4),
                         1: pw.FlexColumnWidth(1.5),
@@ -159,7 +162,7 @@ class KhelafatZonalPdfService {
               // 4. সফর (জোন থেকে)
               _buildSectionHeader('সফর (জোন থেকে)'),
               pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                 columnWidths: const {
                   0: pw.FlexColumnWidth(1.2),
                   1: pw.FlexColumnWidth(3),
@@ -177,7 +180,7 @@ class KhelafatZonalPdfService {
                 ],
               ),
 
-              pw.Spacer(),
+              pw.SizedBox(height: 6),
               pw.Align(
                 alignment: pw.Alignment.bottomRight,
                 child: PdfExportService.bWidget('অপর পৃষ্ঠায় দ্রষ্টব্য', fontSize: 9.5, fontWeight: pw.FontWeight.bold),
@@ -200,7 +203,7 @@ class KhelafatZonalPdfService {
               pw.SizedBox(height: 10),
               _buildSectionHeader('আয়-ব্যয়'),
               pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
+                border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
                 columnWidths: const {
                   0: pw.FlexColumnWidth(1.2),
                   1: pw.FlexColumnWidth(3.5),
@@ -289,7 +292,7 @@ class KhelafatZonalPdfService {
                 child: PdfExportService.bWidget(entry.suggestions.isEmpty ? '........................................................................................................................................................' : entry.suggestions, fontSize: 9.5),
               ),
 
-              pw.Spacer(),
+              pw.SizedBox(height: 6),
 
               // Footer Signatures
               pw.Row(
@@ -307,6 +310,7 @@ class KhelafatZonalPdfService {
       ),
     );
 
+    if (pdfDocument != null) return Uint8List(0);
     return pdf.save();
   }
 

@@ -1,18 +1,27 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'package:mojlish_app/core/constants/majlis_assets.dart';
 import 'package:mojlish_app/core/services/pdf_export_service.dart';
 
-/// খেলাফত মজলিস — শাখার রিপোর্ট ফরম (২ পৃষ্ঠা) অফিশিয়াল PDF সার্ভিস
+/// খেলাফত মজলিস — শাখার রিপোর্ট ফরম (২-পৃষ্ঠার অফিশিয়াল Bijoy-SutonnyMJ হুবহু পিডিএফ জেনারেটর)
 class KhelafatBranchReportPdfService {
-  static Future<Uint8List> generatePdfBytes({
-    required String shakhaName,
-    required String month,
-    required String year,
-    required Map<String, dynamic> data,
+  static Future<Uint8List> generatePdfBytes(
+    Map<String, dynamic> data, {
+    String shakhaName = '',
+    String month = '',
+    String year = '',
+    pw.Document? pdfDocument,
   }) async {
-    final font = await PdfExportService.loadSutonnyFont();
+    final fontRegular = await PdfExportService.loadSutonnyFont();
+    final fontBold = await PdfExportService.loadBengaliBoldFont();
+
+    final mapData = Map<String, dynamic>.from(data);
+    final sName = shakhaName.isNotEmpty ? shakhaName : (mapData['shakhaName'] ?? mapData['branchName'] ?? '').toString();
+    final mName = month.isNotEmpty ? month : (mapData['month'] ?? '').toString();
+    final yName = year.isNotEmpty ? year : (mapData['year'] ?? '').toString();
 
     pw.MemoryImage? logoImage;
     try {
@@ -20,221 +29,349 @@ class KhelafatBranchReportPdfService {
       logoImage = pw.MemoryImage(bytes.buffer.asUint8List());
     } catch (_) {}
 
-    final pdf = pw.Document(
-      theme: pw.ThemeData.withFont(
-        base: font,
-        bold: font,
-      ),
-    );
+    final pdf = pdfDocument ??
+        pw.Document(
+          theme: pw.ThemeData.withFont(
+            base: fontRegular,
+            bold: fontBold,
+          ),
+        );
 
+    // Value lookup helper
+    String v(dynamic key) {
+      if (key == null) return '';
+      if (key is List) {
+        for (final k in key) {
+          final res = v(k);
+          if (res.isNotEmpty) return res;
+        }
+        return '';
+      }
+      final kStr = key.toString();
+      if (mapData.containsKey(kStr) && mapData[kStr] != null) {
+        final val = mapData[kStr].toString().trim();
+        if (val.isNotEmpty) return val;
+      }
+      for (final section in [
+        'manpower',
+        'dawah',
+        'organization',
+        'meetings',
+        'baytulmal',
+        'tour',
+        'training',
+        'office',
+        'publicity',
+        'publication',
+        'library',
+        'socialWelfare'
+      ]) {
+        if (mapData[section] is Map && mapData[section][kStr] != null) {
+          final val = mapData[section][kStr].toString().trim();
+          if (val.isNotEmpty) return val;
+        }
+      }
+      return '';
+    }
+
+    // Section Header Banner Widget
+    pw.Widget buildSectionHeader(String title) {
+      return pw.Container(
+        width: double.infinity,
+        margin: const pw.EdgeInsets.only(top: 4, bottom: 2),
+        padding: const pw.EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+        decoration: pw.BoxDecoration(
+          color: PdfColors.grey100,
+          border: pw.Border.all(color: PdfColors.grey700, width: 0.35),
+        ),
+        child: PdfExportService.bWidget(
+          title,
+          fontSize: 8.0,
+          fontWeight: pw.FontWeight.bold,
+        ),
+      );
+    }
+
+    // Table Builder Helper
+    pw.Widget buildTable({
+      required List<String> headers,
+      required List<List<String>> rows,
+      Map<int, pw.TableColumnWidth>? columnWidths,
+    }) {
+      return pw.Table(
+        border: pw.TableBorder.all(width: 0.35, color: PdfColors.grey700),
+        columnWidths: columnWidths,
+        children: [
+          if (headers.isNotEmpty)
+            pw.TableRow(
+              decoration: const pw.BoxDecoration(color: PdfColors.grey100),
+              children: headers.map((h) {
+                return pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1.5),
+                  child: pw.Center(
+                    child: PdfExportService.bWidget(
+                      h,
+                      fontSize: 7.2,
+                      fontWeight: pw.FontWeight.bold,
+                      textAlign: pw.TextAlign.center,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ...rows.map((row) {
+            return pw.TableRow(
+              children: row.asMap().entries.map((entry) {
+                final idx = entry.key;
+                final cellText = entry.value;
+                final isLabel = idx == 0;
+                return pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 3, vertical: 1.2),
+                  child: PdfExportService.bWidget(
+                    cellText,
+                    fontSize: 7.0,
+                    fontWeight: pw.FontWeight.normal,
+                    textAlign: isLabel ? pw.TextAlign.left : pw.TextAlign.center,
+                  ),
+                );
+              }).toList(),
+            );
+          }),
+        ],
+      );
+    }
+
+    // ==========================================
     // PAGE 1: শাখার রিপোর্ট ফরম (পৃষ্ঠা ১)
+    // ==========================================
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(24),
+        margin: const pw.EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         build: (pw.Context context) {
           return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
-              // Top Header
-              PdfExportService.bWidget('বিসমিল্লাহির রাহমানির রাহীম', fontSize: 9.5),
-              pw.SizedBox(height: 2),
-              PdfExportService.bWidget('শাখার রিপোর্ট ফরম', fontSize: 14, fontWeight: pw.FontWeight.bold),
-              pw.SizedBox(height: 4),
-
-              // Logo + Organization Name
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.center,
-                crossAxisAlignment: pw.CrossAxisAlignment.center,
-                children: [
-                  if (logoImage != null) ...[
-                    pw.Image(logoImage, width: 34, height: 34),
-                    pw.SizedBox(width: 8),
-                  ],
-                  PdfExportService.bWidget('খেলাফত মজলিস', fontSize: 22, fontWeight: pw.FontWeight.bold),
-                ],
-              ),
-              pw.SizedBox(height: 2),
-              PdfExportService.bWidget('কেন্দ্রীয় কার্যালয়: ১৬ বিজয়নগর, (৫ম তলা), ঢাকা-১০০০ | ফোন: ৯৫৮৫৩২১', fontSize: 8.5),
-              pw.SizedBox(height: 10),
-
-              // Info Box: শাখা, মাস, সন
-              pw.Container(
-                decoration: const pw.BoxDecoration(color: PdfColors.grey200),
-                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              // PAGE 1 HEADER
+              pw.Center(
+                child: pw.Column(
                   children: [
-                    PdfExportService.bWidget('শাখা: ${shakhaName.isEmpty ? "........................" : shakhaName}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
-                    PdfExportService.bWidget('মাস: ${month.isEmpty ? "........................" : month}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
-                    PdfExportService.bWidget('সন: ${year.isEmpty ? "........................" : year}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
+                    PdfExportService.bWidget(
+                      'বিসমিল্লাহির রাহমানির রাহীম',
+                      fontSize: 8.5,
+                    ),
+                    pw.SizedBox(height: 1),
+                    PdfExportService.bWidget(
+                      'শাখার রিপোর্ট ফরম',
+                      fontSize: 12,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                    pw.SizedBox(height: 2),
+                    pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.center,
+                      crossAxisAlignment: pw.CrossAxisAlignment.center,
+                      children: [
+                        if (logoImage != null) ...[
+                          pw.Image(logoImage, width: 22, height: 22),
+                          pw.SizedBox(width: 6),
+                        ],
+                        PdfExportService.bWidget(
+                          'খেলাফত মজলিস',
+                          fontSize: 18,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ],
+                    ),
+                    pw.SizedBox(height: 1),
+                    PdfExportService.bWidget(
+                      'কেন্দ্রীয় কার্যালয়: ১৮ বিজয়নগর, (৫ম তলা), ঢাকা-১০০০ | ফোন: ৯৫৮৫৩২১',
+                      fontSize: 7.5,
+                    ),
                   ],
                 ),
               ),
-              pw.SizedBox(height: 8),
+              pw.SizedBox(height: 4),
 
-              // 1. জনশক্তি (Table)
-              _buildSectionHeader('জনশক্তি'),
-              pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
-                columnWidths: const {
-                  0: pw.FlexColumnWidth(2.5),
-                  1: pw.FlexColumnWidth(1.2),
-                  2: pw.FlexColumnWidth(1.2),
-                  3: pw.FlexColumnWidth(2),
-                  4: pw.FlexColumnWidth(1.2),
-                  5: pw.FlexColumnWidth(2),
+              // INFO BANNER BOX: শাখা, মাস, সন
+              pw.Container(
+                decoration: pw.BoxDecoration(
+                  color: PdfColors.grey200,
+                  border: pw.Border.all(color: PdfColors.black, width: 0.5),
+                ),
+                padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                child: pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    PdfExportService.bWidget('শাখা: ${sName.isEmpty ? ".................................................." : sName}', fontSize: 9, fontWeight: pw.FontWeight.bold),
+                    PdfExportService.bWidget('মাস: ${mName.isEmpty ? "...................." : mName}', fontSize: 9, fontWeight: pw.FontWeight.bold),
+                    PdfExportService.bWidget('সন: ${yName.isEmpty ? "............" : yName}', fontSize: 9, fontWeight: pw.FontWeight.bold),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 4),
+
+              // ------------------------------------------
+              // 1. জনশক্তি
+              // ------------------------------------------
+              buildSectionHeader('১. জনশক্তি'),
+              buildTable(
+                headers: ['জনশক্তি', 'সংখ্যা', 'বৃদ্ধি', 'কারণ', 'ঘাটতি', 'কারণ'],
+                columnWidths: {
+                  0: const pw.FlexColumnWidth(2.5),
+                  1: const pw.FlexColumnWidth(1.2),
+                  2: const pw.FlexColumnWidth(1.2),
+                  3: const pw.FlexColumnWidth(2.5),
+                  4: const pw.FlexColumnWidth(1.2),
+                  5: const pw.FlexColumnWidth(2.5),
                 },
-                children: [
-                  _buildTableHeader(['জনশক্তি', 'সংখ্যা', 'বৃদ্ধি', 'কারণ', 'ঘাটতি', 'কারণ']),
-                  _buildManpowerRow('সদস্য', data['sodossoCount'] ?? '', data['sodossoBridhi'] ?? '', data['sodossoBridhiReason'] ?? '', data['sodossoGhatti'] ?? '', data['sodossoGhattiReason'] ?? ''),
-                  _buildManpowerRow('সদস্য প্রার্থী', data['sodossoPrarthiCount'] ?? '', data['sodossoPrarthiBridhi'] ?? '', data['sodossoPrarthiBridhiReason'] ?? '', data['sodossoPrarthiGhatti'] ?? '', data['sodossoPrarthiGhattiReason'] ?? ''),
-                  _buildManpowerRow('কর্মী', data['kormiCount'] ?? '', data['kormiBridhi'] ?? '', '', data['kormiGhatti'] ?? '', ''),
-                  _buildManpowerRow('প্রাথমিক সদস্য', data['primaryMemberCount'] ?? '', data['primaryMemberBridhi'] ?? '', '', data['primaryMemberGhatti'] ?? '', ''),
-                  _buildManpowerRow('মোট জনশক্তি', data['totalManpowerCount'] ?? '', '', '', '', '', isBold: true),
-                  _buildManpowerRow('সুধী / শুভাকাঙ্ক্ষী', data['shudhiCount'] ?? '', data['shudhiBridhi'] ?? '', '', data['shudhiGhatti'] ?? '', ''),
+                rows: [
+                  ['সদস্য', v('sodossoCount'), v('sodossoBridhi'), v('sodossoBridhiReason'), v('sodossoGhatti'), v('sodossoGhattiReason')],
+                  ['সদস্য প্রার্থী', v('sodossoPrarthiCount'), v('sodossoPrarthiBridhi'), v('sodossoPrarthiBridhiReason'), v('sodossoPrarthiGhatti'), v('sodossoPrarthiGhattiReason')],
+                  ['কর্মী', v('kormiCount'), v('kormiBridhi'), '', v('kormiGhatti'), ''],
+                  ['প্রাথমিক সদস্য', v('primaryMemberCount'), v('primaryMemberBridhi'), '', v('primaryMemberGhatti'), ''],
+                  ['মোট জনশক্তি', v(['totalManpowerCount', 'totalManpower']), '', '', '', ''],
+                  ['সুধী / শুভাকাঙ্ক্ষী', v(['shudhiCount', 'shudhiTarget']), v('shudhiBridhi'), '', v('shudhiGhatti'), ''],
                 ],
               ),
-              pw.SizedBox(height: 8),
 
-              // 2. দাওয়াত ও গণসংযোগ (Table)
-              _buildSectionHeader('দাওয়াত ও গণসংযোগ'),
+              // ------------------------------------------
+              // 2. দাওয়াত ও গণসংযোগ
+              // ------------------------------------------
+              buildSectionHeader('২. দাওয়াত ও গণসংযোগ'),
               pw.Row(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Expanded(
-                    child: pw.Table(
-                      border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
-                      columnWidths: const {
-                        0: pw.FlexColumnWidth(4),
-                        1: pw.FlexColumnWidth(1.5),
-                        2: pw.FlexColumnWidth(2),
+                    child: buildTable(
+                      headers: ['কর্মসূচি', 'সংখ্যা', 'উপস্থিতি (গড়)'],
+                      columnWidths: {
+                        0: const pw.FlexColumnWidth(3.0),
+                        1: const pw.FlexColumnWidth(1.0),
+                        2: const pw.FlexColumnWidth(1.5),
                       },
-                      children: [
-                        _buildTableHeader(['কর্মসূচি', 'সংখ্যা', 'উপস্থিতি (গড়)']),
-                        _buildMeetingRow('ব্যক্তিগত দাওয়াত দান', data['personalDawahCount'] ?? '', data['personalDawahPresence'] ?? ''),
-                        _buildMeetingRow('গ্রুপ দাওয়াত', data['groupDawahCount'] ?? '', data['groupDawahPresence'] ?? ''),
-                        _buildMeetingRow('দাওয়াতি মাহফিল / সভা', data['dawahMahfilCount'] ?? '', data['dawahMahfilPresence'] ?? ''),
-                        _buildMeetingRow('আলোচনা সভা / সাধারণ সভা', data['generalMeetingCount'] ?? '', data['generalMeetingPresence'] ?? ''),
-                        _buildMeetingRow('ওলামা / সুধী সমাবেশ', data['olamaMeetingCount'] ?? '', data['olamaMeetingPresence'] ?? ''),
-                        _buildMeetingRow('ওয়াজ / সিরাত মাহফিল', data['siratMahfilCount'] ?? '', data['siratMahfilPresence'] ?? ''),
-                        _buildMeetingRow('মিছিল / মানববন্ধন / জনসভা', data['rallyCount'] ?? '', data['rallyPresence'] ?? ''),
+                      rows: [
+                        ['ব্যক্তিগত দাওয়াত দান', v('personalDawahCount'), v('personalDawahPresence')],
+                        ['গ্রুপ দাওয়াত', v('groupDawahCount'), v('groupDawahPresence')],
+                        ['দাওয়াতি মাহফিল / সভা', v('dawahMahfilCount'), v('dawahMahfilPresence')],
+                        ['আলোচনা সভা / সাধারণ সভা', v('generalMeetingCount'), v('generalMeetingPresence')],
+                        ['ওলামা / সুধী সমাবেশ', v('olamaMeetingCount'), v('olamaMeetingPresence')],
+                        ['ওয়াজ / সিরাত মাহফিল', v('siratMahfilCount'), v('siratMahfilPresence')],
+                        ['মিছিল / মানববন্ধন / জনসভা', v('rallyCount'), v('rallyPresence')],
                       ],
                     ),
                   ),
-                  pw.SizedBox(width: 6),
+                  pw.SizedBox(width: 4),
                   pw.Expanded(
-                    child: pw.Table(
-                      border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
-                      columnWidths: const {
-                        0: pw.FlexColumnWidth(4),
-                        1: pw.FlexColumnWidth(1.5),
-                        2: pw.FlexColumnWidth(2),
+                    child: buildTable(
+                      headers: ['কর্মসূচি', 'সংখ্যা', 'উপলক্ষ'],
+                      columnWidths: {
+                        0: const pw.FlexColumnWidth(3.0),
+                        1: const pw.FlexColumnWidth(1.0),
+                        2: const pw.FlexColumnWidth(1.5),
                       },
-                      children: [
-                        _buildTableHeader(['কর্মসূচি', 'সংখ্যা', 'উপলক্ষ']),
-                        _buildMeetingRow('পরিচিতি বিতরণ', data['introDistCount'] ?? '', data['introDistEvent'] ?? ''),
-                        _buildMeetingRow('লিফলেট বিতরণ', data['leafletDistCount'] ?? '', data['leafletDistEvent'] ?? ''),
-                        _buildMeetingRow('পোস্টার', data['posterCount'] ?? '', data['posterEvent'] ?? ''),
-                        _buildMeetingRow('দিবস পালন (নামসহ)', data['dayObservanceCount'] ?? '', data['dayObservanceName'] ?? ''),
+                      rows: [
+                        ['পরিচিতি বিতরণ', v('introDistCount'), v('introDistEvent')],
+                        ['লিফলেট বিতরণ', v('leafletDistCount'), v('leafletDistEvent')],
+                        ['পোস্টার', v('posterCount'), v('posterEvent')],
+                        ['দিবস পালন (নামসহ)', v('dayObservanceCount'), v('dayObservanceName')],
+                        ['', '', ''],
+                        ['', '', ''],
+                        ['', '', ''],
                       ],
                     ),
                   ),
                 ],
               ),
-              pw.SizedBox(height: 8),
 
-              // 3. সংগঠন (Table)
-              _buildSectionHeader('সংগঠন'),
-              pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
-                columnWidths: const {
-                  0: pw.FlexColumnWidth(3),
-                  1: pw.FlexColumnWidth(1.5),
-                  2: pw.FlexColumnWidth(2),
-                  3: pw.FlexColumnWidth(2),
-                  4: pw.FlexColumnWidth(2),
+              // ------------------------------------------
+              // 3. সংগঠন
+              // ------------------------------------------
+              buildSectionHeader('৩. সংগঠন'),
+              buildTable(
+                headers: ['প্রশাসনিক ইউনিট', 'সংখ্যা', 'সংগঠন', 'কাজ', 'জনশক্তি'],
+                columnWidths: {
+                  0: const pw.FlexColumnWidth(2.5),
+                  1: const pw.FlexColumnWidth(1.0),
+                  2: const pw.FlexColumnWidth(1.2),
+                  3: const pw.FlexColumnWidth(1.2),
+                  4: const pw.FlexColumnWidth(1.2),
                 },
-                children: [
-                  _buildTableHeader(['প্রশাসনিক ইউনিট', 'সংখ্যা', 'সংগঠন', 'কাজ', 'জনশক্তি']),
-                  _buildOrgRow('জেলা / মহানগরী', data['districtCount'] ?? '', data['districtOrg'] ?? '', data['districtWork'] ?? '', data['districtManpower'] ?? ''),
-                  _buildOrgRow('উপজেলা / থানা', data['upazilaCount'] ?? '', data['upazilaOrg'] ?? '', data['upazilaWork'] ?? '', data['upazilaManpower'] ?? ''),
-                  _buildOrgRow('পৌরসভা', data['pourashavaCount'] ?? '', data['pourashavaOrg'] ?? '', '', ''),
-                  _buildOrgRow('ইউনিয়ন', data['unionCount'] ?? '', data['unionOrg'] ?? '', '', ''),
-                  _buildOrgRow('ওয়ার্ড (মহানগরী/পৌর/ইউনিয়ন)', data['wardCount'] ?? '', data['wardOrg'] ?? '', '', ''),
-                  _buildOrgRow('মসজিদ ভিত্তিক সংগঠন', data['mosqueCount'] ?? '', data['mosqueOrg'] ?? '', '', ''),
+                rows: [
+                  ['জেলা / মহানগরী', v('districtCount'), v('districtOrg'), v('districtWork'), v('districtManpower')],
+                  ['উপজেলা / থানা', v('upazilaCount'), v('upazilaOrg'), v('upazilaWork'), v('upazilaManpower')],
+                  ['পৌরসভা', v('pourashavaCount'), v('pourashavaOrg'), '', ''],
+                  ['ইউনিয়ন', v('unionCount'), v('unionOrg'), '', ''],
+                  ['ওয়ার্ড (মহানগরী/পৌর/ইউনিয়ন)', v('wardCount'), v('wardOrg'), '', ''],
+                  ['মসজিদ ভিত্তিক সংগঠন', v('mosqueCount'), v('mosqueOrg'), '', ''],
                 ],
               ),
-              pw.SizedBox(height: 8),
 
-              // 4. সভাসমূহ (Table)
-              _buildSectionHeader('সভাসমূহ'),
+              // ------------------------------------------
+              // 4. সভাসমূহ
+              // ------------------------------------------
+              buildSectionHeader('৪. সভাসমূহ'),
               pw.Row(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Expanded(
-                    child: pw.Table(
-                      border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
-                      columnWidths: const {
-                        0: pw.FlexColumnWidth(4),
-                        1: pw.FlexColumnWidth(1.5),
-                        2: pw.FlexColumnWidth(2),
+                    child: buildTable(
+                      headers: ['বিবরণ', 'সংখ্যা', 'উপস্থিতি (গড়)'],
+                      columnWidths: {
+                        0: const pw.FlexColumnWidth(3.0),
+                        1: const pw.FlexColumnWidth(1.0),
+                        2: const pw.FlexColumnWidth(1.5),
                       },
-                      children: [
-                        _buildTableHeader(['বিবরণ', 'সংখ্যা', 'উপস্থিতি (গড়)']),
-                        _buildMeetingRow('জেলা / মহানগরী নির্বাহী সভা', data['distExecMeetingCount'] ?? '', data['distExecMeetingPres'] ?? ''),
-                        _buildMeetingRow('জেলা / মহানগরী শূরা অধিবেশন', data['distShuraMeetingCount'] ?? '', data['distShuraMeetingPres'] ?? ''),
-                        _buildMeetingRow('থানা / উপজেলা দায়িত্বশীল সভা', data['thanaDaitoshilMeetingCount'] ?? '', data['thanaDaitoshilMeetingPres'] ?? ''),
-                        _buildMeetingRow('থানা / উপজেলা নির্বাহী সভা', data['thanaExecMeetingCount'] ?? '', data['thanaExecMeetingPres'] ?? ''),
+                      rows: [
+                        ['জেলা / মহানগরী নির্বাহী সভা', v('distExecMeetingCount'), v('distExecMeetingPres')],
+                        ['জেলা / মহানগরী মজলিসে শূরা অধিবেশন', v('distShuraMeetingCount'), v('distShuraMeetingPres')],
+                        ['থানা / উপজেলা দায়িত্বশীল সভা', v('thanaDaitoshilMeetingCount'), v('thanaDaitoshilMeetingPres')],
+                        ['থানা / উপজেলা নির্বাহী সভা', v('thanaExecMeetingCount'), v('thanaExecMeetingPres')],
                       ],
                     ),
                   ),
-                  pw.SizedBox(width: 6),
+                  pw.SizedBox(width: 4),
                   pw.Expanded(
-                    child: pw.Table(
-                      border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
-                      columnWidths: const {
-                        0: pw.FlexColumnWidth(4),
-                        1: pw.FlexColumnWidth(1.5),
-                        2: pw.FlexColumnWidth(2),
+                    child: buildTable(
+                      headers: ['বিবরণ', 'সংখ্যা', 'উপস্থিতি (গড়)'],
+                      columnWidths: {
+                        0: const pw.FlexColumnWidth(3.0),
+                        1: const pw.FlexColumnWidth(1.0),
+                        2: const pw.FlexColumnWidth(1.5),
                       },
-                      children: [
-                        _buildTableHeader(['বিবরণ', 'সংখ্যা', 'উপস্থিতি (গড়)']),
-                        _buildMeetingRow('ইউনিয়ন শাখার সভা', data['unionMeetingCount'] ?? '', data['unionMeetingPres'] ?? ''),
-                        _buildMeetingRow('ওয়ার্ড / গ্রাম / মসজিদ শাখার সভা', data['wardMeetingCount'] ?? '', data['wardMeetingPres'] ?? ''),
-                        _buildMeetingRow('কর্মী সভা / সমাবেশ', data['kormiMeetingCount'] ?? '', data['kormiMeetingPres'] ?? ''),
-                        _buildMeetingRow('কর্মী সম্মেলন', data['kormiConferenceCount'] ?? '', data['kormiConferencePres'] ?? ''),
+                      rows: [
+                        ['ইউনিয়ন শাখার সভা', v('unionMeetingCount'), v('unionMeetingPres')],
+                        ['ওয়ার্ড / গ্রাম / মসজিদ শাখার সভা', v('wardMeetingCount'), v('wardMeetingPres')],
+                        ['কর্মী সভা / সমাবেশ', v('kormiMeetingCount'), v('kormiMeetingPres')],
+                        ['কর্মী সম্মেলন', v('kormiConferenceCount'), v('kormiConferencePres')],
                       ],
                     ),
                   ),
                 ],
               ),
-              pw.SizedBox(height: 8),
 
-              // 5. বায়তুলমাল (Table)
-              _buildSectionHeader('বায়তুলমাল (আয়-ব্যয়ের বিস্তারিত রিপোর্ট আলাদা কাগজে)'),
-              pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
-                columnWidths: const {
-                  0: pw.FlexColumnWidth(2),
-                  1: pw.FlexColumnWidth(2),
-                  2: pw.FlexColumnWidth(2),
-                  3: pw.FlexColumnWidth(2),
-                  4: pw.FlexColumnWidth(2),
-                  5: pw.FlexColumnWidth(2),
+              // ------------------------------------------
+              // 5. বায়তুলমাল
+              // ------------------------------------------
+              buildSectionHeader('৫. বায়তুলমাল (আয়-ব্যয়ের বিস্তারিত রিপোর্ট আলাদা কাগজে)'),
+              buildTable(
+                headers: ['মোট আয়', 'মোট ব্যয়', 'উর্ধ্বতন কোটা', 'পরিশোধ', 'শুভাকাঙ্ক্ষী সংখ্যা', 'শুভাকাঙ্ক্ষী আয়'],
+                columnWidths: {
+                  0: const pw.FlexColumnWidth(1.5),
+                  1: const pw.FlexColumnWidth(1.5),
+                  2: const pw.FlexColumnWidth(1.5),
+                  3: const pw.FlexColumnWidth(1.5),
+                  4: const pw.FlexColumnWidth(1.8),
+                  5: const pw.FlexColumnWidth(1.5),
                 },
-                children: [
-                  _buildTableHeader(['মোট আয়', 'মোট ব্যয়', 'উর্ধ্বতন কোটা', 'পরিশোধ', 'শুভাকাঙ্ক্ষী সংখ্যা', 'শুভাকাঙ্ক্ষী আয়']),
-                  pw.TableRow(
-                    children: [
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(data['baytulmalIncome'] ?? '', fontSize: 8.5, textAlign: pw.TextAlign.center)),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(data['baytulmalExpense'] ?? '', fontSize: 8.5, textAlign: pw.TextAlign.center)),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(data['baytulmalQuota'] ?? '', fontSize: 8.5, textAlign: pw.TextAlign.center)),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(data['baytulmalPaid'] ?? '', fontSize: 8.5, textAlign: pw.TextAlign.center)),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(data['shudhiCount'] ?? '', fontSize: 8.5, textAlign: pw.TextAlign.center)),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(data['shudhiIncome'] ?? '', fontSize: 8.5, textAlign: pw.TextAlign.center)),
-                    ],
-                  ),
+                rows: [
+                  [
+                    v('baytulmalIncome'),
+                    v('baytulmalExpense'),
+                    v('baytulmalQuota'),
+                    v('baytulmalPaid'),
+                    v(['shudhiCountBaytulmal', 'shudhiCount']),
+                    v(['shudhiIncome', 'shudhiBaytulmalIncome']),
+                  ],
                 ],
               ),
             ],
@@ -243,333 +380,322 @@ class KhelafatBranchReportPdfService {
       ),
     );
 
-    // PAGE 2: সফর, প্রশিক্ষণ, দফতর, প্রচার, প্রকাশনা, পাঠাগার, সমাজকল্যাণ, মন্তব্য (পৃষ্ঠা ২)
+    // ==========================================
+    // PAGE 2: শাখার রিপোর্ট ফরম (পৃষ্ঠা ২)
+    // ==========================================
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(24),
+        margin: const pw.EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         build: (pw.Context context) {
           return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
-              pw.SizedBox(height: 5),
-
-              // 1. সফর (Table)
-              _buildSectionHeader('সফর'),
-              pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
-                columnWidths: const {
-                  0: pw.FlexColumnWidth(2),
-                  1: pw.FlexColumnWidth(1.5),
-                  2: pw.FlexColumnWidth(6.5),
+              // ------------------------------------------
+              // 6. সফর
+              // ------------------------------------------
+              buildSectionHeader('৬. সফর'),
+              buildTable(
+                headers: ['সফর', 'সংখ্যা', 'তারিখ, স্থান ও উপলক্ষ'],
+                columnWidths: {
+                  0: const pw.FlexColumnWidth(2.0),
+                  1: const pw.FlexColumnWidth(1.0),
+                  2: const pw.FlexColumnWidth(5.0),
                 },
-                children: [
-                  _buildTableHeader(['সফর', 'সংখ্যা', 'তারিখ, স্থান ও উপলক্ষ']),
-                  _buildSafarDetailRow('উর্ধ্বতন', data['upperSafarCount'] ?? '', data['upperSafarDetails'] ?? ''),
-                  _buildSafarDetailRow('স্থানীয় শাখা', data['localSafarCount'] ?? '', data['localSafarDetails'] ?? ''),
+                rows: [
+                  ['উর্ধ্বতন', v('upperSafarCount'), v('upperSafarDetails')],
+                  ['স্থানীয় শাখা', v('localSafarCount'), v('localSafarDetails')],
                 ],
               ),
-              pw.SizedBox(height: 8),
 
-              // 2. প্রশিক্ষণ (Table)
-              _buildSectionHeader('প্রশিক্ষণ'),
+              // ------------------------------------------
+              // 7. প্রশিক্ষণ
+              // ------------------------------------------
+              buildSectionHeader('৭. প্রশিক্ষণ'),
               pw.Row(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Expanded(
-                    child: pw.Table(
-                      border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
-                      columnWidths: const {
-                        0: pw.FlexColumnWidth(4),
-                        1: pw.FlexColumnWidth(1.5),
-                        2: pw.FlexColumnWidth(2),
+                    child: buildTable(
+                      headers: ['বিবরণ', 'সংখ্যা', 'উপস্থিতি (গড়)'],
+                      columnWidths: {
+                        0: const pw.FlexColumnWidth(3.0),
+                        1: const pw.FlexColumnWidth(1.0),
+                        2: const pw.FlexColumnWidth(1.5),
                       },
-                      children: [
-                        _buildTableHeader(['বিবরণ', 'সংখ্যা', 'উপস্থিতি (গড়)']),
-                        _buildMeetingRow('তরবিয়তী মজলিস', data['torbiotMajlisCount'] ?? '', data['torbiotMajlisPres'] ?? ''),
-                        _buildMeetingRow('তরবিয়তী সভা', data['torbiotMeetingCount'] ?? '', data['torbiotMeetingPres'] ?? ''),
-                        _buildMeetingRow('তরবিয়তী সফর', data['torbiotSafarCount'] ?? '', data['torbiotSafarPres'] ?? ''),
-                        _buildMeetingRow('সদস্য সভা', data['sodossoMeetingCount'] ?? '', data['sodossoMeetingPres'] ?? ''),
-                        _buildMeetingRow('শবগুজারি', data['shobgujariCount'] ?? '', data['shobgujariPres'] ?? ''),
+                      rows: [
+                        ['তরবিয়তী মজলিস', v('torbiotMajlisCount'), v('torbiotMajlisPres')],
+                        ['তরবিয়তী সভা', v('torbiotMeetingCount'), v('torbiotMeetingPres')],
+                        ['তরবিয়তী সফর', v('torbiotSafarCount'), v('torbiotSafarPres')],
+                        ['সদস্য সভা', v('sodossoMeetingCount'), v('sodossoMeetingPres')],
+                        ['শবগুজারি', v('shobgujariCount'), v('shobgujariPres')],
                       ],
                     ),
                   ),
-                  pw.SizedBox(width: 6),
+                  pw.SizedBox(width: 4),
                   pw.Expanded(
-                    child: pw.Table(
-                      border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
-                      columnWidths: const {
-                        0: pw.FlexColumnWidth(4),
-                        1: pw.FlexColumnWidth(1.5),
-                        2: pw.FlexColumnWidth(2),
+                    child: buildTable(
+                      headers: ['বিবরণ', 'সংখ্যা', 'উপস্থিতি (গড়)'],
+                      columnWidths: {
+                        0: const pw.FlexColumnWidth(3.0),
+                        1: const pw.FlexColumnWidth(1.0),
+                        2: const pw.FlexColumnWidth(1.5),
                       },
-                      children: [
-                        _buildTableHeader(['বিবরণ', 'সংখ্যা', 'উপস্থিতি (গড়)']),
-                        _buildMeetingRow('সামষ্টিক পাঠ', data['samostikPathCount'] ?? '', data['samostikPathPres'] ?? ''),
-                        _buildMeetingRow('কুরআন-হাদীস শিক্ষা সভা', data['quranEducCount'] ?? '', data['quranEducPres'] ?? ''),
-                        _buildMeetingRow('হাদীস পাঠ', data['hadithPathCount'] ?? '', data['hadithPathPres'] ?? ''),
-                        _buildMeetingRow('পারিবারিক তালিম', data['familyTalimCount'] ?? '', data['familyTalimPres'] ?? ''),
+                      rows: [
+                        ['সামষ্টিক পাঠ', v('samostikPathCount'), v('samostikPathPres')],
+                        ['কুরআন-হাদীস শিক্ষা সভা', v('quranEducCount'), v('quranEducPres')],
+                        ['হাদিস পাঠ', v('hadithPathCount'), v('hadithPathPres')],
+                        ['পারিবারিক তালিম', v('familyTalimCount'), v('familyTalimPres')],
+                        ['', '', ''],
                       ],
                     ),
                   ),
                 ],
               ),
-              pw.SizedBox(height: 8),
 
-              // 3. দফতর (Table)
-              _buildSectionHeader('দফতর'),
+              // ------------------------------------------
+              // 8. দফতর
+              // ------------------------------------------
+              buildSectionHeader('৮. দফতর'),
               pw.Row(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Expanded(
-                    child: pw.Table(
-                      border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
-                      columnWidths: const {
-                        0: pw.FlexColumnWidth(3),
-                        1: pw.FlexColumnWidth(1),
-                        2: pw.FlexColumnWidth(2),
+                    child: buildTable(
+                      headers: ['বিবরণ', 'সংখ্যা', 'বিষয়'],
+                      columnWidths: {
+                        0: const pw.FlexColumnWidth(3.0),
+                        1: const pw.FlexColumnWidth(1.0),
+                        2: const pw.FlexColumnWidth(2.0),
                       },
-                      children: [
-                        _buildTableHeader(['বিবরণ', 'সংখ্যা', 'বিষয়']),
-                        _buildOfficeRow('সার্কুলার প্রাপ্তি', data['circularRecCount'] ?? '', data['circularRecSubject'] ?? ''),
-                        _buildOfficeRow('সার্কুলার প্রেরণ', data['circularSendCount'] ?? '', data['circularSendSubject'] ?? ''),
-                        _buildOfficeRow('যোগাযোগ', data['communicationCount'] ?? '', data['communicationSubject'] ?? ''),
+                      rows: [
+                        ['সার্কুলার প্রাপ্তি', v('circularRecCount'), ''],
+                        ['সার্কুলার প্রেরণ', v('circularSendCount'), ''],
+                        ['যোগাযোগ', '', ''],
                       ],
                     ),
                   ),
-                  pw.SizedBox(width: 6),
+                  pw.SizedBox(width: 4),
                   pw.Expanded(
-                    child: pw.Table(
-                      border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
-                      columnWidths: const {
-                        0: pw.FlexColumnWidth(3),
-                        1: pw.FlexColumnWidth(1),
-                        2: pw.FlexColumnWidth(2),
+                    child: buildTable(
+                      headers: ['বিবরণ', 'সংখ্যা', 'বিষয়'],
+                      columnWidths: {
+                        0: const pw.FlexColumnWidth(3.0),
+                        1: const pw.FlexColumnWidth(1.0),
+                        2: const pw.FlexColumnWidth(2.0),
                       },
-                      children: [
-                        _buildTableHeader(['বিবরণ', 'সংখ্যা', 'বিষয়']),
-                        _buildOfficeRow('চিঠি প্রেরণ', data['letterSendCount'] ?? '', data['letterSendSubject'] ?? ''),
-                        _buildOfficeRow('চিঠি প্রাপ্তি', data['letterRecCount'] ?? '', data['letterRecSubject'] ?? ''),
-                        _buildOfficeRow('অন্যান্য', data['otherOfficeCount'] ?? '', data['otherOfficeSubject'] ?? ''),
+                      rows: [
+                        ['চিঠি প্রেরণ', v('letterSendCount'), ''],
+                        ['চিঠি প্রাপ্তি', v('letterRecCount'), ''],
+                        ['অন্যান্য', '', ''],
                       ],
                     ),
                   ),
                 ],
               ),
-              pw.SizedBox(height: 8),
 
-              // 4. প্রচার ও প্রকাশনা (Side by side)
+              // ------------------------------------------
+              // 9. প্রচার
+              // ------------------------------------------
+              buildSectionHeader('৯. প্রচার'),
               pw.Row(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Expanded(
-                    child: pw.Column(
-                      children: [
-                        _buildSectionHeader('প্রচার'),
-                        pw.Table(
-                          border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
-                          columnWidths: const {
-                            0: pw.FlexColumnWidth(3),
-                            1: pw.FlexColumnWidth(1),
-                            2: pw.FlexColumnWidth(2),
-                          },
-                          children: [
-                            _buildTableHeader(['বিবরণ', 'সংখ্যা', 'বিষয়']),
-                            _buildOfficeRow('সংবাদ বিজ্ঞপ্তি', data['pressReleaseCount'] ?? '', data['pressReleaseSubject'] ?? ''),
-                            _buildOfficeRow('বিবৃতি / বাণী', data['statementCount'] ?? '', data['statementSubject'] ?? ''),
-                          ],
-                        ),
+                    child: buildTable(
+                      headers: ['বিবরণ', 'সংখ্যা', 'বিষয়', 'ছাপানো'],
+                      columnWidths: {
+                        0: const pw.FlexColumnWidth(2.5),
+                        1: const pw.FlexColumnWidth(1.0),
+                        2: const pw.FlexColumnWidth(1.5),
+                        3: const pw.FlexColumnWidth(1.0),
+                      },
+                      rows: [
+                        ['সংবাদ বিজ্ঞপ্তি', v('pressReleaseCount'), '', ''],
+                        ['বিবৃতি / বাণী', v('statementCount'), '', ''],
                       ],
                     ),
                   ),
-                  pw.SizedBox(width: 6),
+                  pw.SizedBox(width: 4),
                   pw.Expanded(
-                    child: pw.Column(
-                      children: [
-                        _buildSectionHeader('প্রকাশনা'),
-                        pw.Table(
-                          border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
-                          columnWidths: const {
-                            0: pw.FlexColumnWidth(3),
-                            1: pw.FlexColumnWidth(1),
-                            2: pw.FlexColumnWidth(2),
-                          },
-                          children: [
-                            _buildTableHeader(['বিবরণ', 'সংখ্যা', 'উপলক্ষ']),
-                            _buildOfficeRow('পোস্টার', data['posterPubCount'] ?? '', data['posterPubEvent'] ?? ''),
-                            _buildOfficeRow('লিফলেট', data['leafletPubCount'] ?? '', data['leafletPubEvent'] ?? ''),
-                          ],
-                        ),
+                    child: buildTable(
+                      headers: ['বিবরণ', 'সংখ্যা', 'বিষয়'],
+                      columnWidths: {
+                        0: const pw.FlexColumnWidth(3.0),
+                        1: const pw.FlexColumnWidth(1.0),
+                        2: const pw.FlexColumnWidth(2.0),
+                      },
+                      rows: [
+                        ['সংবাদ সম্মেলন', '', ''],
+                        ['', '', ''],
                       ],
                     ),
                   ),
                 ],
               ),
-              pw.SizedBox(height: 8),
 
-              // 5. পাঠাগার (Table)
-              _buildSectionHeader('পাঠাগার'),
-              pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
-                columnWidths: const {
-                  0: pw.FlexColumnWidth(2.5),
-                  1: pw.FlexColumnWidth(2.5),
-                  2: pw.FlexColumnWidth(2.5),
-                  3: pw.FlexColumnWidth(2.5),
-                },
+              // ------------------------------------------
+              // 10. প্রকাশনা
+              // ------------------------------------------
+              buildSectionHeader('১০. প্রকাশনা'),
+              pw.Row(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  _buildTableHeader(['পাঠাগার সংখ্যা', 'বই সংখ্যা', 'পঠিত বই সংখ্যা', 'পাঠক সংখ্যা']),
-                  pw.TableRow(
-                    children: [
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(data['libraryCount'] ?? '', fontSize: 8.5, textAlign: pw.TextAlign.center)),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(data['bookCount'] ?? '', fontSize: 8.5, textAlign: pw.TextAlign.center)),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(data['readBookCount'] ?? '', fontSize: 8.5, textAlign: pw.TextAlign.center)),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(data['readerCount'] ?? '', fontSize: 8.5, textAlign: pw.TextAlign.center)),
-                    ],
+                  pw.Expanded(
+                    child: buildTable(
+                      headers: ['বিবরণ', 'সংখ্যা', 'উপলক্ষ'],
+                      columnWidths: {
+                        0: const pw.FlexColumnWidth(3.0),
+                        1: const pw.FlexColumnWidth(1.0),
+                        2: const pw.FlexColumnWidth(2.0),
+                      },
+                      rows: [
+                        ['পোস্টার', v('posterPubCount'), ''],
+                        ['লিফলেট', v('leafletPubCount'), ''],
+                      ],
+                    ),
+                  ),
+                  pw.SizedBox(width: 4),
+                  pw.Expanded(
+                    child: buildTable(
+                      headers: ['বিবরণ', 'সংখ্যা', 'উপলক্ষ'],
+                      columnWidths: {
+                        0: const pw.FlexColumnWidth(3.0),
+                        1: const pw.FlexColumnWidth(1.0),
+                        2: const pw.FlexColumnWidth(2.0),
+                      },
+                      rows: [
+                        ['দাওয়াত কার্ড', '', ''],
+                        ['', '', ''],
+                      ],
+                    ),
                   ),
                 ],
               ),
-              pw.SizedBox(height: 8),
 
-              // 6. সমাজকল্যাণ (Table)
-              _buildSectionHeader('সমাজকল্যাণ (বিস্তারিত আলাদা কাগজে)'),
-              pw.Table(
-                border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
-                columnWidths: const {
-                  0: pw.FlexColumnWidth(3),
-                  1: pw.FlexColumnWidth(2),
-                  2: pw.FlexColumnWidth(3),
-                  3: pw.FlexColumnWidth(2),
+              // ------------------------------------------
+              // 11. পাঠাগার
+              // ------------------------------------------
+              buildSectionHeader('১১. পাঠাগার'),
+              buildTable(
+                headers: ['পাঠাগার সংখ্যা', 'বই সংখ্যা', 'পঠিত বই সংখ্যা', 'পাঠক সংখ্যা'],
+                columnWidths: {
+                  0: const pw.FlexColumnWidth(1.5),
+                  1: const pw.FlexColumnWidth(1.5),
+                  2: const pw.FlexColumnWidth(1.5),
+                  3: const pw.FlexColumnWidth(1.5),
                 },
-                children: [
-                  _buildTableHeader(['আয়ের উৎস', 'আয়ের পরিমাণ', 'কার্যক্রম', 'ব্যয়ের পরিমাণ']),
-                  _buildSocialRow('নিয়মিত অনুদান', data['regDonation'] ?? '', 'চিকিৎসা সেবা', data['medService'] ?? ''),
-                  _buildSocialRow('এককালীন অনুদান', data['onetimeDonation'] ?? '', 'পুনর্বাসন সহায়তা', data['rehabSupport'] ?? ''),
-                  _buildSocialRow('যাকাত', data['zakatDonation'] ?? '', 'ত্রাণ তৎপরতা', data['reliefSupport'] ?? ''),
-                  _buildSocialRow('মোট আয়', data['socialTotalIncome'] ?? '', 'মোট ব্যয়', data['socialTotalExpense'] ?? '', isBold: true),
+                rows: [
+                  [v('libraryCount'), v('bookCount'), v('readBookCount'), v('readerCount')],
                 ],
               ),
-              pw.SizedBox(height: 10),
 
-              // 7. মন্তব্য (সমস্যা ও সম্ভাবনা উল্লেখসহ)
-              pw.Align(
-                alignment: pw.Alignment.centerLeft,
-                child: PdfExportService.bWidget('মন্তব্য (সমস্যা ও সম্ভাবনা উল্লেখসহ):', fontSize: 9.5, fontWeight: pw.FontWeight.bold),
+              // ------------------------------------------
+              // 12. সমাজকল্যাণ (বিস্তারিত আলাদা কাগজে)
+              // ------------------------------------------
+              buildSectionHeader('১২. সমাজকল্যাণ (বিস্তারিত আলাদা কাগজে)'),
+              pw.Row(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Expanded(
+                    flex: 4,
+                    child: buildTable(
+                      headers: ['আয়ের উৎস', 'আয়ের পরিমাণ'],
+                      columnWidths: {
+                        0: const pw.FlexColumnWidth(3.0),
+                        1: const pw.FlexColumnWidth(1.5),
+                      },
+                      rows: [
+                        ['নিয়মিত অনুদান', v('regDonation')],
+                        ['এককালীন অনুদান', ''],
+                        ['যাকাত (শরীয়ত নির্ধারিত খাতে যাকাতের অর্থ ব্যয় হবে)', v('zakatDonation')],
+                        ['মোট আয়', v('totalSocialIncome')],
+                      ],
+                    ),
+                  ),
+                  pw.SizedBox(width: 4),
+                  pw.Expanded(
+                    flex: 6,
+                    child: buildTable(
+                      headers: ['কার্যক্রম', 'ব্যয়ের পরিমাণ', 'কার্যক্রম', 'ব্যয়ের পরিমাণ'],
+                      columnWidths: {
+                        0: const pw.FlexColumnWidth(2.0),
+                        1: const pw.FlexColumnWidth(1.2),
+                        2: const pw.FlexColumnWidth(2.0),
+                        3: const pw.FlexColumnWidth(1.2),
+                      },
+                      rows: [
+                        ['চিকিৎসা সেবা', v('medService'), 'পুনর্বাসন সহায়তা', ''],
+                        ['ঋণ পরিশোধ', '', 'ত্রাণ তৎপরতা', v('reliefSupport')],
+                        ['করজে হাসানা', '', 'অন্যান্য সহায়তা', ''],
+                        ['মোট ব্যয়', v('totalSocialExpense'), '', ''],
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              pw.SizedBox(height: 3),
+
+              // ------------------------------------------
+              // 13. রাজনৈতিক ও অন্যান্য রিপোর্ট
+              // ------------------------------------------
+              buildSectionHeader('১৩. রাজনৈতিক ও অন্যান্য রিপোর্ট পৃথক কাগজে'),
+
+              // ------------------------------------------
+              // 14. মন্তব্য (সমস্যা ও সম্ভাবনা উল্লেখসহ)
+              // ------------------------------------------
+              buildSectionHeader('১৪. মন্তব্য (সমস্যা ও সম্ভাবনা উল্লেখসহ)'),
               pw.Container(
                 width: double.infinity,
-                height: 45,
-                padding: const pw.EdgeInsets.all(5),
-                decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey500, width: 0.5)),
-                child: PdfExportService.bWidget(data['remarks'] ?? '........................................................................................................................................................', fontSize: 9),
+                height: 40,
+                padding: const pw.EdgeInsets.all(3),
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.grey700, width: 0.35),
+                ),
+                child: PdfExportService.bWidget(
+                  v(['comments', 'remarks']).isNotEmpty ? v(['comments', 'remarks']) : '',
+                  fontSize: 7.5,
+                ),
               ),
 
-              pw.Spacer(),
+              pw.SizedBox(height: 6),
 
-              // Footer Signatures
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  PdfExportService.bWidget('তারিখ: ...........................................', fontSize: 9.5),
-                  PdfExportService.bWidget('সভাপতির স্বাক্ষর', fontSize: 9.5, fontWeight: pw.FontWeight.bold),
-                ],
+              // BOTTOM SIGNATURES
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(top: 4, bottom: 4),
+                child: pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    PdfExportService.bWidget('তারিখ: ....................', fontSize: 8.5),
+                    PdfExportService.bWidget('সভাপতি / সম্পাদকের স্বাক্ষর: ....................', fontSize: 8.5),
+                  ],
+                ),
               ),
-              pw.SizedBox(height: 4),
             ],
           );
         },
       ),
     );
 
+    if (pdfDocument != null) return Uint8List(0);
     return pdf.save();
   }
 
-  static pw.Widget _buildSectionHeader(String title) {
-    return pw.Container(
-      width: double.infinity,
-      color: PdfColors.grey300,
-      padding: const pw.EdgeInsets.symmetric(vertical: 2.5),
-      alignment: pw.Alignment.center,
-      child: PdfExportService.bWidget(title, fontSize: 10, fontWeight: pw.FontWeight.bold),
+  static Future<void> printOrDownloadPdf(
+    BuildContext context,
+    Map<String, dynamic> data, {
+    String shakhaName = '',
+    String month = '',
+    String year = '',
+  }) async {
+    final pdfBytes = await generatePdfBytes(
+      data,
+      shakhaName: shakhaName,
+      month: month,
+      year: year,
     );
-  }
-
-  static pw.TableRow _buildTableHeader(List<String> headers) {
-    return pw.TableRow(
-      decoration: const pw.BoxDecoration(color: PdfColors.grey100),
-      children: headers.map((h) {
-        return pw.Padding(
-          padding: const pw.EdgeInsets.all(3),
-          child: PdfExportService.bWidget(h, fontSize: 8.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center),
-        );
-      }).toList(),
-    );
-  }
-
-  static pw.TableRow _buildManpowerRow(String label, String c, String b, String br, String g, String gr, {bool isBold = false}) {
-    return pw.TableRow(
-      children: [
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(label, fontSize: 8.5, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(c, fontSize: 8.5, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(b, fontSize: 8.5, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(br, fontSize: 8.5)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(g, fontSize: 8.5, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(gr, fontSize: 8.5)),
-      ],
-    );
-  }
-
-  static pw.TableRow _buildMeetingRow(String label, String count, String pres) {
-    return pw.TableRow(
-      children: [
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(label, fontSize: 8.5)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(count, fontSize: 8.5, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(pres, fontSize: 8.5, textAlign: pw.TextAlign.center)),
-      ],
-    );
-  }
-
-  static pw.TableRow _buildOrgRow(String label, String count, String org, String work, String manpower) {
-    return pw.TableRow(
-      children: [
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(label, fontSize: 8.5)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(count, fontSize: 8.5, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(org, fontSize: 8.5, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(work, fontSize: 8.5, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(manpower, fontSize: 8.5, textAlign: pw.TextAlign.center)),
-      ],
-    );
-  }
-
-  static pw.TableRow _buildSafarDetailRow(String label, String count, String details) {
-    return pw.TableRow(
-      children: [
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(label, fontSize: 8.5)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(count, fontSize: 8.5, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(details, fontSize: 8.5)),
-      ],
-    );
-  }
-
-  static pw.TableRow _buildOfficeRow(String label, String count, String subject) {
-    return pw.TableRow(
-      children: [
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(label, fontSize: 8.5)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(count, fontSize: 8.5, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(subject, fontSize: 8.5)),
-      ],
-    );
-  }
-
-  static pw.TableRow _buildSocialRow(String u1, String p1, String k2, String p2, {bool isBold = false}) {
-    return pw.TableRow(
-      children: [
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(u1, fontSize: 8.5, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(p1, fontSize: 8.5, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(k2, fontSize: 8.5, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal)),
-        pw.Padding(padding: const pw.EdgeInsets.all(2.5), child: PdfExportService.bWidget(p2, fontSize: 8.5, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal, textAlign: pw.TextAlign.center)),
-      ],
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdfBytes,
+      name: 'Shakhar_Report_${shakhaName.isNotEmpty ? shakhaName : 'form'}.pdf',
     );
   }
 }

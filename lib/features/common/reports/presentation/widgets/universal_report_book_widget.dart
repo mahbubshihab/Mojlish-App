@@ -12,6 +12,7 @@ class UniversalReportBookWidget extends StatefulWidget {
   final Function(int year, int month) onMonthSelected;
   final VoidCallback? onDownloadPressed;
   final VoidCallback? onTodayPressed;
+  final bool showTodayButton;
   final Widget? extraContent;
 
   const UniversalReportBookWidget({
@@ -24,6 +25,7 @@ class UniversalReportBookWidget extends StatefulWidget {
     required this.onMonthSelected,
     this.onDownloadPressed,
     this.onTodayPressed,
+    this.showTodayButton = false,
     this.extraContent,
   });
 
@@ -150,7 +152,8 @@ class _UniversalReportBookWidgetState extends State<UniversalReportBookWidget> {
                   ],
 
                   // 5. Today's Report Outlined Button
-                  _buildTodayButton(accent),
+                  if (widget.showTodayButton && widget.onTodayPressed != null)
+                    _buildTodayButton(accent),
                 ],
               ),
             ),

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../common/widgets/custom_labeled_input_field.dart';
 import '../../domain/entities/member.dart';
 import '../bloc/member_form_bloc.dart';
 import '../bloc/member_form_event.dart';
 import '../bloc/member_form_state.dart';
 
 class MemberFormScreen extends StatefulWidget {
-  const MemberFormScreen({super.key});
+  const MemberFormScreen({Key? key}) : super(key: key);
 
   @override
   State<MemberFormScreen> createState() => _MemberFormScreenState();
@@ -78,45 +79,47 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
               key: _formKey,
               child: Column(
                 children: [
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'নাম',
                     controller: _nameController,
-                    decoration: const InputDecoration(labelText: 'নাম'),
-                    validator: (value) => value!.isEmpty ? 'নাম লিখুন' : null,
+                    validator: (value) => value == null || value.isEmpty ? 'নাম লিখুন' : null,
                   ),
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'পিতার নাম',
                     controller: _fatherNameController,
-                    decoration: const InputDecoration(labelText: 'পিতার নাম'),
-                    validator: (value) => value!.isEmpty ? 'পিতার নাম লিখুন' : null,
+                    validator: (value) => value == null || value.isEmpty ? 'পিতার নাম লিখুন' : null,
                   ),
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'শিক্ষাগত যোগ্যতা',
                     controller: _educationalQualificationController,
-                    decoration: const InputDecoration(labelText: 'শিক্ষাগত যোগ্যতা'),
-                    validator: (value) => value!.isEmpty ? 'শিক্ষাগত যোগ্যতা লিখুন' : null,
+                    validator: (value) => value == null || value.isEmpty ? 'শিক্ষাগত যোগ্যতা লিখুন' : null,
                   ),
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'বয়স',
                     controller: _ageController,
-                    decoration: const InputDecoration(labelText: 'বয়স'),
-                    validator: (value) => value!.isEmpty ? 'বয়স লিখুন' : null,
+                    keyboardType: TextInputType.number,
+                    validator: (value) => value == null || value.isEmpty ? 'বয়স লিখুন' : null,
                   ),
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'পেশা',
                     controller: _professionController,
-                    decoration: const InputDecoration(labelText: 'পেশা'),
-                    validator: (value) => value!.isEmpty ? 'পেশা লিখুন' : null,
+                    validator: (value) => value == null || value.isEmpty ? 'পেশা লিখুন' : null,
                   ),
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'বর্তমান ঠিকানা',
                     controller: _presentAddressController,
-                    decoration: const InputDecoration(labelText: 'বর্তমান ঠিকানা'),
-                    validator: (value) => value!.isEmpty ? 'বর্তমান ঠিকানা লিখুন' : null,
+                    validator: (value) => value == null || value.isEmpty ? 'বর্তমান ঠিকানা লিখুন' : null,
                   ),
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'মোবাইল',
                     controller: _mobileController,
-                    decoration: const InputDecoration(labelText: 'মোবাইল'),
-                    validator: (value) => value!.isEmpty ? 'মোবাইল নম্বর লিখুন' : null,
+                    keyboardType: TextInputType.phone,
+                    validator: (value) => value == null || value.isEmpty ? 'মোবাইল নম্বর লিখুন' : null,
                   ),
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'স্থায়ী ঠিকানা',
                     controller: _permanentAddressController,
-                    decoration: const InputDecoration(labelText: 'স্থায়ী ঠিকানা'),
-                    validator: (value) => value!.isEmpty ? 'স্থায়ী ঠিকানা লিখুন' : null,
+                    validator: (value) => value == null || value.isEmpty ? 'স্থায়ী ঠিকানা লিখুন' : null,
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -7,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:bijoy_helper/bijoy_helper.dart';
 import 'package:mojlish_app/core/constants/majlis_assets.dart';
 import 'package:mojlish_app/features/common/reports/data/models/baytulmal_report_entry.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/pdf_preview_screen.dart';
 
 class MonthReportPdfData {
   final int year;
@@ -30,154 +32,44 @@ class MonthReportPdfData {
   });
 }
 
-class _TextToken {
-  final bool isBengali;
+
+
+class TextSegment {
   final String text;
-  _TextToken(this.isBengali, this.text);
+  final bool isBengali;
+  TextSegment(this.text, this.isBengali);
 }
 
-List<_TextToken> _splitBengaliEnglishTokens(String text) {
-  if (text.isEmpty) return [];
-
-  final List<_TextToken> tokens = [];
-  bool? currentIsBengali;
-  final StringBuffer buffer = StringBuffer();
-
-  for (int i = 0; i < text.length; i++) {
-    final code = text.codeUnitAt(i);
-    final isBnChar = code >= 0x0980 && code <= 0x09FF;
-    final isEnChar = (code >= 0x61 && code <= 0x7A) || (code >= 0x41 && code <= 0x5A);
-
-    bool isBn;
-    if (isBnChar) {
-      isBn = true;
-    } else if (isEnChar) {
-      isBn = false;
-    } else {
-      isBn = currentIsBengali ?? true;
-    }
-
-    if (currentIsBengali != null && isBn != currentIsBengali) {
-      tokens.add(_TextToken(currentIsBengali, buffer.toString()));
-      buffer.clear();
-    }
-
-    currentIsBengali = isBn;
-    buffer.writeCharCode(code);
-  }
-
-  if (buffer.isNotEmpty && currentIsBengali != null) {
-    tokens.add(_TextToken(currentIsBengali, buffer.toString()));
-  }
-
-  return tokens;
-}
-
-/// Helper function to convert Unicode Bengali string to Bijoy ANSI for SutonnyMJ TTF PDF rendering
+/// Helper function to clean text and convert Unicode Bengali to Bijoy ANSI for SutonnyMJ font PDF rendering
 String b(String text) {
   if (text.isEmpty || text == '-') return text;
-  final cleanText = text.replaceAll('_', '.').replaceAll('✓', '√');
-
-  final bool hasEnglish = cleanText.codeUnits.any((c) => (c >= 0x61 && c <= 0x7A) || (c >= 0x41 && c <= 0x5A));
-  final bool hasBengali = cleanText.codeUnits.any((c) => c >= 0x0980 && c <= 0x09FF);
-
-  // If pure English text, do NOT convert via toBijoy (prevents turning English to Bengali glyphs)
-  if (hasEnglish && !hasBengali) {
-    return cleanText;
+  // If the text does NOT contain Bengali characters at all, return raw string
+  if (!RegExp(r'[\u0980-\u09FF]').hasMatch(text)) {
+    return text;
   }
-
-  try {
-    return cleanText.toBijoy;
-  } catch (_) {
-    return cleanText;
-  }
+  return text.replaceAll('_', '.').replaceAll('✓', '√').toBijoy;
 }
 
-/// Smart PDF Widget builder that renders Bengali with SutonnyMJ (Bijoy) and English with Helvetica
+/// Smart PDF Widget builder that renders text with document font
 pw.Widget smartText(
   String rawText, {
-  required pw.Font sutonnyFont,
+  pw.Font? sutonnyFont,
   pw.Font? helveticaFont,
   double fontSize = 8.5,
   PdfColor color = PdfColors.black,
   pw.FontWeight fontWeight = pw.FontWeight.normal,
   pw.TextAlign textAlign = pw.TextAlign.left,
 }) {
-  final hFont = helveticaFont ?? pw.Font.helvetica();
   if (rawText.isEmpty) {
     return pw.Text('', style: pw.TextStyle(fontSize: fontSize));
   }
 
-  final cleanText = rawText.replaceAll('_', '.').replaceAll('✓', '√');
-  final bool hasEnglish = cleanText.codeUnits.any((c) => (c >= 0x61 && c <= 0x7A) || (c >= 0x41 && c <= 0x5A));
-  final bool hasBengali = cleanText.codeUnits.any((c) => c >= 0x0980 && c <= 0x09FF);
-
-  if (hasEnglish && !hasBengali) {
-    return pw.Text(
-      cleanText,
-      textAlign: textAlign,
-      style: pw.TextStyle(
-        font: hFont,
-        fontSize: fontSize,
-        color: color,
-        fontWeight: fontWeight,
-      ),
-    );
-  }
-
-  if (hasBengali && !hasEnglish) {
-    String bijoyText;
-    try {
-      bijoyText = cleanText.toBijoy;
-    } catch (_) {
-      bijoyText = cleanText;
-    }
-    return pw.Text(
-      bijoyText,
-      textAlign: textAlign,
-      style: pw.TextStyle(
-        font: sutonnyFont,
-        fontSize: fontSize,
-        color: color,
-        fontWeight: fontWeight,
-      ),
-    );
-  }
-
-  final tokens = _splitBengaliEnglishTokens(cleanText);
-  return pw.RichText(
+  return PdfExportService.bWidget(
+    rawText,
+    fontSize: fontSize,
+    color: color,
+    fontWeight: fontWeight,
     textAlign: textAlign,
-    text: pw.TextSpan(
-      children: tokens.map((token) {
-        if (token.isBengali) {
-          String bijoyToken;
-          try {
-            bijoyToken = token.text.toBijoy;
-          } catch (_) {
-            bijoyToken = token.text;
-          }
-          return pw.TextSpan(
-            text: bijoyToken,
-            style: pw.TextStyle(
-              font: sutonnyFont,
-              fontSize: fontSize,
-              color: color,
-              fontWeight: fontWeight,
-            ),
-          );
-        } else {
-          return pw.TextSpan(
-            text: token.text,
-            style: pw.TextStyle(
-              font: hFont,
-              fontSize: fontSize,
-              color: color,
-              fontWeight: fontWeight,
-            ),
-          );
-        }
-      }).toList(),
-    ),
   );
 }
 
@@ -186,7 +78,50 @@ class PdfExportService {
   static const String chatroCentralAddress =
       'কেন্দ্রীয় কার্যালয়: ১৬ বিজয়নগর, (৫ম তলা), ঢাকা-১০০০ | ফোন: ৯৫৮৫৩২১';
 
-  /// Standard PDF Text Widget Helper
+  static final RegExp _bengaliRegex = RegExp(r'[\u0980-\u09FF]');
+
+  static bool containsBengali(String text) {
+    return _bengaliRegex.hasMatch(text);
+  }
+
+  static List<TextSegment> _splitMixedText(String input) {
+    final segments = <TextSegment>[];
+    final buffer = StringBuffer();
+    bool? currentIsBengali;
+
+    for (int i = 0; i < input.codeUnits.length; i++) {
+      final char = input[i];
+      final code = input.codeUnitAt(i);
+      final isBeng = (code >= 0x0980 && code <= 0x09FF);
+
+      if (char == ' ' || char == ':' || char == '.' || char == '-' || char == ',' || char == '(' || char == ')' || char == '/') {
+        buffer.write(char);
+        continue;
+      }
+
+      if (currentIsBengali == null) {
+        currentIsBengali = isBeng;
+        buffer.write(char);
+      } else if (currentIsBengali == isBeng) {
+        buffer.write(char);
+      } else {
+        if (buffer.isNotEmpty) {
+          segments.add(TextSegment(buffer.toString(), currentIsBengali));
+          buffer.clear();
+        }
+        currentIsBengali = isBeng;
+        buffer.write(char);
+      }
+    }
+
+    if (buffer.isNotEmpty) {
+      segments.add(TextSegment(buffer.toString(), currentIsBengali ?? true));
+    }
+
+    return segments;
+  }
+
+  /// Standard PDF Text Widget Helper supporting both Bengali and English text input seamlessly!
   static pw.Widget bWidget(
     String text, {
     double fontSize = 9,
@@ -194,13 +129,63 @@ class PdfExportService {
     pw.TextAlign textAlign = pw.TextAlign.left,
     PdfColor color = PdfColors.black,
   }) {
-    return pw.Text(
-      text,
+    if (text.isEmpty) return pw.SizedBox();
+
+    // 1. Pure English / ASCII string (no Bengali letters): Render cleanly in Helvetica font
+    if (!containsBengali(text)) {
+      return pw.Text(
+        text,
+        textAlign: textAlign,
+        style: pw.TextStyle(
+          font: fontWeight == pw.FontWeight.bold ? pw.Font.helveticaBold() : pw.Font.helvetica(),
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+          color: color,
+        ),
+      );
+    }
+
+    // 2. Pure Bengali string (no English letters A-Z, a-z): Convert via .toBijoy and render with SutonnyMJ
+    final hasEnglishLetters = RegExp(r'[a-zA-Z0-9@#\$\%&_\=\+\/]').hasMatch(text);
+    if (!hasEnglishLetters) {
+      return pw.Text(
+        b(text),
+        textAlign: textAlign,
+        style: pw.TextStyle(
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+          color: color,
+        ),
+      );
+    }
+
+    // 3. Mixed Bengali + English string: Split into segments and render with RichText!
+    final segments = _splitMixedText(text);
+    return pw.RichText(
       textAlign: textAlign,
-      style: pw.TextStyle(
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        color: color,
+      text: pw.TextSpan(
+        children: segments.map((seg) {
+          if (seg.isBengali) {
+            return pw.TextSpan(
+              text: b(seg.text),
+              style: pw.TextStyle(
+                fontSize: fontSize,
+                fontWeight: fontWeight,
+                color: color,
+              ),
+            );
+          } else {
+            return pw.TextSpan(
+              text: seg.text,
+              style: pw.TextStyle(
+                font: fontWeight == pw.FontWeight.bold ? pw.Font.helveticaBold() : pw.Font.helvetica(),
+                fontSize: fontSize,
+                fontWeight: fontWeight,
+                color: color,
+              ),
+            );
+          }
+        }).toList(),
       ),
     );
   }
@@ -213,15 +198,37 @@ class PdfExportService {
     return PdfColors.teal900; // Minimal Deep Emerald matching Khelafat/Women Majlis logo
   }
 
-  /// Loads the embedded SutonnyMJ ANSI TTF Font (Gold Standard Bijoy Font for PDFs)
+  /// Loads SutonnyMJ Regular font from assets for Bijoy ANSI PDF rendering
   static Future<pw.Font> loadSutonnyFont() async {
-    try {
-      final fontData = await rootBundle.load('assets/fonts/SutonnyMJ.ttf');
-      return pw.Font.ttf(fontData);
-    } catch (_) {
-      final fallbackData = await rootBundle.load('assets/fonts/kalpurush.ttf');
-      return pw.Font.ttf(fallbackData);
+    final fontData = await rootBundle.load('assets/fonts/SutonnyMJ.ttf');
+    return pw.Font.ttf(fontData);
+  }
+
+  /// Loads SutonnyMJ Bold font from assets for Bijoy ANSI PDF rendering
+  static Future<pw.Font> loadBengaliBoldFont() async {
+    final fontData = await rootBundle.load('assets/fonts/SutonnyMJ.ttf');
+    return pw.Font.ttf(fontData);
+  }
+
+  static Map<int, pw.TableColumnWidth> _getDynamicColumnWidths(List<String> headers) {
+    final Map<int, pw.TableColumnWidth> colWidths = {};
+    for (int i = 0; i < headers.length; i++) {
+      final h = headers[i];
+      if (i == 0 || h.contains('তাং') || h.contains('তারিখ')) {
+        colWidths[i] = const pw.FlexColumnWidth(0.5);
+      } else if (h.contains('কোরআন') || h.contains('কুরআন')) {
+        colWidths[i] = const pw.FlexColumnWidth(1.3);
+      } else if (h.contains('হাদীস')) {
+        colWidths[i] = const pw.FlexColumnWidth(1.3);
+      } else if (h.contains('সাহিত্য')) {
+        colWidths[i] = const pw.FlexColumnWidth(1.3);
+      } else if (h.contains('আত্ম')) {
+        colWidths[i] = const pw.FlexColumnWidth(1.1);
+      } else {
+        colWidths[i] = const pw.FlexColumnWidth(1.0);
+      }
     }
+    return colWidths;
   }
 
   /// Generates a standardized PDF document bytes for any report or form data
@@ -264,7 +271,8 @@ class PdfExportService {
     String? logoAssetPath,
     String? address,
   }) async {
-    final font = await loadSutonnyFont();
+    final fontRegular = await loadSutonnyFont();
+    final fontBold = await loadBengaliBoldFont();
     final accentColor = getAccentColor(majlisName, logoAssetPath);
 
     final effectiveLogoPath = (logoAssetPath != null && logoAssetPath.isNotEmpty)
@@ -293,8 +301,8 @@ class PdfExportService {
 
     final pdf = pw.Document(
       theme: pw.ThemeData.withFont(
-        base: font,
-        bold: font,
+        base: fontRegular,
+        bold: fontBold,
       ),
     );
 
@@ -407,9 +415,10 @@ class PdfExportService {
               pw.SizedBox(height: 6),
               pw.TableHelper.fromTextArray(
                 headers: tableHeaders.map((h) => b(h)).toList(),
-                data: tableData.map((row) => row.map((cell) => smartText(cell, sutonnyFont: font, fontSize: 7.5)).toList()).toList(),
+                data: tableData.map((row) => row.map((cell) => smartText(cell, sutonnyFont: fontRegular, fontSize: 7.5)).toList()).toList(),
                 border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5),
-                headerStyle: pw.TextStyle(fontSize: 8.5, fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+                columnWidths: _getDynamicColumnWidths(tableHeaders),
+                headerStyle: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold, color: PdfColors.white),
                 headerDecoration: pw.BoxDecoration(color: accentColor),
                 cellStyle: const pw.TextStyle(fontSize: 7.5, color: PdfColors.black),
                 cellAlignment: pw.Alignment.center,
@@ -448,8 +457,10 @@ class PdfExportService {
     required List<MonthReportPdfData> monthsData,
     String? logoAssetPath,
     String? address,
+    Map<String, String>? headerMetadata,
   }) async {
-    final font = await loadSutonnyFont();
+    final fontRegular = await loadSutonnyFont();
+    final fontBold = await loadBengaliBoldFont();
     final accentColor = getAccentColor(majlisName, logoAssetPath);
 
     final effectiveLogoPath = (logoAssetPath != null && logoAssetPath.isNotEmpty)
@@ -478,8 +489,8 @@ class PdfExportService {
 
     final pdf = pw.Document(
       theme: pw.ThemeData.withFont(
-        base: font,
-        bold: font,
+        base: fontRegular,
+        bold: fontBold,
       ),
     );
 
@@ -536,29 +547,40 @@ class PdfExportService {
               // Top Info Bar matching exact org form image
               pw.Padding(
                 padding: const pw.EdgeInsets.symmetric(vertical: 4),
-                child: pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    if (majlisName.contains('খেলাফত') || majlisName.contains('মহিলা')) ...[
-                      pw.Text(b('কর্মীর নাম : ............................................'), style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.black)),
-                      pw.Text(b('শাখা : ............................................'), style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.black)),
-                      pw.Text(b('মাস : ${monthData.monthName}   সন : ${monthData.year}'), style: pw.TextStyle(fontSize: 8.5, fontWeight: pw.FontWeight.bold, color: PdfColors.black)),
-                    ] else ...[
-                      pw.Text(b('নাম : ............................................'), style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.black)),
-                      pw.Text(b('প্রা.সদস্য/কর্মী/শুরা সদস্য (✓)  শাখা: ........................'), style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.black)),
-                      pw.Text(b('মাস: ${monthData.monthName}   সন: ${monthData.year}'), style: pw.TextStyle(fontSize: 8.5, fontWeight: pw.FontWeight.bold, color: PdfColors.black)),
-                    ],
-                  ],
-                ),
+                child: headerMetadata != null && headerMetadata.isNotEmpty
+                    ? pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          ...headerMetadata.entries.map(
+                            (e) => pw.Text(
+                              b('${e.key} : ${e.value}'),
+                              style: pw.TextStyle(fontSize: 8.5, fontWeight: pw.FontWeight.bold, color: PdfColors.black),
+                            ),
+                          ),
+                          pw.Text(
+                            b('মাস : ${monthData.monthName}   সন : ${monthData.year}'),
+                            style: pw.TextStyle(fontSize: 8.5, fontWeight: pw.FontWeight.bold, color: PdfColors.black),
+                          ),
+                        ],
+                      )
+                    : pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(b('কর্মীর নাম : ............................................'), style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.black)),
+                          pw.Text(b('শাখা : ............................................'), style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.black)),
+                          pw.Text(b('মাস : ${monthData.monthName}   সন : ${monthData.year}'), style: pw.TextStyle(fontSize: 8.5, fontWeight: pw.FontWeight.bold, color: PdfColors.black)),
+                        ],
+                      ),
               ),
               pw.SizedBox(height: 3),
 
               // Table fitting 31 rows cleanly on 1 A4 Page
               pw.TableHelper.fromTextArray(
                 headers: monthData.headers.map((h) => b(h)).toList(),
-                data: monthData.tableData.map((row) => row.map((cell) => smartText(cell, sutonnyFont: font, fontSize: 6.8, textAlign: pw.TextAlign.center)).toList()).toList(),
+                data: monthData.tableData.map((row) => row.map((cell) => smartText(cell, sutonnyFont: fontRegular, fontSize: 6.8, textAlign: pw.TextAlign.center)).toList()).toList(),
                 border: pw.TableBorder.all(color: PdfColors.grey600, width: 0.5),
-                headerStyle: pw.TextStyle(fontSize: 7.2, fontWeight: pw.FontWeight.bold, color: PdfColors.black),
+                columnWidths: _getDynamicColumnWidths(monthData.headers),
+                headerStyle: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold, color: PdfColors.black),
                 headerDecoration: const pw.BoxDecoration(color: PdfColors.grey200),
                 cellStyle: const pw.TextStyle(fontSize: 6.8, color: PdfColors.black),
                 cellAlignment: pw.Alignment.center,
@@ -646,6 +668,7 @@ class PdfExportService {
     String? comments,
     String? logoAssetPath,
     String? address,
+    BuildContext? context,
   }) async {
     final effectiveLogo = (logoAssetPath != null && logoAssetPath.isNotEmpty)
         ? logoAssetPath
@@ -672,10 +695,19 @@ class PdfExportService {
       address: effectiveAddress,
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdfBytes,
-      name: '${majlisName}_${title.replaceAll(' ', '_')}.pdf',
-    );
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        title,
+        fileName: '${majlisName}_${title.replaceAll(' ', '_')}.pdf',
+      );
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+        name: '${majlisName}_${title.replaceAll(' ', '_')}.pdf',
+      );
+    }
   }
 
   /// Print or Download Multi-Month Personal Report PDF (1 A4 page per month with Custom/Central Address)
@@ -686,6 +718,8 @@ class PdfExportService {
     required List<MonthReportPdfData> monthsData,
     String? logoAssetPath,
     String? address,
+    Map<String, String>? headerMetadata,
+    BuildContext? context,
   }) async {
     final effectiveLogo = (logoAssetPath != null && logoAssetPath.isNotEmpty)
         ? logoAssetPath
@@ -706,12 +740,22 @@ class PdfExportService {
       monthsData: monthsData,
       logoAssetPath: effectiveLogo,
       address: effectiveAddress,
+      headerMetadata: headerMetadata,
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdfBytes,
-      name: '${majlisName}_${title.replaceAll(' ', '_')}_multi_month.pdf',
-    );
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        title,
+        fileName: '${majlisName}_${title.replaceAll(' ', '_')}_multi_month.pdf',
+      );
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+        name: '${majlisName}_${title.replaceAll(' ', '_')}_multi_month.pdf',
+      );
+    }
   }
 
   /// Generates verbatim 100% exact 2-part A4 PDF for Student Majlis Primary Member Form matching official image
@@ -730,11 +774,12 @@ class PdfExportService {
     required String thana,
     required String district,
   }) async {
-    final font = await loadSutonnyFont();
+    final fontRegular = await loadSutonnyFont();
+    final fontBold = await loadBengaliBoldFont();
     final pdf = pw.Document(
       theme: pw.ThemeData.withFont(
-        base: font,
-        bold: font,
+        base: fontRegular,
+        bold: fontBold,
       ),
     );
 
@@ -908,6 +953,7 @@ class PdfExportService {
     required String postOffice,
     required String thana,
     required String district,
+    BuildContext? context,
   }) async {
     final pdfBytes = await generateChatroMemberFormPdf(
       name: name,
@@ -925,10 +971,19 @@ class PdfExportService {
       district: district,
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdfBytes,
-      name: 'বাংলাদেশ_ইসলামী_ছাত্র_মজলিস_প্রাথমিক_সদস্য_ফরম.pdf',
-    );
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        'প্রাথমিক সদস্য ফরম',
+        fileName: 'বাংলাদেশ_ইসলামী_ছাত্র_মজলিস_প্রাথমিক_সদস্য_ফরম.pdf',
+      );
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+        name: 'বাংলাদেশ_ইসলামী_ছাত্র_মজলিস_প্রাথমিক_সদস্য_ফরম.pdf',
+      );
+    }
   }
 
   /// Generates verbatim 100% exact 2-part A4 PDF for Youth Majlis Primary Member Form matching official images
@@ -945,11 +1000,12 @@ class PdfExportService {
     required String email,
     required String joinDate,
   }) async {
-    final font = await loadSutonnyFont();
+    final fontRegular = await loadSutonnyFont();
+    final fontBold = await loadBengaliBoldFont();
     final pdf = pw.Document(
       theme: pw.ThemeData.withFont(
-        base: font,
-        bold: font,
+        base: fontRegular,
+        bold: fontBold,
       ),
     );
 
@@ -967,7 +1023,7 @@ class PdfExportService {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
-              // PART 1: Top Personal Info Section (Matching media__1785275697596.png)
+              // PART 1: Top Personal Info Section
               pw.Container(
                 padding: const pw.EdgeInsets.all(12),
                 decoration: pw.BoxDecoration(
@@ -988,7 +1044,7 @@ class PdfExportService {
                               pw.Text(b('বিসমিল্লাহির রাহমানির রাহিম'), style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
                               pw.SizedBox(height: 2),
                               pw.Text(b('ইসলামী যুব মজলিস'), style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900)),
-                              pw.Text(b('১৬, বিজয়নগর, (৫ম তলা), পুরানা পল্টন, ঢাকা-১০<ctrl42>'), style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey800)),
+                              pw.Text(b('১৬, বিজয়নগর, (৫ম তলা), পুরানা পল্টন, ঢাকা-১০০০'), style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey800)),
                               pw.Text('http://islamijubomajlis.org', style: const pw.TextStyle(fontSize: 8, color: PdfColors.blue800)),
                             ],
                           ),
@@ -1017,28 +1073,28 @@ class PdfExportService {
                     pw.SizedBox(height: 6),
                     pw.Text(b('জাতীয় পরিচয়পত্র নং : ${nidNumber.isNotEmpty ? nidNumber : "...................................................................................................................."}'), style: const pw.TextStyle(fontSize: 10)),
                     pw.SizedBox(height: 6),
-                    pw.Text('ঠিকানা : গ্রাম : ${village.isNotEmpty ? village : "...................................................................................................................."}', style: const pw.TextStyle(fontSize: 10)),
+                    pw.Text(b('ঠিকানা : গ্রাম : ${village.isNotEmpty ? village : "...................................................................................................................."}'), style: const pw.TextStyle(fontSize: 10)),
                     pw.SizedBox(height: 6),
                     pw.Row(
                       children: [
-                        pw.Expanded(child: pw.Text('ইউনিয়ন : ${unionName.isNotEmpty ? unionName : "........................................"}', style: const pw.TextStyle(fontSize: 10))),
-                        pw.Expanded(child: pw.Text('থানা ও উপজেলা : ${thanaUpazila.isNotEmpty ? thanaUpazila : "........................................"}', style: const pw.TextStyle(fontSize: 10))),
+                        pw.Expanded(child: pw.Text(b('ইউনিয়ন : ${unionName.isNotEmpty ? unionName : "........................................"}'), style: const pw.TextStyle(fontSize: 10))),
+                        pw.Expanded(child: pw.Text(b('থানা ও উপজেলা : ${thanaUpazila.isNotEmpty ? thanaUpazila : "........................................"}'), style: const pw.TextStyle(fontSize: 10))),
                       ],
                     ),
                     pw.SizedBox(height: 6),
-                    pw.Text('জেলা : ${district.isNotEmpty ? district : "...................................................................................................................."}', style: const pw.TextStyle(fontSize: 10)),
+                    pw.Text(b('জেলা : ${district.isNotEmpty ? district : "...................................................................................................................."}'), style: const pw.TextStyle(fontSize: 10)),
                     pw.SizedBox(height: 6),
-                    pw.Text('বর্তমান ঠিকানা : ${presentAddress.isNotEmpty ? presentAddress : "...................................................................................................................."}', style: const pw.TextStyle(fontSize: 10)),
+                    pw.Text(b('বর্তমান ঠিকানা : ${presentAddress.isNotEmpty ? presentAddress : "...................................................................................................................."}'), style: const pw.TextStyle(fontSize: 10)),
                     pw.SizedBox(height: 6),
-                    pw.Text('মোবাইল : ${mobile.isNotEmpty ? mobile : "...................................................................................................................."}', style: const pw.TextStyle(fontSize: 10)),
+                    pw.Text(b('মোবাইল : ${mobile.isNotEmpty ? mobile : "...................................................................................................................."}'), style: const pw.TextStyle(fontSize: 10)),
                     pw.SizedBox(height: 6),
-                    pw.Text('ইমেইল : ${email.isNotEmpty ? email : "...................................................................................................................."}', style: const pw.TextStyle(fontSize: 10)),
+                    pw.Text(b('ইমেইল : ${email.isNotEmpty ? email : "...................................................................................................................."}'), style: const pw.TextStyle(fontSize: 10)),
                     pw.SizedBox(height: 12),
                     pw.Row(
                       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                       children: [
-                        pw.Text('যোগদানের তারিখ : ${joinDate.isNotEmpty ? joinDate : "....................."}', style: const pw.TextStyle(fontSize: 9.5)),
-                        pw.Text('স্বাক্ষর : .....................', style: const pw.TextStyle(fontSize: 9.5)),
+                        pw.Text(b('যোগদানের তারিখ : ${joinDate.isNotEmpty ? joinDate : "....................."}'), style: const pw.TextStyle(fontSize: 9.5)),
+                        pw.Text(b('স্বাক্ষর : .....................'), style: const pw.TextStyle(fontSize: 9.5)),
                       ],
                     ),
                   ],
@@ -1047,7 +1103,7 @@ class PdfExportService {
 
               pw.SizedBox(height: 16),
 
-              // PART 2: Bottom Pledge Section (Matching media__1785275794053.png)
+              // PART 2: Bottom Pledge Section
               pw.Container(
                 padding: const pw.EdgeInsets.all(12),
                 decoration: pw.BoxDecoration(
@@ -1064,10 +1120,10 @@ class PdfExportService {
                           child: pw.Column(
                             crossAxisAlignment: pw.CrossAxisAlignment.center,
                             children: [
-                              pw.Text('বিসমিল্লাহির রাহমানির রাহিম', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+                              pw.Text(b('বিসমিল্লাহির রাহমানির রাহিম'), style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
                               pw.SizedBox(height: 2),
-                              pw.Text('ইসলামী যুব মজলিস', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900)),
-                              pw.Text('১৬, বিজয়নগর, (৫ম তলা), পুরানা পল্টন, ঢাকা-১০০০ | http://islamijubomajlis.org', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey800)),
+                              pw.Text(b('اسلامী যুব মজলিস'), style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900)),
+                              pw.Text(b('১৬, বিজয়নগর, (৫ম তলা), পুরানা পল্টন, ঢাকা-১০০০ | http://islamijubomajlis.org'), style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey800)),
                             ],
                           ),
                         ),
@@ -1084,7 +1140,7 @@ class PdfExportService {
                             color: PdfColors.green800,
                             borderRadius: pw.BorderRadius.circular(12),
                           ),
-                          child: pw.Text('প্রাথমিক সদস্য ফরম', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
+                          child: pw.Text(b('প্রাথমিক সদস্য ফরম'), style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
                         ),
                       ],
                     ),
@@ -1092,13 +1148,13 @@ class PdfExportService {
                     pw.Align(
                       alignment: pw.Alignment.centerLeft,
                       child: pw.Text(
-                        'আমি ${name.isNotEmpty ? name : "...................................................................................................."} দৃঢ়ভাবে বিশ্বাস করি যে,',
+                        b('আমি ${name.isNotEmpty ? name : "...................................................................................................."} দৃঢ়ভাবে বিশ্বাস করি যে,'),
                         style: const pw.TextStyle(fontSize: 10.5),
                       ),
                     ),
                     pw.SizedBox(height: 6),
                     pw.Text(
-                      'ইসলামই আল্লাহর একমাত্র মনোনীত জীবনব্যবস্থা। ইসলামী আদর্শের আলোকে যুবসমাজের নেতৃত্বে একটি কল্যাণমুখী সমাজ গড়ার লক্ষ্যে ইসলামী যুব মজলিসের সাথে একমত হয়ে এ সংগঠনে যোগদান করছি।',
+                      b('ইসলামই আল্লাহর একমাত্র মনোনীত জীবনব্যবস্থা। ইসলামী আদর্শের আলোকে যুবসমাজের নেতৃত্বে একটি কল্যাণমুখী সমাজ গড়ার লক্ষ্যে ইসলামী যুব মজলিসের সাথে একমত হয়ে এ সংগঠনে যোগদান করছি।'),
                       textAlign: pw.TextAlign.justify,
                       style: const pw.TextStyle(fontSize: 10, lineSpacing: 1.3),
                     ),
@@ -1106,7 +1162,7 @@ class PdfExportService {
                     pw.Align(
                       alignment: pw.Alignment.centerLeft,
                       child: pw.Text(
-                        'আমি এ লক্ষ্য অর্জনে যথাসাধ্য চেষ্টা করবো ইনশাআল্লাহ।',
+                        b('আমি এ লক্ষ্য অর্জনে যথাসাধ্য চেষ্টা করবো ইনশাআল্লাহ।'),
                         style: const pw.TextStyle(fontSize: 10),
                       ),
                     ),
@@ -1114,8 +1170,8 @@ class PdfExportService {
                     pw.Row(
                       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                       children: [
-                        pw.Text('তারিখ : ${joinDate.isNotEmpty ? joinDate : "....................."}', style: const pw.TextStyle(fontSize: 9.5)),
-                        pw.Text('স্বাক্ষর : .....................', style: const pw.TextStyle(fontSize: 9.5)),
+                        pw.Text(b('তারিখ : ${joinDate.isNotEmpty ? joinDate : "....................."}'), style: const pw.TextStyle(fontSize: 9.5)),
+                        pw.Text(b('স্বাক্ষর : .....................'), style: const pw.TextStyle(fontSize: 9.5)),
                       ],
                     ),
                   ],
@@ -1143,6 +1199,7 @@ class PdfExportService {
     required String mobile,
     required String email,
     required String joinDate,
+    BuildContext? context,
   }) async {
     final pdfBytes = await generateYouthMemberFormPdf(
       name: name,
@@ -1158,10 +1215,19 @@ class PdfExportService {
       joinDate: joinDate,
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdfBytes,
-      name: 'বাংলাদেশ_ইসলামী_যুব_মজলিস_প্রাথমিক_সদস্য_ফরম.pdf',
-    );
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        'প্রাথমিক সদস্য ফরম',
+        fileName: 'বাংলাদেশ_ইসলামী_যুব_মজলিস_প্রাথমিক_সদস্য_ফরম.pdf',
+      );
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+        name: 'বাংলাদেশ_ইসলামী_যুব_মজলিস_প্রাথমিক_সদস্য_ফরম.pdf',
+      );
+    }
   }
 
   /// Saves PDF file to local downloads / documents directory
@@ -1181,7 +1247,8 @@ class PdfExportService {
     String? incomeInWords,
     String? expenseInWords,
   }) async {
-    final font = await loadSutonnyFont();
+    final fontRegular = await loadSutonnyFont();
+    final fontBold = await loadBengaliBoldFont();
 
     pw.MemoryImage? logoImage;
     try {
@@ -1191,8 +1258,8 @@ class PdfExportService {
 
     final pdf = pw.Document(
       theme: pw.ThemeData.withFont(
-        base: font,
-        bold: font,
+        base: fontRegular,
+        bold: fontBold,
       ),
     );
 
@@ -1357,7 +1424,7 @@ class PdfExportService {
                 child: bWidget('কথায়: ${expenseInWords ?? "........................................................................................................"}', fontSize: 9),
               ),
 
-              pw.Spacer(),
+              pw.SizedBox(height: 6),
 
               // ================= FOOTER SIGNATURES =================
               pw.Row(

@@ -5,7 +5,14 @@ import '../bloc/period_plan_event.dart';
 import '../bloc/period_plan_state.dart';
 
 class PeriodPlanPage extends StatefulWidget {
-  const PeriodPlanPage({super.key});
+  final String? initialMonth;
+  final String? initialSession;
+
+  const PeriodPlanPage({
+    super.key,
+    this.initialMonth,
+    this.initialSession,
+  });
 
   @override
   State<PeriodPlanPage> createState() => _PeriodPlanPageState();
@@ -15,6 +22,25 @@ class _PeriodPlanPageState extends State<PeriodPlanPage> {
   final _branchController = TextEditingController();
   final _monthController = TextEditingController();
   final _sessionController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialMonth != null) {
+      _monthController.text = widget.initialMonth!;
+    }
+    if (widget.initialSession != null) {
+      _sessionController.text = widget.initialSession!;
+    }
+  }
+
+  @override
+  void dispose() {
+    _branchController.dispose();
+    _monthController.dispose();
+    _sessionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
