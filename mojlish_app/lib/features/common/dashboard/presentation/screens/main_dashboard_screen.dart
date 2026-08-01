@@ -11,6 +11,8 @@ import 'package:mojlish_app/features/khelafat_majlis/overview/presentation/pages
 import 'package:mojlish_app/features/women_majlis/overview/presentation/pages/overview_page.dart' as women_overview;
 import 'package:mojlish_app/features/youth_majlis/overview/presentation/pages/overview_screen.dart' as youth_overview;
 import 'package:mojlish_app/features/student_majlis/overview/presentation/screens/student_overview_screen.dart' as student_overview;
+import 'package:mojlish_app/features/student_majlis/history/presentation/screens/student_history_screen.dart' as student_history;
+import 'package:mojlish_app/features/student_majlis/activities/presentation/screens/student_activities_screen.dart' as student_activities;
 import 'package:mojlish_app/features/common/profile/presentation/screens/profile_screen.dart';
 
 import 'package:mojlish_app/core/constants/majlis_assets.dart';
@@ -281,8 +283,39 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
       ),
     );
 
-    // 3. Manifesto / Call
-    if (selectedMajlis == 'মহিলা মজলিস') {
+    // 3. Manifesto / Call / History / Activities
+    if (selectedMajlis == 'ছাত্র মজলিস') {
+      cards.add(
+        _buildMenuCard(
+          context,
+          title: 'ইতিকথা',
+          icon: Icons.history_edu_rounded,
+          iconColor: const Color(0xFF9333EA),
+          iconBgColor: pPurpleBg,
+          cardBg: cardBg,
+          borderColor: borderColor,
+          textTitle: textTitle,
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const student_history.StudentHistoryScreen()));
+          },
+        ),
+      );
+      cards.add(
+        _buildMenuCard(
+          context,
+          title: 'আমাদের কার্যক্রম',
+          icon: Icons.checklist_rtl_rounded,
+          iconColor: const Color(0xFFD97706),
+          iconBgColor: pOrangeBg,
+          cardBg: cardBg,
+          borderColor: borderColor,
+          textTitle: textTitle,
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const student_activities.StudentActivitiesScreen()));
+          },
+        ),
+      );
+    } else if (selectedMajlis == 'মহিলা মজলিস') {
       cards.add(
         _buildMenuCard(
           context,
