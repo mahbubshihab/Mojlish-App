@@ -5,6 +5,7 @@ import 'package:mojlish_app/core/constants/majlis_assets.dart';
 import '../../../reports/presentation/screens/report_selection_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 import 'social_media/social_media_screen.dart';
+import 'books/books_screen.dart';
 import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
 import 'package:mojlish_app/features/common/reports/presentation/screens/report_book_screen.dart';
 
@@ -409,19 +410,36 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
       );
     }
 
-    // 5. Social Media & Resources
+    // 5. Social Media Card
     cards.add(
       _buildMenuCard(
         context,
-        title: 'সোশ্যাল মিডিয়া ও বই',
+        title: 'সোশ্যাল মিডিয়া',
         icon: Icons.share_rounded,
+        iconColor: const Color(0xFF0EA5E9),
+        iconBgColor: pBlueBg,
+        cardBg: cardBg,
+        borderColor: borderColor,
+        textTitle: textTitle,
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const SocialMediaScreen()));
+        },
+      ),
+    );
+
+    // 6. Dedicated Books & Library Card
+    cards.add(
+      _buildMenuCard(
+        context,
+        title: 'বই ও প্রকাশনা',
+        icon: Icons.auto_stories_rounded,
         iconColor: const Color(0xFFF59E0B),
         iconBgColor: pOrangeBg,
         cardBg: cardBg,
         borderColor: borderColor,
         textTitle: textTitle,
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const SocialMediaScreen()));
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const BooksScreen()));
         },
       ),
     );
