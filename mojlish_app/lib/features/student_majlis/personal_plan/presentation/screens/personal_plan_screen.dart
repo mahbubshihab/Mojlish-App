@@ -107,7 +107,7 @@ class _PersonalPlanScreenState extends State<PersonalPlanScreen> {
 
   void _exportPdf() {
     final plan = _buildEntityFromControllers();
-    StudentPersonalPlanPdfService.generateAndPrintPdf(plan);
+    StudentPersonalPlanPdfService.generateAndPrintPdf(plan, context: context);
   }
 
   @override

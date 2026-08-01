@@ -93,6 +93,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
       mobile: _mobileController.text,
       email: _emailController.text,
       joinDate: joinDateStr,
+      context: context,
     );
   }
 

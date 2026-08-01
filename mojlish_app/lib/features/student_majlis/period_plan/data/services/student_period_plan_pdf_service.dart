@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:mojlish_app/core/constants/majlis_assets.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/pdf_preview_screen.dart';
 
 /// ছাত্র মজলিস বার্ষিক/ষান্মাসিক/দ্বি-মাসিক পরিকল্পনা (২ পৃষ্ঠা) PDF জেনারেটর সার্ভিস
 class StudentPeriodPlanPdfService {
@@ -717,6 +719,7 @@ class StudentPeriodPlanPdfService {
     required String month,
     required String session,
     Map<String, String>? formData,
+    BuildContext? context,
   }) async {
     final pdfBytes = await generatePdfBytes(
       branch: branch,
@@ -725,10 +728,20 @@ class StudentPeriodPlanPdfService {
       formData: formData,
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdfBytes,
-      name: 'ছাত্র_মজলিস_পরিকল্পনা_${month}_$session.pdf',
-    );
+    final fileName = 'ছাত্র_মজলিস_পরিকল্পনা_${month}_$session.pdf';
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        'পর্যায়ভিত্তিক পরিকল্পনা',
+        fileName: fileName,
+      );
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+        name: fileName,
+      );
+    }
   }
 
   static pw.Widget _buildMeetingRow(String label, String count, String dateTime, pw.TextStyle labelStyle, pw.TextStyle valStyle) {

@@ -129,6 +129,7 @@ class _ReportExportScreenState extends State<ReportExportScreen> {
           userName: _userNameCtrl.text.trim().isEmpty ? 'অজানা' : _userNameCtrl.text.trim(),
           branchName: _branchCtrl.text.trim().isEmpty ? 'অজানা' : _branchCtrl.text.trim(),
           majlisTitle: majlisTitle,
+          context: context,
         );
       }
     } catch (e) {

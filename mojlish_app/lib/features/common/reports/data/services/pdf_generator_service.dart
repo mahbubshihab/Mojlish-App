@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -6,6 +7,7 @@ import '../models/baytulmal_report_entry.dart';
 import '../models/monthly_plan.dart';
 import 'report_storage_service.dart';
 import 'package:mojlish_app/core/services/pdf_export_service.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/pdf_preview_screen.dart';
 
 /// PDF জেনারেটর সার্ভিস — রিপোর্ট থেকে PDF তৈরি ও শেয়ার করে
 class PdfGeneratorService {
@@ -17,6 +19,7 @@ class PdfGeneratorService {
     required String userName,
     required String branchName,
     String? majlisTitle,
+    BuildContext? context,
   }) async {
     final font = await PdfGoogleFonts.notoSansBengaliRegular();
     final boldFont = await PdfGoogleFonts.notoSansBengaliBold();
@@ -445,22 +448,42 @@ class PdfGeneratorService {
       ),
     );
 
-    await Printing.sharePdf(
-      bytes: await pdf.save(),
-      filename: 'personal_report_${_formatDateFile(fromDate)}_to_${_formatDateFile(toDate)}.pdf',
-    );
+    final pdfBytes = await pdf.save();
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        'ব্যক্তিগত রিপোর্ট',
+        fileName: 'personal_report_${_formatDateFile(fromDate)}_to_${_formatDateFile(toDate)}.pdf',
+      );
+    } else {
+      await Printing.sharePdf(
+        bytes: pdfBytes,
+        filename: 'personal_report_${_formatDateFile(fromDate)}_to_${_formatDateFile(toDate)}.pdf',
+      );
+    }
   }
 
   /// বায়তুলমাল রিপোর্ট PDF তৈরি করা
   static Future<void> generateBaytulmalReportPdf({
     required BaytulmalReportEntry entry,
+    BuildContext? context,
   }) async {
     final pdfBytes = await PdfExportService.generateKhelafatBaytulmalPdfBytes(entry: entry);
 
-    await Printing.sharePdf(
-      bytes: pdfBytes,
-      filename: 'baytulmal_report_${entry.year}_${entry.month}.pdf',
-    );
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        'বায়তুলমাল রিপোর্ট',
+        fileName: 'baytulmal_report_${entry.year}_${entry.month}.pdf',
+      );
+    } else {
+      await Printing.sharePdf(
+        bytes: pdfBytes,
+        filename: 'baytulmal_report_${entry.year}_${entry.month}.pdf',
+      );
+    }
   }
 
   // Helper widgets
@@ -527,6 +550,7 @@ class PdfGeneratorService {
     required String district,
     required String joinDate,
     required String fbLink,
+    BuildContext? context,
   }) async {
     final font = await PdfGoogleFonts.notoSansBengaliRegular();
     final boldFont = await PdfGoogleFonts.notoSansBengaliBold();
@@ -674,9 +698,18 @@ class PdfGeneratorService {
       ),
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save(),
-    );
+    final pdfBytes = await pdf.save();
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        'প্রাথমিক সদস্য ফরম',
+      );
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+      );
+    }
   }
 
   static pw.Widget _pdfRow(pw.Font font, pw.Font boldFont, String label, String value) {
@@ -735,6 +768,7 @@ class PdfGeneratorService {
     required String branchName,
     required int year,
     required int month,
+    BuildContext? context,
   }) async {
     final font = await PdfGoogleFonts.notoSansBengaliRegular();
     final boldFont = await PdfGoogleFonts.notoSansBengaliBold();
@@ -854,9 +888,18 @@ class PdfGeneratorService {
       ),
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save(),
-    );
+    final pdfBytes = await pdf.save();
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        'ব্যক্তিগত মাসিক পরিকল্পনা',
+      );
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+      );
+    }
   }
 
   static pw.Widget _pdfPlanRowGroup(pw.Font boldFont, pw.Font font, String title, List<pw.Widget> items) {

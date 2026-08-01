@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -7,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:bijoy_helper/bijoy_helper.dart';
 import 'package:mojlish_app/core/constants/majlis_assets.dart';
 import 'package:mojlish_app/features/common/reports/data/models/baytulmal_report_entry.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/pdf_preview_screen.dart';
 
 class MonthReportPdfData {
   final int year;
@@ -646,6 +648,7 @@ class PdfExportService {
     String? comments,
     String? logoAssetPath,
     String? address,
+    BuildContext? context,
   }) async {
     final effectiveLogo = (logoAssetPath != null && logoAssetPath.isNotEmpty)
         ? logoAssetPath
@@ -672,10 +675,19 @@ class PdfExportService {
       address: effectiveAddress,
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdfBytes,
-      name: '${majlisName}_${title.replaceAll(' ', '_')}.pdf',
-    );
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        title,
+        fileName: '${majlisName}_${title.replaceAll(' ', '_')}.pdf',
+      );
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+        name: '${majlisName}_${title.replaceAll(' ', '_')}.pdf',
+      );
+    }
   }
 
   /// Print or Download Multi-Month Personal Report PDF (1 A4 page per month with Custom/Central Address)
@@ -686,6 +698,7 @@ class PdfExportService {
     required List<MonthReportPdfData> monthsData,
     String? logoAssetPath,
     String? address,
+    BuildContext? context,
   }) async {
     final effectiveLogo = (logoAssetPath != null && logoAssetPath.isNotEmpty)
         ? logoAssetPath
@@ -708,10 +721,19 @@ class PdfExportService {
       address: effectiveAddress,
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdfBytes,
-      name: '${majlisName}_${title.replaceAll(' ', '_')}_multi_month.pdf',
-    );
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        title,
+        fileName: '${majlisName}_${title.replaceAll(' ', '_')}_multi_month.pdf',
+      );
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+        name: '${majlisName}_${title.replaceAll(' ', '_')}_multi_month.pdf',
+      );
+    }
   }
 
   /// Generates verbatim 100% exact 2-part A4 PDF for Student Majlis Primary Member Form matching official image
@@ -908,6 +930,7 @@ class PdfExportService {
     required String postOffice,
     required String thana,
     required String district,
+    BuildContext? context,
   }) async {
     final pdfBytes = await generateChatroMemberFormPdf(
       name: name,
@@ -925,10 +948,19 @@ class PdfExportService {
       district: district,
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdfBytes,
-      name: 'বাংলাদেশ_ইসলামী_ছাত্র_মজলিস_প্রাথমিক_সদস্য_ফরম.pdf',
-    );
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        'প্রাথমিক সদস্য ফরম',
+        fileName: 'বাংলাদেশ_ইসলামী_ছাত্র_মজলিস_প্রাথমিক_সদস্য_ফরম.pdf',
+      );
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+        name: 'বাংলাদেশ_ইসলামী_ছাত্র_মজলিস_প্রাথমিক_সদস্য_ফরম.pdf',
+      );
+    }
   }
 
   /// Generates verbatim 100% exact 2-part A4 PDF for Youth Majlis Primary Member Form matching official images
@@ -1143,6 +1175,7 @@ class PdfExportService {
     required String mobile,
     required String email,
     required String joinDate,
+    BuildContext? context,
   }) async {
     final pdfBytes = await generateYouthMemberFormPdf(
       name: name,
@@ -1158,10 +1191,19 @@ class PdfExportService {
       joinDate: joinDate,
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdfBytes,
-      name: 'বাংলাদেশ_ইসলামী_যুব_মজলিস_প্রাথমিক_সদস্য_ফরম.pdf',
-    );
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        'প্রাথমিক সদস্য ফরম',
+        fileName: 'বাংলাদেশ_ইসলামী_যুব_মজলিস_প্রাথমিক_সদস্য_ফরম.pdf',
+      );
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+        name: 'বাংলাদেশ_ইসলামী_যুব_মজলিস_প্রাথমিক_সদস্য_ফরম.pdf',
+      );
+    }
   }
 
   /// Saves PDF file to local downloads / documents directory

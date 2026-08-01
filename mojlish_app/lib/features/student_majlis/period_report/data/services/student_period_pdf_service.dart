@@ -1,9 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:mojlish_app/core/constants/majlis_assets.dart';
 import '../models/period_report_model.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/pdf_preview_screen.dart';
 
 /// বাংলাদেশ ইসলামী ছাত্র মজলিস বার্ষিক/ষান্মাসিক/দ্বি-মাসিক রিপোর্ট (২ পৃষ্ঠা) PDF জেনারেটর সার্ভিস
 class StudentPeriodPdfService {
@@ -798,6 +800,7 @@ class StudentPeriodPdfService {
     required String session,
     Map<String, String>? formData,
     PeriodReportModel? report,
+    BuildContext? context,
   }) async {
     final pdfBytes = await generatePdfBytes(
       branch: branch,
@@ -807,10 +810,20 @@ class StudentPeriodPdfService {
       report: report,
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdfBytes,
-      name: 'ছাত্র_মজলিস_রিপোর্ট_${month}_$session.pdf',
-    );
+    final fileName = 'ছাত্র_মজলিস_রিপোর্ট_${month}_$session.pdf';
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        'পর্যায়ভিত্তিক রিপোর্ট',
+        fileName: fileName,
+      );
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+        name: fileName,
+      );
+    }
   }
 
   static pw.TableRow _buildOrgTableRow(

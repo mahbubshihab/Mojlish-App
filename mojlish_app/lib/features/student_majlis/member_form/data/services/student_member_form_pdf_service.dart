@@ -1,9 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:mojlish_app/core/constants/majlis_assets.dart';
 import 'package:mojlish_app/core/services/pdf_export_service.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/pdf_preview_screen.dart';
 
 /// বাংলাদেশ ইসলামী ছাত্র মজলিস — প্রাথমিক সদস্য ফরম (অফিশিয়াল ২-পার্ট রসিদ ও সদস্য কার্ড PDF)
 class StudentMemberFormPdfService {
@@ -215,6 +217,7 @@ class StudentMemberFormPdfService {
     required String thana,
     required String district,
     String? dateStr,
+    BuildContext? context,
   }) async {
     final pdfBytes = await generatePdfBytes(
       name: name,
@@ -233,9 +236,18 @@ class StudentMemberFormPdfService {
       dateStr: dateStr,
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdfBytes,
-      name: 'Chatro_Majlis_Member_Form.pdf',
-    );
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        'প্রাথমিক সদস্য ফরম',
+        fileName: 'Chatro_Majlis_Member_Form.pdf',
+      );
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+        name: 'Chatro_Majlis_Member_Form.pdf',
+      );
+    }
   }
 }

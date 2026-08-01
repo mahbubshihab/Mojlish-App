@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../../domain/entities/personal_plan_entity.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/pdf_preview_screen.dart';
 
 /// বাংলাদেশ ইসলামী ছাত্র মজলিস - ব্যক্তিগত মাসিক পরিকল্পনা PDF জেনারেটর সার্ভিস
 class StudentPersonalPlanPdfService {
@@ -341,11 +343,21 @@ class StudentPersonalPlanPdfService {
     return pdf.save();
   }
 
-  static Future<void> generateAndPrintPdf(PersonalPlanEntity plan) async {
+  static Future<void> generateAndPrintPdf(PersonalPlanEntity plan, {BuildContext? context}) async {
     final pdfBytes = await generatePdfBytes(plan);
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdfBytes,
-      name: 'ছাত্র_মজলিস_ব্যক্তিগত_মাসিক_পরিকল্পনা_${plan.name.replaceAll(' ', '_')}.pdf',
-    );
+    final fileName = 'ছাত্র_মজলিস_ব্যক্তিগত_মাসিক_পরিকল্পনা_${plan.name.replaceAll(' ', '_')}.pdf';
+    if (context != null) {
+      await openPdfPreview(
+        context,
+        pdfBytes,
+        'ব্যক্তিগত মাসিক পরিকল্পনা',
+        fileName: fileName,
+      );
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfBytes,
+        name: fileName,
+      );
+    }
   }
 }

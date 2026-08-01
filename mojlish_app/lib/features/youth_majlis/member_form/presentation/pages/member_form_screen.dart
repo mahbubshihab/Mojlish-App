@@ -96,6 +96,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
         'যোগদানের তারিখ': _joinDate != null ? _joinDate!.toLocal().toString().split(' ')[0] : 'N/A',
       },
       comments: 'আমি ইসলামী আদর্শের আলোকে একটি কল্যাণমুখী সমাজ গড়ার লক্ষ্যে বাংলাদেশ ইসলামী যুব মজলিস এর সাথে একমত হয়ে এ সংগঠনে যোগদান করছি। আমি এ লক্ষ্য অর্জনে যথাসাধ্য চেষ্টা করবো ইনশাআল্লাহ।',
+      context: context,
     );
   }
 

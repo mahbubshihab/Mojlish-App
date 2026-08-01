@@ -209,6 +209,7 @@ class _ReportDownloadScreenState extends State<ReportDownloadScreen> {
         monthsData: monthsPdfDataList,
         logoAssetPath: config.logoPath,
         address: addressToUse,
+        context: context,
       );
 
       if (mounted) {
