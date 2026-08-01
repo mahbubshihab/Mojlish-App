@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 import 'package:mojlish_app/core/widgets/pdf_viewer_screen.dart';
+import 'package:mojlish_app/core/widgets/unsaved_changes_dialog.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 import 'package:mojlish_app/features/khelafat_majlis/branch_plan/data/services/khelafat_branch_plan_pdf_service.dart';
 
@@ -186,7 +187,13 @@ class _KhelafatBranchPlanScreenState extends State<KhelafatBranchPlanScreen> {
     final monthStr = widget.month != null ? _monthNames[widget.month! - 1] : '';
     final yearStr = widget.year != null ? _bn(widget.year!) : '';
 
-    return Scaffold(
+    return UnsavedChangesGuard(
+      hasUnsavedChanges: !_isLocked,
+      onSave: () async {
+        await _savePlan();
+        return true;
+      },
+      child: Scaffold(
       appBar: AppBar(
         backgroundColor: appBarBg,
         elevation: 0,
@@ -417,8 +424,9 @@ class _KhelafatBranchPlanScreenState extends State<KhelafatBranchPlanScreen> {
                 ],
               ),
             ),
-    );
-  }
+        ),
+      );
+    }
 
   Widget _buildSectionCard({
     required String title,

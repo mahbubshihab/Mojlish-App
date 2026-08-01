@@ -825,29 +825,47 @@ class _PeriodPlanScreenState extends State<PeriodPlanScreen> {
     Color textColor,
     Color borderColor,
   ) {
-    return TextField(
-      controller: controller,
-      style: TextStyle(fontSize: 13, color: textColor),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(fontSize: 12, color: textColor.withValues(alpha: 0.7)),
-        filled: true,
-        fillColor: inputBg,
-        isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: borderColor),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 2, bottom: 5),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: textColor.withValues(alpha: 0.85),
+            ),
+          ),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: borderColor),
+        TextField(
+          controller: controller,
+          style: TextStyle(fontSize: 13, color: textColor),
+          decoration: InputDecoration(
+            hintText: 'এখানে লিখুন...',
+            hintStyle: TextStyle(fontSize: 12, color: textColor.withValues(alpha: 0.4)),
+            floatingLabelBehavior: FloatingLabelBehavior.never,
+            filled: true,
+            fillColor: inputBg,
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: borderColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: borderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+            ),
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
-        ),
-      ),
+      ],
     );
   }
 }

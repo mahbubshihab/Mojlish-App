@@ -9,6 +9,8 @@ import '../bloc/member_form_state.dart';
 import '../../data/datasources/member_form_remote_datasource.dart';
 import '../../data/repositories/member_form_repository_impl.dart';
 import '../../data/services/student_member_form_pdf_service.dart';
+import 'package:mojlish_app/core/widgets/custom_labeled_input_field.dart';
+import 'package:mojlish_app/core/widgets/unsaved_changes_dialog.dart';
 
 typedef ChatroMemberFormScreen = MemberFormScreen;
 
@@ -110,7 +112,9 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
       ),
       child: DefaultTabController(
         length: 2,
-        child: Scaffold(
+        child: UnsavedChangesGuard(
+          hasUnsavedChanges: _nameController.text.isNotEmpty || _mobileController.text.isNotEmpty,
+          child: Scaffold(
           backgroundColor: bgColor,
           appBar: AppBar(
             backgroundColor: cardBg,
@@ -188,38 +192,41 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
                             _buildSectionTitle('👤 ব্যক্তিগত ও শিক্ষাগত তথ্য'),
                             const SizedBox(height: 10),
                             _buildCardWrapper([
-                              TextFormField(
+                              CustomLabeledInputField(
                                 controller: _nameController,
-                                decoration: const InputDecoration(labelText: 'নাম (Name)', prefixIcon: Icon(Icons.person_outline)),
+                                label: 'নাম (Name)',
+                                prefixIcon: const Icon(Icons.person_outline),
                                 validator: (v) => v!.isEmpty ? 'নাম লিখুন' : null,
                               ),
                               const SizedBox(height: 12),
-                              TextFormField(
+                              CustomLabeledInputField(
                                 controller: _fatherNameController,
-                                decoration: const InputDecoration(labelText: "পিতার নাম (Father's Name)", prefixIcon: Icon(Icons.person_2_outlined)),
+                                label: "পিতার নাম (Father's Name)",
+                                prefixIcon: const Icon(Icons.person_2_outlined),
                                 validator: (v) => v!.isEmpty ? 'পিতার নাম লিখুন' : null,
                               ),
                               const SizedBox(height: 12),
-                              TextFormField(
+                              CustomLabeledInputField(
                                 controller: _eduController,
-                                decoration: const InputDecoration(labelText: 'শিক্ষা প্রতিষ্ঠান (Educational Institution)', prefixIcon: Icon(Icons.school_outlined)),
+                                label: 'শিক্ষা প্রতিষ্ঠান (Educational Institution)',
+                                prefixIcon: const Icon(Icons.school_outlined),
                                 validator: (v) => v!.isEmpty ? 'শিক্ষা প্রতিষ্ঠান লিখুন' : null,
                               ),
                               const SizedBox(height: 12),
                               Row(
                                 children: [
                                   Expanded(
-                                    child: TextFormField(
+                                    child: CustomLabeledInputField(
                                       controller: _classController,
-                                      decoration: const InputDecoration(labelText: 'শ্রেণি (Class)'),
+                                      label: 'শ্রেণি (Class)',
                                       validator: (v) => v!.isEmpty ? 'শ্রেণি লিখুন' : null,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
-                                    child: TextFormField(
+                                    child: CustomLabeledInputField(
                                       controller: _deptController,
-                                      decoration: const InputDecoration(labelText: 'বিভাগ (Department)'),
+                                      label: 'বিভাগ (Department)',
                                       validator: (v) => v!.isEmpty ? 'বিভাগ লিখুন' : null,
                                     ),
                                   ),
@@ -229,17 +236,17 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
                               Row(
                                 children: [
                                   Expanded(
-                                    child: TextFormField(
+                                    child: CustomLabeledInputField(
                                       controller: _rollController,
-                                      decoration: const InputDecoration(labelText: 'ক্রমিক নং (Roll No)'),
+                                      label: 'ক্রমিক নং (Roll No)',
                                       validator: (v) => v!.isEmpty ? 'ক্রমিক নং লিখুন' : null,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
-                                    child: TextFormField(
+                                    child: CustomLabeledInputField(
                                       controller: _bloodGroupController,
-                                      decoration: const InputDecoration(labelText: 'রক্তের গ্রুপ (Blood Group)'),
+                                      label: 'রক্তের গ্রুপ (Blood Group)',
                                       validator: (v) => v!.isEmpty ? 'রক্তের গ্রুপ লিখুন' : null,
                                     ),
                                   ),
@@ -251,15 +258,17 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
                             _buildSectionTitle('🏡 ঠিকানা ও যোগাযোগ'),
                             const SizedBox(height: 10),
                             _buildCardWrapper([
-                              TextFormField(
+                              CustomLabeledInputField(
                                 controller: _presentAddressController,
-                                decoration: const InputDecoration(labelText: 'বর্তমান ঠিকানা (Present Address)', prefixIcon: Icon(Icons.home_outlined)),
+                                label: 'বর্তমান ঠিকানা (Present Address)',
+                                prefixIcon: const Icon(Icons.home_outlined),
                                 validator: (v) => v!.isEmpty ? 'বর্তমান ঠিকানা লিখুন' : null,
                               ),
                               const SizedBox(height: 12),
-                              TextFormField(
+                              CustomLabeledInputField(
                                 controller: _mobileController,
-                                decoration: const InputDecoration(labelText: 'মোবাইল (Mobile)', prefixIcon: Icon(Icons.phone_android_outlined)),
+                                label: 'মোবাইল (Mobile)',
+                                prefixIcon: const Icon(Icons.phone_android_outlined),
                                 keyboardType: TextInputType.phone,
                                 validator: (v) => v!.isEmpty ? 'মোবাইল লিখুন' : null,
                               ),
@@ -269,17 +278,17 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
                               Row(
                                 children: [
                                   Expanded(
-                                    child: TextFormField(
+                                    child: CustomLabeledInputField(
                                       controller: _villageController,
-                                      decoration: const InputDecoration(labelText: 'গ্রাম (Village)'),
+                                      label: 'গ্রাম (Village)',
                                       validator: (v) => v!.isEmpty ? 'গ্রাম লিখুন' : null,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
-                                    child: TextFormField(
+                                    child: CustomLabeledInputField(
                                       controller: _postOfficeController,
-                                      decoration: const InputDecoration(labelText: 'ডাকঘর (Post Office)'),
+                                      label: 'ডাকঘর (Post Office)',
                                       validator: (v) => v!.isEmpty ? 'ডাকঘর লিখুন' : null,
                                     ),
                                   ),
@@ -289,17 +298,17 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
                               Row(
                                 children: [
                                   Expanded(
-                                    child: TextFormField(
+                                    child: CustomLabeledInputField(
                                       controller: _thanaController,
-                                      decoration: const InputDecoration(labelText: 'থানা/উপজেলা (Thana)'),
+                                      label: 'থানা/উপজেলা (Thana)',
                                       validator: (v) => v!.isEmpty ? 'থানা লিখুন' : null,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
-                                    child: TextFormField(
+                                    child: CustomLabeledInputField(
                                       controller: _districtController,
-                                      decoration: const InputDecoration(labelText: 'জেলা (District)'),
+                                      label: 'জেলা (District)',
                                       validator: (v) => v!.isEmpty ? 'জেলা লিখুন' : null,
                                     ),
                                   ),
@@ -378,8 +387,9 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildSectionTitle(String title) {
     return Text(

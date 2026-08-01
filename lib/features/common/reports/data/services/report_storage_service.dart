@@ -2,13 +2,15 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mojlish_app/core/services/network_connectivity_service.dart';
+import 'package:mojlish_app/core/services/offline_sync_manager.dart';
 import '../models/baytulmal_report_entry.dart';
 import '../models/daily_personal_entry.dart';
 import '../models/monthly_comment.dart';
 import '../models/monthly_plan.dart';
 import '../models/zonal_report_entry.dart';
 
-/// লোকাল স্টোরেজ ও ফায়ারস্টোর সিঙ্ক সার্ভিস — SharedPreferences ও Cloud Firestore
+/// লোকাল স্টোরেজ ও ফায়ারস্টোর সিঙ্ক সার্ভিস — SharedPreferences, Cloud Firestore & Offline Sync Queue
 class ReportStorageService {
   static const String _personalReportKey = 'personal_reports';
   static const String _personalPlanKey = 'personal_monthly_plans';
@@ -17,7 +19,7 @@ class ReportStorageService {
   static const String _baytulmalReportKey = 'baytulmal_reports';
 
   // ===========================
-  // ব্যক্তিগত রিপোর্ট — CRUD & Offline Firestore Sync
+  // ব্যক্তিগত রিপোর্ট — CRUD & Offline Sync
   // ===========================
 
   static Future<void> savePersonalEntry(DailyPersonalEntry entry) async {
@@ -27,18 +29,45 @@ class ReportStorageService {
     final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
     await prefs.setString(_personalReportKey, jsonEncode(encoded));
 
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('personal_reports')
-            .doc(entry.date)
-            .set(entry.toJson(), SetOptions(merge: true));
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final isOnline = await NetworkConnectivityService().isOnline;
+      final entryData = entry.toJson();
+      final yearMonth = entry.date.length >= 7 ? entry.date.substring(0, 7) : entry.date;
+
+      if (isOnline) {
+        try {
+          // 1. Individual daily doc
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('personal_reports')
+              .doc(entry.date)
+              .set(entryData, SetOptions(merge: true));
+
+          // 2. Bundled monthly report document: users/{userId}/monthly_reports/{year_month}
+          await OfflineSyncManager.syncMonthlyReportDoc(
+            userId: user.uid,
+            yearMonth: yearMonth,
+            dateKey: entry.date,
+            entryData: entryData,
+          );
+        } catch (e) {
+          print('Firestore sync error: $e. Enqueuing for offline sync.');
+          await OfflineSyncManager.enqueueTask({
+            'type': 'personal_entry',
+            'date': entry.date,
+            'data': entryData,
+          });
+        }
+      } else {
+        // Enqueue to offline sync queue
+        await OfflineSyncManager.enqueueTask({
+          'type': 'personal_entry',
+          'date': entry.date,
+          'data': entryData,
+        });
       }
-    } catch (e) {
-      print('Firestore sync error: $e');
     }
   }
 
@@ -86,7 +115,7 @@ class ReportStorageService {
   }
 
   // ===========================
-  // মাসিক পরিকল্পনা — CRUD
+  // মাসিক পরিকল্পনা — CRUD & Offline Sync
   // ===========================
 
   static Future<void> saveMonthlyPlan(MonthlyPlan plan) async {
@@ -96,6 +125,36 @@ class ReportStorageService {
     allData[key] = plan;
     final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
     await prefs.setString(_personalPlanKey, jsonEncode(encoded));
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final isOnline = await NetworkConnectivityService().isOnline;
+      final planData = plan.toJson();
+      final yearMonth = '${plan.year}-${plan.month.toString().padLeft(2, '0')}';
+
+      if (isOnline) {
+        try {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('monthly_plans')
+              .doc(yearMonth)
+              .set(planData, SetOptions(merge: true));
+        } catch (e) {
+          await OfflineSyncManager.enqueueTask({
+            'type': 'monthly_plan',
+            'yearMonth': yearMonth,
+            'data': planData,
+          });
+        }
+      } else {
+        await OfflineSyncManager.enqueueTask({
+          'type': 'monthly_plan',
+          'yearMonth': yearMonth,
+          'data': planData,
+        });
+      }
+    }
   }
 
   static Future<MonthlyPlan?> getMonthlyPlan(int year, int month) async {
@@ -155,7 +214,7 @@ class ReportStorageService {
   }
 
   // ===========================
-  // জোনাল রিপোর্ট — CRUD
+  // জোনাল রিপোর্ট — CRUD & Offline Sync
   // ===========================
 
   static Future<void> saveZonalEntry(ZonalReportEntry entry) async {
@@ -165,6 +224,36 @@ class ReportStorageService {
     allData[key] = entry;
     final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
     await prefs.setString(_zonalReportKey, jsonEncode(encoded));
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final isOnline = await NetworkConnectivityService().isOnline;
+      final zonalData = entry.toJson();
+      final yearMonth = '${entry.year}-${entry.month.toString().padLeft(2, '0')}';
+
+      if (isOnline) {
+        try {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('zonal_reports')
+              .doc(yearMonth)
+              .set(zonalData, SetOptions(merge: true));
+        } catch (e) {
+          await OfflineSyncManager.enqueueTask({
+            'type': 'zonal_report',
+            'yearMonth': yearMonth,
+            'data': zonalData,
+          });
+        }
+      } else {
+        await OfflineSyncManager.enqueueTask({
+          'type': 'zonal_report',
+          'yearMonth': yearMonth,
+          'data': zonalData,
+        });
+      }
+    }
   }
 
   static Future<Map<String, ZonalReportEntry>> getAllZonalEntries() async {
@@ -184,7 +273,7 @@ class ReportStorageService {
   }
 
   // ===========================
-  // বায়তুলমাল রিপোর্ট — CRUD
+  // বায়তুলমাল রিপোর্ট — CRUD & Offline Sync
   // ===========================
 
   static Future<void> saveBaytulmalReportEntry(BaytulmalReportEntry entry) async {
@@ -194,6 +283,36 @@ class ReportStorageService {
     allData[key] = entry;
     final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
     await prefs.setString(_baytulmalReportKey, jsonEncode(encoded));
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final isOnline = await NetworkConnectivityService().isOnline;
+      final data = entry.toJson();
+      final yearMonth = '${entry.year}-${entry.month}';
+
+      if (isOnline) {
+        try {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('baytulmal_reports')
+              .doc(yearMonth)
+              .set(data, SetOptions(merge: true));
+        } catch (e) {
+          await OfflineSyncManager.enqueueTask({
+            'type': 'baytulmal_report',
+            'yearMonth': yearMonth,
+            'data': data,
+          });
+        }
+      } else {
+        await OfflineSyncManager.enqueueTask({
+          'type': 'baytulmal_report',
+          'yearMonth': yearMonth,
+          'data': data,
+        });
+      }
+    }
   }
 
   static Future<Map<String, BaytulmalReportEntry>> getAllBaytulmalEntries() async {

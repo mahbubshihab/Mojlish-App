@@ -3,6 +3,7 @@ import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
 import 'package:mojlish_app/features/common/reports/presentation/screens/personal_report_table_screen.dart';
+import 'package:mojlish_app/features/common/reports/presentation/screens/report_book_screen.dart';
 
 // Khelafat Majlis Features
 import 'package:mojlish_app/features/khelafat_majlis/branch_report/presentation/screens/khelafat_branch_report_book_screen.dart';
@@ -146,9 +147,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => PersonalReportTableScreen(
-                          year: _now.year,
-                          month: _now.month,
+                        builder: (_) => ReportBookScreen(
                           majlisType: parsedMajlisType,
                         ),
                       ),
@@ -281,36 +280,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const StudentPeriodReportBookScreen()),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  _buildMinimalReportCard(
-                    title: 'বার্ষিক / ষান্মাসic / দ্বি-মাসিক পরিকল্পনা',
-                    icon: Icons.assignment_rounded,
-                    color: const Color(0xFF8B5CF6),
-                    cardBg: cardBg,
-                    borderColor: borderColor,
-                    textLight: textLight,
-                    textMuted: textMuted,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const StudentPeriodPlanBookScreen()),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  _buildMinimalReportCard(
-                    title: 'ব্যক্তিগত মাসিক পরিকল্পনা',
-                    icon: Icons.person_outline_rounded,
-                    color: const Color(0xFF0D9488),
-                    cardBg: cardBg,
-                    borderColor: borderColor,
-                    textLight: textLight,
-                    textMuted: textMuted,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const StudentPersonalPlanBookScreen()),
                     ),
                   ),
                   const SizedBox(height: 12),

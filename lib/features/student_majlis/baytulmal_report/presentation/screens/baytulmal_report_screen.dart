@@ -694,27 +694,41 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
     required TextEditingController controller,
     required String label,
   }) {
-    return TextFormField(
-      controller: controller,
-      onChanged: (_) => setState(() {}),
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      style: const TextStyle(color: Colors.white, fontSize: 14),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-        filled: true,
-        fillColor: const Color(0xFF0F172A),
-        prefixIcon: const Icon(Icons.attach_money_rounded, color: Color(0xFF64748B), size: 18),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF334155)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 2, bottom: 5),
+          child: Text(
+            label,
+            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12, fontWeight: FontWeight.w600),
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF0284C7), width: 1.5),
+        TextFormField(
+          controller: controller,
+          onChanged: (_) => setState(() {}),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          style: const TextStyle(color: Colors.white, fontSize: 14),
+          decoration: InputDecoration(
+            hintText: '০.০০',
+            hintStyle: const TextStyle(color: Color(0xFF475569), fontSize: 12),
+            floatingLabelBehavior: FloatingLabelBehavior.never,
+            filled: true,
+            fillColor: const Color(0xFF0F172A),
+            prefixIcon: const Icon(Icons.attach_money_rounded, color: Color(0xFF64748B), size: 18),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFF334155)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFF0284C7), width: 1.5),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          ),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      ),
+      ],
     );
   }
 
@@ -726,29 +740,41 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
   }) {
-    return TextFormField(
-      controller: controller,
-      validator: validator,
-      keyboardType: keyboardType,
-      style: const TextStyle(color: Colors.white, fontSize: 14),
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        hintStyle: const TextStyle(color: Color(0xFF475569), fontSize: 12),
-        labelStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-        filled: true,
-        fillColor: const Color(0xFF0F172A),
-        prefixIcon: Icon(icon, color: const Color(0xFF64748B), size: 18),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF334155)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 2, bottom: 5),
+          child: Text(
+            label,
+            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12, fontWeight: FontWeight.w600),
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF0284C7), width: 1.5),
+        TextFormField(
+          controller: controller,
+          validator: validator,
+          keyboardType: keyboardType,
+          style: const TextStyle(color: Colors.white, fontSize: 14),
+          decoration: InputDecoration(
+            hintText: hint ?? 'এখানে লিখুন...',
+            hintStyle: const TextStyle(color: Color(0xFF475569), fontSize: 12),
+            floatingLabelBehavior: FloatingLabelBehavior.never,
+            filled: true,
+            fillColor: const Color(0xFF0F172A),
+            prefixIcon: Icon(icon, color: const Color(0xFF64748B), size: 18),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFF334155)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFF0284C7), width: 1.5),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          ),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      ),
+      ],
     );
   }
 
@@ -758,32 +784,44 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
     required List<String> items,
     required ValueChanged<String?> onChanged,
   }) {
-    return DropdownButtonFormField<String>(
-      initialValue: value,
-      items: items
-          .map((item) => DropdownMenuItem(
-                value: item,
-                child: Text(item, style: const TextStyle(color: Colors.white, fontSize: 14)),
-              ))
-          .toList(),
-      onChanged: onChanged,
-      dropdownColor: const Color(0xFF1E293B),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-        filled: true,
-        fillColor: const Color(0xFF0F172A),
-        prefixIcon: const Icon(Icons.date_range_rounded, color: Color(0xFF64748B), size: 18),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF334155)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 2, bottom: 5),
+          child: Text(
+            label,
+            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12, fontWeight: FontWeight.w600),
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF0284C7), width: 1.5),
+        DropdownButtonFormField<String>(
+          initialValue: value,
+          items: items
+              .map((item) => DropdownMenuItem(
+                    value: item,
+                    child: Text(item, style: const TextStyle(color: Colors.white, fontSize: 14)),
+                  ))
+              .toList(),
+          onChanged: onChanged,
+          dropdownColor: const Color(0xFF1E293B),
+          decoration: InputDecoration(
+            floatingLabelBehavior: FloatingLabelBehavior.never,
+            filled: true,
+            fillColor: const Color(0xFF0F172A),
+            prefixIcon: const Icon(Icons.date_range_rounded, color: Color(0xFF64748B), size: 18),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFF334155)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFF0284C7), width: 1.5),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          ),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      ),
+      ],
     );
   }
 

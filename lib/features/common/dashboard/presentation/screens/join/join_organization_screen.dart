@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/app_theme.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/services/pdf_export_service.dart';
+import 'package:mojlish_app/core/widgets/unsaved_changes_dialog.dart';
 
 class JoinOrganizationScreen extends StatefulWidget {
   const JoinOrganizationScreen({super.key});
@@ -372,8 +373,12 @@ class _JoinOrganizationScreenState extends State<JoinOrganizationScreen> {
         final textMuted = isDark ? AppTheme.darkTextMuted : const Color(0xFF64748B);
         final primary = AppTheme.primaryColor;
 
-        return Scaffold(
-          backgroundColor: bg,
+        final hasUnsavedData = _nameCtrl.text.isNotEmpty || _phoneCtrl.text.isNotEmpty || _nidCtrl.text.isNotEmpty;
+
+        return UnsavedChangesGuard(
+          hasUnsavedChanges: hasUnsavedData,
+          child: Scaffold(
+            backgroundColor: bg,
           appBar: AppBar(
             backgroundColor: appBarBg,
             elevation: 0,

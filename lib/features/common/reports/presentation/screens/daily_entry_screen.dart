@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
+import 'package:mojlish_app/core/widgets/unsaved_changes_dialog.dart';
 import 'package:mojlish_app/features/common/reports/data/models/daily_personal_entry.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 
@@ -205,8 +206,14 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
         final inputFill = isDark ? const Color(0xFF0A1628) : const Color(0xFFF1F5F9);
         const accentGreen = Color(0xFF10B981);
 
-        return Scaffold(
-          backgroundColor: bg,
+        return UnsavedChangesGuard(
+          hasUnsavedChanges: !_isLocked,
+          onSave: () async {
+            await _save();
+            return true;
+          },
+          child: Scaffold(
+            backgroundColor: bg,
           appBar: AppBar(
             backgroundColor: appBarBg,
             iconTheme: IconThemeData(color: textLight),
@@ -311,8 +318,9 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
                     ),
             ],
           ),
-        );
-      },
+        ),
+      );
+    },
     );
   }
 

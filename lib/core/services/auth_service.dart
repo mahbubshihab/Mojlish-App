@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -6,7 +7,11 @@ import 'package:mojlish_app/core/services/user_storage_service.dart';
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = kIsWeb
+      ? GoogleSignIn(
+          clientId: '770946894742-1khs1vktmofi0gk00o5udrnde7ltgrla.apps.googleusercontent.com',
+        )
+      : GoogleSignIn();
 
   User? get currentUser => _auth.currentUser;
 

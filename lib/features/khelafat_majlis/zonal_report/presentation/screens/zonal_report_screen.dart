@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 import 'package:mojlish_app/core/widgets/pdf_viewer_screen.dart';
+import 'package:mojlish_app/core/widgets/unsaved_changes_dialog.dart';
 import 'package:mojlish_app/features/common/reports/data/models/zonal_report_entry.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 import 'package:mojlish_app/features/khelafat_majlis/zonal_report/data/services/khelafat_zonal_pdf_service.dart';
@@ -246,7 +247,13 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
     final monthStr = _monthNames[widget.month - 1];
     final yearStr = _bn(widget.year);
 
-    return Scaffold(
+    return UnsavedChangesGuard(
+      hasUnsavedChanges: !_isLocked,
+      onSave: () async {
+        await _saveReport();
+        return true;
+      },
+      child: Scaffold(
       appBar: AppBar(
         backgroundColor: appBarBg,
         elevation: 0,
@@ -529,8 +536,9 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
                 ],
               ),
             ),
-    );
-  }
+        ),
+      );
+    }
 
   Widget _buildSectionCard({
     required String title,
