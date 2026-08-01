@@ -6,6 +6,7 @@ class MajlisAssets {
   static const String juboLogo = 'assets/images/jubo_majlish.png';
   static const String chatroLogo = 'assets/images/chatro_majlish.png';
   static const String mohilaLogo = 'assets/images/mohila-majlish.png';
+  static const String sromikLogo = 'assets/images/sromik-mojlis.jpeg';
   static const String electionSymbolWallClock = 'assets/images/election_symbol_wall_clock.png';
   static const String defaultLogo = 'assets/images/logo.png';
 
@@ -21,7 +22,7 @@ class MajlisAssets {
     } else if (trimmed.contains('মহিলা')) {
       return mohilaLogo;
     } else if (trimmed.contains('শ্রমিক')) {
-      return khelafatLogo;
+      return sromikLogo;
     } else {
       return khelafatLogo;
     }

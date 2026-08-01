@@ -34,7 +34,7 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
     },
     {
       'title': 'শ্রমিক মজলিস',
-      'logo': 'assets/images/logo.png',
+      'logo': 'assets/images/sromik-mojlis.jpeg',
     },
   ];
 
