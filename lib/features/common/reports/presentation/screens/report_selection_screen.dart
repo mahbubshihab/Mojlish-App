@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
-import 'package:mojlish_app/features/common/reports/presentation/screens/personal_report_table_screen.dart';
 import 'package:mojlish_app/features/common/reports/presentation/screens/report_book_screen.dart';
 
 // Khelafat Majlis Features
@@ -254,6 +253,21 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
 
                 // ==================== STUDENT MAJLIS (CHATRO) ONLY ====================
                 if (isChatro) ...[
+                  _buildMinimalReportCard(
+                    title: 'ব্যক্তিগত মাসিক পরিকল্পনা',
+                    icon: Icons.person_search_rounded,
+                    color: const Color(0xFF0077B6),
+                    cardBg: cardBg,
+                    borderColor: borderColor,
+                    textLight: textLight,
+                    textMuted: textMuted,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const StudentPersonalPlanBookScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
                   _buildMinimalReportCard(
                     title: 'বার্ষিক / ষান্মাসিক / দ্বি-মাসিক পর্যায়ভিত্তিক পরিকল্পনা',
                     icon: Icons.assignment_rounded,

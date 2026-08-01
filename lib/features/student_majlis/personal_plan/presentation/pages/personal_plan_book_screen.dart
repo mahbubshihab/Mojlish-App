@@ -7,7 +7,7 @@ import '../../../../common/widgets/staggered_month_grid_book.dart';
 import 'personal_plan_page.dart';
 
 class PersonalPlanBookScreen extends StatelessWidget {
-  const PersonalPlanBookScreen({Key? key}) : super(key: key);
+  const PersonalPlanBookScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class PersonalPlanBookScreen extends StatelessWidget {
             builder: (context) => BlocProvider(
               create: (_) => PersonalPlanBloc(
                 repository: PersonalPlanRepositoryImpl(
-                  remoteDataSource: PersonalPlanRemoteDataSourceImpl(),
+                  PersonalPlanRemoteDataSourceImpl(),
                 ),
               ),
               child: PersonalPlanPage(
