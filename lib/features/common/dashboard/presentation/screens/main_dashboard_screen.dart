@@ -106,11 +106,11 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           appBar: AppBar(
             backgroundColor: appBarBg,
             elevation: 0,
-            centerTitle: true,
+            centerTitle: false,
+            titleSpacing: 16,
             leading: null,
             automaticallyImplyLeading: false,
             title: Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(6),
@@ -126,14 +126,17 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  _selectedMajlis,
-                  style: TextStyle(
-                    color: isDark ? const Color(0xFF34D399) : const Color(0xFF059669),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    letterSpacing: 0.3,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    _selectedMajlis,
+                    style: TextStyle(
+                      color: isDark ? const Color(0xFF34D399) : const Color(0xFF059669),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      letterSpacing: 0.3,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -164,7 +167,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
                   _loadUserData();
                 },
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 16.0, left: 8.0),
+                  padding: const EdgeInsets.only(right: 16.0, left: 4.0),
                   child: CircleAvatar(
                     radius: 16,
                     backgroundColor: const Color(0xFF059669).withValues(alpha: 0.15),
