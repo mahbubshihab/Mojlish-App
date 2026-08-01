@@ -7,9 +7,18 @@ import 'package:mojlish_app/features/common/widgets/unsaved_changes_guard.dart';
 import 'package:mojlish_app/features/common/services/report_storage_service.dart';
 import '../../data/services/student_period_plan_pdf_service.dart';
 
-/// বাংলাদেশ ইসলামী ছাত্র মজলিস — বার্ষিক/ষান্মাসিক/দ্বি-মাসিক পর্যায়ভিত্তিক পরিকল্পনা এন্ট্রি স্ক্রিন
+/// বাংলাদেশ ইসলামী ছাত্র মজলিস — বার্ষিক/ষান্মাসিক/দ্বি-মাসিক পর্যায়ভিত্তিক পরিকল্পনা এন্ট্রি স্ক্রিন (২ পৃষ্ঠা সম্পূর্ণ)
 class PeriodPlanScreen extends StatefulWidget {
-  const PeriodPlanScreen({super.key});
+  final String? initialBranch;
+  final String? initialMonth;
+  final String? initialSession;
+
+  const PeriodPlanScreen({
+    super.key,
+    this.initialBranch,
+    this.initialMonth,
+    this.initialSession,
+  });
 
   @override
   State<PeriodPlanScreen> createState() => _PeriodPlanScreenState();
@@ -17,9 +26,9 @@ class PeriodPlanScreen extends StatefulWidget {
 
 class _PeriodPlanScreenState extends State<PeriodPlanScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _branchController = TextEditingController(text: 'কেন্দ্রীয়');
-  final _monthController = TextEditingController(text: 'মহররম-সফর');
-  final _sessionController = TextEditingController(text: '২০২৬');
+  late final TextEditingController _branchController;
+  late final TextEditingController _monthController;
+  late final TextEditingController _sessionController;
 
   bool _hasChanges = false;
   bool _isLoading = true;
@@ -44,6 +53,10 @@ class _PeriodPlanScreenState extends State<PeriodPlanScreen> {
   @override
   void initState() {
     super.initState();
+    _branchController = TextEditingController(text: widget.initialBranch ?? 'কেন্দ্রীয়');
+    _monthController = TextEditingController(text: widget.initialMonth ?? 'মহররম-সফর');
+    _sessionController = TextEditingController(text: widget.initialSession ?? '২০২৬');
+
     _branchController.addListener(_markChanged);
     _monthController.addListener(_markChanged);
     _sessionController.addListener(_markChanged);
@@ -56,9 +69,15 @@ class _PeriodPlanScreenState extends State<PeriodPlanScreen> {
       final savedData = prefs.getString('report_storage_student_period_plan');
       if (savedData != null && savedData.isNotEmpty) {
         final Map<String, dynamic> map = jsonDecode(savedData);
-        if (map.containsKey('branch')) _branchController.text = map['branch'] ?? '';
-        if (map.containsKey('month')) _monthController.text = map['month'] ?? '';
-        if (map.containsKey('session')) _sessionController.text = map['session'] ?? '';
+        if (map.containsKey('branch') && widget.initialBranch == null) {
+          _branchController.text = map['branch'] ?? '';
+        }
+        if (map.containsKey('month') && widget.initialMonth == null) {
+          _monthController.text = map['month'] ?? '';
+        }
+        if (map.containsKey('session') && widget.initialSession == null) {
+          _sessionController.text = map['session'] ?? '';
+        }
 
         map.forEach((key, value) {
           if (key != 'branch' && key != 'month' && key != 'session') {
@@ -134,7 +153,7 @@ class _PeriodPlanScreenState extends State<PeriodPlanScreen> {
     final textColor = isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A);
     final inputBg = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
     final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
-    final primaryAccent = const Color(0xFF0077B6);
+    const primaryAccent = Color(0xFF0077B6);
 
     return UnsavedChangesGuard(
       hasUnsavedChanges: _hasChanges,
@@ -150,12 +169,12 @@ class _PeriodPlanScreenState extends State<PeriodPlanScreen> {
           elevation: 1,
           actions: [
             IconButton(
-              icon: Icon(Icons.save_rounded, color: const Color(0xFF059669)),
+              icon: const Icon(Icons.save_rounded, color: Color(0xFF059669)),
               tooltip: 'সংরক্ষণ করুন',
               onPressed: _saveReport,
             ),
             IconButton(
-              icon: Icon(Icons.picture_as_pdf_rounded, color: primaryAccent),
+              icon: const Icon(Icons.picture_as_pdf_rounded, color: primaryAccent),
               tooltip: 'PDF ডাউনলোড',
               onPressed: _exportPdf,
             ),
@@ -248,7 +267,7 @@ class _PeriodPlanScreenState extends State<PeriodPlanScreen> {
                                   ),
                                   child: Column(
                                     children: [
-                                      Text(
+                                      const Text(
                                         'বিসমিল্লাহির রাহমানির রাহীম',
                                         style: TextStyle(
                                           fontSize: 12,
@@ -257,7 +276,7 @@ class _PeriodPlanScreenState extends State<PeriodPlanScreen> {
                                         ),
                                       ),
                                       const SizedBox(height: 6),
-                                      Text(
+                                      const Text(
                                         'বাংলাদেশ ইসলামী ছাত্র মজলিস',
                                         style: TextStyle(
                                           fontSize: 18,
@@ -296,9 +315,10 @@ class _PeriodPlanScreenState extends State<PeriodPlanScreen> {
                                 ),
                                 const SizedBox(height: 16),
 
+                                // PAGE 1 SECTIONS
                                 // 1. Dawah Section
                                 _buildSectionCard(
-                                  title: 'প্রথম দফা : দাওয়াত',
+                                  title: 'প্রথম দফা : দাওয়াত (পৃষ্ঠা ১)',
                                   color: primaryAccent,
                                   cardBg: cardBg,
                                   textColor: textColor,
@@ -313,7 +333,7 @@ class _PeriodPlanScreenState extends State<PeriodPlanScreen> {
                                       ],
                                     ),
                                     const SizedBox(height: 10),
-                                    Text('প্রাথমিক সদস্য বৃদ্ধি উপ-খাত:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: primaryAccent)),
+                                    const Text('প্রাথমিক সদস্য বৃদ্ধি উপ-খাত:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: primaryAccent)),
                                     const SizedBox(height: 6),
                                     Row(
                                       children: [
@@ -437,7 +457,7 @@ class _PeriodPlanScreenState extends State<PeriodPlanScreen> {
                                     const SizedBox(height: 8),
                                     _buildInput('কর্মী বৃদ্ধি (জন)', _c('org_worker_growth'), inputBg, textColor, borderColor),
                                     const SizedBox(height: 8),
-                                    Text('কর্মী বৃদ্ধি উপ-খাত:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: primaryAccent)),
+                                    const Text('কর্মী বৃদ্ধি উপ-খাত:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: primaryAccent)),
                                     const SizedBox(height: 6),
                                     Row(
                                       children: [
@@ -575,6 +595,306 @@ class _PeriodPlanScreenState extends State<PeriodPlanScreen> {
                                 ),
                                 const SizedBox(height: 24),
 
+                                // PAGE 2 SECTIONS
+                                const Divider(thickness: 2, color: primaryAccent),
+                                const SizedBox(height: 12),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: primaryAccent.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Text(
+                                    'পৃষ্ঠা ২ এর পরিকল্পনাসমূহ',
+                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: primaryAccent),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // 4. Training Section (তৃতীয় দফা : প্রশিক্ষণ)
+                                _buildSectionCard(
+                                  title: 'তৃতীয় দফা : প্রশিক্ষণ (পৃষ্ঠা ২)',
+                                  color: primaryAccent,
+                                  cardBg: cardBg,
+                                  textColor: textColor,
+                                  borderColor: borderColor,
+                                  inputBg: inputBg,
+                                  children: [
+                                    _buildTrainingBlock('কর্মশালা', 'train_kormoshala', inputBg, textColor, borderColor),
+                                    const SizedBox(height: 10),
+                                    _buildTrainingBlock('শিক্ষা সভা', 'train_shikkha_soba', inputBg, textColor, borderColor),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('সামষ্টিক অধ্যয়ন : সংখ্যা (টি)', _c('train_shamoshtik_count'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('অধিবেশন (টি)', _c('train_shamoshtik_session'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    _buildTrainingBlock('শবগুজারি', 'train_shobgujari', inputBg, textColor, borderColor),
+                                    const SizedBox(height: 10),
+                                    _buildTrainingBlock('জিকির মাহফিল', 'train_jikir', inputBg, textColor, borderColor),
+                                    const SizedBox(height: 10),
+                                    _buildCourseBlock('প্রশিক্ষণ চক্র', 'train_chokro', inputBg, textColor, borderColor),
+                                    const SizedBox(height: 10),
+                                    _buildCourseBlock('স্কিলস ডেভেলপমেন্ট কোর্স', 'train_skills', inputBg, textColor, borderColor),
+                                    const SizedBox(height: 10),
+                                    _buildTrainingBlock('তরবিয়তী সফর', 'train_torbiyoti', inputBg, textColor, borderColor),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('কুরআন ও হাদিস শিক্ষা ক্লাস (টি)', _c('train_quran_hadis_count'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('অধিবেশন (টি)', _c('train_quran_hadis_session'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('মাসআলা-মাসায়েল শিক্ষা ক্লাস (টি)', _c('train_masala_count'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('অধিবেশন (টি)', _c('train_masala_session'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('উন্মুক্ত ক্লাস (টি)', _c('train_unmukto_count'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('অধিবেশন (টি)', _c('train_unmukto_session'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('স্পীকার্স / সাংস্কৃতিক ফোরাম (টি)', _c('train_speakers_cultural_count'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('অধিবেশন (টি)', _c('train_speakers_cultural_session'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('পাঠাগার বৃদ্ধি (টি)', _c('train_pathagar_growth'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('বই বৃদ্ধি (টি)', _c('train_pathagar_book_growth'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+
+                                // 5. Movement Section (চতুর্থ দফা : আন্দোলন - ছাত্রকল্যাণ)
+                                _buildSectionCard(
+                                  title: 'চতুর্থ দফা : আন্দোলন (ছাত্রকল্যাণ)',
+                                  color: primaryAccent,
+                                  cardBg: cardBg,
+                                  textColor: textColor,
+                                  borderColor: borderColor,
+                                  inputBg: inputBg,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('যাকাত সংগ্রহ করা হবে (টাকা)', _c('mov_zakat_target'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('টেবিল ব্যাংক / কলসি বৃদ্ধি (টি)', _c('mov_table_bank_growth'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('লজিং সংগ্রহ (টি)', _c('mov_lodging'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('টিউশনি সংগ্রহ (টি)', _c('mov_tuition'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('স্টাইপেন্ড বা বৃত্তি চালু (টি)', _c('mov_stipend'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('আবাসনের ব্যবস্থা (জন ছাত্রের)', _c('mov_housing'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('ফ্রি কোচিং (টি)', _c('mov_free_coaching'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    _buildInput('একাডেমিক / ভর্তি কোচিং (টি)', _c('mov_academic_coaching'), inputBg, textColor, borderColor),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('প্রশ্নপত্র বিলি (টি)', _c('mov_question'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('সাজেশন বিলি (টি)', _c('mov_suggesion'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('নোট বিলি (টি)', _c('mov_note'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('ল্যাঙ্গুয়েজ লাইব্রেরি প্রতিষ্ঠা (টি)', _c('mov_lang_lib'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('বই বৃদ্ধি (টি)', _c('mov_lang_lib_books'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('ভর্তি গাইড প্রকাশ (টি)', _c('mov_guide_pub'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('সহযোগিতা (টি)', _c('mov_guide_help'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('ভর্তিকালীন সহযোগিতা (জন)', _c('mov_admission_help_students'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      '(ছাত্রকল্যাণের আয়-ব্যয়ের বাজেট আলাদা কাগজে সংরক্ষণ করতে হবে)',
+                                      style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: textColor.withValues(alpha: 0.7)),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+
+                                // 6. Social Welfare Section (সামাজিক খেদমত)
+                                _buildSectionCard(
+                                  title: 'সামাজিক খেদমত (১২ টি খাত)',
+                                  color: primaryAccent,
+                                  cardBg: cardBg,
+                                  textColor: textColor,
+                                  borderColor: borderColor,
+                                  inputBg: inputBg,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('গাছ লাগানো হবে (টি)', _c('social_tree_count'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('রক্তদান করা হবে (ব্যাগ)', _c('social_blood_count'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    _buildInput('কুরআন শিক্ষা ব্যবস্থা (লক্ষ্যমাত্রা/বিবরণ)', _c('social_quran_edu'), inputBg, textColor, borderColor),
+                                    const SizedBox(height: 8),
+                                    _buildInput('মাদক-অশ্লীলতা বিরোধী জনসচেতনতা (বিবরণ)', _c('social_anti_drug'), inputBg, textColor, borderColor),
+                                    const SizedBox(height: 8),
+                                    _buildInput('খেদমতে খালক উদ্বুদ্ধকরণ (বিবরণ)', _c('social_khedmat_khalk'), inputBg, textColor, borderColor),
+                                    const SizedBox(height: 8),
+                                    _buildInput('অন্যায়-জুলুমের বিরুদ্ধে জনমত (বিবরণ)', _c('social_against_oppression'), inputBg, textColor, borderColor),
+                                    const SizedBox(height: 8),
+                                    _buildInput('অন্নবস্ত্রদান কর্মসূচি (বিবরণ)', _c('social_food_cloth'), inputBg, textColor, borderColor),
+                                    const SizedBox(height: 8),
+                                    _buildInput('খেলাফত মজলিসের কাজে সহযোগিতা (বিবরণ)', _c('social_khelafot_help'), inputBg, textColor, borderColor),
+                                    const SizedBox(height: 8),
+                                    _buildInput('পরিষ্কার-পরিচ্ছন্নতা কার্যক্রম (বিবরণ)', _c('social_cleanliness'), inputBg, textColor, borderColor),
+                                    const SizedBox(height: 8),
+                                    _buildInput('মোহররমা আত্মীয়দের মাঝে দাওয়াত (বিবরণ)', _c('social_relative_dawah'), inputBg, textColor, borderColor),
+                                    const SizedBox(height: 8),
+                                    _buildInput('দুর্যোগে পাশে দাঁড়ানো (বিবরণ)', _c('social_disaster_help'), inputBg, textColor, borderColor),
+                                    const SizedBox(height: 8),
+                                    _buildInput('ফ্রি চিকিৎসা সেবা কর্মসূচি (বিবরণ)', _c('social_free_medical'), inputBg, textColor, borderColor),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+
+                                // 7. Baytulmal Budget Table Section (বায়তুলমাল বাজেট)
+                                _buildSectionCard(
+                                  title: 'বায়তুলমাল বাজেট (আয় ও ব্যয় টেবিল)',
+                                  color: primaryAccent,
+                                  cardBg: cardBg,
+                                  textColor: textColor,
+                                  borderColor: borderColor,
+                                  inputBg: inputBg,
+                                  children: [
+                                    Text('আয়ের উৎস (টাকা):', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: primaryAccent)),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('০১. জনশক্তি ইয়ানত', _c('budget_inc_1'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('০২. শাখা ইয়ানত', _c('budget_inc_2'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('০৩. শুভাকাঙ্ক্ষী ইয়ানত', _c('budget_inc_3'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('০৪. এককালীন আয়', _c('budget_inc_4'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('০৫. খাতের নাম', _c('budget_inc_src_5'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('টাকা', _c('budget_inc_5'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('০৬. খাতের নাম', _c('budget_inc_src_6'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('টাকা', _c('budget_inc_6'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('০৭. খাতের নাম', _c('budget_inc_src_7'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('টাকা', _c('budget_inc_7'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    _buildInput('মোট আয় (টাকা)', _c('budget_inc_total'), inputBg, textColor, borderColor),
+
+                                    const SizedBox(height: 16),
+                                    const Divider(),
+                                    const SizedBox(height: 8),
+
+                                    Text('ব্যয়ের খাত (টাকা):', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: primaryAccent)),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('০১. ঊর্ধ্বতন ইয়ানত পরিশোধ', _c('budget_exp_1'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('০২. ঊর্ধ্বতন সফর', _c('budget_exp_2'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('০৩. অফিস', _c('budget_exp_3'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('০৪. যাতায়াত', _c('budget_exp_4'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('০৫. যোগাযোগ', _c('budget_exp_5'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('০৬. প্রচার', _c('budget_exp_6'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Expanded(child: _buildInput('০৭. খাতের নাম', _c('budget_exp_head_7'), inputBg, textColor, borderColor)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: _buildInput('টাকা', _c('budget_exp_7'), inputBg, textColor, borderColor)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    _buildInput('মোট ব্যয় (টাকা)', _c('budget_exp_total'), inputBg, textColor, borderColor),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 24),
+
                                 // Footer Link Display
                                 Container(
                                   width: double.infinity,
@@ -604,6 +924,58 @@ class _PeriodPlanScreenState extends State<PeriodPlanScreen> {
                 ),
               ),
       ),
+    );
+  }
+
+  Widget _buildTrainingBlock(
+    String title,
+    String prefix,
+    Color inputBg,
+    Color textColor,
+    Color borderColor,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0077B6))),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Expanded(child: _buildInput('সংখ্যা (টি)', _c('${prefix}_count'), inputBg, textColor, borderColor)),
+            const SizedBox(width: 6),
+            Expanded(child: _buildInput('তারিখ', _c('${prefix}_date'), inputBg, textColor, borderColor)),
+            const SizedBox(width: 6),
+            Expanded(child: _buildInput('সময়', _c('${prefix}_time'), inputBg, textColor, borderColor)),
+            const SizedBox(width: 6),
+            Expanded(child: _buildInput('স্থান', _c('${prefix}_place'), inputBg, textColor, borderColor)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCourseBlock(
+    String title,
+    String prefix,
+    Color inputBg,
+    Color textColor,
+    Color borderColor,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0077B6))),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Expanded(child: _buildInput('সংখ্যা (টি)', _c('${prefix}_count'), inputBg, textColor, borderColor)),
+            const SizedBox(width: 6),
+            Expanded(child: _buildInput('অধিবেশন (টি)', _c('${prefix}_session'), inputBg, textColor, borderColor)),
+            const SizedBox(width: 6),
+            Expanded(child: _buildInput('তারিখ', _c('${prefix}_date'), inputBg, textColor, borderColor)),
+          ],
+        ),
+      ],
     );
   }
 
