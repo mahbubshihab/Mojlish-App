@@ -307,31 +307,33 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
     );
 
     // 2. Specific Overview Page
-    cards.add(
-      _buildMenuCard(
-        context,
-        title: 'সংক্ষিপ্ত পরিচিতি',
-        icon: Icons.info_outline_rounded,
-        iconColor: const Color(0xFF0EA5E9),
-        iconBgColor: pBlueBg,
-        cardBg: cardBg,
-        borderColor: borderColor,
-        textTitle: textTitle,
-        onTap: () {
-          Widget page;
-          if (selectedMajlis == 'মহিলা মজলিস') {
-            page = const women_overview.WomenMajlisOverviewPage();
-          } else if (selectedMajlis == 'যুব মজলিস') {
-            page = const youth_overview.OverviewScreen();
-          } else if (selectedMajlis == 'ছাত্র মজলিস') {
-            page = const student_overview.StudentOverviewScreen();
-          } else {
-            page = const khelafat_overview.OverviewPage();
-          }
-          Navigator.push(context, MaterialPageRoute(builder: (_) => page));
-        },
-      ),
-    );
+    if (!selectedMajlis.contains('শ্রমিক')) {
+      cards.add(
+        _buildMenuCard(
+          context,
+          title: 'সংক্ষিপ্ত পরিচিতি',
+          icon: Icons.info_outline_rounded,
+          iconColor: const Color(0xFF0EA5E9),
+          iconBgColor: pBlueBg,
+          cardBg: cardBg,
+          borderColor: borderColor,
+          textTitle: textTitle,
+          onTap: () {
+            Widget page;
+            if (selectedMajlis == 'মহিলা মজলিস') {
+              page = const women_overview.WomenMajlisOverviewPage();
+            } else if (selectedMajlis == 'যুব মজলিস') {
+              page = const youth_overview.OverviewScreen();
+            } else if (selectedMajlis == 'ছাত্র মজলিস') {
+              page = const student_overview.StudentOverviewScreen();
+            } else {
+              page = const khelafat_overview.OverviewPage();
+            }
+            Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+          },
+        ),
+      );
+    }
 
     // 3. Special Features according to Selected Majlis
     if (selectedMajlis == 'ছাত্র মজলিস') {
