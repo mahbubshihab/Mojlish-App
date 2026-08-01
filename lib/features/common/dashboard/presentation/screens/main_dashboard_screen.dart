@@ -112,24 +112,28 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
             title: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Image.asset(
-                  MajlisAssets.defaultLogo,
-                  height: 28,
-                  width: 28,
-                  errorBuilder: (_, __, ___) => Image.asset(
-                    MajlisAssets.khelafatLogo,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: Image.asset(
+                    MajlisAssets.getLogoPath(_selectedMajlis),
                     height: 28,
                     width: 28,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => Image.asset(
+                      MajlisAssets.khelafatLogo,
+                      height: 28,
+                      width: 28,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Text(
-                  'মজলিস',
+                Text(
+                  _selectedMajlis,
                   style: TextStyle(
-                    color: Color(0xFF059669),
+                    color: isDark ? const Color(0xFF34D399) : const Color(0xFF059669),
                     fontWeight: FontWeight.bold,
-                    fontSize: 21,
-                    letterSpacing: 0.5,
+                    fontSize: 18,
+                    letterSpacing: 0.3,
                   ),
                 ),
               ],
