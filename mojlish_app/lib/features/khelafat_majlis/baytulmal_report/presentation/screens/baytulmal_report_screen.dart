@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 import 'package:mojlish_app/core/widgets/pdf_viewer_screen.dart';
+import 'package:mojlish_app/core/widgets/unsaved_changes_dialog.dart';
 import 'package:mojlish_app/features/common/reports/data/models/baytulmal_report_entry.dart';
 import 'package:mojlish_app/features/common/reports/data/services/report_storage_service.dart';
 import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/data/services/khelafat_baytulmal_pdf_service.dart';
@@ -225,7 +226,13 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
     final monthStr = _monthNames[_selectedMonth - 1];
     final yearStr = _bn(_selectedYear);
 
-    return Scaffold(
+    return UnsavedChangesGuard(
+      hasUnsavedChanges: !_isLocked,
+      onSave: () async {
+        await _save();
+        return true;
+      },
+      child: Scaffold(
       appBar: AppBar(
         backgroundColor: appBarBg,
         elevation: 0,
@@ -628,8 +635,9 @@ class _BaytulmalReportScreenState extends State<BaytulmalReportScreen> {
                 ),
               ),
             ),
-    );
-  }
+        ),
+      );
+    }
 
   Widget _buildSectionHeader({
     required String title,

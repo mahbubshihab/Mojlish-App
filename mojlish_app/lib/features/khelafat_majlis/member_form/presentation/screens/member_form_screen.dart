@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 import 'package:mojlish_app/core/widgets/pdf_viewer_screen.dart';
+import 'package:mojlish_app/core/widgets/unsaved_changes_dialog.dart';
 import '../bloc/member_form_bloc.dart';
 import '../bloc/member_form_event.dart';
 import '../bloc/member_form_state.dart';
@@ -118,7 +119,9 @@ class _MemberFormScreenContentState extends State<_MemberFormScreenContent> {
     const accentEmerald = Color(0xFF10B981);
     const accentBlue = Color(0xFF0284C7);
 
-    return Scaffold(
+    return UnsavedChangesGuard(
+      hasUnsavedChanges: _nameController.text.isNotEmpty || _mobileController.text.isNotEmpty,
+      child: Scaffold(
       appBar: AppBar(
         backgroundColor: appBarBg,
         elevation: 0,
@@ -427,8 +430,9 @@ class _MemberFormScreenContentState extends State<_MemberFormScreenContent> {
           },
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildSectionCard({
     required String title,

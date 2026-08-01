@@ -10,6 +10,7 @@ import '../../data/datasources/member_form_remote_datasource.dart';
 import '../../data/repositories/member_form_repository_impl.dart';
 import '../../data/services/student_member_form_pdf_service.dart';
 import 'package:mojlish_app/core/widgets/custom_labeled_input_field.dart';
+import 'package:mojlish_app/core/widgets/unsaved_changes_dialog.dart';
 
 typedef ChatroMemberFormScreen = MemberFormScreen;
 
@@ -111,7 +112,9 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
       ),
       child: DefaultTabController(
         length: 2,
-        child: Scaffold(
+        child: UnsavedChangesGuard(
+          hasUnsavedChanges: _nameController.text.isNotEmpty || _mobileController.text.isNotEmpty,
+          child: Scaffold(
           backgroundColor: bgColor,
           appBar: AppBar(
             backgroundColor: cardBg,
@@ -384,8 +387,9 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildSectionTitle(String title) {
     return Text(

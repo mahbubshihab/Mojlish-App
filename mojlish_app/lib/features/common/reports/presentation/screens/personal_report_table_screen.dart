@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
+import 'package:mojlish_app/core/widgets/unsaved_changes_dialog.dart';
 import 'package:mojlish_app/features/common/reports/data/models/daily_personal_entry.dart';
 import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
 import 'package:mojlish_app/features/common/reports/data/models/monthly_comment.dart';

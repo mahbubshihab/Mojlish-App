@@ -9,6 +9,7 @@ import 'package:mojlish_app/features/youth_majlis/member_form/data/repositories/
 import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/constants/majlis_assets.dart';
+import 'package:mojlish_app/core/widgets/unsaved_changes_dialog.dart';
 
 typedef YouthMemberFormScreen = MemberFormScreen;
 
@@ -109,7 +110,9 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
       ),
       child: DefaultTabController(
         length: 2,
-        child: Scaffold(
+        child: UnsavedChangesGuard(
+          hasUnsavedChanges: _nameController.text.isNotEmpty || _mobileController.text.isNotEmpty,
+          child: Scaffold(
           backgroundColor: bgColor,
           appBar: AppBar(
             backgroundColor: cardBg,
@@ -357,8 +360,9 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildSectionTitle(String title) {
     return Text(
