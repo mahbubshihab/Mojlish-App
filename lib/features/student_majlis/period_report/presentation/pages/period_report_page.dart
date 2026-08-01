@@ -6,9 +6,9 @@ import '../../../../common/widgets/unsaved_changes_guard.dart';
 import '../../../../common/services/report_storage_service.dart';
 import '../../data/services/student_period_pdf_service.dart';
 import '../../domain/entities/period_report.dart';
-import 'bloc/period_report_bloc.dart';
-import 'bloc/period_report_event.dart';
-import 'bloc/period_report_state.dart';
+import '../bloc/period_report_bloc.dart';
+import '../bloc/period_report_event.dart';
+import '../bloc/period_report_state.dart';
 
 class PeriodReportPage extends StatefulWidget {
   final String? initialMonth;
