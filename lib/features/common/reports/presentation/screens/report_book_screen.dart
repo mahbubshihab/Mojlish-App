@@ -82,6 +82,7 @@ class ReportBookScreen extends StatelessWidget {
           MaterialPageRoute(
             builder: (_) => DailyEntryScreen(
               date: DateTime.now(),
+              majlisType: majlisType,
             ),
           ),
         );
