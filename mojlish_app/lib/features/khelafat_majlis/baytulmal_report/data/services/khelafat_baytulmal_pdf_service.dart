@@ -61,9 +61,9 @@ class KhelafatBaytulmalPdfService {
             crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
               // Top Header
-              PdfExportService.b('বিসমিল্লাহির রাহমানির রাহীম', fontSize: 9.5),
+              PdfExportService.bWidget('বিসমিল্লাহির রাহমানির রাহীম', fontSize: 9.5),
               pw.SizedBox(height: 2),
-              PdfExportService.b('শাখার বায়তুলমাল রিপোর্ট ফরম', fontSize: 13, fontWeight: pw.FontWeight.bold),
+              PdfExportService.bWidget('শাখার বায়তুলমাল রিপোর্ট ফরম', fontSize: 13, fontWeight: pw.FontWeight.bold),
               pw.SizedBox(height: 4),
 
               // Logo + Organization Name
@@ -75,11 +75,11 @@ class KhelafatBaytulmalPdfService {
                     pw.Image(logoImage, width: 34, height: 34),
                     pw.SizedBox(width: 8),
                   ],
-                  PdfExportService.b('খেলাফত মজলিস', fontSize: 22, fontWeight: pw.FontWeight.bold),
+                  PdfExportService.bWidget('খেলাফত মজলিস', fontSize: 22, fontWeight: pw.FontWeight.bold),
                 ],
               ),
               pw.SizedBox(height: 2),
-              PdfExportService.b('কেন্দ্রীয় কার্যালয়: ১৬ পুরানা পল্টন, (২য় তলা), ঢাকা-১০০০। ফোন: ৯৫৫৮৫২১', fontSize: 8.5),
+              PdfExportService.bWidget('কেন্দ্রীয় কার্যালয়: ১৬ পুরানা পল্টন, (২য় তলা), ঢাকা-১০০০। ফোন: ৯৫৫৮৫২১', fontSize: 8.5),
               pw.SizedBox(height: 10),
 
               // Info Row Box: শাখা, মাস, সন
@@ -91,9 +91,9 @@ class KhelafatBaytulmalPdfService {
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    PdfExportService.b('শাখা: ${entry.branchName.isEmpty ? "........................" : entry.branchName}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
-                    PdfExportService.b('মাস: ${entry.month.isEmpty ? "........................" : entry.month}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
-                    PdfExportService.b('সন: ${entry.year.isEmpty ? "........................" : entry.year}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
+                    PdfExportService.bWidget('শাখা: ${entry.branchName.isEmpty ? "........................" : entry.branchName}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
+                    PdfExportService.bWidget('মাস: ${entry.month.isEmpty ? "........................" : entry.month}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
+                    PdfExportService.bWidget('সন: ${entry.year.isEmpty ? "........................" : entry.year}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
                   ],
                 ),
               ),
@@ -105,7 +105,7 @@ class KhelafatBaytulmalPdfService {
                 color: PdfColors.grey300,
                 padding: const pw.EdgeInsets.symmetric(vertical: 4),
                 alignment: pw.Alignment.center,
-                child: PdfExportService.b('আয়', fontSize: 11, fontWeight: pw.FontWeight.bold),
+                child: PdfExportService.bWidget('আয়', fontSize: 11, fontWeight: pw.FontWeight.bold),
               ),
               pw.Table(
                 border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
@@ -119,9 +119,9 @@ class KhelafatBaytulmalPdfService {
                   pw.TableRow(
                     decoration: const pw.BoxDecoration(color: PdfColors.grey100),
                     children: [
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b('আয়ের উৎস', fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b('টাকা', fontSize: 9.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center)),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b('পয়সা', fontSize: 9.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center)),
+                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget('আয়ের উৎস', fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget('টাকা', fontSize: 9.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center)),
+                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget('পয়সা', fontSize: 9.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center)),
                     ],
                   ),
                   _buildTableRow('নির্বাহী সদস্যদের ইয়ানত (নির্বাহী সদস্য সংখ্যা: ${entry.executiveMemberAyanat.isEmpty ? "____" : entry.executiveMemberAyanat} জন)', entry.executiveMemberAyanatTaka),
@@ -138,7 +138,7 @@ class KhelafatBaytulmalPdfService {
               pw.SizedBox(height: 4),
               pw.Align(
                 alignment: pw.Alignment.centerLeft,
-                child: PdfExportService.b('কথায়: ${incomeInWords ?? "........................................................................................................"}', fontSize: 9),
+                child: PdfExportService.bWidget('কথায়: ${incomeInWords ?? "........................................................................................................"}', fontSize: 9),
               ),
               pw.SizedBox(height: 10),
 
@@ -148,7 +148,7 @@ class KhelafatBaytulmalPdfService {
                 color: PdfColors.grey300,
                 padding: const pw.EdgeInsets.symmetric(vertical: 4),
                 alignment: pw.Alignment.center,
-                child: PdfExportService.b('ব্যয়', fontSize: 11, fontWeight: pw.FontWeight.bold),
+                child: PdfExportService.bWidget('ব্যয়', fontSize: 11, fontWeight: pw.FontWeight.bold),
               ),
               pw.Table(
                 border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
@@ -162,9 +162,9 @@ class KhelafatBaytulmalPdfService {
                   pw.TableRow(
                     decoration: const pw.BoxDecoration(color: PdfColors.grey100),
                     children: [
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b('ব্যয়ের খাত', fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b('টাকা', fontSize: 9.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center)),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b('পয়সা', fontSize: 9.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center)),
+                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget('ব্যয়ের খাত', fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget('টাকা', fontSize: 9.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center)),
+                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget('পয়সা', fontSize: 9.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center)),
                     ],
                   ),
                   _buildTableRow('উর্ধ্বতন ইয়ানত পরিশোধ (মাসিক ধার্যকৃত: ${entry.upwardAyanat.isEmpty ? "____" : entry.upwardAyanat} টাকা)', entry.upwardAyanatTaka),
@@ -186,7 +186,7 @@ class KhelafatBaytulmalPdfService {
               pw.SizedBox(height: 4),
               pw.Align(
                 alignment: pw.Alignment.centerLeft,
-                child: PdfExportService.b('কথায়: ${expenseInWords ?? "........................................................................................................"}', fontSize: 9),
+                child: PdfExportService.bWidget('কথায়: ${expenseInWords ?? "........................................................................................................"}', fontSize: 9),
               ),
 
               pw.Spacer(),
@@ -196,9 +196,9 @@ class KhelafatBaytulmalPdfService {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
-                  PdfExportService.b('তারিখ: ...........................................', fontSize: 9.5),
-                  PdfExportService.b('বায়তুলমাল সম্পাদকের স্বাক্ষর', fontSize: 9.5, fontWeight: pw.FontWeight.bold),
-                  PdfExportService.b('সভাপতির স্বাক্ষর', fontSize: 9.5, fontWeight: pw.FontWeight.bold),
+                  PdfExportService.bWidget('তারিখ: ...........................................', fontSize: 9.5),
+                  PdfExportService.bWidget('বায়তুলমাল সম্পাদকের স্বাক্ষর', fontSize: 9.5, fontWeight: pw.FontWeight.bold),
+                  PdfExportService.bWidget('সভাপতির স্বাক্ষর', fontSize: 9.5, fontWeight: pw.FontWeight.bold),
                 ],
               ),
               pw.SizedBox(height: 6),
@@ -216,15 +216,15 @@ class KhelafatBaytulmalPdfService {
       children: [
         pw.Padding(
           padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 2.5),
-          child: PdfExportService.b(label, fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal),
+          child: PdfExportService.bWidget(label, fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 2.5),
-          child: PdfExportService.b(takaVal, fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal, textAlign: pw.TextAlign.center),
+          child: PdfExportService.bWidget(takaVal, fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal, textAlign: pw.TextAlign.center),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 2.5),
-          child: PdfExportService.b(takaVal.isNotEmpty ? '০০' : '', fontSize: 9, textAlign: pw.TextAlign.center),
+          child: PdfExportService.bWidget(takaVal.isNotEmpty ? '০০' : '', fontSize: 9, textAlign: pw.TextAlign.center),
         ),
       ],
     );

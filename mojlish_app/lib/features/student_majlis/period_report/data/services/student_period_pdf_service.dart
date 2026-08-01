@@ -1,13 +1,68 @@
+import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:mojlish_app/core/constants/majlis_assets.dart';
 import '../models/period_report_model.dart';
 
-/// ছাত্র মজলিস বার্ষিক/ষান্মাসিক/দ্বি-মাসিক রিপোর্ট PDF জেনারেটর সার্ভিস
+/// বাংলাদেশ ইসলামী ছাত্র মজলিস বার্ষিক/ষান্মাসিক/দ্বি-মাসিক রিপোর্ট (২ পৃষ্ঠা) PDF জেনারেটর সার্ভিস
 class StudentPeriodPdfService {
-  static Future<void> generateAndPrintPdf(StudentPeriodReportModel report) async {
+  static Future<Uint8List> generatePdfBytes({
+    required String branch,
+    required String month,
+    required String session,
+    Map<String, String>? formData,
+    PeriodReportModel? report,
+  }) async {
     final fontRegular = await PdfGoogleFonts.notoSansBengaliRegular();
     final fontBold = await PdfGoogleFonts.notoSansBengaliBold();
+
+    final data = <String, String>{};
+    if (report != null) {
+      data['branch'] = report.branch;
+      data['month'] = report.month;
+      data['session'] = report.session;
+      data['mp_member_count'] = '${report.manpower.members}';
+      data['mp_cand_member_count'] = '${report.manpower.candidateMembers}';
+      data['mp_assoc_member_count'] = '${report.manpower.associateMembers}';
+      data['mp_cand_assoc_member_count'] = '${report.manpower.candidateAssociateMembers}';
+      data['mp_worker_count'] = '${report.manpower.workers}';
+      data['dw_primary_count'] = '${report.dawah.primaryMembers}';
+      data['dw_friend_count'] = '${report.dawah.friends}';
+      data['dw_wellwisher_count'] = '${report.dawah.wellWishers}';
+      data['org_public_uni'] = '${report.organization.publicUniversities}';
+      data['org_private_uni'] = '${report.organization.privateUniversities}';
+      data['org_college_govt'] = '${report.organization.colleges}';
+      data['org_madrasa_kamil'] = '${report.organization.madrasas}';
+      data['org_school_govt'] = '${report.organization.schools}';
+      data['meet_daitoshil_count'] = '${report.meetings.responsibleMeetings}';
+      data['meet_member_count'] = '${report.meetings.memberMeetings}';
+      data['meet_general_count'] = '${report.meetings.generalMeetings}';
+      data['train_skills_count'] = '${report.training.skillsDevelopment}';
+      data['train_workshop_count'] = '${report.training.workshops}';
+      data['train_education_count'] = '${report.training.educationMeetings}';
+      data['lib_book_growth'] = '${report.library.totalBooks}';
+      data['lib_reader_count'] = '${report.library.totalReaders}';
+      data['bm_total_income'] = '${report.baytulmal.totalIncome}';
+      data['bm_total_expense'] = '${report.baytulmal.totalExpense}';
+    }
+
+    if (formData != null) {
+      data.addAll(formData);
+    }
+
+    String g(String key) => data[key] ?? '';
+
+    pw.MemoryImage? logoImage;
+    try {
+      final ByteData logoBytes = await rootBundle.load(MajlisAssets.chatroLogo);
+      logoImage = pw.MemoryImage(logoBytes.buffer.asUint8List());
+    } catch (_) {
+      try {
+        final ByteData defaultBytes = await rootBundle.load('assets/images/logo.png');
+        logoImage = pw.MemoryImage(defaultBytes.buffer.asUint8List());
+      } catch (_) {}
+    }
 
     final pdf = pw.Document(
       theme: pw.ThemeData.withFont(
@@ -16,343 +71,712 @@ class StudentPeriodPdfService {
       ),
     );
 
-    final textStyleSmall = pw.TextStyle(font: fontRegular, fontSize: 8);
-    final textStyleBoldSmall = pw.TextStyle(font: fontBold, fontSize: 8);
-    final textStyleTitle = pw.TextStyle(font: fontBold, fontSize: 13);
+    final textStyleBoldSmall = pw.TextStyle(font: fontBold, fontSize: 7.5, color: PdfColors.black);
+    final textStyleTiny = pw.TextStyle(font: fontRegular, fontSize: 6.8, color: PdfColors.black);
+    final textStyleBoldTiny = pw.TextStyle(font: fontBold, fontSize: 6.8, color: PdfColors.black);
 
-    // ===================================
+    const headerBlue = PdfColor.fromInt(0xFF1E3A8A);
+    const tableBorderColor = PdfColors.grey700;
+
+    pw.Widget buildHeader(String pageTitle) {
+      return pw.Column(
+        children: [
+          pw.Text('বিসমিল্লাহির রাহমানির রাহীম', style: pw.TextStyle(font: fontRegular, fontSize: 8)),
+          pw.SizedBox(height: 1),
+          pw.Text(pageTitle, style: pw.TextStyle(font: fontBold, fontSize: 11, color: PdfColors.grey900)),
+          pw.SizedBox(height: 1),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.center,
+            children: [
+              if (logoImage != null) ...[
+                pw.Image(logoImage, width: 20, height: 20),
+                pw.SizedBox(width: 5),
+              ],
+              pw.Text('বাংলাদেশ ইসলামী ছাত্র মজলিস', style: pw.TextStyle(font: fontBold, fontSize: 15, color: headerBlue)),
+            ],
+          ),
+          pw.SizedBox(height: 4),
+          pw.Container(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.grey400, width: 0.5),
+              color: PdfColors.grey100,
+            ),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text('শাখা : ${branch.isEmpty ? g("branch") : branch}', style: textStyleBoldSmall),
+                pw.Text('মাস : ${month.isEmpty ? g("month") : month}', style: textStyleBoldSmall),
+                pw.Text('সেশন : ${session.isEmpty ? g("session") : session}', style: textStyleBoldSmall),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    pw.Widget cellText(String text, {bool isBold = false, pw.TextAlign align = pw.TextAlign.center, double size = 7.0}) {
+      return pw.Padding(
+        padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1.5),
+        child: pw.Text(
+          text,
+          textAlign: align,
+          style: pw.TextStyle(font: isBold ? fontBold : fontRegular, fontSize: size),
+        ),
+      );
+    }
+
+    // ==========================================
     // PAGE 1: জনশক্তি, দাওয়াত, সংগঠন
-    // ===================================
+    // ==========================================
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(16),
+        margin: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         build: (pw.Context context) {
           return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text('বিসমিল্লাহির রাহমানির রাহীম', style: pw.TextStyle(font: fontRegular, fontSize: 9)),
-              pw.SizedBox(height: 2),
-              pw.Text(
-                '${report.periodType} রিপোর্ট (${report.periodName})',
-                style: textStyleTitle.copyWith(color: PdfColors.blue800),
-              ),
-              pw.SizedBox(height: 2),
-              pw.Text('বাংলাদেশ ইসলামী ছাত্র মজলিস', style: pw.TextStyle(font: fontBold, fontSize: 12)),
-              pw.SizedBox(height: 8),
+              buildHeader('বার্ষিক/ষান্মাসিক/দ্বি-মাসিক রিপোর্ট'),
+              pw.SizedBox(height: 6),
 
-              // মেটা তথ্য বার
-              pw.Container(
-                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: pw.BoxDecoration(
-                  border: pw.Border.all(color: PdfColors.blue900, width: 1),
-                ),
-                child: pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Text('শাখা : ${report.branch}', style: textStyleBoldSmall),
-                    pw.Text('মাস/সময়কাল : ${report.periodName}', style: textStyleBoldSmall),
-                    pw.Text('সেশন : ${report.session}', style: textStyleBoldSmall),
-                    pw.Text('বছর : ${report.year}', style: textStyleBoldSmall),
-                  ],
-                ),
-              ),
-              pw.SizedBox(height: 8),
-
-              // সেকশন ১: জনশক্তি
-              pw.Container(
-                alignment: pw.Alignment.centerLeft,
-                child: pw.Text('১. জনশক্তি (Manpower)', style: textStyleBoldSmall),
-              ),
-              pw.SizedBox(height: 2),
-              pw.TableHelper.fromTextArray(
-                headers: ['জনশক্তি', 'সংখ্যা', 'বৃদ্ধি', 'কিভাবে', 'টার্গেট', 'ঘাটতি', 'কারণ'],
-                cellStyle: textStyleSmall,
-                headerStyle: textStyleBoldSmall,
-                headerDecoration: const pw.BoxDecoration(color: PdfColors.grey200),
-                cellAlignment: pw.Alignment.center,
-                data: [
-                  ['সদস্য', '${report.sodosso.presentCount}', '${report.sodosso.increase}', report.sodosso.how, '${report.sodosso.target}', '${report.sodosso.deficit}', report.sodosso.reason],
-                  ['সদস্য প্রার্থী', '${report.sodossoPrarthi.presentCount}', '${report.sodossoPrarthi.increase}', report.sodossoPrarthi.how, '${report.sodossoPrarthi.target}', '${report.sodossoPrarthi.deficit}', report.sodossoPrarthi.reason],
-                  ['সহযোগী সদস্য', '${report.sohoyogiSodosso.presentCount}', '${report.sohoyogiSodosso.increase}', report.sohoyogiSodosso.how, '${report.sohoyogiSodosso.target}', '${report.sohoyogiSodosso.deficit}', report.sohoyogiSodosso.reason],
-                  ['সহযোগী সদস্য প্রার্থী', '${report.sohoyogiSodossoPrarthi.presentCount}', '${report.sohoyogiSodossoPrarthi.increase}', report.sohoyogiSodossoPrarthi.how, '${report.sohoyogiSodossoPrarthi.target}', '${report.sohoyogiSodossoPrarthi.deficit}', report.sohoyogiSodossoPrarthi.reason],
-                  ['কর্মী', '${report.kormi.presentCount}', '${report.kormi.increase}', report.kormi.how, '${report.kormi.target}', '${report.kormi.deficit}', report.kormi.reason],
-                  ['মোট', '${report.totalManpower.presentCount}', '${report.totalManpower.increase}', '-', '${report.totalManpower.target}', '${report.totalManpower.deficit}', '-'],
+              // ১. জনশক্তি টেবিল
+              pw.Table(
+                border: pw.TableBorder.all(color: tableBorderColor, width: 0.5),
+                columnWidths: const {
+                  0: pw.FlexColumnWidth(2.2),
+                  1: pw.FlexColumnWidth(1.2),
+                  2: pw.FlexColumnWidth(1.2),
+                  3: pw.FlexColumnWidth(1.6),
+                  4: pw.FlexColumnWidth(1.2),
+                  5: pw.FlexColumnWidth(1.2),
+                  6: pw.FlexColumnWidth(2.0),
+                },
+                children: [
+                  pw.TableRow(
+                    decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+                    children: [
+                      cellText('জনশক্তি', isBold: true),
+                      cellText('সংখ্যা', isBold: true),
+                      cellText('বৃদ্ধি', isBold: true),
+                      cellText('কিভাবে', isBold: true),
+                      cellText('টার্গেট', isBold: true),
+                      cellText('ঘাটতি', isBold: true),
+                      cellText('কারণ', isBold: true),
+                    ],
+                  ),
+                  pw.TableRow(children: [
+                    cellText('সদস্য', align: pw.TextAlign.left),
+                    cellText(g('mp_member_count')),
+                    cellText(g('mp_member_growth')),
+                    cellText(g('mp_member_how')),
+                    cellText(g('mp_member_target')),
+                    cellText(g('mp_member_shortage')),
+                    cellText(g('mp_member_reason')),
+                  ]),
+                  pw.TableRow(children: [
+                    cellText('সদস্য প্রার্থী', align: pw.TextAlign.left),
+                    cellText(g('mp_cand_member_count')),
+                    cellText(g('mp_cand_member_growth')),
+                    cellText(g('mp_cand_member_how')),
+                    cellText(g('mp_cand_member_target')),
+                    cellText(g('mp_cand_member_shortage')),
+                    cellText(g('mp_cand_member_reason')),
+                  ]),
+                  pw.TableRow(children: [
+                    cellText('সহযোগী সদস্য', align: pw.TextAlign.left),
+                    cellText(g('mp_assoc_member_count')),
+                    cellText(g('mp_assoc_member_growth')),
+                    cellText(g('mp_assoc_member_how')),
+                    cellText(g('mp_assoc_member_target')),
+                    cellText(g('mp_assoc_member_shortage')),
+                    cellText(g('mp_assoc_member_reason')),
+                  ]),
+                  pw.TableRow(children: [
+                    cellText('সহযোগী সদস্য প্রার্থী', align: pw.TextAlign.left),
+                    cellText(g('mp_cand_assoc_member_count')),
+                    cellText(g('mp_cand_assoc_member_growth')),
+                    cellText(g('mp_cand_assoc_member_how')),
+                    cellText(g('mp_cand_assoc_member_target')),
+                    cellText(g('mp_cand_assoc_member_shortage')),
+                    cellText(g('mp_cand_assoc_member_reason')),
+                  ]),
+                  pw.TableRow(children: [
+                    cellText('কর্মী', align: pw.TextAlign.left),
+                    cellText(g('mp_worker_count')),
+                    cellText(g('mp_worker_growth')),
+                    cellText(g('mp_worker_how')),
+                    cellText(g('mp_worker_target')),
+                    cellText(g('mp_worker_shortage')),
+                    cellText(g('mp_worker_reason')),
+                  ]),
+                  pw.TableRow(
+                    decoration: const pw.BoxDecoration(color: PdfColors.grey100),
+                    children: [
+                      cellText('মোট', isBold: true, align: pw.TextAlign.left),
+                      cellText(g('mp_total_count'), isBold: true),
+                      cellText(g('mp_total_growth'), isBold: true),
+                      cellText(g('mp_total_how'), isBold: true),
+                      cellText(g('mp_total_target'), isBold: true),
+                      cellText(g('mp_total_shortage'), isBold: true),
+                      cellText(g('mp_total_reason'), isBold: true),
+                    ],
+                  ),
                 ],
               ),
-              pw.SizedBox(height: 8),
+              pw.SizedBox(height: 6),
 
-              // সেকশন ২: দাওয়াত ও বিতরণ
-              pw.Container(
-                alignment: pw.Alignment.centerLeft,
-                child: pw.Text('২. দাওয়াত ও বিতরণ (Dawah & Distribution)', style: textStyleBoldSmall),
-              ),
-              pw.SizedBox(height: 2),
+              // ২. দাওয়াত ও বিতরণ (Side-by-Side Tables)
               pw.Row(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
+                  // Left: দাওয়াত
                   pw.Expanded(
-                    child: pw.TableHelper.fromTextArray(
-                      headers: ['দাওয়াত', 'সংখ্যা', 'বৃদ্ধি'],
-                      cellStyle: textStyleSmall,
-                      headerStyle: textStyleBoldSmall,
-                      headerDecoration: const pw.BoxDecoration(color: PdfColors.grey200),
-                      cellAlignment: pw.Alignment.center,
-                      data: [
-                        ['প্রাথমিক সদস্য', '${report.primaryMemberDawahCount}', '${report.primaryMemberDawahIncrease}'],
-                        ['বন্ধু', '${report.friendDawahCount}', '${report.friendDawahIncrease}'],
-                        ['শুভাকাঙ্ক্ষী', '${report.wellWisherDawahCount}', '${report.wellWisherDawahIncrease}'],
-                        ['গ্রুপ দাওয়াত', '${report.groupDawahCount}', '-'],
-                        ['চা-চক্র', '${report.teaCircleCount}', '-'],
+                    flex: 4,
+                    child: pw.Table(
+                      border: pw.TableBorder.all(color: tableBorderColor, width: 0.5),
+                      columnWidths: const {
+                        0: pw.FlexColumnWidth(2.5),
+                        1: pw.FlexColumnWidth(1.2),
+                        2: pw.FlexColumnWidth(1.2),
+                      },
+                      children: [
+                        pw.TableRow(
+                          decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+                          children: [
+                            cellText('দাওয়াত', isBold: true),
+                            cellText('সংখ্যা', isBold: true),
+                            cellText('বৃদ্ধি', isBold: true),
+                          ],
+                        ),
+                        pw.TableRow(children: [
+                          cellText('প্রাথমিক সদস্য', align: pw.TextAlign.left),
+                          cellText(g('dw_primary_count')),
+                          cellText(g('dw_primary_growth')),
+                        ]),
+                        pw.TableRow(children: [
+                          cellText('বন্ধু', align: pw.TextAlign.left),
+                          cellText(g('dw_friend_count')),
+                          cellText(g('dw_friend_growth')),
+                        ]),
+                        pw.TableRow(children: [
+                          cellText('শুভাকাঙ্ক্ষী', align: pw.TextAlign.left),
+                          cellText(g('dw_wellwisher_count')),
+                          cellText(g('dw_wellwisher_growth')),
+                        ]),
                       ],
                     ),
                   ),
-                  pw.SizedBox(width: 8),
+                  pw.SizedBox(width: 4),
+                  // Right: বিতরণ
                   pw.Expanded(
-                    child: pw.TableHelper.fromTextArray(
-                      headers: ['বিতরণ', 'পরিমাণ'],
-                      cellStyle: textStyleSmall,
-                      headerStyle: textStyleBoldSmall,
-                      headerDecoration: const pw.BoxDecoration(color: PdfColors.grey200),
-                      cellAlignment: pw.Alignment.center,
-                      data: [
-                        ['ইসলামী সাহিত্য', report.islamicLiterature],
-                        ['পরিচিতি', report.introductionBook],
-                        ['ছাত্র পরিক্রমা/স্টুডেন্টস রিভিউ', report.studentReview],
-                        ['কিশোর পত্রিকা', report.teenMagazine],
-                        ['স্টিকার/কার্ড/ডায়েরি', report.stickerCardDiary],
-                        ['রুটিন/সূত্রাবলী', report.routineFormula],
-                        ['লিফলেট/পোস্টার/ক্যালেন্ডার', report.leafletPosterCalendar],
-                        ['দাওয়াত কার্ড/উপহার', report.invitationCardGift],
+                    flex: 6,
+                    child: pw.Table(
+                      border: pw.TableBorder.all(color: tableBorderColor, width: 0.5),
+                      columnWidths: const {
+                        0: pw.FlexColumnWidth(2.5),
+                        1: pw.FlexColumnWidth(1.2),
+                        2: pw.FlexColumnWidth(2.5),
+                        3: pw.FlexColumnWidth(1.2),
+                      },
+                      children: [
+                        pw.TableRow(
+                          decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+                          children: [
+                            cellText('বিতরণ', isBold: true),
+                            cellText('পরিমাণ', isBold: true),
+                            cellText('বিতরণ', isBold: true),
+                            cellText('পরিমাণ', isBold: true),
+                          ],
+                        ),
+                        pw.TableRow(children: [
+                          cellText('ইসলামী সাহিত্য', align: pw.TextAlign.left),
+                          cellText(g('dist_sahitya')),
+                          cellText('স্টিকার/ভিউকার্ড/ডায়েরি', align: pw.TextAlign.left),
+                          cellText(g('dist_sticker')),
+                        ]),
+                        pw.TableRow(children: [
+                          cellText('পরিচিতি', align: pw.TextAlign.left),
+                          cellText(g('dist_porichiti')),
+                          cellText('ক্লাস/পরীক্ষার রুটিন/সূত্রাবলী', align: pw.TextAlign.left),
+                          cellText(g('dist_routine')),
+                        ]),
+                        pw.TableRow(children: [
+                          cellText('ছাত্র পরিক্রমা/স্টুডেন্টস রিভিউ', align: pw.TextAlign.left),
+                          cellText(g('dist_porikroma')),
+                          cellText('লিফলেট/পোস্টার/ক্যালেন্ডার', align: pw.TextAlign.left),
+                          cellText(g('dist_leaflet')),
+                        ]),
+                        pw.TableRow(children: [
+                          cellText('কিশোর পত্রিকা', align: pw.TextAlign.left),
+                          cellText(g('dist_kishore')),
+                          cellText('দাওয়াত কার্ড / ঈদ কার্ড / উপহার', align: pw.TextAlign.left),
+                          cellText(g('dist_card')),
+                        ]),
                       ],
                     ),
                   ),
                 ],
               ),
-              pw.SizedBox(height: 4),
+              pw.SizedBox(height: 3),
 
+              // দাওয়াত অতিরিক্ত তথ্যাবলী (Dawah Sub-lines)
               pw.Container(
-                padding: const pw.EdgeInsets.all(4),
-                decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400)),
+                padding: const pw.EdgeInsets.all(3),
+                decoration: pw.BoxDecoration(border: pw.Border.all(color: tableBorderColor, width: 0.5)),
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text('শাখার সংবাদ প্রকাশিত হয়েছে (প্রিন্ট/ইলেকট্রনিক/অনলাইন): ${report.newsPublishedCount} | বার দেয়ালিকা প্রকাশ: ${report.wallMagazineCount} | দেয়াল লিখন: ${report.wallWritingCount}', style: textStyleSmall),
-                    pw.SizedBox(height: 2),
-                    pw.Text('বক্তৃতা/বিতর্ক/সাধারণ জ্ঞান প্রতিযোগিতা: ${report.competitionCount} | নবীন বরণ: ${report.freshersReceptionCount} | অন্যান্য: ${report.otherDawahMediaDetails}', style: textStyleSmall),
+                    pw.Row(children: [
+                      pw.Text('গ্রুপ দাওয়াত : ', style: textStyleTiny),
+                      pw.Text(g('dw_group_dawa').isEmpty ? '.......' : g('dw_group_dawa'), style: textStyleBoldTiny),
+                      pw.SizedBox(width: 20),
+                      pw.Text('চা-চক্র : ', style: textStyleTiny),
+                      pw.Text(g('dw_cha_chokro').isEmpty ? '.......' : g('dw_cha_chokro'), style: textStyleBoldTiny),
+                    ]),
+                    pw.SizedBox(height: 1.5),
+                    pw.Row(children: [
+                      pw.Text('প্রাথমিক শাখা : ', style: textStyleTiny),
+                      pw.Text(' প্রাতিষ্ঠানিক : ', style: textStyleTiny),
+                      pw.Text(g('dw_pri_shakha_inst'), style: textStyleBoldTiny),
+                      pw.Text('  বৃদ্ধি : ', style: textStyleTiny),
+                      pw.Text(g('dw_pri_shakha_inst_growth'), style: textStyleBoldTiny),
+                      pw.Text('  ঘাটতি : ', style: textStyleTiny),
+                      pw.Text(g('dw_pri_shakha_inst_shortage'), style: textStyleBoldTiny),
+                      pw.SizedBox(width: 10),
+                      pw.Text(' আবাসিক : ', style: textStyleTiny),
+                      pw.Text(g('dw_pri_shakha_res'), style: textStyleBoldTiny),
+                      pw.Text('  বৃদ্ধি : ', style: textStyleTiny),
+                      pw.Text(g('dw_pri_shakha_res_growth'), style: textStyleBoldTiny),
+                      pw.Text('  ঘাটতি : ', style: textStyleTiny),
+                      pw.Text(g('dw_pri_shakha_res_shortage'), style: textStyleBoldTiny),
+                    ]),
+                    pw.SizedBox(height: 1.5),
+                    pw.Row(children: [
+                      pw.Text('শাখার সংবাদ প্রকাশিত হয়েছে(প্রিন্ট/ইলেকট্রনিক/অনলাইন মিডিয়ায়) : ', style: textStyleTiny),
+                      pw.Text(g('dw_news_media').isEmpty ? '...../.....' : g('dw_news_media'), style: textStyleBoldTiny),
+                      pw.Text(' বার ', style: textStyleTiny),
+                      pw.SizedBox(width: 15),
+                      pw.Text('দেয়ালিকা প্রকাশ : ', style: textStyleTiny),
+                      pw.Text(g('dw_deyalika').isEmpty ? '.......' : g('dw_deyalika'), style: textStyleBoldTiny),
+                    ]),
+                    pw.SizedBox(height: 1.5),
+                    pw.Row(children: [
+                      pw.Text('বক্তৃতা/বিতর্ক/সাধারণ জ্ঞান প্রতিযোগিতা : ', style: textStyleTiny),
+                      pw.Text(g('dw_competition').isEmpty ? '...../.....' : g('dw_competition'), style: textStyleBoldTiny),
+                      pw.SizedBox(width: 10),
+                      pw.Text('নবীন বরণ : ', style: textStyleTiny),
+                      pw.Text(g('dw_nobin_boron').isEmpty ? '.......' : g('dw_nobin_boron'), style: textStyleBoldTiny),
+                      pw.SizedBox(width: 10),
+                      pw.Text('অন্যান্য : (বিস্তারিত আলাদা কাগজে)', style: textStyleTiny),
+                    ]),
                   ],
                 ),
               ),
-              pw.SizedBox(height: 8),
+              pw.SizedBox(height: 6),
 
-              // সেকশন ৩: সংগঠন
-              pw.Container(
-                alignment: pw.Alignment.centerLeft,
-                child: pw.Text('৩. সংগঠন (Organization)', style: textStyleBoldSmall),
-              ),
-              pw.SizedBox(height: 2),
-              pw.TableHelper.fromTextArray(
-                headers: ['প্রতিষ্ঠানের ধরন', 'সংখ্যা', 'প্রতিষ্ঠানের ধরন', 'সংখ্যা'],
-                cellStyle: textStyleSmall,
-                headerStyle: textStyleBoldSmall,
-                headerDecoration: const pw.BoxDecoration(color: PdfColors.grey200),
-                cellAlignment: pw.Alignment.center,
-                data: [
-                  ['পাবলিক বিশ্ববিদ্যালয়', '${report.publicUniversity}', 'মাদরাসা (কামিল)', '${report.kamilMadrasa}'],
-                  ['প্রাইভেট বিশ্ববিদ্যালয়', '${report.privateUniversity}', 'মাদরাসা (ফাজিল)', '${report.fazilMadrasa}'],
-                  ['মেডিকেল কলেজ', '${report.medicalCollege}', 'মাদরাসা (আলিম)', '${report.alimMadrasa}'],
-                  ['বিশ্ববিদ্যালয় কলেজ', '${report.universityCollege}', 'মাদরাসা (দাখিল)', '${report.dakhilMadrasa}'],
-                  ['হোমিও কলেজ', '${report.homeoCollege}', 'মাদরাসা (কওমী)', '${report.qawmiMadrasa}'],
-                  ['আইন কলেজ', '${report.lawCollege}', 'স্কুল (সরকারি)', '${report.govSchool}'],
-                  ['টেকনিক্যাল প্রতিষ্ঠান', '${report.technicalInst}', 'স্কুল (বেসরকারি)', '${report.nonGovSchool}'],
-                  ['কলেজ (সরকারি)', '${report.govCollege}', 'জোন/থানা', '${report.zoneThana}'],
-                  ['কলেজ (বেসরকারি)', '${report.nonGovCollege}', 'মোট শাখা', '${report.totalBranchCount}'],
+              // ৩. সংগঠন (Organization Table)
+              pw.Table(
+                border: pw.TableBorder.all(color: tableBorderColor, width: 0.5),
+                columnWidths: const {
+                  0: pw.FlexColumnWidth(2.6),
+                  1: pw.FlexColumnWidth(1.0),
+                  2: pw.FlexColumnWidth(2.6),
+                  3: pw.FlexColumnWidth(1.8),
+                  4: pw.FlexColumnWidth(2.0),
+                },
+                children: [
+                  pw.TableRow(
+                    decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+                    children: [
+                      cellText('সংগঠন', isBold: true),
+                      cellText('সংখ্যা', isBold: true),
+                      cellText('সংগঠন', isBold: true),
+                      cellText('কাজ', isBold: true),
+                      cellText('জনশক্তির শ্রেণিবিন্যাস', isBold: true),
+                    ],
+                  ),
+                  _buildOrgTableRow('পাবলিক বিশ্ববিদ্যালয়', g('org_public_uni'), g('org_custom_name_1'), g('org_custom_work_1'), g('org_custom_manpower_1'), fontRegular, fontBold),
+                  _buildOrgTableRow('প্রাইভেট বিশ্ববিদ্যালয়', g('org_private_uni'), g('org_custom_name_2'), g('org_custom_work_2'), g('org_custom_manpower_2'), fontRegular, fontBold),
+                  _buildOrgTableRow('মেডিকেল কলেজ', g('org_med_college'), g('org_custom_name_3'), g('org_custom_work_3'), g('org_custom_manpower_3'), fontRegular, fontBold),
+                  _buildOrgTableRow('বিশ্ববিদ্যালয় কলেজ', g('org_uni_college'), g('org_custom_name_4'), g('org_custom_work_4'), g('org_custom_manpower_4'), fontRegular, fontBold),
+                  _buildOrgTableRow('হোমিও কলেজ', g('org_homoeo_college'), g('org_custom_name_5'), g('org_custom_work_5'), g('org_custom_manpower_5'), fontRegular, fontBold),
+                  _buildOrgTableRow('আইন কলেজ', g('org_law_college'), g('org_custom_name_6'), g('org_custom_work_6'), g('org_custom_manpower_6'), fontRegular, fontBold),
+                  _buildOrgTableRow('টেকনিক্যাল প্রতিষ্ঠান', g('org_tech_inst'), g('org_custom_name_7'), g('org_custom_work_7'), g('org_custom_manpower_7'), fontRegular, fontBold),
+                  _buildOrgTableRow('কলেজ', '', g('org_custom_name_8'), g('org_custom_work_8'), g('org_custom_manpower_8'), fontRegular, fontBold, isSectionHeader: true),
+                  _buildOrgTableRow('    সরকারি', g('org_college_govt'), g('org_custom_name_9'), g('org_custom_work_9'), g('org_custom_manpower_9'), fontRegular, fontBold),
+                  _buildOrgTableRow('    বেসরকারি', g('org_college_non_govt'), g('org_custom_name_10'), g('org_custom_work_10'), g('org_custom_manpower_10'), fontRegular, fontBold),
+                  _buildOrgTableRow('মাদ্রাসা', '', '', '', '', fontRegular, fontBold, isSectionHeader: true),
+                  _buildOrgTableRow('    কামিল', g('org_madrasa_kamil'), '', '', '', fontRegular, fontBold),
+                  _buildOrgTableRow('    ফাজিল', g('org_madrasa_fazil'), '', '', '', fontRegular, fontBold),
+                  _buildOrgTableRow('    আলিম', g('org_madrasa_alim'), '', '', '', fontRegular, fontBold),
+                  _buildOrgTableRow('    দাখিল', g('org_madrasa_dakhil'), '', '', '', fontRegular, fontBold),
+                  _buildOrgTableRow('    কওমী', g('org_madrasa_qawmi'), '', '', '', fontRegular, fontBold),
+                  _buildOrgTableRow('স্কুল', '', '', '', '', fontRegular, fontBold, isSectionHeader: true),
+                  _buildOrgTableRow('    সরকারি', g('org_school_govt'), '', '', '', fontRegular, fontBold),
+                  _buildOrgTableRow('    বেসরকারি', g('org_school_non_govt'), '', '', '', fontRegular, fontBold),
+                  _buildOrgTableRow('জোন/থানা', g('org_zone_thana'), '', '', '', fontRegular, fontBold),
                 ],
               ),
-              pw.SizedBox(height: 4),
-              pw.Text('সহযোগী সদস্য শাখা (নামসহ): ${report.associateMemberBranchNames}', style: textStyleSmall),
+              pw.SizedBox(height: 3),
+
+              // সংগঠন সারসংক্ষেপ লাইন (Org Footer Summary)
+              pw.Container(
+                padding: const pw.EdgeInsets.all(3),
+                decoration: pw.BoxDecoration(border: pw.Border.all(color: tableBorderColor, width: 0.5)),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Row(children: [
+                      pw.Text('মোট শাখা : ', style: textStyleTiny),
+                      pw.Text(g('org_total_shakha').isEmpty ? '.....' : g('org_total_shakha'), style: textStyleBoldTiny),
+                      pw.SizedBox(width: 8),
+                      pw.Text('কর্মী শাখা : ', style: textStyleTiny),
+                      pw.Text(g('org_kormi_shakha').isEmpty ? '.....' : g('org_kormi_shakha'), style: textStyleBoldTiny),
+                      pw.SizedBox(width: 8),
+                      pw.Text(' প্রাতিষ্ঠানিক : ', style: textStyleTiny),
+                      pw.Text(' বৃদ্ধি : ', style: textStyleTiny),
+                      pw.Text(g('org_inst_growth'), style: textStyleBoldTiny),
+                      pw.Text(' ঘাটতি : ', style: textStyleTiny),
+                      pw.Text(g('org_inst_shortage'), style: textStyleBoldTiny),
+                      pw.SizedBox(width: 8),
+                      pw.Text(' আবাসিক : ', style: textStyleTiny),
+                      pw.Text(' বৃদ্ধি : ', style: textStyleTiny),
+                      pw.Text(g('org_res_growth'), style: textStyleBoldTiny),
+                      pw.Text(' ঘাটতি : ', style: textStyleTiny),
+                      pw.Text(g('org_res_shortage'), style: textStyleBoldTiny),
+                    ]),
+                    pw.SizedBox(height: 1.5),
+                    pw.Row(children: [
+                      pw.Text('সহযোগী সদস্য শাখা (নামসহ) : ', style: textStyleTiny),
+                      pw.Text(g('org_assoc_shakha_names').isEmpty ? '........................................................................................................................' : g('org_assoc_shakha_names'), style: textStyleBoldTiny),
+                    ]),
+                  ],
+                ),
+              ),
             ],
           );
         },
       ),
     );
 
-    // ===================================
-    // PAGE 2: সভা, প্রশিক্ষণ, পাঠাগার, বায়তুলমাল, ইত্যাদি
-    // ===================================
+    // ==========================================
+    // PAGE 2: সভাসমূহ, প্রশিক্ষণ, পাঠাগার, বায়তুলমাল, প্রকাশনা, ছাত্রকল্যাণ, সফর, যোগাযোগ, মন্তব্য
+    // ==========================================
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(16),
+        margin: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         build: (pw.Context context) {
           return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text(
-                '${report.periodType} রিপোর্ট (${report.periodName}) - পৃষ্ঠা ২',
-                style: textStyleTitle.copyWith(color: PdfColors.blue800),
-              ),
-              pw.SizedBox(height: 6),
-
-              // সেকশন ৪: সভাসমূহ
-              pw.Container(
-                alignment: pw.Alignment.centerLeft,
-                child: pw.Text('৪. সভাসমূহ (Meetings)', style: textStyleBoldSmall),
-              ),
-              pw.SizedBox(height: 2),
+              // ১. সভাসমূহ (Meetings Side-by-Side Tables)
               pw.Row(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
+                  // Left Meetings Table
                   pw.Expanded(
-                    child: pw.TableHelper.fromTextArray(
-                      headers: ['সভাসমূহ', 'সংখ্যা', 'উপস্থিতি', 'সর্বোচ্চ/সর্বনিম্ন'],
-                      cellStyle: textStyleSmall,
-                      headerStyle: textStyleBoldSmall,
-                      headerDecoration: const pw.BoxDecoration(color: PdfColors.grey200),
-                      cellAlignment: pw.Alignment.center,
-                      data: [
-                        ['দায়িত্বশীল সভা', '${report.dayittoshilMeeting.count}', '${report.dayittoshilMeeting.attendance}', report.dayittoshilMeeting.maxMin],
-                        ['থানা/জোনাল সভা', '${report.thanaZonalMeeting.count}', '${report.thanaZonalMeeting.attendance}', report.thanaZonalMeeting.maxMin],
-                        ['সদস্য সভা', '${report.sodossoMeeting.count}', '${report.sodossoMeeting.attendance}', report.sodossoMeeting.maxMin],
-                        ['সহযোগী সদস্য সভা', '${report.sohoyogiSodossoMeeting.count}', '${report.sohoyogiSodossoMeeting.attendance}', report.sohoyogiSodossoMeeting.maxMin],
-                        ['কর্মী সভা', '${report.kormiMeeting.count}', '${report.kormiMeeting.attendance}', report.kormiMeeting.maxMin],
-                        ['জরুরি সভা', '${report.emergencyMeeting.count}', '${report.emergencyMeeting.attendance}', report.emergencyMeeting.maxMin],
-                        ['সাধারণ সভা', '${report.generalMeeting.count}', '${report.generalMeeting.attendance}', report.generalMeeting.maxMin],
+                    child: pw.Table(
+                      border: pw.TableBorder.all(color: tableBorderColor, width: 0.5),
+                      columnWidths: const {
+                        0: pw.FlexColumnWidth(2.6),
+                        1: pw.FlexColumnWidth(1.0),
+                        2: pw.FlexColumnWidth(1.2),
+                        3: pw.FlexColumnWidth(1.4),
+                      },
+                      children: [
+                        pw.TableRow(
+                          decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+                          children: [
+                            cellText('সভাসমূহ', isBold: true),
+                            cellText('সংখ্যা', isBold: true),
+                            cellText('উপস্থিতি', isBold: true),
+                            cellText('সর্বোচ্চ/সর্বনিম্ন', isBold: true),
+                          ],
+                        ),
+                        pw.TableRow(children: [cellText('দায়িত্বশীল সভা', align: pw.TextAlign.left), cellText(g('meet_daitoshil_count')), cellText(g('meet_daitoshil_pres')), cellText(g('meet_daitoshil_max_min'))]),
+                        pw.TableRow(children: [cellText('থানা/জোনাল দায়িত্বশীল সভা', align: pw.TextAlign.left), cellText(g('meet_thana_daitoshil_count')), cellText(g('meet_thana_daitoshil_pres')), cellText(g('meet_thana_daitoshil_max_min'))]),
+                        pw.TableRow(children: [cellText('সদস্য সভা', align: pw.TextAlign.left), cellText(g('meet_member_count')), cellText(g('meet_member_pres')), cellText(g('meet_member_max_min'))]),
+                        pw.TableRow(children: [cellText('সহযোগী সদস্য সভা', align: pw.TextAlign.left), cellText(g('meet_assoc_member_count')), cellText(g('meet_assoc_member_pres')), cellText(g('meet_assoc_member_max_min'))]),
+                        pw.TableRow(children: [cellText('কর্মী সভা', align: pw.TextAlign.left), cellText(g('meet_worker_count')), cellText(g('meet_worker_pres')), cellText(g('meet_worker_max_min'))]),
+                        pw.TableRow(children: [cellText('জরুরি সভা', align: pw.TextAlign.left), cellText(g('meet_urgent_count')), cellText(g('meet_urgent_pres')), cellText(g('meet_urgent_max_min'))]),
+                        pw.TableRow(children: [cellText('সাধারণ সভা', align: pw.TextAlign.left), cellText(g('meet_general_count')), cellText(g('meet_general_pres')), cellText(g('meet_general_max_min'))]),
                       ],
                     ),
                   ),
-                  pw.SizedBox(width: 6),
+                  pw.SizedBox(width: 4),
+                  // Right Meetings Table
                   pw.Expanded(
-                    child: pw.TableHelper.fromTextArray(
-                      headers: ['সভাসমূহ', 'সংখ্যা', 'উপস্থিতি', 'সর্বোচ্চ/সর্বনিম্ন'],
-                      cellStyle: textStyleSmall,
-                      headerStyle: textStyleBoldSmall,
-                      headerDecoration: const pw.BoxDecoration(color: PdfColors.grey200),
-                      cellAlignment: pw.Alignment.center,
-                      data: [
-                        ['আলোচনা সভা', '${report.discussionMeeting.count}', '${report.discussionMeeting.attendance}', report.discussionMeeting.maxMin],
-                        ['সহযোগী সদস্য সমাবেশ', '${report.sohoyogiSodossoSamabesh.count}', '${report.sohoyogiSodossoSamabesh.attendance}', report.sohoyogiSodossoSamabesh.maxMin],
-                        ['কর্মী সমাবেশ', '${report.kormiSamabesh.count}', '${report.kormiSamabesh.attendance}', report.kormiSamabesh.maxMin],
-                        ['ছাত্র সমাবেশ', '${report.studentSamabesh.count}', '${report.studentSamabesh.attendance}', report.studentSamabesh.maxMin],
-                        ['মিছিল', '${report.rally.count}', '${report.rally.attendance}', report.rally.maxMin],
-                        ['দিবস পালন', '${report.dayObservance.count}', '${report.dayObservance.attendance}', report.dayObservance.maxMin],
-                        ['অন্যান্য', '${report.otherMeetings.count}', '${report.otherMeetings.attendance}', report.otherMeetings.maxMin],
+                    child: pw.Table(
+                      border: pw.TableBorder.all(color: tableBorderColor, width: 0.5),
+                      columnWidths: const {
+                        0: pw.FlexColumnWidth(2.6),
+                        1: pw.FlexColumnWidth(1.0),
+                        2: pw.FlexColumnWidth(1.2),
+                        3: pw.FlexColumnWidth(1.4),
+                      },
+                      children: [
+                        pw.TableRow(
+                          decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+                          children: [
+                            cellText('সভাসমূহ', isBold: true),
+                            cellText('সংখ্যা', isBold: true),
+                            cellText('উপস্থিতি', isBold: true),
+                            cellText('সর্বোচ্চ/সর্বনিম্ন', isBold: true),
+                          ],
+                        ),
+                        pw.TableRow(children: [cellText('আলোচনা সভা', align: pw.TextAlign.left), cellText(g('meet_discussion_count')), cellText(g('meet_discussion_pres')), cellText(g('meet_discussion_max_min'))]),
+                        pw.TableRow(children: [cellText('সহযোগী সদস্য সমাবেশ', align: pw.TextAlign.left), cellText(g('meet_assoc_samabesh_count')), cellText(g('meet_assoc_samabesh_pres')), cellText(g('meet_assoc_samabesh_max_min'))]),
+                        pw.TableRow(children: [cellText('কর্মী সমাবেশ', align: pw.TextAlign.left), cellText(g('meet_worker_samabesh_count')), cellText(g('meet_worker_samabesh_pres')), cellText(g('meet_worker_samabesh_max_min'))]),
+                        pw.TableRow(children: [cellText('ছাত্র সমাবেশ', align: pw.TextAlign.left), cellText(g('meet_student_samabesh_count')), cellText(g('meet_student_samabesh_pres')), cellText(g('meet_student_samabesh_max_min'))]),
+                        pw.TableRow(children: [cellText('মিছিল', align: pw.TextAlign.left), cellText(g('meet_rally_count')), cellText(g('meet_rally_pres')), cellText(g('meet_rally_max_min'))]),
+                        pw.TableRow(children: [cellText('দিবস পালন', align: pw.TextAlign.left), cellText(g('meet_day_observance_count')), cellText(g('meet_day_observance_pres')), cellText(g('meet_day_observance_max_min'))]),
+                        pw.TableRow(children: [cellText('অন্যান্য', align: pw.TextAlign.left), cellText(g('meet_other_count')), cellText(g('meet_other_pres')), cellText(g('meet_other_max_min'))]),
                       ],
                     ),
                   ),
                 ],
               ),
-              pw.SizedBox(height: 6),
+              pw.SizedBox(height: 5),
 
-              // সেকশন ৫: প্রশিক্ষণ
-              pw.Container(
-                alignment: pw.Alignment.centerLeft,
-                child: pw.Text('৫. প্রশিক্ষণ (Training)', style: textStyleBoldSmall),
-              ),
-              pw.SizedBox(height: 2),
-              pw.TableHelper.fromTextArray(
-                headers: ['প্রশিক্ষণ', 'সংখ্যা', 'অধिवेशन', 'উপস্থিতি', 'সর্বোচ্চ/সর্বনিম্ন'],
-                cellStyle: textStyleSmall,
-                headerStyle: textStyleBoldSmall,
-                headerDecoration: const pw.BoxDecoration(color: PdfColors.grey200),
-                cellAlignment: pw.Alignment.center,
-                data: [
-                  ['স্কিলস ডেভেলপমেন্ট', '${report.skillsDev.count}', '${report.skillsDev.sessionCount}', '${report.skillsDev.attendance}', report.skillsDev.maxMin],
-                  ['কর্মশালা', '${report.workshop.count}', '${report.workshop.sessionCount}', '${report.workshop.attendance}', report.workshop.maxMin],
-                  ['তরবিয়তি সফর', '${report.torbiyatiSofor.count}', '${report.torbiyatiSofor.sessionCount}', '${report.torbiyatiSofor.attendance}', report.torbiyatiSofor.maxMin],
-                  ['প্রশিক্ষণ চক্র', '${report.trainingCircle.count}', '${report.trainingCircle.sessionCount}', '${report.trainingCircle.attendance}', report.trainingCircle.maxMin],
-                  ['শিক্ষা সভা', '${report.shikshaSobha.count}', '${report.shikshaSobha.sessionCount}', '${report.shikshaSobha.attendance}', report.shikshaSobha.maxMin],
-                  ['কুরআন ও হাদীস ক্লাস', '${report.quranHadithClass.count}', '${report.quranHadithClass.sessionCount}', '${report.quranHadithClass.attendance}', report.quranHadithClass.maxMin],
-                  ['শবগুজারি', '${report.shabGujari.count}', '${report.shabGujari.sessionCount}', '${report.shabGujari.attendance}', report.shabGujari.maxMin],
-                  ['জিকির মাহফিল', '${report.zikrMahfil.count}', '${report.zikrMahfil.sessionCount}', '${report.zikrMahfil.attendance}', report.zikrMahfil.maxMin],
-                  ['সামষ্টিক অধ্যয়ন', '${report.samostikOddhayon.count}', '${report.samostikOddhayon.sessionCount}', '${report.samostikOddhayon.attendance}', report.samostikOddhayon.maxMin],
-                  ['হাদীস পাঠ', '${report.hadithPath.count}', '${report.hadithPath.sessionCount}', '${report.hadithPath.attendance}', report.hadithPath.maxMin],
-                  ['সাংস্কৃতিক ফোরাম', '${report.culturalForum.count}', '${report.culturalForum.sessionCount}', '${report.culturalForum.attendance}', report.culturalForum.maxMin],
-                  ['উন্মুক্ত ক্লাস', '${report.openClass.count}', '${report.openClass.sessionCount}', '${report.openClass.attendance}', report.openClass.maxMin],
-                ],
-              ),
-              pw.SizedBox(height: 6),
-
-              // সেকশন ৬ & ৭: পাঠাগার ও বায়তুলমাল
-              pw.Row(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
+              // ২. প্রশিক্ষণ (Training Table)
+              pw.Table(
+                border: pw.TableBorder.all(color: tableBorderColor, width: 0.5),
+                columnWidths: const {
+                  0: pw.FlexColumnWidth(3.0),
+                  1: pw.FlexColumnWidth(1.0),
+                  2: pw.FlexColumnWidth(1.2),
+                  3: pw.FlexColumnWidth(1.2),
+                  4: pw.FlexColumnWidth(1.4),
+                },
                 children: [
-                  pw.Expanded(
-                    child: pw.Container(
-                      padding: const pw.EdgeInsets.all(4),
-                      decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400)),
-                      child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.start,
-                        children: [
-                          pw.Text('৬. পাঠাগার', style: textStyleBoldSmall),
-                          pw.Text('সংখ্যা: ${report.libraryCount} | বই সংখ্যা: ${report.bookCount}', style: textStyleSmall),
-                          pw.Text('পাঠক: ${report.readerCount} | ইস্যু: ${report.issuedBooks} | পঠিত: ${report.readBooks}', style: textStyleSmall),
-                          pw.Text('বৃদ্ধি: ${report.libraryIncrease} | ঘাটতি: ${report.libraryDeficit}', style: textStyleSmall),
-                        ],
-                      ),
-                    ),
+                  pw.TableRow(
+                    decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+                    children: [
+                      cellText('প্রশিক্ষণ', isBold: true),
+                      cellText('সংখ্যা', isBold: true),
+                      cellText('অধিবেশন', isBold: true),
+                      cellText('উপস্থিতি', isBold: true),
+                      cellText('সর্বোচ্চ/সর্বনিম্ন', isBold: true),
+                    ],
                   ),
-                  pw.SizedBox(width: 6),
-                  pw.Expanded(
-                    child: pw.Container(
-                      padding: const pw.EdgeInsets.all(4),
-                      decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400)),
-                      child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.start,
-                        children: [
-                          pw.Text('৭. বায়তুলমাল', style: textStyleBoldSmall),
-                          pw.Text('আয়: ৳${report.totalIncome} | ব্যয়: ৳${report.totalExpense}', style: textStyleSmall),
-                          pw.Text('বকেয়া: ৳${report.dueAmount} | বকেয়া পরিশোধ: ৳${report.dueRepaid}', style: textStyleSmall),
-                          pw.Text('উর্ধ্বতন এয়ানত: ৳${report.seniorEyanatPaid} | ধার্যকৃত: ৳${report.assignedAmount}', style: textStyleSmall),
-                        ],
-                      ),
-                    ),
-                  ),
+                  _buildTrainingRow('স্কিলস ডেভেলপমেন্ট প্রোগ্রাম', g('train_skills_count'), g('train_skills_session'), g('train_skills_pres'), g('train_skills_max_min')),
+                  _buildTrainingRow('কর্মশালা', g('train_workshop_count'), g('train_workshop_session'), g('train_workshop_pres'), g('train_workshop_max_min')),
+                  _buildTrainingRow('তরবিয়াতি সফর', g('train_tarbiyath_count'), g('train_tarbiyath_session'), g('train_tarbiyath_pres'), g('train_tarbiyath_max_min')),
+                  _buildTrainingRow('প্রশিক্ষণ চক্র', g('train_cycle_count'), g('train_cycle_session'), g('train_cycle_pres'), g('train_cycle_max_min')),
+                  _buildTrainingRow('শিক্ষা সভা', g('train_education_count'), g('train_education_session'), g('train_education_pres'), g('train_education_max_min')),
+                  _buildTrainingRow('কুরআন ও হাদীস শিক্ষা ক্লাস', g('train_quran_hadith_count'), g('train_quran_hadith_session'), g('train_quran_hadith_pres'), g('train_quran_hadith_max_min')),
+                  _buildTrainingRow('শবগুজারি', g('train_shobgujari_count'), g('train_shobgujari_session'), g('train_shobgujari_pres'), g('train_shobgujari_max_min')),
+                  _buildTrainingRow('জিকির মাহফিল', g('train_zikir_count'), g('train_zikir_session'), g('train_zikir_pres'), g('train_zikir_max_min')),
+                  _buildTrainingRow('সমষ্টিগত অধ্যয়ন', g('train_group_study_count'), g('train_group_study_session'), g('train_group_study_pres'), g('train_group_study_max_min')),
+                  _buildTrainingRow('হাদীস পাঠ', g('train_hadith_path_count'), g('train_hadith_path_session'), g('train_hadith_path_pres'), g('train_hadith_path_max_min')),
+                  _buildTrainingRow('স্পীকার্স/সাংস্কৃতিক ফোরাম', g('train_speakers_count'), g('train_speakers_session'), g('train_speakers_pres'), g('train_speakers_max_min')),
+                  _buildTrainingRow('উন্মুক্ত ক্লাস', g('train_open_class_count'), g('train_open_class_session'), g('train_open_class_pres'), g('train_open_class_max_min')),
                 ],
               ),
-              pw.SizedBox(height: 6),
+              pw.SizedBox(height: 5),
 
-              // সেকশন ৮ & ৯: প্রকাশনা ও ছাত্রকল্যাণ
+              // ৩. পাঠাগার (Library Table & Sub-line)
+              pw.Table(
+                border: pw.TableBorder.all(color: tableBorderColor, width: 0.5),
+                columnWidths: const {
+                  0: pw.FlexColumnWidth(2.5),
+                  1: pw.FlexColumnWidth(2.5),
+                  2: pw.FlexColumnWidth(2.5),
+                },
+                children: [
+                  pw.TableRow(
+                    decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+                    children: [
+                      cellText('পাঠাগার', isBold: true),
+                      cellText('বৃদ্ধি', isBold: true),
+                      cellText('ঘাটতি', isBold: true),
+                    ],
+                  ),
+                  pw.TableRow(children: [
+                    cellText('সংখ্যা', align: pw.TextAlign.left),
+                    cellText(g('lib_shakha_growth')),
+                    cellText(g('lib_shakha_shortage')),
+                  ]),
+                  pw.TableRow(children: [
+                    cellText('বই সংখ্যা', align: pw.TextAlign.left),
+                    cellText(g('lib_book_growth')),
+                    cellText(g('lib_book_shortage')),
+                  ]),
+                ],
+              ),
               pw.Container(
-                padding: const pw.EdgeInsets.all(4),
-                decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400)),
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                decoration: const pw.BoxDecoration(
+                  border: pw.Border(
+                    left: pw.BorderSide(color: tableBorderColor, width: 0.5),
+                    right: pw.BorderSide(color: tableBorderColor, width: 0.5),
+                    bottom: pw.BorderSide(color: tableBorderColor, width: 0.5),
+                  ),
+                ),
+                child: pw.Row(
                   children: [
-                    pw.Text('৮. প্রকাশনা: মোট ক্রয়: ৳${report.pubTotalPurchase} | পরিশোধ: ৳${report.pubRepaid} | বকেয়া: ৳${report.pubDue} | বকেয়া পরিশোধ: ৳${report.pubDueRepaid}', style: textStyleSmall),
-                    pw.SizedBox(height: 2),
-                    pw.Text('৯. ছাত্রকল্যাণ: আয়: ৳${report.welfareIncome} | ব্যয়: ৳${report.welfareExpense} | লজিং: ${report.lodgingCount} | টিউশনি: ${report.tuitionCount} | টেবিল ব্যাংক: ${report.tableBankCount}', style: textStyleSmall),
-                    pw.Text('নোট বিলি: ${report.questionNoteBiliCount} | যাকাত: ৳${report.zakatCollection} | কোচিং/আবাসন: ${report.freeCoachingAccomodationCount} (জন: ${report.freeCoachingPersons}) | রক্তদান: ${report.bloodDonationBags} ব্যাগ', style: textStyleSmall),
+                    pw.Text('পাঠক সংখ্যা : ', style: textStyleTiny),
+                    pw.Text(g('lib_reader_count').isEmpty ? '.......' : g('lib_reader_count'), style: textStyleBoldTiny),
+                    pw.SizedBox(width: 20),
+                    pw.Text('ইস্যুকৃত বই : ', style: textStyleTiny),
+                    pw.Text(g('lib_issued_books').isEmpty ? '.......' : g('lib_issued_books'), style: textStyleBoldTiny),
+                    pw.SizedBox(width: 20),
+                    pw.Text('পঠিত বই : ', style: textStyleTiny),
+                    pw.Text(g('lib_read_books').isEmpty ? '.......' : g('lib_read_books'), style: textStyleBoldTiny),
                   ],
                 ),
               ),
-              pw.SizedBox(height: 6),
+              pw.SizedBox(height: 5),
 
-              // সেকশন ১০ & ১১: যোগাযোগ ও মন্তব্য
+              // ৪. বায়তুলমাল & ৫. প্রকাশনা Box
               pw.Container(
-                padding: const pw.EdgeInsets.all(4),
-                decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400)),
+                padding: const pw.EdgeInsets.all(3),
+                decoration: pw.BoxDecoration(border: pw.Border.all(color: tableBorderColor, width: 0.5)),
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text('১০. যোগাযোগ: সার্কুলার প্রাপ্ত: ${report.circularReceived.count} (কপি: ${report.circularReceived.copyCount}) | সার্কুলার প্রেরিত: ${report.circularSent.count} | চিঠি প্রাপ্ত: ${report.letterReceived.count} | চিঠি প্রেরিত: ${report.letterSent.count}', style: textStyleSmall),
-                    pw.SizedBox(height: 2),
-                    pw.Text('১১. অন্যান্য ছাত্র সংগঠনের তৎপরতা: ${report.otherOrgActivities}', style: textStyleSmall),
-                    pw.Text('বিবিধ: ${report.miscellaneous}', style: textStyleSmall),
-                    pw.Text('মন্তব্য: ${report.remarks}', style: textStyleSmall),
+                    pw.Row(children: [
+                      pw.Text('বায়তুলমাল (আয়-ব্যয়ের বিস্তারিত রিপোর্ট আলাদা কাগজে)  বকেয়াঃ ', style: textStyleTiny),
+                      pw.Text(g('bm_due').isEmpty ? '.........' : g('bm_due'), style: textStyleBoldTiny),
+                      pw.Text('  বকেয়া পরিশোধঃ ', style: textStyleTiny),
+                      pw.Text(g('bm_due_paid').isEmpty ? '.........' : g('bm_due_paid'), style: textStyleBoldTiny),
+                    ]),
+                    pw.SizedBox(height: 1.5),
+                    pw.Row(children: [
+                      pw.Text('মোট আয় : ', style: textStyleTiny),
+                      pw.Text(g('bm_total_income'), style: textStyleBoldTiny),
+                      pw.SizedBox(width: 15),
+                      pw.Text('মোট ব্যয় : ', style: textStyleTiny),
+                      pw.Text(g('bm_total_expense'), style: textStyleBoldTiny),
+                      pw.SizedBox(width: 15),
+                      pw.Text('উর্ধ্বতন ইয়ানত পরিশোধ : ', style: textStyleTiny),
+                      pw.Text(g('bm_senior_paid'), style: textStyleBoldTiny),
+                      pw.SizedBox(width: 15),
+                      pw.Text('ধারকৃত : ', style: textStyleTiny),
+                      pw.Text(g('bm_borrowed'), style: textStyleBoldTiny),
+                    ]),
+                    pw.SizedBox(height: 3),
+                    pw.Row(children: [
+                      pw.Text('প্রকাশনা (বিস্তারিত রিপোর্ট আলাদা কাগজে) : মোট ক্রয়ঃ ', style: textStyleTiny),
+                      pw.Text(g('pub_total_buy'), style: textStyleBoldTiny),
+                      pw.Text('  পরিশোধঃ ', style: textStyleTiny),
+                      pw.Text(g('pub_paid'), style: textStyleBoldTiny),
+                      pw.Text('  বকেয়াঃ ', style: textStyleTiny),
+                      pw.Text(g('pub_due'), style: textStyleBoldTiny),
+                      pw.Text('  বকেয়া পরিশোধঃ ', style: textStyleTiny),
+                      pw.Text(g('pub_due_paid'), style: textStyleBoldTiny),
+                    ]),
                   ],
                 ),
               ),
+              pw.SizedBox(height: 5),
+
+              // ৬. ছাত্রকল্যাণ (Student Welfare Box)
+              pw.Container(
+                padding: const pw.EdgeInsets.all(3),
+                decoration: pw.BoxDecoration(border: pw.Border.all(color: tableBorderColor, width: 0.5)),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Row(children: [
+                      pw.Text('ছাত্রকল্যাণ (আয়-ব্যয়সহ বিস্তারিত রিপোর্ট আলাদা কাগজে)  ', style: textStyleBoldTiny),
+                      pw.Text('মোট আয় : ', style: textStyleTiny),
+                      pw.Text(g('sw_total_income'), style: textStyleBoldTiny),
+                      pw.SizedBox(width: 20),
+                      pw.Text('মোট ব্যয় : ', style: textStyleTiny),
+                      pw.Text(g('sw_total_expense'), style: textStyleBoldTiny),
+                    ]),
+                    pw.SizedBox(height: 2),
+                    pw.Row(children: [
+                      pw.Text('লজিং : ', style: textStyleTiny),
+                      pw.Text(g('sw_lodging'), style: textStyleBoldTiny),
+                      pw.Text(' টি  ', style: textStyleTiny),
+                      pw.Text('টিউশনি : ', style: textStyleTiny),
+                      pw.Text(g('sw_tuition'), style: textStyleBoldTiny),
+                      pw.Text(' টি  ', style: textStyleTiny),
+                      pw.Text('টেবিল/কলসি ব্যাংক : ', style: textStyleTiny),
+                      pw.Text(g('sw_table_bank').isEmpty ? '...../.....' : g('sw_table_bank'), style: textStyleBoldTiny),
+                      pw.Text(' টি  ', style: textStyleTiny),
+                      pw.Text('প্রশ্নপত্র/সাজেশন/নোট বিলি : ', style: textStyleTiny),
+                      pw.Text(g('sw_notes_dist').isEmpty ? '...../.....' : g('sw_notes_dist'), style: textStyleBoldTiny),
+                      pw.Text(' টি', style: textStyleTiny),
+                    ]),
+                    pw.SizedBox(height: 2),
+                    pw.Row(children: [
+                      pw.Text('যাকাত সংগ্রহঃ ', style: textStyleTiny),
+                      pw.Text(g('sw_zakat_collected'), style: textStyleBoldTiny),
+                      pw.Text(' টাকা  ', style: textStyleTiny),
+                      pw.Text('ল্যাঙ্গুয়েজ লাইব্রেরি :  বই বৃদ্ধি : ', style: textStyleTiny),
+                      pw.Text(g('sw_lang_lib_books'), style: textStyleBoldTiny),
+                      pw.Text(' টি  ঘাটতি : ', style: textStyleTiny),
+                      pw.Text(g('sw_lang_lib_shortage'), style: textStyleBoldTiny),
+                      pw.Text(' জন  ', style: textStyleTiny),
+                      pw.Text('একাডেমিক/ভর্তি কোচিংঃ ', style: textStyleTiny),
+                      pw.Text(g('sw_coaching').isEmpty ? '...../.....' : g('sw_coaching'), style: textStyleBoldTiny),
+                      pw.Text(' টি', style: textStyleTiny),
+                    ]),
+                    pw.SizedBox(height: 2),
+                    pw.Row(children: [
+                      pw.Text('ফ্রি কোচিং/আবাসন ব্যবস্থা : ', style: textStyleTiny),
+                      pw.Text(g('sw_free_coaching'), style: textStyleBoldTiny),
+                      pw.Text(' টি  জন/ বৃদ্ধি : ', style: textStyleTiny),
+                      pw.Text(g('sw_free_coaching_people_growth'), style: textStyleBoldTiny),
+                      pw.Text('  ঘাটতি : ', style: textStyleTiny),
+                      pw.Text(g('sw_free_coaching_shortage'), style: textStyleBoldTiny),
+                      pw.Text(' জন  ', style: textStyleTiny),
+                      pw.Text('স্টাইপেন্ড চালু হয়েছে : ', style: textStyleTiny),
+                      pw.Text(g('sw_stipend_count'), style: textStyleBoldTiny),
+                      pw.Text(' টি  ', style: textStyleTiny),
+                      pw.Text('রক্ত দানঃ ', style: textStyleTiny),
+                      pw.Text(g('sw_blood_bags'), style: textStyleBoldTiny),
+                      pw.Text(' ব্যাগ', style: textStyleTiny),
+                    ]),
+                    pw.SizedBox(height: 2),
+                    pw.Row(children: [
+                      pw.Text('ভর্তি গাইড প্রকাশ/সহযোগিতা : ', style: textStyleTiny),
+                      pw.Text(g('sw_guide_pub').isEmpty ? '...../.....' : g('sw_guide_pub'), style: textStyleBoldTiny),
+                      pw.Text(' টি  ', style: textStyleTiny),
+                      pw.Text('ভর্তিকালীন সহযোগিতা করা হয়েছে : ', style: textStyleTiny),
+                      pw.Text(g('sw_admission_help'), style: textStyleBoldTiny),
+                      pw.Text(' জনকে  ', style: textStyleTiny),
+                      pw.Text('অন্যান্য : (আলাদা কাগজে)', style: textStyleTiny),
+                    ]),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 3),
+
+              // ৭. সফর & অতিরিক্ত তথ্যাবলী
+              pw.Text('সফর (আলাদা কাগজে)', style: textStyleTiny),
+              pw.Text('অন্যান্য ছাত্র সংগঠনের তৎপরতা (আলাদা কাগজে)', style: textStyleTiny),
+              pw.Text('বিবিধ (আলাদা কাগজে)', style: textStyleTiny),
+              pw.SizedBox(height: 3),
+
+              // ৮. মন্তব্য (Remarks Box)
+              pw.Text('মন্তব্য (গৃহীত পরিকল্পনার আলোকে, সমস্যা ও সম্ভাবনা উল্লেখ করে)', style: textStyleBoldTiny),
+              pw.SizedBox(height: 1),
+              pw.Container(
+                width: double.infinity,
+                height: 32,
+                padding: const pw.EdgeInsets.all(3),
+                decoration: pw.BoxDecoration(border: pw.Border.all(color: tableBorderColor, width: 0.5)),
+                child: pw.Text(
+                  g('remarks').isEmpty ? '................................................................................................................................................................' : g('remarks'),
+                  style: textStyleTiny,
+                ),
+              ),
+
               pw.Spacer(),
 
-              // স্বাক্ষর
+              // স্বাক্ষর (Footer Signature)
               pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: pw.MainAxisAlignment.end,
                 children: [
-                  pw.Text('তারিখ: ${report.presidentSignatureDate}', style: textStyleSmall),
                   pw.Column(
                     children: [
-                      pw.Container(width: 100, height: 1, color: PdfColors.black),
+                      pw.Container(width: 110, height: 0.5, color: PdfColors.black),
                       pw.SizedBox(height: 2),
                       pw.Text('সভাপতির স্বাক্ষর', style: textStyleBoldSmall),
                     ],
@@ -365,10 +789,64 @@ class StudentPeriodPdfService {
       ),
     );
 
-    // PDF প্রদর্শন ও প্রিন্ট
+    return pdf.save();
+  }
+
+  static Future<void> generateAndPrintPdf({
+    required String branch,
+    required String month,
+    required String session,
+    Map<String, String>? formData,
+    PeriodReportModel? report,
+  }) async {
+    final pdfBytes = await generatePdfBytes(
+      branch: branch,
+      month: month,
+      session: session,
+      formData: formData,
+      report: report,
+    );
+
     await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save(),
-      name: '${report.periodType}_রিপোর্ট_${report.periodName}.pdf',
+      onLayout: (PdfPageFormat format) async => pdfBytes,
+      name: 'ছাত্র_মজলিস_রিপোর্ট_${month}_$session.pdf',
+    );
+  }
+
+  static pw.TableRow _buildOrgTableRow(
+    String label1,
+    String val1,
+    String label2,
+    String val2,
+    String val3,
+    pw.Font fontRegular,
+    pw.Font fontBold, {
+    bool isSectionHeader = false,
+  }) {
+    final style1 = pw.TextStyle(font: isSectionHeader ? fontBold : fontRegular, fontSize: 6.8);
+    final styleVal = pw.TextStyle(font: fontRegular, fontSize: 6.8);
+    return pw.TableRow(
+      decoration: isSectionHeader ? const pw.BoxDecoration(color: PdfColors.grey100) : null,
+      children: [
+        pw.Padding(padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1), child: pw.Text(label1, style: style1)),
+        pw.Padding(padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1), child: pw.Text(val1, textAlign: pw.TextAlign.center, style: styleVal)),
+        pw.Padding(padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1), child: pw.Text(label2, style: styleVal)),
+        pw.Padding(padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1), child: pw.Text(val2, style: styleVal)),
+        pw.Padding(padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1), child: pw.Text(val3, style: styleVal)),
+      ],
+    );
+  }
+
+  static pw.TableRow _buildTrainingRow(String label, String c, String s, String p, String m) {
+    final style = const pw.TextStyle(fontSize: 6.8);
+    return pw.TableRow(
+      children: [
+        pw.Padding(padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1), child: pw.Text(label, style: style)),
+        pw.Padding(padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1), child: pw.Text(c, textAlign: pw.TextAlign.center, style: style)),
+        pw.Padding(padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1), child: pw.Text(s, textAlign: pw.TextAlign.center, style: style)),
+        pw.Padding(padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1), child: pw.Text(p, textAlign: pw.TextAlign.center, style: style)),
+        pw.Padding(padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1), child: pw.Text(m, textAlign: pw.TextAlign.center, style: style)),
+      ],
     );
   }
 }

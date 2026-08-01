@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../common/widgets/custom_labeled_input_field.dart';
 import '../bloc/baytulmal_report_bloc.dart';
 import '../bloc/baytulmal_report_event.dart';
 import '../bloc/baytulmal_report_state.dart';
@@ -139,16 +140,10 @@ class _BaytulmalReportPageState extends State<BaytulmalReportPage> {
   }
 
   Widget _buildTextField(String label, TextEditingController controller, {bool isNumber = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
-      ),
+    return CustomLabeledInputField(
+      label: label,
+      controller: controller,
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
     );
   }
 

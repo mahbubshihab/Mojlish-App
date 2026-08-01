@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../common/widgets/custom_labeled_input_field.dart';
 import '../bloc/member_form_bloc.dart';
 import '../bloc/member_form_event.dart';
 import '../bloc/member_form_state.dart';
@@ -97,64 +98,56 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'নাম',
                     controller: _nameController,
-                    decoration: const InputDecoration(labelText: 'নাম'),
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'নাম লিখুন' : null,
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'পিতা',
                     controller: _fatherNameController,
-                    decoration: const InputDecoration(labelText: 'পিতা'),
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'পিতার নাম লিখুন' : null,
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'জাতীয় পরিচয়পত্র নং',
                     controller: _nidController,
-                    decoration: const InputDecoration(labelText: 'জাতীয় পরিচয়পত্র নং'),
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    keyboardType: TextInputType.number,
+                    validator: (v) => v == null || v.isEmpty ? 'জাতীয় পরিচয়পত্র নং লিখুন' : null,
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'ঠিকানা: গ্রাম',
                     controller: _villageController,
-                    decoration: const InputDecoration(labelText: 'ঠিকানা: গ্রাম'),
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'গ্রাম লিখুন' : null,
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'ইউনিয়ন',
                     controller: _unionController,
-                    decoration: const InputDecoration(labelText: 'ইউনিয়ন'),
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'ইউনিয়ন লিখুন' : null,
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'থানা ও উপজেলা',
                     controller: _thanaUpazilaController,
-                    decoration: const InputDecoration(labelText: 'থানা ও উপজেলা'),
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'থানা/উপজেলা লিখুন' : null,
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'জেলা',
                     controller: _districtController,
-                    decoration: const InputDecoration(labelText: 'জেলা'),
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'জেলা লিখুন' : null,
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'বর্তমান ঠিকানা',
                     controller: _presentAddressController,
-                    decoration: const InputDecoration(labelText: 'বর্তমান ঠিকানা'),
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'বর্তমান ঠিকানা লিখুন' : null,
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'মোবাইল',
                     controller: _mobileController,
-                    decoration: const InputDecoration(labelText: 'মোবাইল'),
                     keyboardType: TextInputType.phone,
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'মোবাইল নম্বর লিখুন' : null,
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
+                  CustomLabeledInputField(
+                    label: 'ইমেইল',
                     controller: _emailController,
-                    decoration: const InputDecoration(labelText: 'ইমেইল'),
                     keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 24),

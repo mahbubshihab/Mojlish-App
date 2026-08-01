@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../common/widgets/custom_labeled_input_field.dart';
 import '../bloc/women_majlis_personal_report_bloc.dart';
 import '../bloc/women_majlis_personal_report_event.dart';
 import '../bloc/women_majlis_personal_report_state.dart';
@@ -47,21 +48,21 @@ class WomenMajlisPersonalReportScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextFormField(
+          CustomLabeledInputField(
+            label: 'কর্মীর নাম',
             initialValue: state.report.workerName,
-            decoration: const InputDecoration(labelText: 'কর্মীর নাম'),
           ),
-          TextFormField(
+          CustomLabeledInputField(
+            label: 'শাখা',
             initialValue: state.report.branch,
-            decoration: const InputDecoration(labelText: 'শাখা'),
           ),
-          TextFormField(
+          CustomLabeledInputField(
+            label: 'মাস',
             initialValue: state.report.month,
-            decoration: const InputDecoration(labelText: 'মাস'),
           ),
-          TextFormField(
+          CustomLabeledInputField(
+            label: 'সন',
             initialValue: state.report.year,
-            decoration: const InputDecoration(labelText: 'সন'),
           ),
           const SizedBox(height: 20),
           const Text('দৈনিক রিপোর্ট', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
@@ -98,18 +99,19 @@ class WomenMajlisPersonalReportScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          TextFormField(
+          CustomLabeledInputField(
+            label: 'এ মাসে সভায় যোগদান (টি)',
             initialValue: state.report.meetingsAttendedThisMonth.toString(),
-            decoration: const InputDecoration(labelText: 'এ মাসে সভায় যোগদান (টি)'),
             keyboardType: TextInputType.number,
           ),
-          TextFormField(
+          CustomLabeledInputField(
+            label: 'সভার নাম',
             initialValue: state.report.meetingName,
-            decoration: const InputDecoration(labelText: 'সভার নাম'),
           ),
-          TextFormField(
+          CustomLabeledInputField(
+            label: 'শাখা দায়িত্বশীলের মন্তব্য ও পরামর্শ',
             initialValue: state.report.branchResponsibleComment,
-            decoration: const InputDecoration(labelText: 'শাখা দায়িত্বশীলের মন্তব্য ও পরামর্শ'),
+            maxLines: 3,
           ),
           const SizedBox(height: 20),
           ElevatedButton(

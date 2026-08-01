@@ -186,6 +186,25 @@ class PdfExportService {
   static const String chatroCentralAddress =
       'কেন্দ্রীয় কার্যালয়: ১৬ বিজয়নগর, (৫ম তলা), ঢাকা-১০০০ | ফোন: ৯৫৮৫৩২১';
 
+  /// Standard PDF Text Widget Helper
+  static pw.Widget bWidget(
+    String text, {
+    double fontSize = 9,
+    pw.FontWeight fontWeight = pw.FontWeight.normal,
+    pw.TextAlign textAlign = pw.TextAlign.left,
+    PdfColor color = PdfColors.black,
+  }) {
+    return pw.Text(
+      text,
+      textAlign: textAlign,
+      style: pw.TextStyle(
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        color: color,
+      ),
+    );
+  }
+
   /// Resolves standard minimal theme color matching the logo
   static PdfColor getAccentColor(String? majlisName, String? logoPath) {
     if (majlisName != null && (majlisName.contains('যুব') || majlisName.contains('ছাত্র'))) {
@@ -998,28 +1017,28 @@ class PdfExportService {
                     pw.SizedBox(height: 6),
                     pw.Text(b('জাতীয় পরিচয়পত্র নং : ${nidNumber.isNotEmpty ? nidNumber : "...................................................................................................................."}'), style: const pw.TextStyle(fontSize: 10)),
                     pw.SizedBox(height: 6),
-                    pw.Text(b('ঠিকানা : গ্রাম : ${village.isNotEmpty ? village : "...................................................................................................................."}'), style: const pw.TextStyle(fontSize: 10)),
+                    pw.Text('ঠিকানা : গ্রাম : ${village.isNotEmpty ? village : "...................................................................................................................."}', style: const pw.TextStyle(fontSize: 10)),
                     pw.SizedBox(height: 6),
                     pw.Row(
                       children: [
-                        pw.Expanded(child: pw.Text(b('ইউনিয়ন : ${unionName.isNotEmpty ? unionName : "........................................"}'), style: const pw.TextStyle(fontSize: 10))),
-                        pw.Expanded(child: pw.Text(b('থানা ও উপজেলা : ${thanaUpazila.isNotEmpty ? thanaUpazila : "........................................"}'), style: const pw.TextStyle(fontSize: 10))),
+                        pw.Expanded(child: pw.Text('ইউনিয়ন : ${unionName.isNotEmpty ? unionName : "........................................"}', style: const pw.TextStyle(fontSize: 10))),
+                        pw.Expanded(child: pw.Text('থানা ও উপজেলা : ${thanaUpazila.isNotEmpty ? thanaUpazila : "........................................"}', style: const pw.TextStyle(fontSize: 10))),
                       ],
                     ),
                     pw.SizedBox(height: 6),
-                    pw.Text(b('জেলা : ${district.isNotEmpty ? district : "...................................................................................................................."}'), style: const pw.TextStyle(fontSize: 10)),
+                    pw.Text('জেলা : ${district.isNotEmpty ? district : "...................................................................................................................."}', style: const pw.TextStyle(fontSize: 10)),
                     pw.SizedBox(height: 6),
-                    pw.Text(b('বর্তমান ঠিকানা : ${presentAddress.isNotEmpty ? presentAddress : "...................................................................................................................."}'), style: const pw.TextStyle(fontSize: 10)),
+                    pw.Text('বর্তমান ঠিকানা : ${presentAddress.isNotEmpty ? presentAddress : "...................................................................................................................."}', style: const pw.TextStyle(fontSize: 10)),
                     pw.SizedBox(height: 6),
-                    pw.Text(b('মোবাইল : ${mobile.isNotEmpty ? mobile : "...................................................................................................................."}'), style: const pw.TextStyle(fontSize: 10)),
+                    pw.Text('মোবাইল : ${mobile.isNotEmpty ? mobile : "...................................................................................................................."}', style: const pw.TextStyle(fontSize: 10)),
                     pw.SizedBox(height: 6),
-                    pw.Text(b('ইমেইল : ${email.isNotEmpty ? email : "...................................................................................................................."}'), style: const pw.TextStyle(fontSize: 10)),
+                    pw.Text('ইমেইল : ${email.isNotEmpty ? email : "...................................................................................................................."}', style: const pw.TextStyle(fontSize: 10)),
                     pw.SizedBox(height: 12),
                     pw.Row(
                       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                       children: [
-                        pw.Text(b('যোগদানের তারিখ : ${joinDate.isNotEmpty ? joinDate : "....................."}'), style: const pw.TextStyle(fontSize: 9.5)),
-                        pw.Text(b('স্বাক্ষর : .....................'), style: const pw.TextStyle(fontSize: 9.5)),
+                        pw.Text('যোগদানের তারিখ : ${joinDate.isNotEmpty ? joinDate : "....................."}', style: const pw.TextStyle(fontSize: 9.5)),
+                        pw.Text('স্বাক্ষর : .....................', style: const pw.TextStyle(fontSize: 9.5)),
                       ],
                     ),
                   ],
@@ -1045,10 +1064,10 @@ class PdfExportService {
                           child: pw.Column(
                             crossAxisAlignment: pw.CrossAxisAlignment.center,
                             children: [
-                              pw.Text(b('বিসমিল্লাহির রাহমানির রাহিম'), style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+                              pw.Text('বিসমিল্লাহির রাহমানির রাহিম', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
                               pw.SizedBox(height: 2),
-                              pw.Text(b('ইসলামী যুব মজলিস'), style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900)),
-                              pw.Text(b('১৬, বিজয়নগর, (৫ম তলা), পুরানা পল্টন, ঢাকা-১০<ctrl42> | http://islamijubomajlis.org'), style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey800)),
+                              pw.Text('ইসলামী যুব মজলিস', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900)),
+                              pw.Text('১৬, বিজয়নগর, (৫ম তলা), পুরানা পল্টন, ঢাকা-১০০০ | http://islamijubomajlis.org', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey800)),
                             ],
                           ),
                         ),
@@ -1065,7 +1084,7 @@ class PdfExportService {
                             color: PdfColors.green800,
                             borderRadius: pw.BorderRadius.circular(12),
                           ),
-                          child: pw.Text(b('প্রাথমিক সদস্য ফরম'), style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
+                          child: pw.Text('প্রাথমিক সদস্য ফরম', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
                         ),
                       ],
                     ),
@@ -1073,13 +1092,13 @@ class PdfExportService {
                     pw.Align(
                       alignment: pw.Alignment.centerLeft,
                       child: pw.Text(
-                        b('আমি ${name.isNotEmpty ? name : "...................................................................................................."} দৃঢ়ভাবে বিশ্বাস করি যে,'),
+                        'আমি ${name.isNotEmpty ? name : "...................................................................................................."} দৃঢ়ভাবে বিশ্বাস করি যে,',
                         style: const pw.TextStyle(fontSize: 10.5),
                       ),
                     ),
                     pw.SizedBox(height: 6),
                     pw.Text(
-                      b('ইসলামই আল্লাহর একমাত্র মনোনীত জীবনব্যবস্থা। ইসলামী আদর্শের আলোকে যুবসমাজের নেতৃত্বে একটি কল্যাণমুখী সমাজ গড়ার লক্ষ্যে ইসলামী যুব মজলিসের সাথে একমত হয়ে এ সংগঠনে যোগদান করছি।'),
+                      'ইসলামই আল্লাহর একমাত্র মনোনীত জীবনব্যবস্থা। ইসলামী আদর্শের আলোকে যুবসমাজের নেতৃত্বে একটি কল্যাণমুখী সমাজ গড়ার লক্ষ্যে ইসলামী যুব মজলিসের সাথে একমত হয়ে এ সংগঠনে যোগদান করছি।',
                       textAlign: pw.TextAlign.justify,
                       style: const pw.TextStyle(fontSize: 10, lineSpacing: 1.3),
                     ),
@@ -1087,7 +1106,7 @@ class PdfExportService {
                     pw.Align(
                       alignment: pw.Alignment.centerLeft,
                       child: pw.Text(
-                        b('আমি এ লক্ষ্য অর্জনে যথাসাধ্য চেষ্টা করবো ইনশাআল্লাহ।'),
+                        'আমি এ লক্ষ্য অর্জনে যথাসাধ্য চেষ্টা করবো ইনশাআল্লাহ।',
                         style: const pw.TextStyle(fontSize: 10),
                       ),
                     ),
@@ -1095,8 +1114,8 @@ class PdfExportService {
                     pw.Row(
                       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                       children: [
-                        pw.Text(b('তারিখ : ${joinDate.isNotEmpty ? joinDate : "....................."}'), style: const pw.TextStyle(fontSize: 9.5)),
-                        pw.Text(b('স্বাক্ষর : .....................'), style: const pw.TextStyle(fontSize: 9.5)),
+                        pw.Text('তারিখ : ${joinDate.isNotEmpty ? joinDate : "....................."}', style: const pw.TextStyle(fontSize: 9.5)),
+                        pw.Text('স্বাক্ষর : .....................', style: const pw.TextStyle(fontSize: 9.5)),
                       ],
                     ),
                   ],
@@ -1210,9 +1229,9 @@ class PdfExportService {
             crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
               // Top Header
-              b('বিসমিল্লাহির রাহমানির রাহীম', fontSize: 9.5),
+              bWidget('বিসমিল্লাহির রাহমানির রাহীম', fontSize: 9.5),
               pw.SizedBox(height: 2),
-              b('শাখার বায়তুলমাল রিপোর্ট ফরম', fontSize: 13, fontWeight: pw.FontWeight.bold),
+              bWidget('শাখার বায়তুলমাল রিপোর্ট ফরম', fontSize: 13, fontWeight: pw.FontWeight.bold),
               pw.SizedBox(height: 4),
 
               // Logo + Organization Name
@@ -1224,11 +1243,11 @@ class PdfExportService {
                     pw.Image(logoImage, width: 34, height: 34),
                     pw.SizedBox(width: 8),
                   ],
-                  b('খেলাফত মজলিস', fontSize: 22, fontWeight: pw.FontWeight.bold),
+                  bWidget('খেলাফত মজলিস', fontSize: 22, fontWeight: pw.FontWeight.bold),
                 ],
               ),
               pw.SizedBox(height: 2),
-              b('কেন্দ্রীয় কার্যালয়: ১৬ পুরানা পল্টন, (২য় তলা), ঢাকা-১০০০। ফোন: ৯৫৫৮৫২১', fontSize: 8.5),
+              bWidget('কেন্দ্রীয় কার্যালয়: ১৬ পুরানা পল্টন, (২য় তলা), ঢাকা-১০০০। ফোন: ৯৫৫৮৫২১', fontSize: 8.5),
               pw.SizedBox(height: 10),
 
               // Info Row Box: শাখা, মাস, সন
@@ -1240,9 +1259,9 @@ class PdfExportService {
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    b('শাখা: ${entry.branchName.isEmpty ? "........................" : entry.branchName}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
-                    b('মাস: ${entry.month.isEmpty ? "........................" : entry.month}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
-                    b('সন: ${entry.year.isEmpty ? "........................" : entry.year}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
+                    bWidget('শাখা: ${entry.branchName.isEmpty ? "........................" : entry.branchName}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
+                    bWidget('মাস: ${entry.month.isEmpty ? "........................" : entry.month}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
+                    bWidget('সন: ${entry.year.isEmpty ? "........................" : entry.year}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
                   ],
                 ),
               ),
@@ -1254,7 +1273,7 @@ class PdfExportService {
                 color: PdfColors.grey300,
                 padding: const pw.EdgeInsets.symmetric(vertical: 4),
                 alignment: pw.Alignment.center,
-                child: b('আয়', fontSize: 11, fontWeight: pw.FontWeight.bold),
+                child: bWidget('আয়', fontSize: 11, fontWeight: pw.FontWeight.bold),
               ),
               pw.Table(
                 border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
@@ -1268,9 +1287,9 @@ class PdfExportService {
                   pw.TableRow(
                     decoration: const pw.BoxDecoration(color: PdfColors.grey100),
                     children: [
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: b('আয়ের উৎস', fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: b('টাকা', fontSize: 9.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center)),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: b('পয়সা', fontSize: 9.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center)),
+                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: bWidget('আয়ের উৎস', fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: bWidget('টাকা', fontSize: 9.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center)),
+                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: bWidget('পয়সা', fontSize: 9.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center)),
                     ],
                   ),
                   _buildKhelafatBaytulmalTableRow('নির্বাহী সদস্যদের ইয়ানত (নির্বাহী সদস্য সংখ্যা: ${entry.executiveMemberAyanat.isEmpty ? "____" : entry.executiveMemberAyanat} জন)', entry.executiveMemberAyanatTaka),
@@ -1287,7 +1306,7 @@ class PdfExportService {
               pw.SizedBox(height: 4),
               pw.Align(
                 alignment: pw.Alignment.centerLeft,
-                child: b('কথায়: ${incomeInWords ?? "........................................................................................................"}', fontSize: 9),
+                child: bWidget('কথায়: ${incomeInWords ?? "........................................................................................................"}', fontSize: 9),
               ),
               pw.SizedBox(height: 10),
 
@@ -1297,7 +1316,7 @@ class PdfExportService {
                 color: PdfColors.grey300,
                 padding: const pw.EdgeInsets.symmetric(vertical: 4),
                 alignment: pw.Alignment.center,
-                child: b('ব্যয়', fontSize: 11, fontWeight: pw.FontWeight.bold),
+                child: bWidget('ব্যয়', fontSize: 11, fontWeight: pw.FontWeight.bold),
               ),
               pw.Table(
                 border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
@@ -1311,9 +1330,9 @@ class PdfExportService {
                   pw.TableRow(
                     decoration: const pw.BoxDecoration(color: PdfColors.grey100),
                     children: [
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: b('ব্যয়ের খাত', fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: b('টাকা', fontSize: 9.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center)),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: b('পয়সা', fontSize: 9.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center)),
+                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: bWidget('ব্যয়ের খাত', fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: bWidget('টাকা', fontSize: 9.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center)),
+                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: bWidget('পয়সা', fontSize: 9.5, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center)),
                     ],
                   ),
                   _buildKhelafatBaytulmalTableRow('উর্ধ্বতন ইয়ানত পরিশোধ (মাসিক ধার্যকৃত: ${entry.upwardAyanat.isEmpty ? "____" : entry.upwardAyanat} টাকা)', entry.upwardAyanatTaka),
@@ -1335,7 +1354,7 @@ class PdfExportService {
               pw.SizedBox(height: 4),
               pw.Align(
                 alignment: pw.Alignment.centerLeft,
-                child: b('কথায়: ${expenseInWords ?? "........................................................................................................"}', fontSize: 9),
+                child: bWidget('কথায়: ${expenseInWords ?? "........................................................................................................"}', fontSize: 9),
               ),
 
               pw.Spacer(),
@@ -1345,9 +1364,9 @@ class PdfExportService {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
-                  b('তারিখ: ...........................................', fontSize: 9.5),
-                  b('বায়তুলমাল সম্পাদকের স্বাক্ষর', fontSize: 9.5, fontWeight: pw.FontWeight.bold),
-                  b('সভাপতির স্বাক্ষর', fontSize: 9.5, fontWeight: pw.FontWeight.bold),
+                  bWidget('তারিখ: ...........................................', fontSize: 9.5),
+                  bWidget('বায়তুলমাল সম্পাদকের স্বাক্ষর', fontSize: 9.5, fontWeight: pw.FontWeight.bold),
+                  bWidget('সভাপতির স্বাক্ষর', fontSize: 9.5, fontWeight: pw.FontWeight.bold),
                 ],
               ),
               pw.SizedBox(height: 6),
@@ -1365,15 +1384,15 @@ class PdfExportService {
       children: [
         pw.Padding(
           padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 2.5),
-          child: b(label, fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal),
+          child: bWidget(label, fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 2.5),
-          child: b(takaVal, fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal, textAlign: pw.TextAlign.center),
+          child: bWidget(takaVal, fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal, textAlign: pw.TextAlign.center),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 2.5),
-          child: b(takaVal.isNotEmpty ? '০০' : '', fontSize: 9, textAlign: pw.TextAlign.center),
+          child: bWidget(takaVal.isNotEmpty ? '০০' : '', fontSize: 9, textAlign: pw.TextAlign.center),
         ),
       ],
     );

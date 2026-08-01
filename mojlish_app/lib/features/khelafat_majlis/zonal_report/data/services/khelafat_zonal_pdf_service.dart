@@ -39,9 +39,9 @@ class KhelafatZonalPdfService {
             crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
               // Header
-              PdfExportService.b('বিসমিল্লাহির রাহমানির রাহীম', fontSize: 9.5),
+              PdfExportService.bWidget('বিসমিল্লাহির রাহমানির রাহীম', fontSize: 9.5),
               pw.SizedBox(height: 2),
-              PdfExportService.b('জোনাল রিপোর্ট ফরম', fontSize: 14, fontWeight: pw.FontWeight.bold),
+              PdfExportService.bWidget('জোনাল রিপোর্ট ফরম', fontSize: 14, fontWeight: pw.FontWeight.bold),
               pw.SizedBox(height: 4),
 
               // Logo + Organization Name
@@ -53,11 +53,11 @@ class KhelafatZonalPdfService {
                     pw.Image(logoImage, width: 34, height: 34),
                     pw.SizedBox(width: 8),
                   ],
-                  PdfExportService.b('খেলাফত মজলিস', fontSize: 22, fontWeight: pw.FontWeight.bold),
+                  PdfExportService.bWidget('খেলাফত মজলিস', fontSize: 22, fontWeight: pw.FontWeight.bold),
                 ],
               ),
               pw.SizedBox(height: 2),
-              PdfExportService.b('কেন্দ্রীয় কার্যালয়: ১৬, বিজয়নগর (৫ম তলা), ঢাকা-১০০০, ফোন: ০২-৯৫৮৫৩২১', fontSize: 8.5),
+              PdfExportService.bWidget('কেন্দ্রীয় কার্যালয়: ১৬, বিজয়নগর (৫ম তলা), ঢাকা-১০০০, ফোন: ০২-৯৫৮৫৩২১', fontSize: 8.5),
               pw.SizedBox(height: 10),
 
               // Info Box: জোন, মাস, সন
@@ -67,9 +67,9 @@ class KhelafatZonalPdfService {
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    PdfExportService.b('জোন: ${entry.zoneName.isEmpty ? "........................" : entry.zoneName}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
-                    PdfExportService.b('মাস: ${entry.month.isEmpty ? "........................" : entry.month}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
-                    PdfExportService.b('সন: ${entry.year.isEmpty ? "........................" : entry.year}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
+                    PdfExportService.bWidget('জোন: ${entry.zoneName.isEmpty ? "........................" : entry.zoneName}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
+                    PdfExportService.bWidget('মাস: ${entry.month.isEmpty ? "........................" : entry.month}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
+                    PdfExportService.bWidget('সন: ${entry.year.isEmpty ? "........................" : entry.year}', fontSize: 10.5, fontWeight: pw.FontWeight.bold),
                   ],
                 ),
               ),
@@ -121,7 +121,7 @@ class KhelafatZonalPdfService {
               _buildSectionHeader('সভা/প্রশিক্ষণ'),
               pw.Row(
                 children: [
-                  Expanded(
+                  pw.Expanded(
                     child: pw.Table(
                       border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
                       columnWidths: const {
@@ -137,7 +137,7 @@ class KhelafatZonalPdfService {
                     ),
                   ),
                   pw.SizedBox(width: 6),
-                  Expanded(
+                  pw.Expanded(
                     child: pw.Table(
                       border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey700),
                       columnWidths: const {
@@ -180,7 +180,7 @@ class KhelafatZonalPdfService {
               pw.Spacer(),
               pw.Align(
                 alignment: pw.Alignment.bottomRight,
-                child: PdfExportService.b('অপর পৃষ্ঠায় দ্রষ্টব্য', fontSize: 9.5, fontWeight: pw.FontWeight.bold),
+                child: PdfExportService.bWidget('অপর পৃষ্ঠায় দ্রষ্টব্য', fontSize: 9.5, fontWeight: pw.FontWeight.bold),
               ),
             ],
           );
@@ -216,13 +216,13 @@ class KhelafatZonalPdfService {
                       pw.Container(
                         alignment: pw.Alignment.center,
                         padding: const pw.EdgeInsets.all(3),
-                        child: PdfExportService.b('আয়', fontSize: 10, fontWeight: pw.FontWeight.bold),
+                        child: PdfExportService.bWidget('আয়', fontSize: 10, fontWeight: pw.FontWeight.bold),
                       ),
                       pw.Container(), pw.Container(),
                       pw.Container(
                         alignment: pw.Alignment.center,
                         padding: const pw.EdgeInsets.all(3),
-                        child: PdfExportService.b('ব্যয়', fontSize: 10, fontWeight: pw.FontWeight.bold),
+                        child: PdfExportService.bWidget('ব্যয়', fontSize: 10, fontWeight: pw.FontWeight.bold),
                       ),
                       pw.Container(), pw.Container(),
                     ],
@@ -245,16 +245,16 @@ class KhelafatZonalPdfService {
                 padding: const pw.EdgeInsets.all(10),
                 decoration: pw.BoxDecoration(
                   border: pw.Border.all(color: PdfColors.grey500, width: 0.5),
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: pw.BorderRadius.circular(4),
                 ),
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    PdfExportService.b('১ । শাখা রিপোর্ট জমা হয়েছে: ${entry.shakhaReportSubmitted.isEmpty ? "........" : entry.shakhaReportSubmitted} টি;  শাখার নাম- ....................................................', fontSize: 9.5),
+                    PdfExportService.bWidget('১ । শাখা রিপোর্ট জমা হয়েছে: ${entry.shakhaReportSubmitted.isEmpty ? "........" : entry.shakhaReportSubmitted} টি;  শাখার নাম- ....................................................', fontSize: 9.5),
                     pw.SizedBox(height: 6),
-                    PdfExportService.b('২ । শাখা পরিকল্পনা জমা হয়েছে: ${entry.shakhaPlanSubmitted.isEmpty ? "........" : entry.shakhaPlanSubmitted} টি;  শাখার নাম- ....................................................', fontSize: 9.5),
+                    PdfExportService.bWidget('২ । শাখা পরিকল্পনা জমা হয়েছে: ${entry.shakhaPlanSubmitted.isEmpty ? "........" : entry.shakhaPlanSubmitted} টি;  শাখার নাম- ....................................................', fontSize: 9.5),
                     pw.SizedBox(height: 6),
-                    PdfExportService.b('৩ । শাখা বায়তুলমাল জমা হয়েছে: ${entry.shakhaBaytulmalSubmitted.isEmpty ? "........" : entry.shakhaBaytulmalSubmitted} টি;  শাখার নাম- ....................................................', fontSize: 9.5),
+                    PdfExportService.bWidget('৩ । শাখা বায়তুলমাল জমা হয়েছে: ${entry.shakhaBaytulmalSubmitted.isEmpty ? "........" : entry.shakhaBaytulmalSubmitted} টি;  শাখার নাম- ....................................................', fontSize: 9.5),
                   ],
                 ),
               ),
@@ -263,7 +263,7 @@ class KhelafatZonalPdfService {
               // মন্তব্য
               pw.Align(
                 alignment: pw.Alignment.centerLeft,
-                child: PdfExportService.b('মন্তব্য:', fontSize: 10, fontWeight: pw.FontWeight.bold),
+                child: PdfExportService.bWidget('মন্তব্য:', fontSize: 10, fontWeight: pw.FontWeight.bold),
               ),
               pw.SizedBox(height: 4),
               pw.Container(
@@ -271,14 +271,14 @@ class KhelafatZonalPdfService {
                 height: 60,
                 padding: const pw.EdgeInsets.all(6),
                 decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey500, width: 0.5)),
-                child: PdfExportService.b(entry.remarks.isEmpty ? '........................................................................................................................................................' : entry.remarks, fontSize: 9.5),
+                child: PdfExportService.bWidget(entry.remarks.isEmpty ? '........................................................................................................................................................' : entry.remarks, fontSize: 9.5),
               ),
               pw.SizedBox(height: 14),
 
               // পরামর্শ
               pw.Align(
                 alignment: pw.Alignment.centerLeft,
-                child: PdfExportService.b('পরামর্শ:', fontSize: 10, fontWeight: pw.FontWeight.bold),
+                child: PdfExportService.bWidget('পরামর্শ:', fontSize: 10, fontWeight: pw.FontWeight.bold),
               ),
               pw.SizedBox(height: 4),
               pw.Container(
@@ -286,7 +286,7 @@ class KhelafatZonalPdfService {
                 height: 60,
                 padding: const pw.EdgeInsets.all(6),
                 decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey500, width: 0.5)),
-                child: PdfExportService.b(entry.suggestions.isEmpty ? '........................................................................................................................................................' : entry.suggestions, fontSize: 9.5),
+                child: PdfExportService.bWidget(entry.suggestions.isEmpty ? '........................................................................................................................................................' : entry.suggestions, fontSize: 9.5),
               ),
 
               pw.Spacer(),
@@ -295,12 +295,12 @@ class KhelafatZonalPdfService {
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  PdfExportService.b('তারিখ: ...........................................', fontSize: 9.5),
-                  PdfExportService.b('জোন পরিচালকের স্বাক্ষর', fontSize: 9.5, fontWeight: pw.FontWeight.bold),
+                  PdfExportService.bWidget('তারিখ: ...........................................', fontSize: 9.5),
+                  PdfExportService.bWidget('জোন পরিচালকের স্বাক্ষর', fontSize: 9.5, fontWeight: pw.FontWeight.bold),
                 ],
               ),
               pw.SizedBox(height: 8),
-              PdfExportService.b('বি: দ্র: জেলা শাখার রিপোর্ট (শাখা রিপোর্ট ফরমে) আলাদাভাবে নিয়মিত কেন্দ্রে পাঠানোর ব্যবস্থা করবেন।', fontSize: 8.5),
+              PdfExportService.bWidget('বি: দ্র: জেলা শাখার রিপোর্ট (শাখা রিপোর্ট ফরমে) আলাদাভাবে নিয়মিত কেন্দ্রে পাঠানোর ব্যবস্থা করবেন।', fontSize: 8.5),
             ],
           );
         },
@@ -316,7 +316,7 @@ class KhelafatZonalPdfService {
       color: PdfColors.grey300,
       padding: const pw.EdgeInsets.symmetric(vertical: 3),
       alignment: pw.Alignment.center,
-      child: PdfExportService.b(title, fontSize: 10.5, fontWeight: pw.FontWeight.bold),
+      child: PdfExportService.bWidget(title, fontSize: 10.5, fontWeight: pw.FontWeight.bold),
     );
   }
 
@@ -326,7 +326,7 @@ class KhelafatZonalPdfService {
       children: headers.map((h) {
         return pw.Padding(
           padding: const pw.EdgeInsets.all(3),
-          child: PdfExportService.b(h, fontSize: 9, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center),
+          child: PdfExportService.bWidget(h, fontSize: 9, fontWeight: pw.FontWeight.bold, textAlign: pw.TextAlign.center),
         );
       }).toList(),
     );
@@ -335,11 +335,11 @@ class KhelafatZonalPdfService {
   static pw.TableRow _buildManpowerRow(String label, String count, String bridhi, String ghatti) {
     return pw.TableRow(
       children: [
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(label, fontSize: 9)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(count, fontSize: 9, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(bridhi, fontSize: 9, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(ghatti, fontSize: 9, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b('', fontSize: 9)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(label, fontSize: 9)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(count, fontSize: 9, textAlign: pw.TextAlign.center)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(bridhi, fontSize: 9, textAlign: pw.TextAlign.center)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(ghatti, fontSize: 9, textAlign: pw.TextAlign.center)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget('', fontSize: 9)),
       ],
     );
   }
@@ -347,11 +347,11 @@ class KhelafatZonalPdfService {
   static pw.TableRow _buildOrgRow(String label, String count, String org, String reorg) {
     return pw.TableRow(
       children: [
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(label, fontSize: 9)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(count, fontSize: 9, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(org, fontSize: 9, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(reorg, fontSize: 9, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b('', fontSize: 9)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(label, fontSize: 9)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(count, fontSize: 9, textAlign: pw.TextAlign.center)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(org, fontSize: 9, textAlign: pw.TextAlign.center)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(reorg, fontSize: 9, textAlign: pw.TextAlign.center)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget('', fontSize: 9)),
       ],
     );
   }
@@ -359,9 +359,9 @@ class KhelafatZonalPdfService {
   static pw.TableRow _buildMeetingRow(String label, String count, String pres) {
     return pw.TableRow(
       children: [
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(label, fontSize: 9)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(count, fontSize: 9, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(pres, fontSize: 9, textAlign: pw.TextAlign.center)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(label, fontSize: 9)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(count, fontSize: 9, textAlign: pw.TextAlign.center)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(pres, fontSize: 9, textAlign: pw.TextAlign.center)),
       ],
     );
   }
@@ -369,12 +369,12 @@ class KhelafatZonalPdfService {
   static pw.TableRow _buildSafarGridRow(String d1, String s1, String c1, String d2, String s2, String c2) {
     return pw.TableRow(
       children: [
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(d1, fontSize: 9, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(s1, fontSize: 9)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(c1, fontSize: 9)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(d2, fontSize: 9, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(s2, fontSize: 9)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(c2, fontSize: 9)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(d1, fontSize: 9, textAlign: pw.TextAlign.center)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(s1, fontSize: 9)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(c1, fontSize: 9)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(d2, fontSize: 9, textAlign: pw.TextAlign.center)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(s2, fontSize: 9)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(c2, fontSize: 9)),
       ],
     );
   }
@@ -382,12 +382,12 @@ class KhelafatZonalPdfService {
   static pw.TableRow _buildIncomeExpenseRow(String d1, String u1, String p1, String d2, String k2, String p2, {bool isBold = false}) {
     return pw.TableRow(
       children: [
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(d1, fontSize: 9, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(u1, fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(p1, fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(d2, fontSize: 9, textAlign: pw.TextAlign.center)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(k2, fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal)),
-        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.b(p2, fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal, textAlign: pw.TextAlign.center)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(d1, fontSize: 9, textAlign: pw.TextAlign.center)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(u1, fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(p1, fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal, textAlign: pw.TextAlign.center)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(d2, fontSize: 9, textAlign: pw.TextAlign.center)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(k2, fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal)),
+        pw.Padding(padding: const pw.EdgeInsets.all(3), child: PdfExportService.bWidget(p2, fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal, textAlign: pw.TextAlign.center)),
       ],
     );
   }

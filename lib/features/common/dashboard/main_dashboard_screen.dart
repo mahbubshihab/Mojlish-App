@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../syllabi/khelafot_syllabus/presentation/pages/khelafot_syllabus_page.dart';
 import '../../student_majlis/hub/student_hub_screen.dart';
+import '../../khelafat_majlis/hub/khelafat_hub_screen.dart';
+import '../../youth_majlis/personal_report/presentation/pages/personal_report_book_screen.dart';
+import '../../women_majlis/personal_report/presentation/pages/women_majlis_personal_report_book_screen.dart';
 
 class MainDashboardScreen extends StatelessWidget {
   const MainDashboardScreen({Key? key}) : super(key: key);
@@ -47,6 +50,30 @@ class MainDashboardScreen extends StatelessWidget {
                 },
               ),
             ),
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0xFF1B5E20),
+                  child: Icon(Icons.account_balance, color: Colors.white),
+                ),
+                title: const Text(
+                  'খেলাফত মজলিস হাব',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                subtitle: const Text('ব্যক্তিগত রিপোর্ট বই, সিলেবাস ও ফরমসমূহ'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const KhelafatHubScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
             const SizedBox(height: 12),
             Card(
               elevation: 4,
@@ -67,6 +94,56 @@ class MainDashboardScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => const StudentHubScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0xFF2563EB),
+                  child: Icon(Icons.groups, color: Colors.white),
+                ),
+                title: const Text(
+                  'যুব মজলিস - ব্যক্তিগত রিপোর্ট বই',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                subtitle: const Text('যুব মজলিসের মাসিক ব্যক্তিগত তৎপরতার রিপোর্ট বই'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const YouthPersonalReportBookScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0xFFDB2777),
+                  child: Icon(Icons.female, color: Colors.white),
+                ),
+                title: const Text(
+                  'মহিলা মজলিস - ব্যক্তিগত রিপোর্ট বই',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                subtitle: const Text('মহিলা মজলিসের মাসিক ব্যক্তিগত তৎপরতার রিপোর্ট বই'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const WomenMajlisPersonalReportBookScreen(),
                     ),
                   );
                 },

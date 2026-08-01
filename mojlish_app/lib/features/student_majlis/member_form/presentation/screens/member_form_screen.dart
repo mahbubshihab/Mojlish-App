@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mojlish_app/core/constants/majlis_assets.dart';
+import 'package:mojlish_app/core/theme/theme_manager.dart';
+import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 import '../bloc/member_form_bloc.dart';
 import '../bloc/member_form_event.dart';
 import '../bloc/member_form_state.dart';
-import 'package:mojlish_app/core/services/pdf_export_service.dart';
-import 'package:mojlish_app/core/theme/theme_manager.dart';
-import 'package:mojlish_app/core/constants/majlis_assets.dart';
-
 import '../../data/datasources/member_form_remote_datasource.dart';
 import '../../data/repositories/member_form_repository_impl.dart';
+import '../../data/services/student_member_form_pdf_service.dart';
+import 'package:mojlish_app/core/widgets/custom_labeled_input_field.dart';
 
 typedef ChatroMemberFormScreen = MemberFormScreen;
 
@@ -79,7 +80,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
   }
 
   Future<void> _exportFormPdf() async {
-    await PdfExportService.printOrDownloadChatroMemberFormPdf(
+    await StudentMemberFormPdfService.printOrDownloadPdf(
       name: _nameController.text,
       fatherName: _fatherNameController.text,
       eduInstitution: _eduController.text,
@@ -111,259 +112,285 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
       child: DefaultTabController(
         length: 2,
         child: Scaffold(
-        backgroundColor: bgColor,
-        appBar: AppBar(
-          backgroundColor: cardBg,
-          elevation: 1,
-          title: const Text('ছাত্র মজলিস — সদস্য ফরম', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          bottom: const TabBar(
-            indicatorColor: Color(0xFF059669),
-            indicatorWeight: 3,
-            labelColor: Color(0xFF059669),
-            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-            tabs: [
-              Tab(icon: Icon(Icons.edit_note_rounded), text: '১. তথ্য পূরণ'),
-              Tab(icon: Icon(Icons.print_rounded), text: '২. প্রিভিউ ও PDF'),
-            ],
+          backgroundColor: bgColor,
+          appBar: AppBar(
+            backgroundColor: cardBg,
+            elevation: 1,
+            title: const Text(
+              'বাংলাদেশ ইসলামী ছাত্র মজলিস — সদস্য ফরম',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            bottom: const TabBar(
+              indicatorColor: Color(0xFF0284C7),
+              indicatorWeight: 3,
+              labelColor: Color(0xFF0284C7),
+              labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              tabs: [
+                Tab(icon: Icon(Icons.edit_note_rounded), text: '১. তথ্য পূরণ'),
+                Tab(icon: Icon(Icons.print_rounded), text: '২. প্রিভিউ ও PDF'),
+              ],
+            ),
+          ),
+          body: AmbientBackgroundWidget(
+            primaryAccent: const Color(0xFF0284C7),
+            child: TabBarView(
+              children: [
+                // Tab 1: Edit Form
+                BlocConsumer<MemberFormBloc, MemberFormState>(
+                  listener: (context, state) {
+                    if (state is MemberFormSuccess) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('ফরম সফলভাবে সংরক্ষিত হয়েছে')),
+                      );
+                      Navigator.pop(context);
+                    } else if (state is MemberFormError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(state.message)),
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(colors: [Color(0xFF0284C7), Color(0xFF0369A1)]),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'প্রাথমিক সদস্য ফরম',
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      'ফরম নং: $_serialNumber',
+                                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+
+                            _buildSectionTitle('👤 ব্যক্তিগত ও শিক্ষাগত তথ্য'),
+                            const SizedBox(height: 10),
+                            _buildCardWrapper([
+                              CustomLabeledInputField(
+                                controller: _nameController,
+                                label: 'নাম (Name)',
+                                prefixIcon: const Icon(Icons.person_outline),
+                                validator: (v) => v!.isEmpty ? 'নাম লিখুন' : null,
+                              ),
+                              const SizedBox(height: 12),
+                              CustomLabeledInputField(
+                                controller: _fatherNameController,
+                                label: "পিতার নাম (Father's Name)",
+                                prefixIcon: const Icon(Icons.person_2_outlined),
+                                validator: (v) => v!.isEmpty ? 'পিতার নাম লিখুন' : null,
+                              ),
+                              const SizedBox(height: 12),
+                              CustomLabeledInputField(
+                                controller: _eduController,
+                                label: 'শিক্ষা প্রতিষ্ঠান (Educational Institution)',
+                                prefixIcon: const Icon(Icons.school_outlined),
+                                validator: (v) => v!.isEmpty ? 'শিক্ষা প্রতিষ্ঠান লিখুন' : null,
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: CustomLabeledInputField(
+                                      controller: _classController,
+                                      label: 'শ্রেণি (Class)',
+                                      validator: (v) => v!.isEmpty ? 'শ্রেণি লিখুন' : null,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: CustomLabeledInputField(
+                                      controller: _deptController,
+                                      label: 'বিভাগ (Department)',
+                                      validator: (v) => v!.isEmpty ? 'বিভাগ লিখুন' : null,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: CustomLabeledInputField(
+                                      controller: _rollController,
+                                      label: 'ক্রমিক নং (Roll No)',
+                                      validator: (v) => v!.isEmpty ? 'ক্রমিক নং লিখুন' : null,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: CustomLabeledInputField(
+                                      controller: _bloodGroupController,
+                                      label: 'রক্তের গ্রুপ (Blood Group)',
+                                      validator: (v) => v!.isEmpty ? 'রক্তের গ্রুপ লিখুন' : null,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ], cardBg),
+                            const SizedBox(height: 20),
+
+                            _buildSectionTitle('🏡 ঠিকানা ও যোগাযোগ'),
+                            const SizedBox(height: 10),
+                            _buildCardWrapper([
+                              CustomLabeledInputField(
+                                controller: _presentAddressController,
+                                label: 'বর্তমান ঠিকানা (Present Address)',
+                                prefixIcon: const Icon(Icons.home_outlined),
+                                validator: (v) => v!.isEmpty ? 'বর্তমান ঠিকানা লিখুন' : null,
+                              ),
+                              const SizedBox(height: 12),
+                              CustomLabeledInputField(
+                                controller: _mobileController,
+                                label: 'মোবাইল (Mobile)',
+                                prefixIcon: const Icon(Icons.phone_android_outlined),
+                                keyboardType: TextInputType.phone,
+                                validator: (v) => v!.isEmpty ? 'মোবাইল লিখুন' : null,
+                              ),
+                              const SizedBox(height: 12),
+                              const Text('স্থায়ী ঠিকানা (Permanent Address)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0284C7))),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: CustomLabeledInputField(
+                                      controller: _villageController,
+                                      label: 'গ্রাম (Village)',
+                                      validator: (v) => v!.isEmpty ? 'গ্রাম লিখুন' : null,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: CustomLabeledInputField(
+                                      controller: _postOfficeController,
+                                      label: 'ডাকঘর (Post Office)',
+                                      validator: (v) => v!.isEmpty ? 'ডাকঘর লিখুন' : null,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: CustomLabeledInputField(
+                                      controller: _thanaController,
+                                      label: 'থানা/উপজেলা (Thana)',
+                                      validator: (v) => v!.isEmpty ? 'থানা লিখুন' : null,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: CustomLabeledInputField(
+                                      controller: _districtController,
+                                      label: 'জেলা (District)',
+                                      validator: (v) => v!.isEmpty ? 'জেলা লিখুন' : null,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ], cardBg),
+                            const SizedBox(height: 20),
+
+                            _buildSectionTitle('📜 অঙ্গীকারনামা'),
+                            const SizedBox(height: 10),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFFEF3C7),
+                                border: Border.all(color: const Color(0xFFF59E0B)),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                'আমি (${_nameController.text.isEmpty ? "আবেদনকারী" : _nameController.text}) বিশ্বাস করি যে, ইসলাম আল্লাহর মনোনীত দ্বীন বা জীবনব্যবস্থা এবং এর পূর্ণাঙ্গ অনুসরণের মধ্যেই মানব জীবনে ইহকালীন কল্যাণ ও পরকালীন মুক্তি নিহিত। এ উদ্দেশ্যে বাংলাদেশ ইসলামী ছাত্র মজলিস যে কর্মসূচি গ্রহণ করেছে, আমি তার সাথে একমত হয়ে আল্লাহর সন্তুষ্টি অর্জনের জন্যে এ সংগঠনে যোগদান করছি।',
+                                textAlign: TextAlign.justify,
+                                style: TextStyle(
+                                  color: isDark ? const Color(0xFFFCD34D) : const Color(0xFF78350F),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+
+                            ElevatedButton.icon(
+                              onPressed: state is MemberFormLoading ? null : _submit,
+                              icon: const Icon(Icons.check_circle_rounded),
+                              label: state is MemberFormLoading
+                                  ? const CircularProgressIndicator(color: Colors.white)
+                                  : const Text('সংরক্ষণ করুন / জমা দিন', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                backgroundColor: const Color(0xFF0284C7),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+
+                // Tab 2: Preview & Export PDF
+                SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildBrochureCard('বাংলাদেশ ইসলামী ছাত্র মজলিস'),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: _exportFormPdf,
+                        icon: const Icon(Icons.picture_as_pdf_rounded, size: 22),
+                        label: const Text('📥 PDF ডাউনলোড / প্রিন্ট করুন', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0284C7),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        body: TabBarView(
-          children: [
-            // Tab 1: Edit Form
-            BlocConsumer<MemberFormBloc, MemberFormState>(
-              listener: (context, state) {
-                if (state is MemberFormSuccess) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Form Submitted Successfully')),
-                  );
-                  Navigator.pop(context);
-                } else if (state is MemberFormError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.message)),
-                  );
-                }
-              },
-              builder: (context, state) {
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(colors: [Color(0xFF059669), Color(0xFF0284C7)]),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('প্রাথমিক সদস্য ফরম', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
-                                child: Text('ফরম নং: $_serialNumber', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-
-                        _buildSectionTitle('👤 ব্যক্তিগত ও শিক্ষাগত তথ্য'),
-                        const SizedBox(height: 10),
-                        _buildCardWrapper([
-                          TextFormField(
-                            controller: _nameController,
-                            decoration: const InputDecoration(labelText: 'নাম (Name)', prefixIcon: Icon(Icons.person_outline)),
-                            validator: (v) => v!.isEmpty ? 'নাম লিখুন' : null,
-                          ),
-                          const SizedBox(height: 12),
-                          TextFormField(
-                            controller: _fatherNameController,
-                            decoration: const InputDecoration(labelText: "পিতার নাম (Father's Name)", prefixIcon: Icon(Icons.person_2_outlined)),
-                            validator: (v) => v!.isEmpty ? 'পিতার নাম লিখুন' : null,
-                          ),
-                          const SizedBox(height: 12),
-                          TextFormField(
-                            controller: _eduController,
-                            decoration: const InputDecoration(labelText: 'শিক্ষা প্রতিষ্ঠান (Educational Institution)', prefixIcon: Icon(Icons.school_outlined)),
-                            validator: (v) => v!.isEmpty ? 'শিক্ষা প্রতিষ্ঠান লিখুন' : null,
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _classController,
-                                  decoration: const InputDecoration(labelText: 'শ্রেণি (Class)'),
-                                  validator: (v) => v!.isEmpty ? 'শ্রেণি লিখুন' : null,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _deptController,
-                                  decoration: const InputDecoration(labelText: 'বিভাগ (Department)'),
-                                  validator: (v) => v!.isEmpty ? 'বিভাগ লিখুন' : null,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _rollController,
-                                  decoration: const InputDecoration(labelText: 'ক্রমিক নং (Roll No)'),
-                                  validator: (v) => v!.isEmpty ? 'ক্রমিক নং লিখুন' : null,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _bloodGroupController,
-                                  decoration: const InputDecoration(labelText: 'রক্তের গ্রুপ (Blood Group)'),
-                                  validator: (v) => v!.isEmpty ? 'রক্তের গ্রুপ লিখুন' : null,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ], cardBg),
-                        const SizedBox(height: 20),
-
-                        _buildSectionTitle('🏡 ঠিকানা ও যোগাযোগ'),
-                        const SizedBox(height: 10),
-                        _buildCardWrapper([
-                          TextFormField(
-                            controller: _presentAddressController,
-                            decoration: const InputDecoration(labelText: 'বর্তমান ঠিকানা (Present Address)', prefixIcon: Icon(Icons.home_outlined)),
-                            validator: (v) => v!.isEmpty ? 'বর্তমান ঠিকানা লিখুন' : null,
-                          ),
-                          const SizedBox(height: 12),
-                          TextFormField(
-                            controller: _mobileController,
-                            decoration: const InputDecoration(labelText: 'মোবাইল (Mobile)', prefixIcon: Icon(Icons.phone_android_outlined)),
-                            keyboardType: TextInputType.phone,
-                            validator: (v) => v!.isEmpty ? 'মোবাইল লিখুন' : null,
-                          ),
-                          const SizedBox(height: 12),
-                          const Text('স্থায়ী ঠিকানা (Permanent Address)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF059669))),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _villageController,
-                                  decoration: const InputDecoration(labelText: 'গ্রাম (Village)'),
-                                  validator: (v) => v!.isEmpty ? 'গ্রাম লিখুন' : null,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _postOfficeController,
-                                  decoration: const InputDecoration(labelText: 'ডাকঘর (Post Office)'),
-                                  validator: (v) => v!.isEmpty ? 'ডাকঘর লিখুন' : null,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _thanaController,
-                                  decoration: const InputDecoration(labelText: 'থানা/উপজেলা (Thana)'),
-                                  validator: (v) => v!.isEmpty ? 'থানা লিখুন' : null,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _districtController,
-                                  decoration: const InputDecoration(labelText: 'জেলা (District)'),
-                                  validator: (v) => v!.isEmpty ? 'জেলা লিখুন' : null,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ], cardBg),
-                        const SizedBox(height: 20),
-
-                        _buildSectionTitle('📜 অঙ্গীকারনামা'),
-                        const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFEF3C7),
-                            border: Border.all(color: const Color(0xFFF59E0B)),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            'আমি (${_nameController.text.isEmpty ? "আবেদনকারী" : _nameController.text}) বিশ্বাস করি যে, ইসলাম আল্লাহর মনোনীত দ্বীন বা জীবনব্যবস্থা এবং এর পূর্ণাঙ্গ অনুসরণের মধ্যেই মানব জীবনে ইহকালীন কল্যাণ ও পরকালীন মুক্তি নিহিত। এ উদ্দেশ্যে বাংলাদেশ ইসলামী ছাত্র মজলিস যে কর্মসূচি গ্রহণ করেছে, আমি তার সাথে একমত হয়ে আল্লাহর সন্তুষ্টি অর্জনের জন্যে এ সংগঠনে যোগদান করছি।',
-                            textAlign: TextAlign.justify,
-                            style: const TextStyle(color: Color(0xFF78350F), fontWeight: FontWeight.bold, fontSize: 13, height: 1.5),
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-
-                        ElevatedButton.icon(
-                          onPressed: state is MemberFormLoading ? null : _submit,
-                          icon: const Icon(Icons.check_circle_rounded),
-                          label: state is MemberFormLoading
-                              ? const CircularProgressIndicator(color: Colors.white)
-                              : const Text('সংরক্ষণ করুন / জমা দিন', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            backgroundColor: const Color(0xFF059669),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-
-            // Tab 2: Preview
-            SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildBrochureCard('বাংলাদেশ ইসলামী ছাত্র মজলিস'),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: _exportFormPdf,
-                    icon: const Icon(Icons.picture_as_pdf_rounded, size: 22),
-                    label: const Text('📥 PDF ডাউনলোড / প্রিন্ট করুন', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0284C7),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 3,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
-    ));
+    );
   }
 
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
+      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0284C7)),
     );
   }
 
@@ -412,7 +439,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset(MajlisAssets.chatroLogo, width: 28, height: 28, errorBuilder: (_, __, ___) => const Icon(Icons.school_rounded, color: Color(0xFF0284C7), size: 28)),
+                    Image.asset(MajlisAssets.chatroLogo, width: 28, height: 28, errorBuilder: (context, error, stackTrace) => const Icon(Icons.school_rounded, color: Color(0xFF0284C7), size: 28)),
                     const SizedBox(width: 8),
                     Text(majlisName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0284C7))),
                   ],
@@ -437,10 +464,10 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
                   ),
                 ),
                 const SizedBox(height: 6),
-                Text(
+                const Text(
                   'ইসলাম আল্লাহর মনোনীত দ্বীন বা জীবনব্যবস্থা এবং এর পূর্ণাঙ্গ অনুসরণের মধ্যেই মানব জীবনে ইহকালীন কল্যাণ ও পরকালীন মুক্তি নিহিত। এ উদ্দেশ্যে বাংলাদেশ ইসলামী ছাত্র মজলিস যে কর্মসূচি গ্রহণ করেছে, আমি তার সাথে একমত হয়ে আল্লাহর সন্তুষ্টি অর্জনের জন্যে এ সংগঠনে যোগদান করছি।',
                   textAlign: TextAlign.justify,
-                  style: const TextStyle(fontSize: 11.5, height: 1.4, color: Colors.black87),
+                  style: TextStyle(fontSize: 11.5, height: 1.4, color: Colors.black87),
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -468,7 +495,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset(MajlisAssets.chatroLogo, width: 28, height: 28, errorBuilder: (_, __, ___) => const Icon(Icons.school_rounded, color: Color(0xFF0284C7), size: 28)),
+                    Image.asset(MajlisAssets.chatroLogo, width: 28, height: 28, errorBuilder: (context, error, stackTrace) => const Icon(Icons.school_rounded, color: Color(0xFF0284C7), size: 28)),
                     const SizedBox(width: 8),
                     Text(majlisName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0284C7))),
                   ],
@@ -547,4 +574,3 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
     );
   }
 }
-

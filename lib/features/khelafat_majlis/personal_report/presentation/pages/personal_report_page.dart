@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../common/widgets/custom_labeled_input_field.dart';
 import '../bloc/personal_report_bloc.dart';
 import '../bloc/personal_report_event.dart';
 import '../bloc/personal_report_state.dart';
@@ -109,27 +110,28 @@ class _PersonalReportPageState extends State<PersonalReportPage> {
   Widget _buildHeaderFields() {
     return Column(
       children: [
-        TextField(
+        CustomLabeledInputField(
+          label: 'কর্মীর নাম',
           controller: _workerNameController,
-          decoration: const InputDecoration(labelText: 'কর্মীর নাম'),
         ),
-        TextField(
+        CustomLabeledInputField(
+          label: 'শাখা',
           controller: _branchController,
-          decoration: const InputDecoration(labelText: 'শাখা'),
         ),
         Row(
           children: [
             Expanded(
-              child: TextField(
+              child: CustomLabeledInputField(
+                label: 'মাস',
                 controller: _monthController,
-                decoration: const InputDecoration(labelText: 'মাস'),
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: TextField(
+              child: CustomLabeledInputField(
+                label: 'সন',
                 controller: _yearController,
-                decoration: const InputDecoration(labelText: 'সন'),
+                keyboardType: TextInputType.number,
               ),
             ),
           ],
@@ -232,9 +234,9 @@ class _PersonalReportPageState extends State<PersonalReportPage> {
           ],
         ),
         const SizedBox(height: 16),
-        TextField(
+        CustomLabeledInputField(
+          label: 'শাখা দায়িত্বশীলের মন্তব্য ও পরামর্শ',
           controller: _branchResponsibleCommentsController,
-          decoration: const InputDecoration(labelText: 'শাখা দায়িত্বশীলের মন্তব্য ও পরামর্শ'),
           maxLines: 3,
         ),
       ],

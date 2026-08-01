@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../common/widgets/custom_labeled_input_field.dart';
 
 class BranchReportScreen extends StatefulWidget {
   const BranchReportScreen({Key? key}) : super(key: key);
@@ -42,11 +43,8 @@ class _BranchReportScreenState extends State<BranchReportScreen> {
             _buildSectionHeader('সমাজকল্যাণ'),
             // TODO: Add form fields for Social Welfare
             const SizedBox(height: 16),
-            const TextField(
-              decoration: InputDecoration(
-                labelText: 'মন্তব্য (সমস্যা ও সম্ভাবনা উল্লেখসহ)',
-                border: OutlineInputBorder(),
-              ),
+            const CustomLabeledInputField(
+              label: 'মন্তব্য (সমস্যা ও সম্ভাবনা উল্লেখসহ)',
               maxLines: 3,
             ),
             const SizedBox(height: 24),

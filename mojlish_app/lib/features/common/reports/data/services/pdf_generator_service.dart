@@ -5,6 +5,7 @@ import '../models/daily_personal_entry.dart';
 import '../models/baytulmal_report_entry.dart';
 import '../models/monthly_plan.dart';
 import 'report_storage_service.dart';
+import 'package:mojlish_app/core/services/pdf_export_service.dart';
 
 /// PDF জেনারেটর সার্ভিস — রিপোর্ট থেকে PDF তৈরি ও শেয়ার করে
 class PdfGeneratorService {

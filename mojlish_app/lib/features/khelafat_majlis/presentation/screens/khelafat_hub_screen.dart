@@ -179,7 +179,7 @@ class KhelafatHubScreen extends StatelessWidget {
                     textColor: textColor,
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const KhelafatOverviewPage()),
+                      MaterialPageRoute(builder: (_) => const OverviewPage()),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -193,7 +193,7 @@ class KhelafatHubScreen extends StatelessWidget {
                     textColor: textColor,
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const ExecutiveRulesScreen()),
+                      MaterialPageRoute(builder: (_) => const KhelafatExecutiveRulesScreen()),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -239,10 +239,10 @@ class KhelafatHubScreen extends StatelessWidget {
           )
         ],
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'খেলাফত মজলিস',
             style: TextStyle(
               color: Colors.white,
@@ -250,11 +250,11 @@ class KhelafatHubScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           Text(
             'কুরআন, সুন্নাহ ও খেলাফতে রাশেদার অনুসরণে ইনসাফপূর্ণ সমাজ বিনির্মাণে সংকল্পবদ্ধ।',
             style: TextStyle(
-              color: Colors.white90,
+              color: Colors.white.withValues(alpha: 0.9),
               fontSize: 13,
               height: 1.4,
             ),

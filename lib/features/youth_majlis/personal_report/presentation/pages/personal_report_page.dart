@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../common/widgets/custom_labeled_input_field.dart';
 import '../../domain/entities/personal_report.dart';
 import '../bloc/personal_report_bloc.dart';
 import '../bloc/personal_report_event.dart';
@@ -123,41 +124,74 @@ class _YouthMajlisPersonalReportPageState extends State<YouthMajlisPersonalRepor
   Widget _buildHeaderInfo() {
     return Column(
       children: [
-        TextFormField(
-          decoration: const InputDecoration(labelText: 'নাম (Name)'),
-          onSaved: (val) => _name = val ?? '',
+        CustomLabeledInputField(
+          label: 'নাম (Name)',
+          onChanged: (val) => _name = val,
         ),
-        DropdownButtonFormField<String>(
-          value: _memberType,
-          items: const [
-            DropdownMenuItem(value: 'প্রঃ সদস্য', child: Text('প্রঃ সদস্য')),
-            DropdownMenuItem(value: 'কর্মী', child: Text('কর্মী')),
-            DropdownMenuItem(value: 'শূরা সদস্য', child: Text('শূরা সদস্য')),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'সদস্য ধরণ',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF2E3A59),
+              ),
+            ),
+            const SizedBox(height: 6),
+            DropdownButtonFormField<String>(
+              value: _memberType,
+              items: const [
+                DropdownMenuItem(value: 'প্রঃ সদস্য', child: Text('প্রঃ সদস্য')),
+                DropdownMenuItem(value: 'কর্মী', child: Text('কর্মী')),
+                DropdownMenuItem(value: 'শূরা সদস্য', child: Text('শূরা সদস্য')),
+              ],
+              onChanged: (val) {
+                setState(() {
+                  _memberType = val ?? 'কর্মী';
+                });
+              },
+              decoration: InputDecoration(
+                floatingLabelBehavior: FloatingLabelBehavior.never,
+                filled: true,
+                fillColor: Colors.grey.shade50,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFF10B981), width: 1.5),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
           ],
-          onChanged: (val) {
-            setState(() {
-              _memberType = val ?? 'কর্মী';
-            });
-          },
-          decoration: const InputDecoration(labelText: 'সদস্য ধরণ'),
         ),
-        TextFormField(
-          decoration: const InputDecoration(labelText: 'শাখা (Branch)'),
-          onSaved: (val) => _branch = val ?? '',
+        CustomLabeledInputField(
+          label: 'শাখা (Branch)',
+          onChanged: (val) => _branch = val,
         ),
         Row(
           children: [
             Expanded(
-              child: TextFormField(
-                decoration: const InputDecoration(labelText: 'মাস (Month)'),
-                onSaved: (val) => _month = val ?? '',
+              child: CustomLabeledInputField(
+                label: 'মাস (Month)',
+                onChanged: (val) => _month = val,
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: TextFormField(
-                decoration: const InputDecoration(labelText: 'সন (Year)'),
-                onSaved: (val) => _year = val ?? '',
+              child: CustomLabeledInputField(
+                label: 'সন (Year)',
+                keyboardType: TextInputType.number,
+                onChanged: (val) => _year = val,
               ),
             ),
           ],
@@ -271,30 +305,30 @@ class _YouthMajlisPersonalReportPageState extends State<YouthMajlisPersonalRepor
           children: [
             Expanded(
               flex: 1,
-              child: TextFormField(
-                decoration: const InputDecoration(labelText: 'সভায় যোগদান মোট (টি)'),
+              child: CustomLabeledInputField(
+                label: 'সভায় যোগদান মোট (টি)',
                 keyboardType: TextInputType.number,
-                onSaved: (val) => _totalMeetingsAttended = int.tryParse(val ?? '0') ?? 0,
+                onChanged: (val) => _totalMeetingsAttended = int.tryParse(val) ?? 0,
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
               flex: 3,
-              child: TextFormField(
-                decoration: const InputDecoration(labelText: 'সভার নাম'),
-                onSaved: (val) => _meetingNames = val ?? '',
+              child: CustomLabeledInputField(
+                label: 'সভার নাম',
+                onChanged: (val) => _meetingNames = val,
               ),
             ),
           ],
         ),
-        TextFormField(
-          decoration: const InputDecoration(labelText: 'উর্ধ্বতন দায়িত্বশীলের মন্তব্য ও পরামর্শ'),
+        CustomLabeledInputField(
+          label: 'উর্ধ্বতন দায়িত্বশীলের মন্তব্য ও পরামর্শ',
           maxLines: 2,
-          onSaved: (val) => _supervisorComments = val ?? '',
+          onChanged: (val) => _supervisorComments = val,
         ),
-        TextFormField(
-          decoration: const InputDecoration(labelText: 'শাখা দায়িত্বশীলের নাম'),
-          onSaved: (val) => _branchOfficialName = val ?? '',
+        CustomLabeledInputField(
+          label: 'শাখা দায়িত্বশীলের নাম',
+          onChanged: (val) => _branchOfficialName = val,
         ),
       ],
     );

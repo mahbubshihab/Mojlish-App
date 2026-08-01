@@ -1,32 +1,62 @@
+import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:mojlish_app/core/constants/majlis_assets.dart';
+import 'package:mojlish_app/core/services/pdf_export_service.dart';
+import 'package:mojlish_app/features/student_majlis/baytulmal_report/domain/entities/baytulmal_report_entity.dart';
 
+/// বাংলাদেশ ইসলামী ছাত্র মজলিস — বায়তুলমাল রিপোর্ট ডেডিকেটেড পিডিএফ সার্ভিস
+/// ডেমো ফরম্যাটের (chatro_baytulmal_p1.png) শতভাগ হুবহু ২-কলাম টেবিল ও সামারি লেআউট
 class StudentBaytulmalPdfService {
-  static const _monthNames = [
-    'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
-    'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর',
-  ];
+  /// ডেমো ফরম লেআউট অনুযায়ী পিডিএফ বাইটস জেনারেট করা
+  static Future<Uint8List> generatePdfBytes({
+    required BaytulmalReportEntity report,
+  }) async {
+    final font = await PdfExportService.loadSutonnyFont();
 
-  static String _bn(int n) {
-    const digits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-    return n.toString().split('').map((c) => digits[int.parse(c)]).join();
-  }
-
-  static Future<void> generateAndSharePdf(dynamic report) async {
-    final font = await PdfGoogleFonts.notoSansBengaliRegular();
-    final boldFont = await PdfGoogleFonts.notoSansBengaliBold();
+    pw.MemoryImage? logoImage;
+    try {
+      final bytes = await rootBundle.load(MajlisAssets.chatroLogo);
+      logoImage = pw.MemoryImage(bytes.buffer.asUint8List());
+    } catch (_) {}
 
     final pdf = pw.Document(
       theme: pw.ThemeData.withFont(
         base: font,
-        bold: boldFont,
+        bold: font,
       ),
     );
 
-    final monthName = (report.month >= 1 && report.month <= 12)
-        ? _monthNames[report.month - 1]
-        : _bn(report.month);
+    // হিসাব নির্ধারণ
+    final double motAy = report.motAy > 0
+        ? report.motAy
+        : (report.jonoshoktiIyanot +
+            report.shakhaIyanot +
+            report.shuvakangkhiIyanot +
+            report.ekkalinAy);
+
+    final double sorbomotAy = report.sorbomotAy > 0
+        ? report.sorbomotAy
+        : (motAy + report.bigotoSeshonMasherUdbritto);
+
+    final double motBay = report.motBay > 0
+        ? report.motBay
+        : (report.urdhotonIyanotPorishodh +
+            report.urdhotonSofor +
+            report.office +
+            report.jatayat +
+            report.jogajog +
+            report.prochar);
+
+    final double sorbomotBay = report.sorbomotBay > 0
+        ? report.sorbomotBay
+        : (motBay + report.bigotoSeshonMasherGhatti);
+
+    final double udbrittoBaGhatti = sorbomotAy - sorbomotBay;
+
+    final primaryBlue = PdfColor.fromHex('#004b92');
+    final tableHeaderBg = PdfColor.fromHex('#e8f1fd');
 
     pdf.addPage(
       pw.Page(
@@ -34,200 +64,288 @@ class StudentBaytulmalPdfService {
         margin: const pw.EdgeInsets.all(24),
         build: (pw.Context context) {
           return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
-              // Header
-              pw.Center(
-                child: pw.Text(
-                  'বিসমিল্লাহির রাহমানির রাহিম',
-                  style: pw.TextStyle(font: font, fontSize: 11, color: PdfColors.blueGrey800),
+              // ================= TOP HEADER =================
+              PdfExportService.bWidget('বিসমিল্লাহির রাহমানির রাহীম',
+                  fontSize: 9.5, textAlign: pw.TextAlign.center),
+              pw.SizedBox(height: 2),
+              PdfExportService.bWidget('বায়তুলমাল রিপোর্ট',
+                  fontSize: 15,
+                  fontWeight: pw.FontWeight.bold,
+                  textAlign: pw.TextAlign.center,
+                  color: primaryBlue),
+              pw.SizedBox(height: 4),
+
+              // Logo + Organization Title
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.center,
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
+                children: [
+                  if (logoImage != null) ...[
+                    pw.Image(logoImage, width: 34, height: 34),
+                    pw.SizedBox(width: 8),
+                  ],
+                  PdfExportService.bWidget('বাংলাদেশ ইসলামী ছাত্র মজলিস',
+                      fontSize: 21,
+                      fontWeight: pw.FontWeight.bold,
+                      color: primaryBlue),
+                ],
+              ),
+              pw.SizedBox(height: 10),
+
+              // ================= INFO ROW BOX (শাখা, মাস, সেশন) =================
+              pw.Container(
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: primaryBlue, width: 0.8),
+                ),
+                padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    PdfExportService.bWidget(
+                        'শাখা : ${report.branch.isEmpty ? "...................................." : report.branch}',
+                        fontSize: 10.5,
+                        fontWeight: pw.FontWeight.bold),
+                    PdfExportService.bWidget(
+                        'মাস : ${report.month.isEmpty ? "...................................." : report.month}',
+                        fontSize: 10.5,
+                        fontWeight: pw.FontWeight.bold),
+                    PdfExportService.bWidget(
+                        'সেশন : ${report.session.isEmpty ? "...................................." : report.session}',
+                        fontSize: 10.5,
+                        fontWeight: pw.FontWeight.bold),
+                  ],
                 ),
               ),
-              pw.SizedBox(height: 2),
-              pw.Center(
-                child: pw.Text(
-                  'বায়তুলমাল রিপোর্ট',
-                  style: pw.TextStyle(font: boldFont, fontSize: 18, color: PdfColors.blue800),
-                ),
+              pw.SizedBox(height: 8),
+
+              // ================= SECTION 1: আয় =================
+              pw.Container(
+                width: double.infinity,
+                color: PdfColor.fromHex('#d0e1f9'),
+                padding: const pw.EdgeInsets.symmetric(vertical: 3),
+                alignment: pw.Alignment.center,
+                child: PdfExportService.bWidget('আয়',
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                    color: primaryBlue),
               ),
-              pw.SizedBox(height: 2),
-              pw.Center(
-                child: pw.Text(
-                  'বাংলাদেশ ইসলামী ছাত্র মজলিস',
-                  style: pw.TextStyle(font: boldFont, fontSize: 22, color: PdfColors.blue900),
+              pw.Table(
+                border: pw.TableBorder.all(width: 0.5, color: primaryBlue),
+                columnWidths: const {
+                  0: pw.FlexColumnWidth(5.5),
+                  1: pw.FlexColumnWidth(2),
+                  2: pw.FlexColumnWidth(1.2),
+                },
+                children: [
+                  // Table Header
+                  pw.TableRow(
+                    decoration: pw.BoxDecoration(color: tableHeaderBg),
+                    children: [
+                      pw.Padding(
+                          padding: const pw.EdgeInsets.all(3.5),
+                          child: PdfExportService.bWidget('আয়ের উৎস',
+                              fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+                      pw.Padding(
+                          padding: const pw.EdgeInsets.all(3.5),
+                          child: PdfExportService.bWidget('টাকা',
+                              fontSize: 9.5,
+                              fontWeight: pw.FontWeight.bold,
+                              textAlign: pw.TextAlign.center)),
+                      pw.Padding(
+                          padding: const pw.EdgeInsets.all(3.5),
+                          child: PdfExportService.bWidget('পয়সা',
+                              fontSize: 9.5,
+                              fontWeight: pw.FontWeight.bold,
+                              textAlign: pw.TextAlign.center)),
+                    ],
+                  ),
+                  _buildRow('১ । জনশক্তি এয়ানত (সদস্য/সহযোগী সদস্য/কর্মী)',
+                      report.jonoshoktiIyanot),
+                  _buildRow('২ । শাখা এয়ানত', report.shakhaIyanot),
+                  _buildRow('৩ । শুভাকাঙ্ক্ষী এয়ানত', report.shuvakangkhiIyanot),
+                  _buildRow(
+                      '৪ । এককালীন আয় (বিস্তারিত আলাদা কাগজে)', report.ekkalinAy),
+                  _buildRow('', 0, forceEmpty: true),
+                  _buildRow('', 0, forceEmpty: true),
+                  _buildRow('', 0, forceEmpty: true),
+                  _buildRow('', 0, forceEmpty: true),
+                ],
+              ),
+
+              // Income Summary Block (Matching Demo Photo)
+              pw.Container(
+                decoration: pw.BoxDecoration(
+                  border: pw.Border(
+                    left: pw.BorderSide(color: primaryBlue, width: 0.5),
+                    right: pw.BorderSide(color: primaryBlue, width: 0.5),
+                    bottom: pw.BorderSide(color: primaryBlue, width: 0.5),
+                  ),
+                ),
+                child: pw.Row(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    // Left: কথায়
+                    pw.Expanded(
+                      flex: 55,
+                      child: pw.Container(
+                        padding: const pw.EdgeInsets.all(6),
+                        alignment: pw.Alignment.topLeft,
+                        decoration: pw.BoxDecoration(
+                          border: pw.Border(
+                            right: pw.BorderSide(color: primaryBlue, width: 0.5),
+                          ),
+                        ),
+                        child: PdfExportService.bWidget(
+                            'কথায় : ${report.motAyInWords.isEmpty ? "........................................................................................................" : report.motAyInWords}',
+                            fontSize: 9),
+                      ),
+                    ),
+                    // Right: Summary Table (মোট আয়, বিগত উদ্বৃত্ত, সর্বমোট আয়)
+                    pw.Expanded(
+                      flex: 32,
+                      child: pw.Table(
+                        border: pw.TableBorder.all(width: 0.5, color: primaryBlue),
+                        columnWidths: const {
+                          0: pw.FlexColumnWidth(2),
+                          1: pw.FlexColumnWidth(1.2),
+                        },
+                        children: [
+                          _buildSummaryRow(
+                              'মোট আয়', motAy),
+                          _buildSummaryRow(
+                              'বিগত সেশন/মাসের উদ্বৃত্ত',
+                              report.bigotoSeshonMasherUdbritto),
+                          _buildSummaryRow(
+                              'সর্বমোট আয়', sorbomotAy,
+                              isBold: true),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
               pw.SizedBox(height: 10),
 
-              // Metadata row
+              // ================= SECTION 2: ব্যয় =================
               pw.Container(
-                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                width: double.infinity,
+                color: PdfColor.fromHex('#d0e1f9'),
+                padding: const pw.EdgeInsets.symmetric(vertical: 3),
+                alignment: pw.Alignment.center,
+                child: PdfExportService.bWidget('ব্যয়',
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                    color: primaryBlue),
+              ),
+              pw.Table(
+                border: pw.TableBorder.all(width: 0.5, color: primaryBlue),
+                columnWidths: const {
+                  0: pw.FlexColumnWidth(5.5),
+                  1: pw.FlexColumnWidth(2),
+                  2: pw.FlexColumnWidth(1.2),
+                },
+                children: [
+                  // Table Header
+                  pw.TableRow(
+                    decoration: pw.BoxDecoration(color: tableHeaderBg),
+                    children: [
+                      pw.Padding(
+                          padding: const pw.EdgeInsets.all(3.5),
+                          child: PdfExportService.bWidget('ব্যয়ের খাত',
+                              fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
+                      pw.Padding(
+                          padding: const pw.EdgeInsets.all(3.5),
+                          child: PdfExportService.bWidget('টাকা',
+                              fontSize: 9.5,
+                              fontWeight: pw.FontWeight.bold,
+                              textAlign: pw.TextAlign.center)),
+                      pw.Padding(
+                          padding: const pw.EdgeInsets.all(3.5),
+                          child: PdfExportService.bWidget('পয়সা',
+                              fontSize: 9.5,
+                              fontWeight: pw.FontWeight.bold,
+                              textAlign: pw.TextAlign.center)),
+                    ],
+                  ),
+                  _buildRow('১ । ঊর্ধ্বতন এয়ানত পরিশোধ',
+                      report.urdhotonIyanotPorishodh),
+                  _buildRow('২ । ঊর্ধ্বতন সফর', report.urdhotonSofor),
+                  _buildRow('৩ । অফিস', report.office),
+                  _buildRow('৪ । যাতায়াত', report.jatayat),
+                  _buildRow('৫ । যোগাযোগ', report.jogajog),
+                  _buildRow('৬ । প্রচার', report.prochar),
+                  _buildRow('', 0, forceEmpty: true),
+                  _buildRow('', 0, forceEmpty: true),
+                  _buildRow('', 0, forceEmpty: true),
+                ],
+              ),
+
+              // Expense Summary Block (Matching Demo Photo)
+              pw.Container(
                 decoration: pw.BoxDecoration(
-                  border: pw.Border.all(color: PdfColors.blue800, width: 0.8),
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+                  border: pw.Border(
+                    left: pw.BorderSide(color: primaryBlue, width: 0.5),
+                    right: pw.BorderSide(color: primaryBlue, width: 0.5),
+                    bottom: pw.BorderSide(color: primaryBlue, width: 0.5),
+                  ),
                 ),
                 child: pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text('শাখা : ${report.branchName.isEmpty ? '________' : report.branchName}',
-                        style: pw.TextStyle(font: font, fontSize: 11)),
-                    pw.Text('মাস : $monthName ${_bn(report.year)}',
-                        style: pw.TextStyle(font: font, fontSize: 11)),
-                    pw.Text('সেশন : ${report.session.isEmpty ? _bn(report.year) : report.session}',
-                        style: pw.TextStyle(font: font, fontSize: 11)),
-                  ],
-                ),
-              ),
-              pw.SizedBox(height: 12),
-
-              // 1. আয় সেকশন
-              pw.Container(
-                color: PdfColors.blue100,
-                padding: const pw.EdgeInsets.all(4),
-                child: pw.Center(
-                  child: pw.Text('আয়', style: pw.TextStyle(font: boldFont, fontSize: 14, color: PdfColors.blue900)),
-                ),
-              ),
-              pw.Table(
-                border: pw.TableBorder.all(color: PdfColors.blueGrey300, width: 0.5),
-                columnWidths: {
-                  0: const pw.FlexColumnWidth(3),
-                  1: const pw.FlexColumnWidth(1),
-                  2: const pw.FlexColumnWidth(1),
-                },
-                children: [
-                  // Table Header
-                  pw.TableRow(
-                    decoration: const pw.BoxDecoration(color: PdfColors.blue50),
-                    children: [
-                      _th('আয়ের উৎস', font: boldFont),
-                      _th('টাকা', font: boldFont, align: pw.TextAlign.right),
-                      _th('পয়সা', font: boldFont, align: pw.TextAlign.right),
-                    ],
-                  ),
-                  // Pre-printed rows
-                  _tRow('১. জনশক্তি এয়ানত (সদস্য/সহযোগী সদস্য/কর্মী)', report.jonoshaktiAyanatTaka, report.jonoshaktiAyanatPaisa, font),
-                  _tRow('২. শাখা এয়ানত', report.shakhaAyanatTaka, report.shakhaAyanatPaisa, font),
-                  _tRow('৩. শুভাকাঙ্ক্ষী এয়ানত', report.suhridAyanatTaka, report.suhridAyanatPaisa, font),
-                  _tRow('৪. এককালীন আয় (বিস্তারিত আলাদা কাগজে)', report.ekkalinIncomeTaka, report.ekkalinIncomePaisa, font),
-                  // Custom rows
-                  for (int i = 0; i < report.customIncomeRows.length; i++)
-                    _tRow('${i + 5}. ${report.customIncomeRows[i].title}', report.customIncomeRows[i].taka, report.customIncomeRows[i].paisa, font),
-                ],
-              ),
-
-              // Income Summary Box
-              pw.Container(
-                decoration: pw.BoxDecoration(
-                  border: pw.Border.all(color: PdfColors.blueGrey300, width: 0.5),
-                ),
-                padding: const pw.EdgeInsets.all(6),
-                child: pw.Column(
-                  children: [
-                    pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [
-                        pw.Text('কথায় : ${report.incomeInWords}', style: pw.TextStyle(font: font, fontSize: 10)),
-                        pw.Text('মোট আয়: ৳ ${report.totalIncome.toStringAsFixed(2)}', style: pw.TextStyle(font: boldFont, fontSize: 10)),
-                      ],
-                    ),
-                    pw.SizedBox(height: 2),
-                    pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [
-                        pw.Text('বিগত সেশন/মাসের উদ্বৃত্ত: ৳ ${report.previousSurplus.toStringAsFixed(2)}', style: pw.TextStyle(font: font, fontSize: 10)),
-                        pw.Text('সর্বমোট আয়: ৳ ${report.grandTotalIncome.toStringAsFixed(2)}', style: pw.TextStyle(font: boldFont, fontSize: 11, color: PdfColors.green800)),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              pw.SizedBox(height: 14),
-
-              // 2. ব্যয় সেকশন
-              pw.Container(
-                color: PdfColors.red100,
-                padding: const pw.EdgeInsets.all(4),
-                child: pw.Center(
-                  child: pw.Text('ব্যয়', style: pw.TextStyle(font: boldFont, fontSize: 14, color: PdfColors.red900)),
-                ),
-              ),
-              pw.Table(
-                border: pw.TableBorder.all(color: PdfColors.blueGrey300, width: 0.5),
-                columnWidths: {
-                  0: const pw.FlexColumnWidth(3),
-                  1: const pw.FlexColumnWidth(1),
-                  2: const pw.FlexColumnWidth(1),
-                },
-                children: [
-                  // Table Header
-                  pw.TableRow(
-                    decoration: const pw.BoxDecoration(color: PdfColors.red50),
-                    children: [
-                      _th('ব্যয়ের খাত', font: boldFont),
-                      _th('টাকা', font: boldFont, align: pw.TextAlign.right),
-                      _th('পয়সা', font: boldFont, align: pw.TextAlign.right),
-                    ],
-                  ),
-                  // Pre-printed rows
-                  _tRow('১. ঊর্ধ্বতন এয়ানত পরিশোধ', report.upwardAyanatTaka, report.upwardAyanatPaisa, font),
-                  _tRow('২. ঊর্ধ্বতন সফর', report.upwardSafarTaka, report.upwardSafarPaisa, font),
-                  _tRow('৩. অফিস', report.officeTaka, report.officePaisa, font),
-                  _tRow('৪. যাতায়াত', report.transportTaka, report.transportPaisa, font),
-                  _tRow('৫. যোগাযোগ', report.communicationTaka, report.communicationPaisa, font),
-                  _tRow('৬. প্রচার', report.procharTaka, report.procharPaisa, font),
-                  // Custom rows
-                  for (int i = 0; i < report.customExpenseRows.length; i++)
-                    _tRow('${i + 7}. ${report.customExpenseRows[i].title}', report.customExpenseRows[i].taka, report.customExpenseRows[i].paisa, font),
-                ],
-              ),
-
-              // Expense Summary Box
-              pw.Container(
-                decoration: pw.BoxDecoration(
-                  border: pw.Border.all(color: PdfColors.blueGrey300, width: 0.5),
-                ),
-                padding: const pw.EdgeInsets.all(6),
-                child: pw.Column(
-                  children: [
-                    pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [
-                        pw.Text('কথায় : ${report.expenseInWords}', style: pw.TextStyle(font: font, fontSize: 10)),
-                        pw.Text('মোট ব্যয়: ৳ ${report.totalExpense.toStringAsFixed(2)}', style: pw.TextStyle(font: boldFont, fontSize: 10)),
-                      ],
-                    ),
-                    pw.SizedBox(height: 2),
-                    pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [
-                        pw.Text('বিগত সেশন/মাসের ঘাটতি: ৳ ${report.previousDeficit.toStringAsFixed(2)}', style: pw.TextStyle(font: font, fontSize: 10)),
-                        pw.Text('সর্বমোট ব্যয়: ৳ ${report.grandTotalExpense.toStringAsFixed(2)}', style: pw.TextStyle(font: boldFont, fontSize: 10)),
-                      ],
-                    ),
-                    pw.Divider(color: PdfColors.grey400, thickness: 0.5),
-                    pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [
-                        pw.Text('সর্বমোট আয়: ৳ ${report.grandTotalIncome.toStringAsFixed(2)}', style: pw.TextStyle(font: font, fontSize: 10)),
-                        pw.Text(
-                          report.balance >= 0
-                              ? 'উদ্বৃত্ত: ৳ ${report.balance.toStringAsFixed(2)}'
-                              : 'ঘাটতি: ৳ ${report.balance.abs().toStringAsFixed(2)}',
-                          style: pw.TextStyle(
-                            font: boldFont,
-                            fontSize: 11,
-                            color: report.balance >= 0 ? PdfColors.green800 : PdfColors.red800,
+                    // Left: কথায় & Note
+                    pw.Expanded(
+                      flex: 55,
+                      child: pw.Container(
+                        padding: const pw.EdgeInsets.all(6),
+                        decoration: pw.BoxDecoration(
+                          border: pw.Border(
+                            right: pw.BorderSide(color: primaryBlue, width: 0.5),
                           ),
                         ),
-                      ],
+                        child: pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          children: [
+                            PdfExportService.bWidget(
+                                'কথায় : ${report.motBayInWords.isEmpty ? "........................................................................................................" : report.motBayInWords}',
+                                fontSize: 9),
+                            pw.SizedBox(height: 20),
+                            PdfExportService.bWidget(
+                                '(ঘাটতি তালিকার বিস্তারিত আলাদা কাগজে)',
+                                fontSize: 8.5,
+                                color: PdfColors.grey700),
+                          ],
+                        ),
+                      ),
                     ),
-                    pw.SizedBox(height: 2),
-                    pw.Align(
-                      alignment: pw.Alignment.centerLeft,
-                      child: pw.Text('(ঘাটতি তালিকার বিস্তারিত আলাদা কাগজে)',
-                          style: pw.TextStyle(font: font, fontSize: 8, color: PdfColors.grey700)),
+                    // Right: Summary Table (মোট ব্যয়, বিগত ঘাটতি, সর্বমোট ব্যয়, সর্বমোট আয়, উদ্বৃত্ত/ঘাটতি)
+                    pw.Expanded(
+                      flex: 32,
+                      child: pw.Table(
+                        border: pw.TableBorder.all(width: 0.5, color: primaryBlue),
+                        columnWidths: const {
+                          0: pw.FlexColumnWidth(2),
+                          1: pw.FlexColumnWidth(1.2),
+                        },
+                        children: [
+                          _buildSummaryRow(
+                              'মোট ব্যয়', motBay),
+                          _buildSummaryRow(
+                              'বিগত সেশন/মাসের ঘাটতি',
+                              report.bigotoSeshonMasherGhatti),
+                          _buildSummaryRow(
+                              'সর্বমোট ব্যয়', sorbomotBay,
+                              isBold: true),
+                          _buildSummaryRow(
+                              'সর্বমোট আয়', sorbomotAy,
+                              isBold: true),
+                          _buildSummaryRow(
+                              'উদ্বৃত্ত/ঘাটতি', udbrittoBaGhatti,
+                              isBold: true),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -235,54 +353,115 @@ class StudentBaytulmalPdfService {
 
               pw.Spacer(),
 
-              // Footer: President Signature
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.end,
-                children: [
-                  pw.Column(
-                    children: [
-                      pw.Container(width: 120, height: 1, color: PdfColors.black),
-                      pw.SizedBox(height: 4),
-                      pw.Text('সভাপতির স্বাক্ষর', style: pw.TextStyle(font: font, fontSize: 11)),
-                    ],
-                  ),
-                ],
+              // ================= FOOTER SIGNATURE =================
+              pw.Align(
+                alignment: pw.Alignment.bottomRight,
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.center,
+                  children: [
+                    PdfExportService.bWidget(
+                        '..................................................',
+                        fontSize: 9.5),
+                    pw.SizedBox(height: 3),
+                    PdfExportService.bWidget(
+                        report.presidentSignature.isNotEmpty
+                            ? 'সভাপতির স্বাক্ষর: ${report.presidentSignature}'
+                            : 'সভাপতির স্বাক্ষর',
+                        fontSize: 9.5,
+                        fontWeight: pw.FontWeight.bold),
+                  ],
+                ),
               ),
+              pw.SizedBox(height: 4),
             ],
           );
         },
       ),
     );
 
+    return pdf.save();
+  }
+
+  /// শেয়ার / প্রিন্ট করার অ্যাকশন সুবিধা
+  static Future<void> generateAndSharePdf(BaytulmalReportEntity report) async {
+    final bytes = await generatePdfBytes(report: report);
     await Printing.sharePdf(
-      bytes: await pdf.save(),
-      filename: 'baytulmal_report_${report.year}_${report.month}.pdf',
+      bytes: bytes,
+      filename:
+          'chatro_baytulmal_report_${report.branch.isEmpty ? "shakha" : report.branch}_${report.month.isEmpty ? "month" : report.month}.pdf',
     );
   }
 
-  static pw.Widget _th(String text, {required pw.Font font, pw.TextAlign align = pw.TextAlign.left}) {
-    return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-      child: pw.Text(text, style: pw.TextStyle(font: font, fontSize: 10), textAlign: align),
-    );
-  }
+  // Helper row builder for main tables (Taka & Poisa split)
+  static pw.TableRow _buildRow(String label, double val,
+      {bool forceEmpty = false}) {
+    final (taka, poisa) = _formatTakaPoisa(val, forceEmpty: forceEmpty);
 
-  static pw.TableRow _tRow(String title, String taka, String paisa, pw.Font font) {
     return pw.TableRow(
       children: [
         pw.Padding(
-          padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-          child: pw.Text(title, style: pw.TextStyle(font: font, fontSize: 9)),
+          padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 2.5),
+          child: PdfExportService.bWidget(label, fontSize: 9),
         ),
         pw.Padding(
-          padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-          child: pw.Text(taka.isEmpty ? '0' : taka, style: pw.TextStyle(font: font, fontSize: 9), textAlign: pw.TextAlign.right),
+          padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 2.5),
+          child: PdfExportService.bWidget(taka,
+              fontSize: 9, textAlign: pw.TextAlign.center),
         ),
         pw.Padding(
-          padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-          child: pw.Text(paisa.isEmpty ? '0' : paisa, style: pw.TextStyle(font: font, fontSize: 9), textAlign: pw.TextAlign.right),
+          padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 2.5),
+          child: PdfExportService.bWidget(poisa,
+              fontSize: 9, textAlign: pw.TextAlign.center),
         ),
       ],
     );
+  }
+
+  // Helper summary row builder (Label, Taka, Poisa)
+  static pw.TableRow _buildSummaryRow(String label, double val,
+      {bool isBold = false}) {
+    final (taka, poisa) = _formatTakaPoisa(val, isSummary: true);
+
+    return pw.TableRow(
+      children: [
+        pw.Padding(
+          padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 2.5),
+          child: PdfExportService.bWidget(label,
+              fontSize: 8.5,
+              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 2.5),
+          child: PdfExportService.bWidget(taka,
+              fontSize: 8.5,
+              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+              textAlign: pw.TextAlign.center),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 2.5),
+          child: PdfExportService.bWidget(poisa,
+              fontSize: 8.5,
+              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+              textAlign: pw.TextAlign.center),
+        ),
+      ],
+    );
+  }
+
+  // Formats double value into Taka and Poisa strings
+  static (String, String) _formatTakaPoisa(double amount,
+      {bool forceEmpty = false, bool isSummary = false}) {
+    if (forceEmpty) {
+      return ('', '');
+    }
+    if (amount == 0 && !isSummary) {
+      return ('', '');
+    }
+
+    final taka = amount.truncate().toString();
+    final poisaVal = ((amount - amount.truncate()).abs() * 100).round();
+    final poisa = poisaVal == 0 ? '০০' : poisaVal.toString().padLeft(2, '0');
+
+    return (taka, poisa);
   }
 }

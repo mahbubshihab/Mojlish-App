@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/datasources/personal_report_remote_data_source.dart';
 import '../../data/repositories/personal_report_repository_impl.dart';
 import '../bloc/personal_report_bloc.dart';
-import '../../../common/widgets/staggered_month_grid_book.dart';
+import '../../../../common/widgets/staggered_month_grid_book.dart';
 import 'personal_report_page.dart';
 
 class PersonalReportBookScreen extends StatelessWidget {

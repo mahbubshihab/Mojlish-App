@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../common/widgets/custom_labeled_input_field.dart';
 import '../bloc/branch_plan_bloc.dart';
 import '../bloc/branch_plan_event.dart';
 import '../bloc/branch_plan_state.dart';
@@ -47,23 +48,24 @@ class BranchPlanScreen extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: TextField(
+                      child: CustomLabeledInputField(
+                        label: 'শাখা',
                         controller: _branchNameController,
-                        decoration: const InputDecoration(labelText: 'শাখা'),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: TextField(
+                      child: CustomLabeledInputField(
+                        label: 'মাস',
                         controller: _monthController,
-                        decoration: const InputDecoration(labelText: 'মাস'),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: TextField(
+                      child: CustomLabeledInputField(
+                        label: 'সন',
                         controller: _yearController,
-                        decoration: const InputDecoration(labelText: 'সন'),
+                        keyboardType: TextInputType.number,
                       ),
                     ),
                   ],
