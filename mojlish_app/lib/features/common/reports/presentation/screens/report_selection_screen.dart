@@ -285,36 +285,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen> {
                   const SizedBox(height: 12),
 
                   _buildMinimalReportCard(
-                    title: 'বার্ষিক / ষান্মাসic / দ্বি-মাসিক পরিকল্পনা',
-                    icon: Icons.assignment_rounded,
-                    color: const Color(0xFF8B5CF6),
-                    cardBg: cardBg,
-                    borderColor: borderColor,
-                    textLight: textLight,
-                    textMuted: textMuted,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const StudentPeriodPlanBookScreen()),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  _buildMinimalReportCard(
-                    title: 'ব্যক্তিগত মাসিক পরিকল্পনা',
-                    icon: Icons.person_outline_rounded,
-                    color: const Color(0xFF0D9488),
-                    cardBg: cardBg,
-                    borderColor: borderColor,
-                    textLight: textLight,
-                    textMuted: textMuted,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const StudentPersonalPlanBookScreen()),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  _buildMinimalReportCard(
                     title: 'বায়তুলমাল রিপোর্ট',
                     icon: Icons.account_balance_wallet_rounded,
                     color: const Color(0xFFD97706),

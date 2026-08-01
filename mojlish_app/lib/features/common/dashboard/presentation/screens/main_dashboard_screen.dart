@@ -10,7 +10,7 @@ import 'package:mojlish_app/features/khelafat_majlis/executive_rules/presentatio
 import 'package:mojlish_app/features/khelafat_majlis/overview/presentation/pages/overview_page.dart' as khelafat_overview;
 import 'package:mojlish_app/features/women_majlis/overview/presentation/pages/overview_page.dart' as women_overview;
 import 'package:mojlish_app/features/youth_majlis/overview/presentation/pages/overview_screen.dart' as youth_overview;
-import 'package:mojlish_app/features/student_majlis/period_plan/presentation/screens/student_period_plan_book_screen.dart' as student_plan;
+import 'package:mojlish_app/features/student_majlis/overview/presentation/screens/student_overview_screen.dart' as student_overview;
 import 'package:mojlish_app/features/common/profile/presentation/screens/profile_screen.dart';
 
 import 'package:mojlish_app/core/constants/majlis_assets.dart';
@@ -271,6 +271,8 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
             page = const women_overview.WomenMajlisOverviewPage();
           } else if (selectedMajlis == 'যুব মজলিস') {
             page = const youth_overview.OverviewScreen();
+          } else if (selectedMajlis == 'ছাত্র মজলিস') {
+            page = const student_overview.StudentOverviewScreen();
           } else {
             page = const khelafat_overview.OverviewPage();
           }
@@ -279,24 +281,8 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
       ),
     );
 
-    // 3. Manifesto / Call / Plan
-    if (selectedMajlis == 'ছাত্র মজলিস') {
-      cards.add(
-        _buildMenuCard(
-          context,
-          title: 'কর্ম পরিকল্পনা',
-          icon: Icons.assignment_outlined,
-          iconColor: const Color(0xFF9333EA),
-          iconBgColor: pPurpleBg,
-          cardBg: cardBg,
-          borderColor: borderColor,
-          textTitle: textTitle,
-          onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const student_plan.StudentPeriodPlanBookScreen()));
-          },
-        ),
-      );
-    } else if (selectedMajlis == 'মহিলা মজলিস') {
+    // 3. Manifesto / Call
+    if (selectedMajlis == 'মহিলা মজলিস') {
       cards.add(
         _buildMenuCard(
           context,
