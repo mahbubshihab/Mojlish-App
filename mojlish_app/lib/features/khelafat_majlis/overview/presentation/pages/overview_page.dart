@@ -33,9 +33,8 @@ class OverviewView extends StatefulWidget {
 class _OverviewViewState extends State<OverviewView> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final ScrollController _chipScrollController = ScrollController();
+  String _searchQuery = '';
   int _selectedSectionIndex = 0;
-  bool _isProgrammaticScroll = false;
 
   final GlobalKey _introKey = GlobalKey();
   final GlobalKey _goalKey = GlobalKey();
@@ -47,76 +46,17 @@ class _OverviewViewState extends State<OverviewView> {
   final GlobalKey _commitmentsKey = GlobalKey();
   final GlobalKey _officeKey = GlobalKey();
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  void _checkActiveSection() {
-    if (_isProgrammaticScroll) return;
-    final keys = [
-      _introKey,
-      _goalKey,
-      _programsKey,
-      _membershipKey,
-      _structureKey,
-      _baytulmalkey,
-      _principlesKey,
-      _commitmentsKey,
-      _officeKey,
-    ];
-
-    int newIndex = 0;
-    for (int i = 0; i < keys.length; i++) {
-      final ctx = keys[i].currentContext;
-      if (ctx != null) {
-        final box = ctx.findRenderObject() as RenderBox?;
-        if (box != null && box.hasSize) {
-          final position = box.localToGlobal(Offset.zero);
-          if (position.dy <= 200) {
-            newIndex = i;
-          }
-        }
-      }
-    }
-
-    if (newIndex != _selectedSectionIndex) {
-      setState(() {
-        _selectedSectionIndex = newIndex;
-      });
-      _scrollToChip(newIndex);
-    }
-  }
-
-  void _scrollToChip(int index) {
-    if (_chipScrollController.hasClients) {
-      final targetOffset = (index * 88.0).clamp(
-        0.0,
-        _chipScrollController.position.maxScrollExtent,
-      );
-      _chipScrollController.jumpTo(targetOffset);
-    }
-  }
-
   void _scrollToSection(GlobalKey key, int index) {
-    _isProgrammaticScroll = true;
     setState(() {
       _selectedSectionIndex = index;
     });
-    _scrollToChip(index);
     final context = key.currentContext;
     if (context != null) {
       Scrollable.ensureVisible(
         context,
-        duration: const Duration(milliseconds: 400),
+        duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
-      ).then((_) {
-        Future.delayed(const Duration(milliseconds: 150), () {
-          _isProgrammaticScroll = false;
-        });
-      });
-    } else {
-      _isProgrammaticScroll = false;
+      );
     }
   }
 
@@ -124,7 +64,6 @@ class _OverviewViewState extends State<OverviewView> {
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
-    _chipScrollController.dispose();
     super.dispose();
   }
 
@@ -203,27 +142,31 @@ class _OverviewViewState extends State<OverviewView> {
           } else if (state is OverviewLoaded) {
             final overview = state.overview;
 
+            // Search filter for political commitments
+            final filteredCommitments = overview.politicalCommitments.where((item) {
+              if (_searchQuery.isEmpty) return true;
+              return item.title.contains(_searchQuery) ||
+                  item.description.contains(_searchQuery);
+            }).toList();
+
             return Column(
               children: [
                 // Quick Section Navigation Bar
                 _buildSectionNavigationChips(primaryColor, isDark),
                 
                 Expanded(
-                  child: NotificationListener<ScrollNotification>(
-                    onNotification: (notification) {
-                      if (!_isProgrammaticScroll) {
-                        _checkActiveSection();
-                      }
-                      return false;
-                    },
-                    child: SingleChildScrollView(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // 1. Header Banner
                         _buildHeaderBanner(overview, primaryColor, isDark),
+                        const SizedBox(height: 20),
+
+                        // Search Bar
+                        _buildSearchBar(isDark, borderColor, textTitleColor),
                         const SizedBox(height: 20),
 
                         // 2. Intro Section
@@ -266,9 +209,9 @@ class _OverviewViewState extends State<OverviewView> {
                           child: Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: primaryColor.withValues(alpha: 0.08),
+                              color: primaryColor.withOpacity(0.08),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: primaryColor.withValues(alpha: 0.2)),
+                              border: Border.all(color: primaryColor.withOpacity(0.2)),
                             ),
                             child: Row(
                               children: [
@@ -455,7 +398,7 @@ class _OverviewViewState extends State<OverviewView> {
                                       lvl,
                                       style: const TextStyle(fontSize: 12),
                                     ),
-                                    backgroundColor: primaryColor.withValues(alpha: 0.1),
+                                    backgroundColor: primaryColor.withOpacity(0.1),
                                   );
                                 }).toList(),
                               ),
@@ -566,7 +509,7 @@ class _OverviewViewState extends State<OverviewView> {
                           borderColor: borderColor,
                           textTitleColor: textTitleColor,
                           child: Column(
-                            children: overview.politicalCommitments.map((item) {
+                            children: filteredCommitments.map((item) {
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 12),
                                 decoration: BoxDecoration(
@@ -664,11 +607,11 @@ class _OverviewViewState extends State<OverviewView> {
                                 children: [
                                   Chip(
                                     label: Text('বিনিময় : ${overview.callToAction.price}'),
-                                    backgroundColor: primaryColor.withValues(alpha: 0.1),
+                                    backgroundColor: primaryColor.withOpacity(0.1),
                                   ),
                                   Chip(
                                     label: Text('নিবন্ধন নং : ${overview.callToAction.regNo}'),
-                                    backgroundColor: primaryColor.withValues(alpha: 0.1),
+                                    backgroundColor: primaryColor.withOpacity(0.1),
                                   ),
                                 ],
                               )
@@ -680,9 +623,8 @@ class _OverviewViewState extends State<OverviewView> {
                     ),
                   ),
                 ),
-              ),
-            ],
-          );
+              ],
+            );
           }
           return const SizedBox.shrink();
         },
@@ -708,7 +650,6 @@ class _OverviewViewState extends State<OverviewView> {
       padding: const EdgeInsets.symmetric(vertical: 6),
       color: isDark ? const Color(0xFF162032) : Colors.white,
       child: ListView.builder(
-        controller: _chipScrollController,
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         itemCount: sections.length,
@@ -749,7 +690,7 @@ class _OverviewViewState extends State<OverviewView> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withValues(alpha: 0.3),
+            color: primaryColor.withOpacity(0.3),
             blurRadius: 15,
             offset: const Offset(0, 5),
           )
@@ -760,19 +701,13 @@ class _OverviewViewState extends State<OverviewView> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: Colors.white.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
-            child: Image.asset(
-              'assets/images/khelafot_majlish.png',
-              height: 48,
-              width: 48,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const Icon(
-                Icons.stars_rounded,
-                color: Colors.white,
-                size: 40,
-              ),
+            child: const Icon(
+              Icons.account_balance_rounded,
+              color: Colors.white,
+              size: 40,
             ),
           ),
           const SizedBox(height: 12),
@@ -799,7 +734,42 @@ class _OverviewViewState extends State<OverviewView> {
     );
   }
 
-
+  Widget _buildSearchBar(bool isDark, Color borderColor, Color textTitleColor) {
+    return TextField(
+      controller: _searchController,
+      onChanged: (val) {
+        setState(() {
+          _searchQuery = val.trim();
+        });
+      },
+      decoration: InputDecoration(
+        hintText: '২৫-দফা ও নীতিমালায় খুঁজুন...',
+        prefixIcon: const Icon(Icons.search_rounded),
+        suffixIcon: _searchQuery.isNotEmpty
+            ? IconButton(
+                icon: const Icon(Icons.clear_rounded),
+                onPressed: () {
+                  _searchController.clear();
+                  setState(() {
+                    _searchQuery = '';
+                  });
+                },
+              )
+            : null,
+        filled: true,
+        fillColor: isDark ? const Color(0xFF162032) : Colors.white,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: borderColor),
+        ),
+      ),
+    );
+  }
 
   Widget _buildSectionCard({
     required String title,
@@ -819,7 +789,7 @@ class _OverviewViewState extends State<OverviewView> {
         border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )

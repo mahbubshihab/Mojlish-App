@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:mojlish_app/features/student_majlis/baytulmal_report/presentation/screens/baytulmal_report_screen.dart';
+import '../screens/baytulmal_report_screen.dart';
+export '../screens/baytulmal_report_screen.dart';
 
-/// Legacy page wrapper exporting BaytulmalReportScreen for Student Majlis
+/// Legacy alias widget for BaytulmalReportScreen
 class BaytulmalReportPage extends StatelessWidget {
-  const BaytulmalReportPage({super.key});
+  final String? initialMonth;
+  final String? initialSession;
+
+  const BaytulmalReportPage({
+    super.key,
+    this.initialMonth,
+    this.initialSession,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const BaytulmalReportScreen();
+    return BaytulmalReportScreen(
+      initialMonth: initialMonth,
+      initialSession: initialSession,
+    );
   }
 }

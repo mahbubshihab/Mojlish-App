@@ -272,6 +272,11 @@ class ReportStorageService {
     return all[key];
   }
 
+  static Future<Map<String, dynamic>?> getZonalReport(int year, int month) async {
+    final entry = await getZonalEntry(year, month);
+    return entry?.toJson();
+  }
+
   // ===========================
   // বায়তুলমাল রিপোর্ট — CRUD & Offline Sync
   // ===========================
@@ -331,6 +336,11 @@ class ReportStorageService {
     return all[key];
   }
 
+  static Future<Map<String, dynamic>?> getBaytulmalReport(int year, int month) async {
+    final entry = await getBaytulmalReportEntry(year.toString(), month.toString().padLeft(2, '0'));
+    return entry?.toJson();
+  }
+
   static const String _branchReportKey = 'branch_reports_storage_key';
   static const String _branchPlanKey = 'branch_plans_storage_key';
 
@@ -341,6 +351,33 @@ class ReportStorageService {
     final key = '$year-${month.toString().padLeft(2, '0')}';
     all[key] = data;
     await prefs.setString(_branchReportKey, jsonEncode(all));
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final isOnline = await NetworkConnectivityService().isOnline;
+      if (isOnline) {
+        try {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('branch_reports')
+              .doc(key)
+              .set(data, SetOptions(merge: true));
+        } catch (_) {
+          await OfflineSyncManager.enqueueTask({
+            'type': 'branch_report',
+            'yearMonth': key,
+            'data': data,
+          });
+        }
+      } else {
+        await OfflineSyncManager.enqueueTask({
+          'type': 'branch_report',
+          'yearMonth': key,
+          'data': data,
+        });
+      }
+    }
   }
 
   static Future<Map<String, dynamic>?> getBranchReport(int year, int month) async {
@@ -359,6 +396,33 @@ class ReportStorageService {
     final key = '$year-${month.toString().padLeft(2, '0')}';
     all[key] = data;
     await prefs.setString(_branchPlanKey, jsonEncode(all));
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final isOnline = await NetworkConnectivityService().isOnline;
+      if (isOnline) {
+        try {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('branch_plans')
+              .doc(key)
+              .set(data, SetOptions(merge: true));
+        } catch (_) {
+          await OfflineSyncManager.enqueueTask({
+            'type': 'branch_plan',
+            'yearMonth': key,
+            'data': data,
+          });
+        }
+      } else {
+        await OfflineSyncManager.enqueueTask({
+          'type': 'branch_plan',
+          'yearMonth': key,
+          'data': data,
+        });
+      }
+    }
   }
 
   static Future<Map<String, dynamic>?> getBranchPlan(int year, int month) async {

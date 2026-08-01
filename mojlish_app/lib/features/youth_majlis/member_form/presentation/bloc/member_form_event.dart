@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:mojlish_app/features/youth_majlis/member_form/domain/entities/member_form_entity.dart';
+import '../../domain/entities/member_form_entity.dart';
 
 abstract class MemberFormEvent extends Equatable {
   const MemberFormEvent();

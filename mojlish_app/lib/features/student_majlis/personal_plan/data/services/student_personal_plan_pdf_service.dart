@@ -3,23 +3,16 @@ import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import '../../domain/entities/personal_plan_entity.dart';
+import 'package:mojlish_app/core/services/pdf_export_service.dart';
 import 'package:mojlish_app/features/common/reports/presentation/screens/pdf_preview_screen.dart';
+import '../../domain/entities/personal_plan_entity.dart';
 
 /// বাংলাদেশ ইসলামী ছাত্র মজলিস - ব্যক্তিগত মাসিক পরিকল্পনা PDF জেনারেটর সার্ভিস
+/// বিজয় এনকোডিং (SutonnyMJ ফন্ট) ও ওশান ব্লু (#0077B6) ডিজাইনে নির্মিত
 class StudentPersonalPlanPdfService {
   static Future<Uint8List> generatePdfBytes(PersonalPlanEntity plan) async {
-    pw.Font fontRegular;
-    pw.Font fontBold;
-
-    try {
-      fontRegular = await PdfGoogleFonts.notoSansBengaliRegular();
-      fontBold = await PdfGoogleFonts.notoSansBengaliBold();
-    } catch (_) {
-      final fontData = await rootBundle.load('assets/fonts/kalpurush.ttf');
-      fontRegular = pw.Font.ttf(fontData);
-      fontBold = pw.Font.ttf(fontData);
-    }
+    final fontRegular = await PdfExportService.loadSutonnyFont();
+    final fontBold = await PdfExportService.loadBengaliBoldFont();
 
     final pdf = pw.Document(
       theme: pw.ThemeData.withFont(
@@ -28,10 +21,8 @@ class StudentPersonalPlanPdfService {
       ),
     );
 
-    final textStyleSmall = pw.TextStyle(font: fontRegular, fontSize: 8.5);
-    final textStyleBoldSmall = pw.TextStyle(font: fontBold, fontSize: 8.5, color: PdfColors.blue900);
-    final sectionTitleStyle = pw.TextStyle(font: fontBold, fontSize: 10, color: PdfColor.fromInt(0xFF1E3A8A));
-    const headerBlue = PdfColor.fromInt(0xFF1E3A8A);
+    final oceanBlue = PdfColor.fromHex('#0077B6');
+    final titleBgColor = PdfColor.fromHex('#E0F2FE');
 
     pw.Widget buildDottedInline({
       required String label,
@@ -39,6 +30,7 @@ class StudentPersonalPlanPdfService {
       String prefix = '■ ',
       String suffix = '',
       int defaultDots = 15,
+      double fontSize = 8.5,
     }) {
       final hasValue = value.trim().isNotEmpty;
       final displayVal = hasValue ? value.trim() : ('.' * defaultDots);
@@ -47,18 +39,46 @@ class StudentPersonalPlanPdfService {
         crossAxisAlignment: pw.CrossAxisAlignment.center,
         children: [
           if (prefix.isNotEmpty)
-            pw.Text(prefix, style: pw.TextStyle(font: fontBold, fontSize: 8.5, color: PdfColors.blue800)),
-          pw.Text(label, style: textStyleSmall),
+            PdfExportService.bWidget(
+              prefix,
+              fontSize: fontSize,
+              color: oceanBlue,
+              fontWeight: pw.FontWeight.bold,
+            ),
+          PdfExportService.bWidget(label, fontSize: fontSize),
           pw.SizedBox(width: 2),
-          pw.Text(
+          PdfExportService.bWidget(
             displayVal,
-            style: hasValue ? textStyleBoldSmall : pw.TextStyle(font: fontRegular, fontSize: 8.5, color: PdfColors.grey600),
+            fontSize: fontSize,
+            fontWeight: hasValue ? pw.FontWeight.bold : pw.FontWeight.normal,
+            color: hasValue ? PdfColors.blue900 : PdfColors.grey600,
           ),
           if (suffix.isNotEmpty) ...[
             pw.SizedBox(width: 2),
-            pw.Text(suffix, style: textStyleSmall),
+            PdfExportService.bWidget(suffix, fontSize: fontSize),
           ],
         ],
+      );
+    }
+
+    pw.Widget buildSectionHeader(String title) {
+      return pw.Container(
+        width: double.infinity,
+        padding: const pw.EdgeInsets.symmetric(vertical: 2.5, horizontal: 6),
+        margin: const pw.EdgeInsets.only(top: 6, bottom: 4),
+        decoration: pw.BoxDecoration(
+          color: titleBgColor,
+          borderRadius: pw.BorderRadius.circular(2),
+          border: pw.Border(
+            left: pw.BorderSide(color: oceanBlue, width: 3),
+          ),
+        ),
+        child: PdfExportService.bWidget(
+          title,
+          fontSize: 9.5,
+          fontWeight: pw.FontWeight.bold,
+          color: oceanBlue,
+        ),
       );
     }
 
@@ -70,61 +90,76 @@ class StudentPersonalPlanPdfService {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              // Header Title Box
+              // Top Header Title Box
               pw.Container(
                 width: double.infinity,
-                padding: const pw.EdgeInsets.symmetric(vertical: 5),
+                padding: const pw.EdgeInsets.symmetric(vertical: 6),
                 decoration: pw.BoxDecoration(
-                  color: headerBlue,
-                  borderRadius: pw.BorderRadius.circular(3),
+                  color: oceanBlue,
+                  borderRadius: pw.BorderRadius.circular(4),
                 ),
                 child: pw.Center(
-                  child: pw.Text(
+                  child: PdfExportService.bWidget(
                     'ব্যক্তিগত মাসিক পরিকল্পনা',
-                    style: pw.TextStyle(font: fontBold, fontSize: 14, color: PdfColors.white),
+                    fontSize: 14,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.white,
+                    textAlign: pw.TextAlign.center,
                   ),
                 ),
-              ),
-              pw.SizedBox(height: 10),
-
-              // Info Section
-              pw.Row(
-                children: [
-                  pw.Expanded(
-                    flex: 3,
-                    child: buildDottedInline(label: 'নাম', value: plan.name, prefix: '', defaultDots: 35),
-                  ),
-                  pw.SizedBox(width: 10),
-                  pw.Expanded(
-                    flex: 2,
-                    child: buildDottedInline(label: 'শাখা', value: plan.branch, prefix: '', defaultDots: 25),
-                  ),
-                ],
-              ),
-              pw.SizedBox(height: 4),
-              pw.Row(
-                children: [
-                  pw.Expanded(
-                    flex: 3,
-                    child: buildDottedInline(label: 'দায়িত্ব', value: plan.responsibility, prefix: '', defaultDots: 35),
-                  ),
-                  pw.SizedBox(width: 10),
-                  pw.Expanded(
-                    flex: 1,
-                    child: buildDottedInline(label: 'মাস', value: plan.month, prefix: '', defaultDots: 12),
-                  ),
-                  pw.SizedBox(width: 10),
-                  pw.Expanded(
-                    flex: 1,
-                    child: buildDottedInline(label: 'সন', value: plan.year, prefix: '', defaultDots: 10),
-                  ),
-                ],
               ),
               pw.SizedBox(height: 8),
 
+              // Top Metadata Bar
+              pw.Container(
+                width: double.infinity,
+                padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: pw.BoxDecoration(
+                  color: PdfColor.fromHex('#F8FAFC'),
+                  borderRadius: pw.BorderRadius.circular(4),
+                  border: pw.Border.all(color: oceanBlue, width: 0.6),
+                ),
+                child: pw.Column(
+                  children: [
+                    pw.Row(
+                      children: [
+                        pw.Expanded(
+                          flex: 3,
+                          child: buildDottedInline(label: 'নাম:', value: plan.name, prefix: '', defaultDots: 35),
+                        ),
+                        pw.SizedBox(width: 10),
+                        pw.Expanded(
+                          flex: 2,
+                          child: buildDottedInline(label: 'শাখা:', value: plan.branch, prefix: '', defaultDots: 25),
+                        ),
+                      ],
+                    ),
+                    pw.SizedBox(height: 3),
+                    pw.Row(
+                      children: [
+                        pw.Expanded(
+                          flex: 3,
+                          child: buildDottedInline(label: 'দায়িত্ব:', value: plan.responsibility, prefix: '', defaultDots: 35),
+                        ),
+                        pw.SizedBox(width: 10),
+                        pw.Expanded(
+                          flex: 1,
+                          child: buildDottedInline(label: 'মাস:', value: plan.month, prefix: '', defaultDots: 12),
+                        ),
+                        pw.SizedBox(width: 10),
+                        pw.Expanded(
+                          flex: 1,
+                          child: buildDottedInline(label: 'সন:', value: plan.year, prefix: '', defaultDots: 10),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 4),
+
               // 1. অধ্যয়ন
-              pw.Text('অধ্যয়ন', style: sectionTitleStyle),
-              pw.SizedBox(height: 3),
+              buildSectionHeader('১. অধ্যয়ন'),
               pw.Row(
                 children: [
                   buildDottedInline(label: 'কুরআন : আয়াত সংখ্যা ', value: plan.quranAyatCount, defaultDots: 12),
@@ -187,11 +222,9 @@ class StudentPersonalPlanPdfService {
                   buildDottedInline(label: '• সময় নির্ধারণ : ', value: plan.textbookClassTime, prefix: '', defaultDots: 16),
                 ],
               ),
-              pw.SizedBox(height: 8),
 
               // 2. ইবাদত
-              pw.Text('ইবাদত', style: sectionTitleStyle),
-              pw.SizedBox(height: 3),
+              buildSectionHeader('২. ইবাদত'),
               pw.Row(
                 children: [
                   buildDottedInline(label: 'জামাআতে নামায ', value: plan.jamatNamazWaqt, suffix: 'ওয়াক্ত', defaultDots: 14),
@@ -201,11 +234,9 @@ class StudentPersonalPlanPdfService {
               ),
               pw.SizedBox(height: 3),
               buildDottedInline(label: 'নফল ইবাদত ', value: plan.nafalIbadat, defaultDots: 50),
-              pw.SizedBox(height: 8),
 
               // 3. দাওয়াতি কাজ
-              pw.Text('দাওয়াতি কাজ', style: sectionTitleStyle),
-              pw.SizedBox(height: 3),
+              buildSectionHeader('৩. দাওয়াতি কাজ'),
               pw.Row(
                 children: [
                   buildDottedInline(label: 'বন্ধু টার্গেট/যোগাযোগ ', value: plan.friendTargetContactCount, suffix: 'জন', defaultDots: 10),
@@ -247,11 +278,9 @@ class StudentPersonalPlanPdfService {
                   buildDottedInline(label: 'অন্যান্য দাওয়াতি উপকরণ বিতরণ ', value: plan.otherDawahMaterialsDistribution, defaultDots: 25),
                 ],
               ),
-              pw.SizedBox(height: 8),
 
               // 4. সাংগঠনিক কাজ
-              pw.Text('সাংগঠনিক কাজ', style: sectionTitleStyle),
-              pw.SizedBox(height: 3),
+              buildSectionHeader('৪. সাংগঠনিক কাজ'),
               pw.Row(
                 children: [
                   buildDottedInline(label: 'কর্মী মানে উন্নীতকরণ ', value: plan.workerStandardUpgradeCount, suffix: 'জন', defaultDots: 10),
@@ -282,11 +311,9 @@ class StudentPersonalPlanPdfService {
                   buildDottedInline(label: 'নাম ', value: plan.workerNames, prefix: '', defaultDots: 50),
                 ],
               ),
-              pw.SizedBox(height: 8),
 
               // 5. বিবিধ
-              pw.Text('বিবিধ', style: sectionTitleStyle),
-              pw.SizedBox(height: 3),
+              buildSectionHeader('৫. বিবিধ'),
               pw.Row(
                 children: [
                   buildDottedInline(label: 'দৈনিক /অন্যান্য পত্রিকা পাঠ (গড়ে) ', value: plan.dailyOtherNewspaperAvgHours, suffix: 'ঘণ্টা', defaultDots: 10),
@@ -300,11 +327,9 @@ class StudentPersonalPlanPdfService {
               buildDottedInline(label: 'পারিবারিক/সামাজিক কাজে সময়দান (গড়ে) ', value: plan.familySocialWorkAvgHours, suffix: 'ঘণ্টা', defaultDots: 15),
               pw.SizedBox(height: 3),
               buildDottedInline(label: 'অন্যান্য ', value: plan.others, defaultDots: 50),
-              pw.SizedBox(height: 8),
 
               // 6. সংশ্লিষ্টদের জন্য
-              pw.Text('সংশ্লিষ্টদের জন্য', style: sectionTitleStyle),
-              pw.SizedBox(height: 3),
+              buildSectionHeader('৬. সংশ্লিষ্টদের জন্য'),
               pw.Row(
                 children: [
                   buildDottedInline(label: 'সদস্য পর্যায়ে উন্নীতকরণ টার্গেট ', value: plan.memberLevelUpgradeTargetCount, suffix: 'জন', defaultDots: 8),
@@ -323,14 +348,14 @@ class StudentPersonalPlanPdfService {
 
               pw.Spacer(),
 
-              // Signatures Footer
+              // Footer Signatures
               pw.Padding(
                 padding: const pw.EdgeInsets.only(top: 10, bottom: 5),
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text('দায়িত্বশীলের স্বাক্ষর', style: textStyleSmall),
-                    pw.Text('পরিকল্পনা গ্রহণকারীর স্বাক্ষর', style: textStyleSmall),
+                    PdfExportService.bWidget('দায়িত্বশীলদের স্বাক্ষর', fontSize: 8.5),
+                    PdfExportService.bWidget('পরিকল্পনা গ্রহণকারীর স্বাক্ষর', fontSize: 8.5),
                   ],
                 ),
               ),
@@ -343,21 +368,28 @@ class StudentPersonalPlanPdfService {
     return pdf.save();
   }
 
-  static Future<void> generateAndPrintPdf(PersonalPlanEntity plan, {BuildContext? context}) async {
+  static Future<void> generateAndPrintPdf(PersonalPlanEntity plan, [BuildContext? context]) async {
     final pdfBytes = await generatePdfBytes(plan);
-    final fileName = 'ছাত্র_মজলিস_ব্যক্তিগত_মাসিক_পরিকল্পনা_${plan.name.replaceAll(' ', '_')}.pdf';
-    if (context != null) {
-      await openPdfPreview(
+    if (context != null && context.mounted) {
+      await Navigator.push(
         context,
-        pdfBytes,
-        'ব্যক্তিগত মাসিক পরিকল্পনা',
-        fileName: fileName,
+        MaterialPageRoute(
+          builder: (_) => PdfPreviewScreen(
+            pdfBytes: pdfBytes,
+            fileName: 'ছাত্র_মজলিস_ব্যক্তিগত_মাসিক_পরিকল্পনা_${plan.name.replaceAll(' ', '_')}.pdf',
+            title: 'ব্যক্তিগত মাসিক পরিকল্পনা',
+          ),
+        ),
       );
     } else {
       await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => pdfBytes,
-        name: fileName,
+        name: 'ছাত্র_মজলিস_ব্যক্তিগত_মাসিক_পরিকল্পনা_${plan.name.replaceAll(' ', '_')}.pdf',
       );
     }
+  }
+
+  static Future<void> printOrDownloadPdf(PersonalPlanEntity plan) async {
+    await generateAndPrintPdf(plan);
   }
 }

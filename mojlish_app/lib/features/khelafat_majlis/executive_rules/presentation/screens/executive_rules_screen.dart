@@ -16,8 +16,8 @@ class _KhelafatExecutiveRulesScreenState
     extends State<KhelafatExecutiveRulesScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final ScrollController _chipScrollController = ScrollController();
 
+  String _searchQuery = '';
   String _selectedCategory = 'সবগুলো';
   final Map<String, bool> _expandedSections = {};
 
@@ -35,21 +35,9 @@ class _KhelafatExecutiveRulesScreenState
   @override
   void initState() {
     super.initState();
+    // Expand the first 3 sections by default
     for (int i = 0; i < ExecutiveRulesRepositoryData.sections.length; i++) {
       _expandedSections[ExecutiveRulesRepositoryData.sections[i].id] = i < 2;
-    }
-  }
-
-  void _onCategorySelected(String category, int index) {
-    setState(() {
-      _selectedCategory = category;
-    });
-    if (_chipScrollController.hasClients) {
-      final targetOffset = (index * 75.0).clamp(
-        0.0,
-        _chipScrollController.position.maxScrollExtent,
-      );
-      _chipScrollController.jumpTo(targetOffset);
     }
   }
 
@@ -57,13 +45,34 @@ class _KhelafatExecutiveRulesScreenState
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
-    _chipScrollController.dispose();
     super.dispose();
   }
 
   List<ExecutiveRuleSection> get _filteredSections {
     return ExecutiveRulesRepositoryData.sections.where((section) {
-      return _selectedCategory == 'সবগুলো' || section.category == _selectedCategory;
+      final matchesCategory = _selectedCategory == 'সবগুলো' ||
+          section.category == _selectedCategory;
+
+      if (_searchQuery.trim().isEmpty) {
+        return matchesCategory;
+      }
+
+      final query = _searchQuery.toLowerCase().trim();
+      final titleMatch = section.title.toLowerCase().contains(query);
+      final numMatch = section.sectionNumber.toLowerCase().contains(query);
+      final descMatch = section.description.toLowerCase().contains(query);
+
+      final itemsMatch = section.items.any((item) {
+        final itemTitle = item.title.toLowerCase().contains(query);
+        final itemContent = item.content.toLowerCase().contains(query);
+        final itemQuote = item.quote?.toLowerCase().contains(query) ?? false;
+        final itemBullets = item.bulletPoints
+            .any((b) => b.toLowerCase().contains(query));
+        return itemTitle || itemContent || itemQuote || itemBullets;
+      });
+
+      return matchesCategory &&
+          (titleMatch || numMatch || descMatch || itemsMatch);
     }).toList();
   }
 
@@ -100,7 +109,7 @@ class _KhelafatExecutiveRulesScreenState
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF059669).withValues(alpha: 0.15),
+                      color: const Color(0xFF059669).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
@@ -235,50 +244,114 @@ class _KhelafatExecutiveRulesScreenState
           ),
           body: Column(
             children: [
-              // Filter Chips Container
+              // Search & Filter Header Container
               Container(
                 color: isDark ? const Color(0xFF162032) : Colors.white,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                child: SizedBox(
-                  height: 36,
-                  child: ListView.separated(
-                    controller: _chipScrollController,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _categories.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(width: 8),
-                    itemBuilder: (context, index) {
-                      final category = _categories[index];
-                      final isSelected = _selectedCategory == category;
-                      return ChoiceChip(
-                        label: Text(
-                          category,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                            color: isSelected
-                                ? Colors.white
-                                : (isDark
-                                    ? const Color(0xFFCBD5E1)
-                                    : const Color(0xFF475569)),
-                          ),
-                        ),
-                        selected: isSelected,
-                        selectedColor: const Color(0xFF059669),
-                        backgroundColor: isDark
+                child: Column(
+                  children: [
+                    // Search Bar
+                    TextField(
+                      controller: _searchController,
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
+                      },
+                      style: TextStyle(color: textColor, fontSize: 14),
+                      decoration: InputDecoration(
+                        hintText: 'অনুচ্ছেদ বা নিয়ম খুঁজুন...',
+                        hintStyle:
+                            TextStyle(color: subTextColor, fontSize: 13),
+                        prefixIcon: const Icon(Icons.search_rounded,
+                            color: Color(0xFF059669)),
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear_rounded,
+                                    size: 18),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() {
+                                    _searchQuery = '';
+                                  });
+                                },
+                              )
+                            : null,
+                        filled: true,
+                        fillColor: isDark
                             ? const Color(0xFF0D1B2A)
                             : const Color(0xFFF1F5F9),
-                        onSelected: (selected) {
-                          if (selected) {
-                            _onCategorySelected(category, index);
-                          }
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 16),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: borderColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: borderColor),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide:
+                              const BorderSide(color: Color(0xFF059669)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Category Chips
+                    SizedBox(
+                      height: 36,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _categories.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(width: 8),
+                        itemBuilder: (context, index) {
+                          final category = _categories[index];
+                          final isSelected = _selectedCategory == category;
+                          return ChoiceChip(
+                            label: Text(
+                              category,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                color: isSelected
+                                    ? Colors.white
+                                    : (isDark
+                                        ? const Color(0xFFCBD5E1)
+                                        : const Color(0xFF475569)),
+                              ),
+                            ),
+                            selected: isSelected,
+                            selectedColor: const Color(0xFF059669),
+                            backgroundColor: isDark
+                                ? const Color(0xFF0D1B2A)
+                                : const Color(0xFFF1F5F9),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              side: BorderSide(
+                                color: isSelected
+                                    ? const Color(0xFF059669)
+                                    : borderColor,
+                              ),
+                            ),
+                            onSelected: (selected) {
+                              if (selected) {
+                                setState(() {
+                                  _selectedCategory = category;
+                                });
+                              }
+                            },
+                          );
                         },
-                      );
-                    },
-                  ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
@@ -379,13 +452,13 @@ class _KhelafatExecutiveRulesScreenState
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isExpanded
-              ? const Color(0xFF059669).withValues(alpha: 0.5)
+              ? const Color(0xFF059669).withOpacity(0.5)
               : borderColor,
           width: isExpanded ? 1.5 : 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
@@ -406,7 +479,7 @@ class _KhelafatExecutiveRulesScreenState
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF059669).withValues(alpha: 0.12),
+                      color: const Color(0xFF059669).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(section.icon,
@@ -425,7 +498,7 @@ class _KhelafatExecutiveRulesScreenState
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF059669).withValues(alpha: 0.15),
+                                color: const Color(0xFF059669).withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -489,7 +562,7 @@ class _KhelafatExecutiveRulesScreenState
                             : const Color(0xFFECFDF5),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                            color: const Color(0xFF059669).withValues(alpha: 0.2)),
+                            color: const Color(0xFF059669).withOpacity(0.2)),
                       ),
                       child: Row(
                         children: [
@@ -595,7 +668,7 @@ class _KhelafatExecutiveRulesScreenState
               style: TextStyle(
                 fontSize: 13.5,
                 height: 1.5,
-                color: textColor.withValues(alpha: 0.9),
+                color: textColor.withOpacity(0.9),
               ),
             ),
           ],
@@ -611,7 +684,7 @@ class _KhelafatExecutiveRulesScreenState
                     ? const Color(0xFF2B2111)
                     : const Color(0xFFFFFBEB),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.4)),
+                border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -660,7 +733,7 @@ class _KhelafatExecutiveRulesScreenState
                         style: TextStyle(
                           fontSize: 13,
                           height: 1.45,
-                          color: textColor.withValues(alpha: 0.9),
+                          color: textColor.withOpacity(0.9),
                         ),
                       ),
                     ),

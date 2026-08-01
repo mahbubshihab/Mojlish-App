@@ -27,18 +27,7 @@ class ReportBookScreen extends StatelessWidget {
   }
 
   Color _getMajlisColor() {
-    switch (majlisType) {
-      case MajlisType.khelafat:
-        return const Color(0xFF10B981);
-      case MajlisType.chatro:
-        return const Color(0xFF006A4E);
-      case MajlisType.jubo:
-        return const Color(0xFF2563EB);
-      case MajlisType.sromik:
-        return const Color(0xFFD97706);
-      case MajlisType.mohila:
-        return const Color(0xFFDB2777);
-    }
+    return const Color(0xFF10B981);
   }
 
   @override
@@ -72,6 +61,7 @@ class ReportBookScreen extends StatelessWidget {
               majlisType: majlisType,
               initialYear: now.year,
               initialMonth: now.month,
+              reportCategory: ReportCategory.personal,
             ),
           ),
         );
@@ -87,6 +77,7 @@ class ReportBookScreen extends StatelessWidget {
           ),
         );
       },
+      showTodayButton: true,
     );
   }
 }

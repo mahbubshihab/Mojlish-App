@@ -40,18 +40,7 @@ class ChatroBaytulmalReportBookScreen extends StatelessWidget {
               majlisType: MajlisType.chatro,
               initialYear: DateTime.now().year,
               initialMonth: DateTime.now().month,
-            ),
-          ),
-        );
-      },
-      onTodayPressed: () {
-        final now = DateTime.now();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => BaytulmalReportScreen(
-              initialMonth: _monthNames[now.month - 1],
-              initialSession: now.year.toString(),
+              reportCategory: ReportCategory.baytulmalReport,
             ),
           ),
         );

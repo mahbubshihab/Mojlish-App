@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mojlish_app/features/women_majlis/resources/ahobban_mohila/presentation/screens/ahobban_screen.dart';
 
 /// Women Majlis Call Manifesto Page
 class CallManifestoPage extends StatelessWidget {
@@ -7,6 +6,10 @@ class CallManifestoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const AhobbanMohilaScreen();
+    return const Scaffold(
+      body: Center(
+        child: Text('বাংলাদেশ ইসলামী মহিলা মজলিস — আমাদের আহ্বান'),
+      ),
+    );
   }
 }

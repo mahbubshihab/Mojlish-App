@@ -15,7 +15,7 @@ class KhelafatBranchReportBookScreen extends StatelessWidget {
       cardTitle: 'শাখা রিপোর্ট',
       cardSubtitle: 'মাসিক সাংগঠনিক বিবরণী, দাওয়াত, বৈঠক ও বায়তুলমাল রিপোর্ট',
       icon: Icons.assessment_rounded,
-      accentColor: const Color(0xFFC084FC),
+      accentColor: const Color(0xFF2563EB),
       onMonthSelected: (year, month) {
         Navigator.push(
           context,
@@ -32,16 +32,8 @@ class KhelafatBranchReportBookScreen extends StatelessWidget {
               majlisType: MajlisType.khelafat,
               initialYear: DateTime.now().year,
               initialMonth: DateTime.now().month,
+              reportCategory: ReportCategory.branchReport,
             ),
-          ),
-        );
-      },
-      onTodayPressed: () {
-        final now = DateTime.now();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => BranchReportScreen(year: now.year, month: now.month),
           ),
         );
       },

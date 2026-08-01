@@ -572,9 +572,10 @@ class _JoinOrganizationScreenState extends State<JoinOrganizationScreen> {
               ),
             ),
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
   }
 
   Widget _buildBloodGroupDropdown(Color textLight, Color textMuted, Color borderColor, Color primary) {

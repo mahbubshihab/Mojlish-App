@@ -32,16 +32,8 @@ class KhelafatBaytulmalReportBookScreen extends StatelessWidget {
               majlisType: MajlisType.khelafat,
               initialYear: DateTime.now().year,
               initialMonth: DateTime.now().month,
+              reportCategory: ReportCategory.baytulmalReport,
             ),
-          ),
-        );
-      },
-      onTodayPressed: () {
-        final now = DateTime.now();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => BaytulmalReportScreen(year: now.year, month: now.month),
           ),
         );
       },

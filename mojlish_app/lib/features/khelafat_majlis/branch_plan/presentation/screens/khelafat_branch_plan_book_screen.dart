@@ -15,7 +15,7 @@ class KhelafatBranchPlanBookScreen extends StatelessWidget {
       cardTitle: 'শাখা পরিকল্পনা',
       cardSubtitle: 'মাসিক সাংগঠনিক লক্ষ্যমাত্রা, দাওয়াত, বায়তুলমাল ও সফর পরিকল্পনা',
       icon: Icons.calendar_month_rounded,
-      accentColor: const Color(0xFF06B6D4),
+      accentColor: const Color(0xFF8B5CF6),
       onMonthSelected: (year, month) {
         Navigator.push(
           context,
@@ -32,16 +32,8 @@ class KhelafatBranchPlanBookScreen extends StatelessWidget {
               majlisType: MajlisType.khelafat,
               initialYear: DateTime.now().year,
               initialMonth: DateTime.now().month,
+              reportCategory: ReportCategory.branchPlan,
             ),
-          ),
-        );
-      },
-      onTodayPressed: () {
-        final now = DateTime.now();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => KhelafatBranchPlanScreen(year: now.year, month: now.month),
           ),
         );
       },

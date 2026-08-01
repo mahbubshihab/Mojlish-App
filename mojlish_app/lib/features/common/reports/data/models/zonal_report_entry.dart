@@ -136,6 +136,17 @@ class ZonalReportEntry {
     };
   }
 
+  factory ZonalReportEntry.fromMap(Map<String, dynamic>? map, [int? year, int? month]) {
+    if (map == null) {
+      return ZonalReportEntry(
+        year: year?.toString() ?? '',
+        month: month?.toString() ?? '',
+        zoneName: '',
+      );
+    }
+    return ZonalReportEntry.fromJson(map);
+  }
+
   factory ZonalReportEntry.fromJson(Map<String, dynamic> json) {
     return ZonalReportEntry(
       month: json['month'] ?? '',
@@ -176,6 +187,88 @@ class ZonalReportEntry {
       remarks: json['remarks'] ?? '',
       suggestions: json['suggestions'] ?? '',
       updatedAt: json['updatedAt'],
+    );
+  }
+
+  ZonalReportEntry copyWith({
+    String? month,
+    String? year,
+    String? zoneName,
+    String? sodossoCount,
+    String? sodossoBridhi,
+    String? sodossoGhatti,
+    String? sodossoPrarthiCount,
+    String? sodossoPrarthiBridhi,
+    String? sodossoPrarthiGhatti,
+    String? districtCount,
+    String? districtOrg,
+    String? districtReorg,
+    String? cityCount,
+    String? cityOrg,
+    String? cityReorg,
+    String? upazilaThanaCount,
+    String? upazilaThanaOrg,
+    String? upazilaThanaReorg,
+    String? shakhaDaitoshilCount,
+    String? shakhaDaitoshilPresence,
+    String? districtExecCount,
+    String? districtExecPresence,
+    String? zonalTorbiotCount,
+    String? zonalTorbiotPresence,
+    String? travelDetails,
+    String? safarIncomeTaka,
+    String? centralIncomeTaka,
+    String? onetimeIncomeTaka,
+    String? safarExpenseTaka,
+    String? communicationExpenseTaka,
+    String? officeExpenseTaka,
+    String? otherExpenseTaka,
+    String? shakhaReportSubmitted,
+    String? shakhaPlanSubmitted,
+    String? shakhaBaytulmalSubmitted,
+    String? remarks,
+    String? suggestions,
+    int? updatedAt,
+  }) {
+    return ZonalReportEntry(
+      month: month ?? this.month,
+      year: year ?? this.year,
+      zoneName: zoneName ?? this.zoneName,
+      sodossoCount: sodossoCount ?? this.sodossoCount,
+      sodossoBridhi: sodossoBridhi ?? this.sodossoBridhi,
+      sodossoGhatti: sodossoGhatti ?? this.sodossoGhatti,
+      sodossoPrarthiCount: sodossoPrarthiCount ?? this.sodossoPrarthiCount,
+      sodossoPrarthiBridhi: sodossoPrarthiBridhi ?? this.sodossoPrarthiBridhi,
+      sodossoPrarthiGhatti: sodossoPrarthiGhatti ?? this.sodossoPrarthiGhatti,
+      districtCount: districtCount ?? this.districtCount,
+      districtOrg: districtOrg ?? this.districtOrg,
+      districtReorg: districtReorg ?? this.districtReorg,
+      cityCount: cityCount ?? this.cityCount,
+      cityOrg: cityOrg ?? this.cityOrg,
+      cityReorg: cityReorg ?? this.cityReorg,
+      upazilaThanaCount: upazilaThanaCount ?? this.upazilaThanaCount,
+      upazilaThanaOrg: upazilaThanaOrg ?? this.upazilaThanaOrg,
+      upazilaThanaReorg: upazilaThanaReorg ?? this.upazilaThanaReorg,
+      shakhaDaitoshilCount: shakhaDaitoshilCount ?? this.shakhaDaitoshilCount,
+      shakhaDaitoshilPresence: shakhaDaitoshilPresence ?? this.shakhaDaitoshilPresence,
+      districtExecCount: districtExecCount ?? this.districtExecCount,
+      districtExecPresence: districtExecPresence ?? this.districtExecPresence,
+      zonalTorbiotCount: zonalTorbiotCount ?? this.zonalTorbiotCount,
+      zonalTorbiotPresence: zonalTorbiotPresence ?? this.zonalTorbiotPresence,
+      travelDetails: travelDetails ?? this.travelDetails,
+      safarIncomeTaka: safarIncomeTaka ?? this.safarIncomeTaka,
+      centralIncomeTaka: centralIncomeTaka ?? this.centralIncomeTaka,
+      onetimeIncomeTaka: onetimeIncomeTaka ?? this.onetimeIncomeTaka,
+      safarExpenseTaka: safarExpenseTaka ?? this.safarExpenseTaka,
+      communicationExpenseTaka: communicationExpenseTaka ?? this.communicationExpenseTaka,
+      officeExpenseTaka: officeExpenseTaka ?? this.officeExpenseTaka,
+      otherExpenseTaka: otherExpenseTaka ?? this.otherExpenseTaka,
+      shakhaReportSubmitted: shakhaReportSubmitted ?? this.shakhaReportSubmitted,
+      shakhaPlanSubmitted: shakhaPlanSubmitted ?? this.shakhaPlanSubmitted,
+      shakhaBaytulmalSubmitted: shakhaBaytulmalSubmitted ?? this.shakhaBaytulmalSubmitted,
+      remarks: remarks ?? this.remarks,
+      suggestions: suggestions ?? this.suggestions,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 

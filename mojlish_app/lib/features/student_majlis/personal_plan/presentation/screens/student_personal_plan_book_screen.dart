@@ -32,15 +32,8 @@ class StudentPersonalPlanBookScreen extends StatelessWidget {
               majlisType: MajlisType.chatro,
               initialYear: DateTime.now().year,
               initialMonth: DateTime.now().month,
+              reportCategory: ReportCategory.personal,
             ),
-          ),
-        );
-      },
-      onTodayPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const PersonalPlanScreen(),
           ),
         );
       },

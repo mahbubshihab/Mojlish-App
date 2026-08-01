@@ -48,13 +48,7 @@ class _MemberFormScreenContentState extends State<_MemberFormScreenContent> {
   final _mobileController = TextEditingController();
   final _permanentAddressController = TextEditingController();
 
-  String _serialNumber = '০৩৮';
 
-  @override
-  void initState() {
-    super.initState();
-    _serialNumber = (100 + (DateTime.now().millisecondsSinceEpoch % 899)).toString();
-  }
 
   @override
   void dispose() {
@@ -94,7 +88,6 @@ class _MemberFormScreenContentState extends State<_MemberFormScreenContent> {
       context,
       title: 'খেলাফত মজলিস — প্রাথমিক সদস্য ফরম',
       buildPdf: (format) => KhelafatMemberFormPdfService.generatePdfBytes(
-        regNo: _serialNumber,
         name: _nameController.text,
         fatherName: _fatherNameController.text,
         educationalQualification: _educationalQualificationController.text,
@@ -182,12 +175,12 @@ class _MemberFormScreenContentState extends State<_MemberFormScreenContent> {
                           height: 48,
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF059669), Color(0xFF10B981)],
+                              colors: [Color(0xFFDB2777), Color(0xFFEC4899)],
                             ),
                             borderRadius: BorderRadius.circular(14),
                             boxShadow: [
                               BoxShadow(
-                                color: accentEmerald.withValues(alpha: 0.25),
+                                color: accentPink.withValues(alpha: 0.25),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -269,28 +262,12 @@ class _MemberFormScreenContentState extends State<_MemberFormScreenContent> {
                       border: Border.all(color: accentPink.withValues(alpha: 0.3)),
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.badge_rounded, color: accentPink, size: 20),
-                            const SizedBox(width: 8),
-                            Text(
-                              'প্রাথমিক সদস্য ফরম',
-                              style: TextStyle(color: textLight, fontWeight: FontWeight.bold, fontSize: 14),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: accentPink,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            'নিবন্ধন নং: $_serialNumber',
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
-                          ),
+                        const Icon(Icons.badge_rounded, color: accentPink, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          'প্রাথমিক সদস্য ফরম',
+                          style: TextStyle(color: textLight, fontWeight: FontWeight.bold, fontSize: 14),
                         ),
                       ],
                     ),

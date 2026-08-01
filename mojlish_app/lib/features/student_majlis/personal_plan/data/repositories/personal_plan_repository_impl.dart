@@ -69,7 +69,7 @@ class PersonalPlanRepositoryImpl implements PersonalPlanRepository {
 
   @override
   Future<PersonalPlanEntity?> getPersonalPlan(String id) async {
-    final model = await remoteDataSource.getPersonalPlan(id);
-    return model;
+    final result = await remoteDataSource.getPersonalPlan(id);
+    return result;
   }
 }

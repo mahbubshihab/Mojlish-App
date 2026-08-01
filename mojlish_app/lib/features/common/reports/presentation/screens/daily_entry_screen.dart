@@ -405,7 +405,7 @@ class _DailyEntryScreenState extends State<DailyEntryScreen> {
           const SizedBox(width: 8),
           Text(
             title,
-            style: const TextStyle(color: Color(0xFF34D399), fontSize: 15, fontWeight: FontWeight.bold),
+            style: TextStyle(color: accentGreen, fontSize: 15, fontWeight: FontWeight.bold),
           ),
         ],
       ),
