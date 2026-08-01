@@ -77,7 +77,7 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen> {
                     ),
                     const SizedBox(height: 24),
                     const Text(
-                      'মজলিশ অ্যাপ',
+                      'মজলিস অ্যাপ',
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,

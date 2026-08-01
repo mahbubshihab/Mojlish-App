@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
       animation: themeManager,
       builder: (context, _) {
         return MaterialApp(
-          title: 'মজলিশ অ্যাপ',
+          title: 'মজলিস অ্যাপ',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,

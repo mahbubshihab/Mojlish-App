@@ -12,7 +12,7 @@ class MainDashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('মজলিশ অ্যাপ - ড্যাশবোর্ড'),
+        title: const Text('মজলিস অ্যাপ - ড্যাশবোর্ড'),
         backgroundColor: const Color(0xFF1B5E20),
         foregroundColor: Colors.white,
       ),
