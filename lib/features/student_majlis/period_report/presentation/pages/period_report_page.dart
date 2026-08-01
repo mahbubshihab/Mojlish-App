@@ -5,6 +5,8 @@ import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 import '../../../../common/widgets/unsaved_changes_guard.dart';
 import '../../../../common/services/report_storage_service.dart';
 import '../../data/services/student_period_pdf_service.dart';
+import '../../data/datasources/period_report_remote_datasource.dart';
+import '../../data/repositories/period_report_repository_impl.dart';
 import '../../domain/entities/period_report.dart';
 import '../bloc/period_report_bloc.dart';
 import '../bloc/period_report_event.dart';
@@ -136,6 +138,24 @@ class _PeriodReportPageState extends State<PeriodReportPage> {
 
   @override
   Widget build(BuildContext context) {
+    try {
+      context.read<PeriodReportBloc>();
+      return _buildContent(context);
+    } catch (_) {
+      return BlocProvider<PeriodReportBloc>(
+        create: (_) => PeriodReportBloc(
+          repository: PeriodReportRepositoryImpl(
+            remoteDataSource: PeriodReportRemoteDataSourceImpl(),
+          ),
+        ),
+        child: Builder(
+          builder: (ctx) => _buildContent(ctx),
+        ),
+      );
+    }
+  }
+
+  Widget _buildContent(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark || themeManager.isDarkMode;
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A);
