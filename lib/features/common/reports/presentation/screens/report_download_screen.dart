@@ -13,6 +13,8 @@ import 'package:mojlish_app/features/khelafat_majlis/branch_plan/data/services/k
 import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/data/services/khelafat_baytulmal_pdf_service.dart';
 import 'package:mojlish_app/features/khelafat_majlis/zonal_report/data/services/khelafat_zonal_pdf_service.dart';
 import 'package:mojlish_app/features/student_majlis/period_report/data/services/student_period_pdf_service.dart';
+import 'package:mojlish_app/features/student_majlis/baytulmal_report/data/services/student_baytulmal_pdf_service.dart';
+import 'package:mojlish_app/features/student_majlis/baytulmal_report/data/models/baytulmal_report_model.dart';
 
 /// Categories of report for dynamic header metadata fields
 enum ReportCategory {
@@ -242,6 +244,26 @@ class _ReportDownloadScreenState extends State<ReportDownloadScreen> {
           return;
 
         case ReportCategory.baytulmalReport:
+          if (widget.majlisType == MajlisType.chatro) {
+            final month = sortedMonths.first;
+            final mapData = await ReportStorageService.getBaytulmalReport(_year, month) ?? {};
+            if (_branchController.text.trim().isNotEmpty) {
+              mapData['branch'] = _branchController.text.trim();
+            }
+            mapData['month'] = _monthNames[month - 1];
+            mapData['session'] = _bn(_year);
+            final reportModel = BaytulmalReportModel.fromJson(mapData);
+            final pdfBytes = await StudentBaytulmalPdfService.generatePdfBytes(report: reportModel);
+            if (mounted) {
+              await PdfPreviewScreen.open(
+                context,
+                pdfBytes,
+                'বায়তুলমাল রিপোর্ট — ${_monthNames[month - 1]} ${_bn(_year)}',
+              );
+            }
+            return;
+          }
+
           final pdf = pw.Document(
             theme: pw.ThemeData.withFont(
               base: await PdfExportService.loadSutonnyFont(),
