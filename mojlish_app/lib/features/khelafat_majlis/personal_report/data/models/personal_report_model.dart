@@ -1,4 +1,4 @@
-import '../domain/entities/personal_report.dart';
+import '../../domain/entities/personal_report.dart';
 
 class DailyActivityModel extends DailyActivity {
   DailyActivityModel({

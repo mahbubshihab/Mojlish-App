@@ -1,4 +1,4 @@
-import '../domain/entities/personal_report.dart';
+import '../entities/personal_report.dart';
 
 abstract class PersonalReportRepository {
   Future<void> savePersonalReport(PersonalReport report);

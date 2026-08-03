@@ -11,9 +11,15 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    function isSuperAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email != null && request.auth.token.email in ['magician290@gmail.com', 'xlshihab9@gmail.com']
+      );
+    }
+
     function isAdmin() {
       return isAuthenticated() && (
-        (request.auth.token.email != null && request.auth.token.email in ['magician290@gmail.com', 'xlshihab9@gmail.com']) ||
+        isSuperAdmin() ||
         exists(/databases/$(database)/documents/allowed_admins/$(request.auth.token.email.lower())) ||
         request.auth.token.admin == true
       );
@@ -27,9 +33,10 @@ service cloud.firestore {
       );
     }
 
-    // 1. Allowed Admins collection: Admin read/write access
+    // 1. Allowed Admins collection: Admin read, Super Admin write access
     match /allowed_admins/{adminId} {
-      allow read, write: if isAdmin();
+      allow read: if isAdmin();
+      allow write: if isSuperAdmin();
     }
 
     // 2. Books collection: Admin write/edit/delete, public/user read

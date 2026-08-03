@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/repositories/khelafot_syllabus_repository.dart';
-import '../datasources/khelafot_syllabus_remote_datasource.dart';
+import '../../data/datasources/khelafot_syllabus_remote_datasource.dart';
 import 'khelafot_syllabus_event.dart';
 import 'khelafot_syllabus_state.dart';
 

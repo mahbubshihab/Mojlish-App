@@ -288,7 +288,7 @@ class _KhelafotSyllabusViewState extends State<KhelafotSyllabusView>
                               style: TextStyle(
                                 fontSize: 12.5,
                                 height: 1.5,
-                                color: isDark ? Colors.grey.shade200 : Colors.black80,
+                                color: isDark ? Colors.grey.shade200 : Colors.black87,
                               ),
                             ),
                           ),
@@ -567,7 +567,7 @@ class _KhelafotSyllabusViewState extends State<KhelafotSyllabusView>
                         style: TextStyle(
                           fontSize: 13,
                           height: 1.4,
-                          color: isDark ? Colors.grey.shade200 : Colors.black90,
+                          color: isDark ? Colors.grey.shade200 : Colors.black87,
                         ),
                       ),
                     ),

@@ -17,10 +17,7 @@ class YouthPersonalReportBookScreen extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => BlocProvider(
-              create: (_) => PersonalReportBloc(),
-              child: const YouthMajlisPersonalReportPage(),
-            ),
+            builder: (context) => const YouthMajlisPersonalReportPage(),
           ),
         );
       },

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../common/widgets/custom_labeled_input_field.dart';
+import 'package:mojlish_app/core/widgets/custom_labeled_input_field.dart';
 import '../../domain/entities/personal_report.dart';
 import '../bloc/personal_report_bloc.dart';
 import '../bloc/personal_report_event.dart';

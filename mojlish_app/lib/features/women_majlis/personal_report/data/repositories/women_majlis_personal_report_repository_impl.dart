@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
+import 'package:mojlish_app/core/error/failures.dart';
 import '../../domain/entities/women_majlis_personal_report_entity.dart';
 import '../../domain/repositories/women_majlis_personal_report_repository.dart';
 import '../datasources/women_majlis_personal_report_remote_data_source.dart';

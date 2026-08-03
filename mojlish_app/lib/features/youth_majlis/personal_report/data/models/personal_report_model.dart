@@ -1,4 +1,4 @@
-import '../entities/personal_report.dart';
+import '../../domain/entities/personal_report.dart';
 
 class YouthMajlisDailyActivityModel extends YouthMajlisDailyActivity {
   const YouthMajlisDailyActivityModel({
@@ -100,17 +100,17 @@ class YouthMajlisPersonalReportModel extends YouthMajlisPersonalReport {
     return {
       'id': id,
       'name': name,
-      'memberType': memberType,
-      'branch': branch,
-      'month': month,
-      'year': year,
-      'dailyActivities': dailyActivities
+      'memberType': this.memberType,
+      'branch': this.branch,
+      'month': this.month,
+      'year': this.year,
+      'dailyActivities': this.dailyActivities
           .map((e) => (e as YouthMajlisDailyActivityModel).toJson())
           .toList(),
-      'totalMeetingsAttended': totalMeetingsAttended,
-      'meetingNames': meetingNames,
-      'supervisorComments': supervisorComments,
-      'branchOfficialName': branchOfficialName,
+      'totalMeetingsAttended': this.totalMeetingsAttended,
+      'meetingNames': this.meetingNames,
+      'supervisorComments': this.supervisorComments,
+      'branchOfficialName': this.branchOfficialName,
       'createdAt': createdAt?.toIso8601String(),
     };
   }
