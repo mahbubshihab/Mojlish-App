@@ -357,7 +357,6 @@ class PdfGeneratorService {
           final targetQuran = plan?.quranAyahCount ?? '-';
           final targetHadith = plan?.hadithCount ?? '-';
           final targetLit = plan?.litPages ?? '-';
-          final targetAcademic = plan?.academicHours ?? '-';
           final targetPrayer = plan?.jamaatPrayerWaqt ?? '-';
           final targetSelf = plan?.selfAnalysisDays ?? '-';
           final targetFriend = plan?.friendTargetCount ?? '-';

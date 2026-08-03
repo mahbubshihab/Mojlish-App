@@ -122,7 +122,7 @@ class _PersonalReportTableScreenState extends State<PersonalReportTableScreen>
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: widget.majlisType == MajlisType.chatro ? 3 : 2,
+      length: widget.majlisType == MajlisType.chatro ? 4 : 3,
       vsync: this,
     );
 
@@ -572,11 +572,13 @@ class _PersonalReportTableScreenState extends State<PersonalReportTableScreen>
               tabs: widget.majlisType == MajlisType.chatro
                   ? const [
                       Tab(text: 'রিপোর্ট টেবিল'),
+                      Tab(text: 'মাসিক পরিকল্পনা'),
                       Tab(text: 'রিপোর্ট সামারি'),
                       Tab(text: 'মন্তব্য সমূহ'),
                     ]
                   : const [
                       Tab(text: 'রিপোর্ট টেবিল'),
+                      Tab(text: 'মাসিক পরিকল্পনা'),
                       Tab(text: 'মন্তব্য সমূহ'),
                     ],
             ),
@@ -589,11 +591,13 @@ class _PersonalReportTableScreenState extends State<PersonalReportTableScreen>
               children: widget.majlisType == MajlisType.chatro
                   ? [
                       _buildReportTab(),
+                      _buildPlanTab(),
                       _buildSummaryTab(),
                       _buildCommentsTab(),
                     ]
                   : [
                       _buildReportTab(),
+                      _buildPlanTab(),
                       _buildCommentsTab(),
                     ],
             ),
@@ -1512,54 +1516,4 @@ class _ColGroup {
   final String Function(DailyPersonalEntry) extractor;
 
   _ColGroup(this.title, this.extractor);
-}
-
-class _PersonalBgPainter extends CustomPainter {
-  final bool isDark;
-  _PersonalBgPainter({required this.isDark});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (!isDark) {
-      final grid = Paint()..color = Colors.grey.withValues(alpha: 0.05)..strokeWidth = 0.5..style = PaintingStyle.stroke;
-      for (double x = 0; x < size.width; x += 40) {
-        canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
-      }
-      for (double y = 0; y < size.height; y += 40) {
-        canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-      }
-      return;
-    }
-
-    final fill = Paint()..color = const Color(0xFF10B981).withValues(alpha: 0.025)..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.05), 130, fill);
-    canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.5), 100, fill);
-
-    final grid = Paint()..color = const Color(0xFF10B981).withValues(alpha: 0.012)..strokeWidth = 0.5..style = PaintingStyle.stroke;
-    for (double x = 0; x < size.width; x += 40) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
-    }
-    for (double y = 0; y < size.height; y += 40) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-    }
-
-    final star = Paint()..color = const Color(0xFF1E3A52)..style = PaintingStyle.fill;
-    _drawStar(canvas, Offset(size.width * 0.85, size.height * 0.12), 18, star);
-    _drawStar(canvas, Offset(size.width * 0.08, size.height * 0.3), 12, star);
-  }
-
-  void _drawStar(Canvas canvas, Offset c, double r, Paint p) {
-    final path = Path();
-    for (int i = 0; i < 8; i++) {
-      final a = i * 45 * pi / 180;
-      final rad = i % 2 == 0 ? r : r * 0.45;
-      i == 0 ? path.moveTo(c.dx + rad * cos(a), c.dy + rad * sin(a))
-             : path.lineTo(c.dx + rad * cos(a), c.dy + rad * sin(a));
-    }
-    path.close();
-    canvas.drawPath(path, p);
-  }
-
-  @override
-  bool shouldRepaint(_PersonalBgPainter _) => false;
 }
