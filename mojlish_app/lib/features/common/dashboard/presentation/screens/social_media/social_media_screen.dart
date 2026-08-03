@@ -17,14 +17,6 @@ class _SocialMediaScreenState extends State<SocialMediaScreen> {
   String _activeMajlisName = 'খেলাফত মজলিস';
   bool _isLoadingMajlis = true;
 
-  final List<Map<String, String>> _majlisOptions = [
-    {'id': 'khelafat', 'name': 'খেলাফত মজলিস'},
-    {'id': 'jubo', 'name': 'ইসলামী যুব মজলিস'},
-    {'id': 'chatro', 'name': 'বাংলাদেশ ইসলামী ছাত্র মজলিস'},
-    {'id': 'labor', 'name': 'বাংলাদেশ ইসলামী শ্রমিক মজলিস'},
-    {'id': 'women', 'name': 'বাংলাদেশ ইসলামী মহিলা মজলিস'},
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -109,52 +101,11 @@ class _SocialMediaScreenState extends State<SocialMediaScreen> {
       ),
       body: _isLoadingMajlis
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                // 📌 Majlis Selector Bar
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: _majlisOptions.map((option) {
-                        final isSelected = option['id'] == _activeMajlisId;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: ChoiceChip(
-                            label: Text(
-                              option['name']!,
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                color: isSelected ? Colors.white : textDark,
-                              ),
-                            ),
-                            selected: isSelected,
-                            selectedColor: AppTheme.primaryColor,
-                            backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
-                            onSelected: (selected) {
-                              if (selected) {
-                                setState(() {
-                                  _activeMajlisId = option['id']!;
-                                  _activeMajlisName = option['name']!;
-                                });
-                              }
-                            },
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ),
-
-                Expanded(
-                  child: StreamBuilder<DocumentSnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('settings')
-                        .doc('social_links_$_activeMajlisId')
-                        .snapshots(),
+          : StreamBuilder<DocumentSnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('settings')
+                  .doc('social_links_$_activeMajlisId')
+                  .snapshots(),
                     builder: (context, snapshot) {
                       Map<String, dynamic> linksData = {};
 
@@ -290,9 +241,6 @@ class _SocialMediaScreenState extends State<SocialMediaScreen> {
                       );
                     },
                   ),
-                ),
-              ],
-            ),
     );
   }
 

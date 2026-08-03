@@ -546,7 +546,7 @@ class PdfGeneratorService {
                   children: [
                     pw.Text('বিসমিল্লাহির রাহমানির রাহীম', style: pw.TextStyle(font: font, fontSize: 10)),
                     pw.SizedBox(height: 6),
-                    pw.Text('বাংলাদেশ ইসলামী যুব মজলিস', style: pw.TextStyle(font: boldFont, fontSize: 20, color: PdfColors.blue800)),
+                    pw.Text('ইসলামী যুব মজলিস', style: pw.TextStyle(font: boldFont, fontSize: 20, color: PdfColors.blue800)),
                     pw.Text('www.yuvamajlis.org.bd', style: pw.TextStyle(font: font, fontSize: 9, color: PdfColors.grey700)),
                     pw.SizedBox(height: 10),
                     pw.Container(
@@ -611,7 +611,7 @@ class PdfGeneratorService {
               pw.Center(
                 child: pw.Column(
                   children: [
-                    pw.Text('বাংলাদেশ ইসলামী যুব মজলিস', style: pw.TextStyle(font: boldFont, fontSize: 18, color: PdfColors.blue800)),
+                    pw.Text('ইসলামী যুব মজলিস', style: pw.TextStyle(font: boldFont, fontSize: 18, color: PdfColors.blue800)),
                     pw.SizedBox(height: 16),
                   ],
                 ),
@@ -761,7 +761,7 @@ class PdfGeneratorService {
                   children: [
                     pw.Text(b('বিসমিল্লাহির রাহমানির রাহীম'), style: pw.TextStyle(font: font, fontSize: 10)),
                     pw.SizedBox(height: 4),
-                    pw.Text(b('বাংলাদেশ ইসলামী যুব মজলিস'), style: pw.TextStyle(font: boldFont, fontSize: 20, color: PdfColors.blue900)),
+                    pw.Text(b('ইসলামী যুব মজলিস'), style: pw.TextStyle(font: boldFont, fontSize: 20, color: PdfColors.blue900)),
                     pw.Text(b('ব্যক্তিগত মাসিক পরিকল্পনা (টার্গেট)'), style: pw.TextStyle(font: boldFont, fontSize: 12)),
                     pw.SizedBox(height: 10),
                   ],

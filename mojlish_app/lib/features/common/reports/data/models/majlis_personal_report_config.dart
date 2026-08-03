@@ -14,7 +14,7 @@ extension MajlisTypeExtension on MajlisType {
       case MajlisType.khelafat:
         return 'খেলাফত মজলিস';
       case MajlisType.jubo:
-        return 'বাংলাদেশ ইসলামী যুব মজলিস';
+        return 'ইসলামী যুব মজলিস';
       case MajlisType.chatro:
         return 'বাংলাদেশ ইসলামী ছাত্র মজলিস';
       case MajlisType.mohila:

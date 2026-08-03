@@ -113,7 +113,7 @@ class _ReportExportScreenState extends State<ReportExportScreen> {
         if (majlisName.contains('ছাত্র')) {
           majlisTitle = 'বাংলাদেশ খেলাফত ছাত্র মজলিস';
         } else if (majlisName.contains('যুব')) {
-          majlisTitle = 'বাংলাদেশ ইসলামী যুব মজলিস';
+          majlisTitle = 'ইসলামী যুব মজলিস';
         } else if (majlisName.contains('মহিলা')) {
           majlisTitle = 'বাংলাদেশ ইসলামী মহিলা মজলিস';
         } else if (majlisName.contains('শ্রমিক')) {

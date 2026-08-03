@@ -82,7 +82,7 @@ class _CallManifestoPageState extends State<CallManifestoPage> {
                   ),
                   const SizedBox(height: 4),
                   const Text(
-                    'বাংলাদেশ ইসলামী যুব মজলিস',
+                    'ইসলামী যুব মজলিস',
                     style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),

@@ -9,7 +9,7 @@ class MemberFormRemoteDataSourceImpl implements MemberFormRemoteDataSource {
   @override
   Future<void> submitMemberForm(MemberFormModel formModel) async {
     await MemberApplicationSubmissionService.submitApplication(
-      majlis: 'বাংলাদেশ ইসলামী যুব মজলিস',
+      majlis: 'ইসলামী যুব মজলিস',
       name: formModel.name,
       mobile: formModel.mobile,
       fatherName: formModel.fatherName,
