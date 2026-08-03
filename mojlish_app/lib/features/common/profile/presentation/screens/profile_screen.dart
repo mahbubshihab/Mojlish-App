@@ -4,6 +4,7 @@ import 'package:mojlish_app/core/services/auth_service.dart';
 import 'package:mojlish_app/core/services/user_storage_service.dart';
 import 'package:mojlish_app/core/theme/app_theme.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
+import 'package:mojlish_app/core/constants/majlis_assets.dart';
 import 'package:mojlish_app/features/common/auth/presentation/screens/google_login_screen.dart';
 import 'package:mojlish_app/features/common/auth/presentation/screens/org_selection_screen.dart';
 
@@ -58,19 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   String _getLogoForMajlis(String majlisName) {
-    switch (majlisName) {
-      case 'খেলাফত মজলিস':
-        return 'assets/images/khelafot_majlish.png';
-      case 'ছাত্র মজলিস':
-        return 'assets/images/chatro_majlish.png';
-      case 'যুব মজলিস':
-        return 'assets/images/jubo_majlish.png';
-      case 'মহিলা মজলিস':
-        return 'assets/images/mohila-majlish.png';
-      case 'শ্রমিক মজলিস':
-      default:
-        return 'assets/images/logo.png';
-    }
+    return MajlisAssets.getLogoPath(majlisName);
   }
 
   Future<void> _saveProfileChanges() async {

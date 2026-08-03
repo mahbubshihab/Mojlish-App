@@ -3,6 +3,7 @@ import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/services/user_storage_service.dart';
 import 'package:mojlish_app/core/constants/majlis_assets.dart';
 import '../../../reports/presentation/screens/report_selection_screen.dart';
+import 'package:mojlish_app/core/constants/majlis_types.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 import 'package:mojlish_app/core/services/notification_service.dart';
 import 'social_media/social_media_screen.dart';
@@ -345,7 +346,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
     );
 
     // 2. Specific Overview Page
-    if (!selectedMajlis.contains('শ্রমিক')) {
+    if (!MajlisTypes.isLabor(selectedMajlis)) {
       cards.add(
         _buildMenuCard(
           context,
@@ -358,11 +359,11 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           textTitle: textTitle,
           onTap: () {
             Widget page;
-            if (selectedMajlis == 'মহিলা মজলিস') {
+            if (MajlisTypes.isWomen(selectedMajlis)) {
               page = const women_overview.WomenMajlisOverviewPage();
-            } else if (selectedMajlis == 'যুব মজলিস') {
-              page = const youth_overview.OverviewScreen();
-            } else if (selectedMajlis == 'ছাত্র মজলিস') {
+            } else if (MajlisTypes.isYouth(selectedMajlis)) {
+              page = const YouthCallManifestoScreen();
+            } else if (MajlisTypes.isChatro(selectedMajlis)) {
               page = const student_overview.StudentOverviewScreen();
             } else {
               page = const khelafat_overview.OverviewPage();
@@ -374,7 +375,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
     }
 
     // 3. Special Features according to Selected Majlis
-    if (selectedMajlis == 'ছাত্র মজলিস') {
+    if (MajlisTypes.isChatro(selectedMajlis)) {
       cards.add(
         _buildMenuCard(
           context,
@@ -405,7 +406,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           },
         ),
       );
-    } else if (selectedMajlis == 'মহিলা মজলিস') {
+    } else if (MajlisTypes.isWomen(selectedMajlis)) {
       cards.add(
         _buildMenuCard(
           context,
@@ -424,7 +425,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
     }
 
     // 4. Syllabus / Executive Rules for Khelafat
-    if (selectedMajlis == 'খেলাফত মজলিস') {
+    if (MajlisTypes.isKhelafat(selectedMajlis)) {
       cards.add(
         _buildMenuCard(
           context,
@@ -748,25 +749,6 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
 
     // Youth Specific Reports & Forms
     if (isYouth) {
-      reportTiles.add(
-        _buildQuickReportTile(
-          context,
-          title: 'সংক্ষিপ্ত পরিচিতি ও আহ্বান',
-          subtitle: 'বাংলাদেশ ইসলামী যুব মজলিস পরিচিতি ও দাওয়াত',
-          icon: Icons.auto_stories_rounded,
-          color: const Color(0xFF0284C7),
-          cardBg: cardBg,
-          borderColor: borderColor,
-          textTitle: textTitle,
-          textMuted: textMuted,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const YouthCallManifestoScreen()),
-            );
-          },
-        ),
-      );
       reportTiles.add(
         _buildQuickReportTile(
           context,

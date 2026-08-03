@@ -60,4 +60,11 @@ class MajlisTypes {
         return khelafat;
     }
   }
+
+  /// টাইপ ডিটেকশন হেল্পার
+  static bool isKhelafat(String? raw) => getKey(raw) == 'khelafat';
+  static bool isYouth(String? raw) => getKey(raw) == 'jubo';
+  static bool isChatro(String? raw) => getKey(raw) == 'chatro';
+  static bool isLabor(String? raw) => getKey(raw) == 'labor';
+  static bool isWomen(String? raw) => getKey(raw) == 'women';
 }
