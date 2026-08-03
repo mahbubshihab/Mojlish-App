@@ -1,8 +1,131 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        (request.auth.token.email != null && request.auth.token.email in ['magician290@gmail.com', 'xlshihab9@gmail.com']) ||
+        request.auth.token.admin == true
+      );
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && (
+        (resource.data.userId != null && resource.data.userId == request.auth.uid) ||
+        (resource.data.uid != null && resource.data.uid == request.auth.uid) ||
+        (resource.data.authorId != null && resource.data.authorId == request.auth.uid)
+      );
+    }
+
+    // 1. Books collection: Admin write/edit/delete, public/user read
+    match /books/{bookId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // 2. Notifications collection: Admin write/delete, public/user read
+    match /notifications/{noticeId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // 3. Settings collection: Admin write/edit, public/user read
+    match /settings/{settingId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // 4. Stats collection: Admin write/edit, public/user read
+    match /stats/{statId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // 5. Member Applications collection: Anyone/User create only, Admin full read/write/delete.
+    // Users CANNOT read, list, or edit existing document submissions.
+    match /member_applications/{appId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /applications/{appId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // 6. Users collection & subcollections: Users read/write their own document; Admin read/manage access
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create, update, delete: if isOwner(userId) || isAdmin();
+
+      // Subcollections under users/{userId} (reports, plans, read_notifications, etc.)
+      match /{subcollection=**} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // 7. Reports & Plans collections:
+    // Authenticated users create/read/update their own reports; Admin read/write access.
+    match /personal_reports/{reportId} {
+      allow create: if isAuthenticated();
+      allow read, update: if isAdmin() || isDocOwner();
+      allow delete: if isAdmin() || isDocOwner();
+    }
+
+    match /branch_reports/{reportId} {
+      allow create: if isAuthenticated();
+      allow read, update: if isAdmin() || isDocOwner();
+      allow delete: if isAdmin() || isDocOwner();
+    }
+
+    match /branch_plans/{planId} {
+      allow create: if isAuthenticated();
+      allow read, update: if isAdmin() || isDocOwner();
+      allow delete: if isAdmin() || isDocOwner();
+    }
+
+    match /baytulmal_reports/{reportId} {
+      allow create: if isAuthenticated();
+      allow read, update: if isAdmin() || isDocOwner();
+      allow delete: if isAdmin() || isDocOwner();
+    }
+
+    match /zonal_reports/{reportId} {
+      allow create: if isAuthenticated();
+      allow read, update: if isAdmin() || isDocOwner();
+      allow delete: if isAdmin() || isDocOwner();
+    }
+
+    match /reports/{reportId} {
+      allow create: if isAuthenticated();
+      allow read, update: if isAdmin() || isDocOwner();
+      allow delete: if isAdmin() || isDocOwner();
+    }
+
+    match /monthly_plans/{planId} {
+      allow create: if isAuthenticated();
+      allow read, update: if isAdmin() || isDocOwner();
+      allow delete: if isAdmin() || isDocOwner();
+    }
+
+    match /monthly_reports/{reportId} {
+      allow create: if isAuthenticated();
+      allow read, update: if isAdmin() || isDocOwner();
+      allow delete: if isAdmin() || isDocOwner();
+    }
+
+    // Default deny all other paths
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }

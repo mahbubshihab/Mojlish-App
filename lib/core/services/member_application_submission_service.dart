@@ -17,6 +17,24 @@ class MemberApplicationSubmissionService {
     String branchOrDistrict = '',
     Map<String, dynamic>? additionalData,
   }) async {
+    String derivedDistrict = branchOrDistrict.trim();
+    if (derivedDistrict.isEmpty) {
+      if (permanentAddress.trim().isNotEmpty) {
+        final parts = permanentAddress.split(',');
+        derivedDistrict = parts.last.trim();
+      } else if (presentAddress.trim().isNotEmpty) {
+        final parts = presentAddress.split(',');
+        derivedDistrict = parts.last.trim();
+      }
+    }
+    if (derivedDistrict.isEmpty) {
+      derivedDistrict = 'N/A';
+    }
+
+    final String resolvedAddress = presentAddress.trim().isNotEmpty
+        ? presentAddress.trim()
+        : permanentAddress.trim();
+
     final Map<String, dynamic> docData = {
       'majlis': majlis,
       'name': name.trim(),
@@ -30,9 +48,9 @@ class MemberApplicationSubmissionService {
       'profession': profession.trim(),
       'occupation': profession.trim(),
       'presentAddress': presentAddress.trim(),
-      'address': presentAddress.trim(),
+      'address': resolvedAddress,
       'permanentAddress': permanentAddress.trim(),
-      'district': branchOrDistrict.trim().isNotEmpty ? branchOrDistrict.trim() : 'N/A',
+      'district': derivedDistrict,
       'branchName': branchOrDistrict.trim(),
       'status': 'সক্রিয়',
       'createdAt': FieldValue.serverTimestamp(),
@@ -41,6 +59,12 @@ class MemberApplicationSubmissionService {
 
     if (additionalData != null && additionalData.isNotEmpty) {
       docData['additionalData'] = additionalData;
+      if (additionalData.containsKey('facebook') && additionalData['facebook'] != null) {
+        docData['facebook'] = additionalData['facebook'].toString().trim();
+      }
+      if (additionalData.containsKey('notes') && additionalData['notes'] != null) {
+        docData['notes'] = additionalData['notes'].toString().trim();
+      }
     }
 
     await _firestore.collection('member_applications').add(docData);

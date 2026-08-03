@@ -13,8 +13,9 @@ class MemberFormRemoteDataSourceImpl implements MemberFormRemoteDataSource {
       name: formModel.name,
       mobile: formModel.mobile,
       fatherName: formModel.fatherName,
+      profession: 'যুবক / পেশাজীবী',
       presentAddress: formModel.presentAddress,
-      permanentAddress: '${formModel.village}, ${formModel.unionName}, ${formModel.thanaUpazila}',
+      permanentAddress: '${formModel.village}, ${formModel.unionName}, ${formModel.thanaUpazila}, ${formModel.district}',
       branchOrDistrict: formModel.district,
       additionalData: {
         'nidNumber': formModel.nidNumber,
