@@ -1,0 +1,44 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        (request.auth.token.email != null && request.auth.token.email in ['magician290@gmail.com', 'xlshihab9@gmail.com']) ||
+        request.auth.token.admin == true
+      );
+    }
+
+    // Public resources (books, PDFs, images)
+    match /books/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /resources/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /announcements/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // User profile images & uploads
+    match /users/{userId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Default rule
+    match /{allPaths=**} {
+      allow read: if isAuthenticated() || isAdmin();
+      allow write: if isAuthenticated() || isAdmin();
+    }
+  }
+}

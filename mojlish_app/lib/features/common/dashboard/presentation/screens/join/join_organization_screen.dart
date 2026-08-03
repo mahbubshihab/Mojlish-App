@@ -221,7 +221,7 @@ class _JoinOrganizationScreenState extends State<JoinOrganizationScreen> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text('সদস্য পরিচিতি কার্ড', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor)),
-                                        const Text('বাংলাদেশ ইসলামী যুব মজলিস', style: TextStyle(fontSize: 9, color: goldAccent, fontWeight: FontWeight.bold)),
+                                        const Text('ইসলামী যুব মজলিস', style: TextStyle(fontSize: 9, color: goldAccent, fontWeight: FontWeight.bold)),
                                       ],
                                     ),
                                   ),

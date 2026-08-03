@@ -13,6 +13,7 @@ import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/presentati
 
 // Youth Majlis Features
 import 'package:mojlish_app/features/youth_majlis/member_form/presentation/screens/member_form_screen.dart' as youth_form;
+import 'package:mojlish_app/features/youth_majlis/call_manifesto/presentation/screens/call_manifesto_screen.dart';
 
 // Student Majlis Features
 import 'package:mojlish_app/features/student_majlis/member_form/presentation/screens/member_form_screen.dart' as chatro_form;

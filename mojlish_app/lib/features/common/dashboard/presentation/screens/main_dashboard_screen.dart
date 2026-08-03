@@ -751,8 +751,8 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
       reportTiles.add(
         _buildQuickReportTile(
           context,
-          title: 'দাওয়াতী ইশতেহার ও ম্যানিফেস্টো',
-          subtitle: 'যুব মজলিস দাওয়াতী ম্যানিফেস্টো',
+          title: 'সংক্ষিপ্ত পরিচিতি ও আহ্বান',
+          subtitle: 'বাংলাদেশ ইসলামী যুব মজলিস পরিচিতি ও দাওয়াত',
           icon: Icons.auto_stories_rounded,
           color: const Color(0xFF0284C7),
           cardBg: cardBg,

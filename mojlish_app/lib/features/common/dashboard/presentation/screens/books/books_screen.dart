@@ -85,17 +85,8 @@ class BooksScreen extends StatefulWidget {
 }
 
 class _BooksScreenState extends State<BooksScreen> {
-  String _selectedCategory = 'সব বই';
   String _searchQuery = '';
   String _activeMajlis = '';
-
-  final List<String> _categories = [
-    'সব বই',
-    'সিলেবাস ও পাঠ্যক্রম',
-    'সাংগঠনিক সাহিত্য',
-    'ইসলামী দাওয়াত',
-    'নীতিমালা ও নির্দেশিকা',
-  ];
 
   @override
   void initState() {
@@ -152,7 +143,6 @@ class _BooksScreenState extends State<BooksScreen> {
           }
 
           final filteredBooks = combinedBooks.where((b) {
-            final matchesCategory = _selectedCategory == 'সব বই' || b.category == _selectedCategory;
             final matchesSearch = b.title.contains(_searchQuery) ||
                 b.author.contains(_searchQuery) ||
                 b.description.contains(_searchQuery);
@@ -160,12 +150,12 @@ class _BooksScreenState extends State<BooksScreen> {
                 b.majlis == 'সকল' ||
                 b.majlis == _activeMajlis ||
                 b.majlis.contains(_activeMajlis);
-            return matchesCategory && matchesSearch && matchesMajlis;
+            return matchesSearch && matchesMajlis;
           }).toList();
 
           return Column(
             children: [
-              // Search & Filter Header Container
+              // Search Header Container
               Container(
                 padding: const EdgeInsets.all(16),
                 color: cardBg,
@@ -186,39 +176,6 @@ class _BooksScreenState extends State<BooksScreen> {
                           borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide.none,
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Category Chips
-                    SizedBox(
-                      height: 38,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _categories.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 8),
-                        itemBuilder: (context, idx) {
-                          final cat = _categories[idx];
-                          final isSelected = cat == _selectedCategory;
-                          return ChoiceChip(
-                            label: Text(
-                              cat,
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                color: isSelected
-                                    ? Colors.white
-                                    : (isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569)),
-                              ),
-                            ),
-                            selected: isSelected,
-                            selectedColor: const Color(0xFF059669),
-                            backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
-                            onSelected: (selected) {
-                              if (selected) setState(() => _selectedCategory = cat);
-                            },
-                          );
-                        },
                       ),
                     ),
                   ],
@@ -311,26 +268,9 @@ class _BooksScreenState extends State<BooksScreen> {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          // Category Tag
                                           Row(
                                             children: [
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                                decoration: BoxDecoration(
-                                                  color: book.coverColor.withValues(alpha: 0.12),
-                                                  borderRadius: BorderRadius.circular(6),
-                                                ),
-                                                child: Text(
-                                                  book.category,
-                                                  style: TextStyle(
-                                                    fontSize: 10.5,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: book.coverColor,
-                                                  ),
-                                                ),
-                                              ),
-                                              if (book.pdfUrl.isNotEmpty) ...[
-                                                const SizedBox(width: 6),
+                                              if (book.pdfUrl.isNotEmpty)
                                                 Container(
                                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                                   decoration: BoxDecoration(
@@ -346,7 +286,6 @@ class _BooksScreenState extends State<BooksScreen> {
                                                     ),
                                                   ),
                                                 ),
-                                              ],
                                             ],
                                           ),
                                           const SizedBox(height: 6),

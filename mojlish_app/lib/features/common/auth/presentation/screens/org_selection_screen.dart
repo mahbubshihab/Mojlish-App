@@ -18,22 +18,27 @@ class _OrgSelectionScreenState extends State<OrgSelectionScreen> {
   final List<Map<String, String>> _majlisItems = [
     {
       'title': 'খেলাফত মজলিস',
+      'fullTitle': 'খেলাফত মজলিস',
       'logo': 'assets/images/khelafot_majlish.png',
     },
     {
-      'title': 'ছাত্র মজলিস',
+      'title': 'বাংলাদেশ ইসলামী ছাত্র মজলিস',
+      'fullTitle': 'বাংলাদেশ ইসলামী ছাত্র মজলিস',
       'logo': 'assets/images/chatro_majlish.png',
     },
     {
-      'title': 'যুব মজলিস',
+      'title': 'ইসলামী যুব মজলিস',
+      'fullTitle': 'ইসলামী যুব মজলিস',
       'logo': 'assets/images/jubo_majlish.png',
     },
     {
-      'title': 'মহিলা মজলিস',
+      'title': 'বাংলাদেশ ইসলামী মহিলা মজলিস',
+      'fullTitle': 'বাংলাদেশ ইসলামী মহিলা মজলিস',
       'logo': 'assets/images/mohila-majlish.png',
     },
     {
-      'title': 'শ্রমিক মজলিস',
+      'title': 'বাংলাদেশ ইসলামী শ্রমিক মজলিস',
+      'fullTitle': 'বাংলাদেশ ইসলামী শ্রমিক মজলিস',
       'logo': 'assets/images/sromik-mojlis.jpeg',
     },
   ];
