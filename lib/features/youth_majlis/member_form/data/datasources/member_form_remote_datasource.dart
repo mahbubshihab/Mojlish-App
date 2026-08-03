@@ -1,3 +1,4 @@
+import 'package:mojlish_app/core/services/member_application_submission_service.dart';
 import '../models/member_form_model.dart';
 
 abstract class MemberFormRemoteDataSource {
@@ -5,15 +6,20 @@ abstract class MemberFormRemoteDataSource {
 }
 
 class MemberFormRemoteDataSourceImpl implements MemberFormRemoteDataSource {
-  // Assuming a generic HTTP client or Dio is injected here.
-  // final HttpClient client;
-  // MemberFormRemoteDataSourceImpl({required this.client});
-
   @override
   Future<void> submitMemberForm(MemberFormModel formModel) async {
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 2));
-    // Implement actual API call here
-    // Example: await client.post('/api/youth-majlis/member', data: formModel.toJson());
+    await MemberApplicationSubmissionService.submitApplication(
+      majlis: 'বাংলাদেশ ইসলামী যুব মজলিস',
+      name: formModel.name,
+      mobile: formModel.mobile,
+      fatherName: formModel.fatherName,
+      presentAddress: formModel.presentAddress,
+      permanentAddress: '${formModel.village}, ${formModel.unionName}, ${formModel.thanaUpazila}',
+      branchOrDistrict: formModel.district,
+      additionalData: {
+        'nidNumber': formModel.nidNumber,
+        'email': formModel.email ?? '',
+      },
+    );
   }
 }

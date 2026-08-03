@@ -15,7 +15,26 @@ class NotificationService {
   /// FCM মেসেজিং ইনিশিয়ালাইজেশন ও অল ইউজার টপিক সাবস্ক্রিপশন
   static Future<void> initialize() async {
     try {
-      // 1. Request Notification Permissions
+      if (kIsWeb) {
+        // On Web, request permission asynchronously with timeout so app never blocks loading
+        _fcm.requestPermission(
+          alert: true,
+          badge: true,
+          sound: true,
+        ).timeout(const Duration(seconds: 3)).then((settings) {
+          if (kDebugMode) {
+            print('FCM Web Authorization status: ${settings.authorizationStatus}');
+          }
+          _fcm.subscribeToTopic('all_users').catchError((_) {});
+        }).catchError((e) {
+          if (kDebugMode) {
+            print('FCM Web permission non-blocking notice: $e');
+          }
+        });
+        return;
+      }
+
+      // 1. Request Notification Permissions for Mobile
       NotificationSettings settings = await _fcm.requestPermission(
         alert: true,
         badge: true,
@@ -121,5 +140,22 @@ class NotificationService {
   static Future<bool> isRead(String notificationId) async {
     final Set<String> readIds = await getReadNotificationIds();
     return readIds.contains(notificationId);
+  }
+
+  /// রিয়েল-টাইম অপঠিত (Unread) নোটিফিকেশন গণনার জন্য স্ট্রিম
+  static Stream<int> getUnreadCountStream() {
+    return _firestore
+        .collection('notifications')
+        .snapshots()
+        .asyncMap((snapshot) async {
+      final readIds = await getReadNotificationIds();
+      int unreadCount = 0;
+      for (var doc in snapshot.docs) {
+        if (!readIds.contains(doc.id)) {
+          unreadCount++;
+        }
+      }
+      return unreadCount;
+    });
   }
 }

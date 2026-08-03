@@ -3,6 +3,7 @@ import 'package:mojlish_app/core/theme/theme_manager.dart';
 import 'package:mojlish_app/core/widgets/ambient_background_widget.dart';
 import 'package:mojlish_app/core/widgets/pdf_viewer_screen.dart';
 import 'package:mojlish_app/core/widgets/unsaved_changes_dialog.dart';
+import 'package:mojlish_app/core/services/member_application_submission_service.dart';
 import '../../data/services/women_member_form_pdf_service.dart';
 
 /// বাংলাদেশ ইসলামী মহিলা মজলিস — প্রাথমিক সদস্যা ফরম (প্রিমিয়াম UI ইনপুট ও PDF প্রভিউ স্ক্রিন)
@@ -45,13 +46,33 @@ class _WomenMemberFormScreenState extends State<WomenMemberFormScreen> {
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       setState(() => _isSubmitting = true);
-      Future.delayed(const Duration(milliseconds: 500), () {
+      MemberApplicationSubmissionService.submitApplication(
+        majlis: 'বাংলাদেশ ইসলামী মহিলা মজলিস',
+        name: _nameController.text.trim(),
+        mobile: _mobileController.text.trim(),
+        fatherName: _fatherOrHusbandNameController.text.trim(),
+        educationalQualification: _eduController.text.trim(),
+        age: _ageController.text.trim(),
+        profession: _professionController.text.trim(),
+        presentAddress: _presentAddressController.text.trim(),
+        permanentAddress: _permanentAddressController.text.trim(),
+      ).then((_) {
         if (mounted) {
           setState(() => _isSubmitting = false);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('সদস্যা ফরম সফলভাবে তথ্য সংরক্ষিত হয়েছে!'),
               backgroundColor: Color(0xFF10B981),
+            ),
+          );
+        }
+      }).catchError((err) {
+        if (mounted) {
+          setState(() => _isSubmitting = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('সংরক্ষণে সমস্যা হয়েছে: $err'),
+              backgroundColor: Colors.red,
             ),
           );
         }

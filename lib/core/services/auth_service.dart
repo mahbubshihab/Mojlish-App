@@ -7,11 +7,7 @@ import 'package:mojlish_app/core/services/user_storage_service.dart';
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final GoogleSignIn _googleSignIn = kIsWeb
-      ? GoogleSignIn(
-          clientId: '770946894742-1khs1vktmofi0gk00o5udrnde7ltgrla.apps.googleusercontent.com',
-        )
-      : GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   User? get currentUser => _auth.currentUser;
 
@@ -20,6 +16,17 @@ class AuthService {
   /// Google Sign-In Flow
   Future<UserCredential?> signInWithGoogle() async {
     try {
+      if (kIsWeb) {
+        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        googleProvider.addScope('email');
+        googleProvider.addScope('profile');
+        final UserCredential userCredential = await _auth.signInWithPopup(googleProvider);
+        if (userCredential.user != null) {
+          syncUserProfile(userCredential.user!);
+        }
+        return userCredential;
+      }
+
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser != null) {
         final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
@@ -29,13 +36,12 @@ class AuthService {
         );
         final UserCredential userCredential = await _auth.signInWithCredential(credential);
         if (userCredential.user != null) {
-          // Immediately save local storage & run Firestore sync in background (non-blocking)
           syncUserProfile(userCredential.user!);
         }
         return userCredential;
       }
     } catch (e) {
-      print('Google sign in bypassed: $e');
+      print('Google sign in error / bypassed: $e');
     }
     await UserStorageService.saveUserName('মিজানুর রহমান');
     await UserStorageService.saveUserEmail('mizanur.rahman@gmail.com');

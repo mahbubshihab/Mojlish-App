@@ -73,14 +73,29 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Future<void> _openLink(String urlStr) async {
-    final Uri? uri = Uri.tryParse(urlStr);
-    if (uri != null && await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('লিংকটি খোলা সম্ভব হয়নি')),
+    if (urlStr.trim().isEmpty) return;
+    String formattedUrl = urlStr.trim();
+    if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+      formattedUrl = 'https://$formattedUrl';
+    }
+    final Uri? uri = Uri.tryParse(formattedUrl);
+    if (uri != null) {
+      try {
+        final launched = await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
         );
+        if (!launched && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('এক্সটার্নাল ব্রাউজারে লিংকটি খোলা সম্ভব হয়নি')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('এক্সটার্নal ব্রাউজারে লিংকটি খোলা সম্ভব হয়নি')),
+          );
+        }
       }
     }
   }

@@ -24,8 +24,10 @@ void main() async {
       );
     }
 
-    // Initialize Notification Service & FCM topic subscription
-    await NotificationService.initialize();
+    // Initialize Notification Service & FCM topic subscription in background (non-blocking)
+    NotificationService.initialize().catchError((e) {
+      debugPrint('NotificationService background init error: $e');
+    });
   } catch (e) {
     debugPrint('Firebase initialization error: $e');
   }
