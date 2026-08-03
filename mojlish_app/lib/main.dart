@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mojlish_app/core/theme/app_theme.dart';
 import 'package:mojlish_app/core/theme/theme_manager.dart';
+import 'package:mojlish_app/core/services/notification_service.dart';
 import 'package:mojlish_app/firebase_options.dart';
 import 'features/common/auth/presentation/screens/splash_screen.dart';
 
@@ -15,13 +16,16 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
-    // Enable Firestore Offline Persistence on Mobile platforms (Web handles persistence automatically or via web SDK)
+    // Enable Firestore Offline Persistence on Mobile platforms
     if (!kIsWeb) {
       FirebaseFirestore.instance.settings = const Settings(
         persistenceEnabled: true,
         cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
       );
     }
+
+    // Initialize Notification Service & FCM topic subscription
+    await NotificationService.initialize();
   } catch (e) {
     debugPrint('Firebase initialization error: $e');
   }
