@@ -1,0 +1,80 @@
+Flutter crash report.
+Please report a bug at https://github.com/flutter/flutter/issues.
+
+## command
+
+flutter analyze lib/features/khelafat_majlis/branch_plan/presentation/screens/branch_plan_screen.dart
+
+## exception
+
+_Exception: Exception: analysis server exited with code 64 and output:
+[stderr] Project
+[stderr]   build       Build a Dart application including code assets.
+[stderr]   compile     Compile Dart to various formats.
+[stderr]   create      Create a new Dart project.
+[stderr]   pub         Work with packages.
+[stderr]   run         Run a Dart program.
+[stderr]   test        Run tests for a project.
+[stderr] 
+[stderr] Source code
+[stderr]   analyze     Analyze Dart code in a directory.
+[stderr]   doc         Generate API documentation for Dart projects.
+[stderr]   fix         Apply automated fixes to Dart source code.
+[stderr]   format      Idiomatically format Dart source code.
+[stderr] 
+[stderr] Tools
+[stderr]   devtools    Open DevTools (optionally connecting to an existing application).
+[stderr]   info        Show diagnostic information about the installed tooling.
+[stderr] 
+[stderr] Run "dart help <command>" for more information about a command.
+[stderr] See https://dart.dev/tools/dart-tool for detailed documentation.
+
+```
+```
+
+## flutter doctor
+
+```
+[✓] Flutter (Channel stable, 3.38.7, on macOS 26.5.1 25F80 darwin-arm64, locale en-BD) [1,196ms]
+    • Flutter version 3.38.7 on channel stable at /Users/mahbubshihab/Development/flutter
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision 3b62efc2a3 (7 months ago), 2026-01-13 13:47:42 -0800
+    • Engine revision 78fc3012e4
+    • Dart version 3.10.7
+    • DevTools version 2.51.1
+    • Feature flags: enable-web, enable-linux-desktop, enable-macos-desktop, enable-windows-desktop, enable-android, enable-ios, cli-animations, enable-native-assets, omit-legacy-version-file, enable-lldb-debugging
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 36.1.0) [2.4s]
+    • Android SDK at /Users/mahbubshihab/Library/Android/sdk
+    • Emulator version unknown
+    • Platform android-36, build-tools 36.1.0
+    • ANDROID_HOME = /Users/mahbubshihab/Library/Android/sdk
+    • Java binary at: /opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home/bin/java
+      This JDK is specified in your Flutter configuration.
+      To change the current JDK, run: `flutter config --jdk-dir="path/to/jdk"`.
+    • Java version OpenJDK Runtime Environment Homebrew (build 17.0.18+0)
+    • All Android licenses accepted.
+
+[!] Xcode - develop for iOS and macOS (Xcode 26.5) [1,461ms]
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 17F42
+    ✗ Unable to get list of installed Simulator runtimes.
+    ✗ CocoaPods not installed.
+        CocoaPods is a package manager for iOS or macOS platform code.
+        Without CocoaPods, plugins will not work on iOS or macOS.
+        For more info, see https://flutter.dev/to/platform-plugins
+      For installation instructions, see https://guides.cocoapods.org/using/getting-started.html#installation
+
+[✓] Chrome - develop for the web [133ms]
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Connected device (3 available) [7.7s]
+    • CPH2799 (wireless) (mobile) • adb-YXE6G65PW86TBQQG-FXvBnp._adb-tls-connect._tcp • android-arm64  • Android 16 (API 36)
+    • macOS (desktop)             • macos                                             • darwin-arm64   • macOS 26.5.1 25F80 darwin-arm64
+    • Chrome (web)                • chrome                                            • web-javascript • Google Chrome 150.0.7871.187
+
+[✓] Network resources [1,370ms]
+    • All expected network resources are available.
+
+! Doctor found issues in 1 category.
+```

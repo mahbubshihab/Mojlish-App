@@ -1,3 +1,4 @@
+import 'package:mojlish_app/core/services/member_application_submission_service.dart';
 import '../models/member_form_model.dart';
 
 abstract class MemberFormRemoteDataSource {
@@ -7,7 +8,22 @@ abstract class MemberFormRemoteDataSource {
 class MemberFormRemoteDataSourceImpl implements MemberFormRemoteDataSource {
   @override
   Future<void> submitForm(MemberFormModel formModel) async {
-    // Mock API call
-    await Future.delayed(const Duration(seconds: 1));
+    await MemberApplicationSubmissionService.submitApplication(
+      majlis: 'বাংলাদেশ ইসলামী ছাত্র মজলিস',
+      name: formModel.name,
+      mobile: formModel.mobile,
+      fatherName: formModel.fatherName,
+      educationalQualification: '${formModel.educationalInstitution} (${formModel.department})',
+      profession: 'ছাত্র',
+      presentAddress: formModel.presentAddress,
+      permanentAddress: '${formModel.permanentVillage}, ${formModel.permanentPostOffice}, ${formModel.permanentThana}, ${formModel.permanentDistrict}',
+      branchOrDistrict: formModel.permanentDistrict,
+      additionalData: {
+        'bloodGroup': formModel.bloodGroup,
+        'studentClass': formModel.studentClass,
+        'department': formModel.department,
+        'rollNo': formModel.rollNo,
+      },
+    );
   }
 }

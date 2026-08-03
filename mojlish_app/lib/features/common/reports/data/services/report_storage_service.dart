@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -220,7 +221,8 @@ class ReportStorageService {
   static Future<void> saveZonalEntry(ZonalReportEntry entry) async {
     final prefs = await SharedPreferences.getInstance();
     final allData = await getAllZonalEntries();
-    final key = '${entry.year}-${entry.month}';
+    final monthPadded = entry.month.padLeft(2, '0');
+    final key = '${entry.year}-$monthPadded';
     allData[key] = entry;
     final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
     await prefs.setString(_zonalReportKey, jsonEncode(encoded));
@@ -229,7 +231,7 @@ class ReportStorageService {
     if (user != null) {
       final isOnline = await NetworkConnectivityService().isOnline;
       final zonalData = entry.toJson();
-      final yearMonth = '${entry.year}-${entry.month.toString().padLeft(2, '0')}';
+      final yearMonth = key;
 
       if (isOnline) {
         try {
@@ -267,9 +269,36 @@ class ReportStorageService {
   }
 
   static Future<ZonalReportEntry?> getZonalEntry(int year, int month) async {
+    final monthPadded = month.toString().padLeft(2, '0');
+    final key = '$year-$monthPadded';
     final all = await getAllZonalEntries();
-    final key = '$year-${month.toString().padLeft(2, '0')}';
-    return all[key];
+    if (all.containsKey(key)) return all[key];
+    final unpaddedKey = '$year-$month';
+    if (all.containsKey(unpaddedKey)) return all[unpaddedKey];
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('zonal_reports')
+            .doc(key)
+            .get();
+
+        if (doc.exists && doc.data() != null) {
+          final entry = ZonalReportEntry.fromJson(doc.data()!);
+          all[key] = entry;
+          final prefs = await SharedPreferences.getInstance();
+          final encoded = all.map((k, v) => MapEntry(k, v.toJson()));
+          await prefs.setString(_zonalReportKey, jsonEncode(encoded));
+          return entry;
+        }
+      } catch (e) {
+        debugPrint('Error loading zonal_reports from Firestore: $e');
+      }
+    }
+    return null;
   }
 
   static Future<Map<String, dynamic>?> getZonalReport(int year, int month) async {
@@ -284,7 +313,8 @@ class ReportStorageService {
   static Future<void> saveBaytulmalReportEntry(BaytulmalReportEntry entry) async {
     final prefs = await SharedPreferences.getInstance();
     final allData = await getAllBaytulmalEntries();
-    final key = '${entry.year}-${entry.month}';
+    final monthPadded = entry.month.padLeft(2, '0');
+    final key = '${entry.year}-$monthPadded';
     allData[key] = entry;
     final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
     await prefs.setString(_baytulmalReportKey, jsonEncode(encoded));
@@ -293,7 +323,7 @@ class ReportStorageService {
     if (user != null) {
       final isOnline = await NetworkConnectivityService().isOnline;
       final data = entry.toJson();
-      final yearMonth = '${entry.year}-${entry.month}';
+      final yearMonth = key;
 
       if (isOnline) {
         try {
@@ -331,9 +361,37 @@ class ReportStorageService {
   }
 
   static Future<BaytulmalReportEntry?> getBaytulmalReportEntry(String year, String month) async {
+    final monthPadded = month.padLeft(2, '0');
+    final key = '$year-$monthPadded';
     final all = await getAllBaytulmalEntries();
-    final key = '$year-$month';
-    return all[key];
+    if (all.containsKey(key)) return all[key];
+    final unpaddedMonth = int.tryParse(month)?.toString() ?? month;
+    final unpaddedKey = '$year-$unpaddedMonth';
+    if (all.containsKey(unpaddedKey)) return all[unpaddedKey];
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('baytulmal_reports')
+            .doc(key)
+            .get();
+
+        if (doc.exists && doc.data() != null) {
+          final entry = BaytulmalReportEntry.fromJson(doc.data()!);
+          all[key] = entry;
+          final prefs = await SharedPreferences.getInstance();
+          final encoded = all.map((k, v) => MapEntry(k, v.toJson()));
+          await prefs.setString(_baytulmalReportKey, jsonEncode(encoded));
+          return entry;
+        }
+      } catch (e) {
+        debugPrint('Error loading baytulmal_reports from Firestore: $e');
+      }
+    }
+    return null;
   }
 
   static Future<Map<String, dynamic>?> getBaytulmalReport(int year, int month) async {

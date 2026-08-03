@@ -18,6 +18,7 @@ class BaytulmalReportEntry {
   final String onetimeIncome; // এককালীন আয়
   final String onetimeIncomeTaka;
   final String previousBalance; // বিগত মাস/মৌসুমের উদ্বৃত্ত
+  final String kothayAay; // কথায় (আয়)
 
   // ব্যয়
   final String upwardAyanat; // উর্ধতন এয়ানত পরিশোধ
@@ -36,13 +37,21 @@ class BaytulmalReportEntry {
   final String procharTaka;
   final String prokashnaExpense; // প্রকাশনা
   final String prokashnaExpenseTaka;
-  final String dibosPalan; // দিবস পালন
-  final String dibosPatanTaka;
+  final String dibosPalan; // দিবস পালন (দিবসের নাম)
+  final String dibosPatanTaka; // দিবস পালন ব্যয় টাকা
   final String appayan; // আপ্যায়ন
   final String appayanTaka;
   final String sova; // সভা/সমাবেশ
   final String sovaTaka;
+  final String kothayBbay; // কথায় (ব্যয়)
   final String remarks; // মন্তব্য
+
+  // স্বাক্ষর ও সত্যায়ন
+  final String reportDate;
+  final String baytulmalSecretary;
+  final String president;
+
+  String get dibosPalanTaka => dibosPatanTaka;
 
   const BaytulmalReportEntry({
     required this.month,
@@ -61,6 +70,7 @@ class BaytulmalReportEntry {
     this.onetimeIncome = '',
     this.onetimeIncomeTaka = '',
     this.previousBalance = '',
+    this.kothayAay = '',
     this.upwardAyanat = '',
     this.upwardAyanatTaka = '',
     this.officeRent = '',
@@ -83,7 +93,11 @@ class BaytulmalReportEntry {
     this.appayanTaka = '',
     this.sova = '',
     this.sovaTaka = '',
+    this.kothayBbay = '',
     this.remarks = '',
+    this.reportDate = '',
+    this.baytulmalSecretary = '',
+    this.president = '',
   });
 
   double get totalIncome {
@@ -118,42 +132,73 @@ class BaytulmalReportEntry {
     'month': month,
     'year': year,
     'branchName': branchName,
+    'branch': branchName,
     'executiveMemberAyanat': executiveMemberAyanat,
+    'nirbahiSodossoSonkkha': executiveMemberAyanat,
     'executiveMemberAyanatTaka': executiveMemberAyanatTaka,
+    'nirbahiSodossoIyanat': executiveMemberAyanatTaka,
     'subBranchAyanat': subBranchAyanat,
+    'shakhaSonkkha': subBranchAyanat,
     'subBranchAyanatTaka': subBranchAyanatTaka,
+    'odhostonShakhaIyanat': subBranchAyanatTaka,
     'suhridAyanat': suhridAyanat,
+    'shudhiSonkkha': suhridAyanat,
     'suhridAyanatTaka': suhridAyanatTaka,
+    'shudhiIyanat': suhridAyanatTaka,
     'safarIncome': safarIncome,
     'safarIncomeTaka': safarIncomeTaka,
+    'soforAay': safarIncomeTaka,
     'prokashnaIncome': prokashnaIncome,
     'prokashnaIncomeTaka': prokashnaIncomeTaka,
+    'prokashonaAay': prokashnaIncomeTaka,
     'onetimeIncome': onetimeIncome,
     'onetimeIncomeTaka': onetimeIncomeTaka,
+    'ekkalinAay': onetimeIncomeTaka,
     'previousBalance': previousBalance,
+    'bigotoMashUdbritto': previousBalance,
+    'kothayAay': kothayAay,
     'upwardAyanat': upwardAyanat,
+    'mashikDharjokrito': upwardAyanat,
     'upwardAyanatTaka': upwardAyanatTaka,
+    'urdhotonIyanatPorishodh': upwardAyanatTaka,
     'officeRent': officeRent,
     'officeRentTaka': officeRentTaka,
+    'officeVaraOBill': officeRentTaka,
     'officeCost': officeCost,
     'officeCostTaka': officeCostTaka,
+    'officeKhoroch': officeCostTaka,
     'safarExpense': safarExpense,
     'safarExpenseTaka': safarExpenseTaka,
+    'soforBbay': safarExpenseTaka,
     'transport': transport,
     'transportTaka': transportTaka,
+    'jatayat': transportTaka,
     'communication': communication,
     'communicationTaka': communicationTaka,
+    'jogajog': communicationTaka,
     'prochar': prochar,
     'procharTaka': procharTaka,
     'prokashnaExpense': prokashnaExpense,
     'prokashnaExpenseTaka': prokashnaExpenseTaka,
+    'prokashonaBbay': prokashnaExpenseTaka,
     'dibosPalan': dibosPalan,
+    'diboshNam': dibosPalan,
     'dibosPatanTaka': dibosPatanTaka,
+    'dibosPalanTaka': dibosPatanTaka,
+    'diboshPalon': dibosPatanTaka,
     'appayan': appayan,
     'appayanTaka': appayanTaka,
+    'appayon': appayanTaka,
     'sova': sova,
     'sovaTaka': sovaTaka,
+    'shobhaShomabesh': sovaTaka,
+    'kothayBbay': kothayBbay,
     'remarks': remarks,
+    'reportDate': reportDate,
+    'baytulmalSecretary': baytulmalSecretary,
+    'baytulmalSompodokShakkhor': baytulmalSecretary,
+    'president': president,
+    'sobhapotiShakkhor': president,
   };
 
   factory BaytulmalReportEntry.fromMap(Map<String, dynamic>? map, [int? year, int? month]) {
@@ -167,46 +212,59 @@ class BaytulmalReportEntry {
   }
 
   factory BaytulmalReportEntry.fromJson(Map<String, dynamic> json) {
+    String str(dynamic val) => val?.toString() ?? '';
+    String pick(String k1, [String? k2, String? k3]) {
+      if (json[k1] != null && json[k1].toString().isNotEmpty) return json[k1].toString();
+      if (k2 != null && json[k2] != null && json[k2].toString().isNotEmpty) return json[k2].toString();
+      if (k3 != null && json[k3] != null && json[k3].toString().isNotEmpty) return json[k3].toString();
+      return '';
+    }
+
     return BaytulmalReportEntry(
-      month: json['month'] ?? '',
-      year: json['year'] ?? '',
-      branchName: json['branchName'] ?? '',
-      executiveMemberAyanat: json['executiveMemberAyanat'] ?? '',
-      executiveMemberAyanatTaka: json['executiveMemberAyanatTaka'] ?? '',
-      subBranchAyanat: json['subBranchAyanat'] ?? '',
-      subBranchAyanatTaka: json['subBranchAyanatTaka'] ?? '',
-      suhridAyanat: json['suhridAyanat'] ?? '',
-      suhridAyanatTaka: json['suhridAyanatTaka'] ?? '',
-      safarIncome: json['safarIncome'] ?? '',
-      safarIncomeTaka: json['safarIncomeTaka'] ?? '',
-      prokashnaIncome: json['prokashnaIncome'] ?? '',
-      prokashnaIncomeTaka: json['prokashnaIncomeTaka'] ?? '',
-      onetimeIncome: json['onetimeIncome'] ?? '',
-      onetimeIncomeTaka: json['onetimeIncomeTaka'] ?? '',
-      previousBalance: json['previousBalance'] ?? '',
-      upwardAyanat: json['upwardAyanat'] ?? '',
-      upwardAyanatTaka: json['upwardAyanatTaka'] ?? '',
-      officeRent: json['officeRent'] ?? '',
-      officeRentTaka: json['officeRentTaka'] ?? '',
-      officeCost: json['officeCost'] ?? '',
-      officeCostTaka: json['officeCostTaka'] ?? '',
-      safarExpense: json['safarExpense'] ?? '',
-      safarExpenseTaka: json['safarExpenseTaka'] ?? '',
-      transport: json['transport'] ?? '',
-      transportTaka: json['transportTaka'] ?? '',
-      communication: json['communication'] ?? '',
-      communicationTaka: json['communicationTaka'] ?? '',
-      prochar: json['prochar'] ?? '',
-      procharTaka: json['procharTaka'] ?? '',
-      prokashnaExpense: json['prokashnaExpense'] ?? '',
-      prokashnaExpenseTaka: json['prokashnaExpenseTaka'] ?? '',
-      dibosPalan: json['dibosPalan'] ?? '',
-      dibosPatanTaka: json['dibosPatanTaka'] ?? '',
-      appayan: json['appayan'] ?? '',
-      appayanTaka: json['appayanTaka'] ?? '',
-      sova: json['sova'] ?? '',
-      sovaTaka: json['sovaTaka'] ?? '',
-      remarks: json['remarks'] ?? '',
+      month: str(json['month']),
+      year: str(json['year']),
+      branchName: pick('branchName', 'branch'),
+      executiveMemberAyanat: pick('executiveMemberAyanat', 'nirbahiSodossoSonkkha'),
+      executiveMemberAyanatTaka: pick('executiveMemberAyanatTaka', 'nirbahiSodossoIyanat'),
+      subBranchAyanat: pick('subBranchAyanat', 'shakhaSonkkha'),
+      subBranchAyanatTaka: pick('subBranchAyanatTaka', 'odhostonShakhaIyanat'),
+      suhridAyanat: pick('suhridAyanat', 'shudhiSonkkha'),
+      suhridAyanatTaka: pick('suhridAyanatTaka', 'shudhiIyanat'),
+      safarIncome: str(json['safarIncome']),
+      safarIncomeTaka: pick('safarIncomeTaka', 'soforAay'),
+      prokashnaIncome: str(json['prokashnaIncome']),
+      prokashnaIncomeTaka: pick('prokashnaIncomeTaka', 'prokashonaAay'),
+      onetimeIncome: str(json['onetimeIncome']),
+      onetimeIncomeTaka: pick('onetimeIncomeTaka', 'ekkalinAay'),
+      previousBalance: pick('previousBalance', 'bigotoMashUdbritto'),
+      kothayAay: str(json['kothayAay']),
+      upwardAyanat: pick('upwardAyanat', 'mashikDharjokrito'),
+      upwardAyanatTaka: pick('upwardAyanatTaka', 'urdhotonIyanatPorishodh'),
+      officeRent: str(json['officeRent']),
+      officeRentTaka: pick('officeRentTaka', 'officeVaraOBill'),
+      officeCost: str(json['officeCost']),
+      officeCostTaka: pick('officeCostTaka', 'officeKhoroch'),
+      safarExpense: str(json['safarExpense']),
+      safarExpenseTaka: pick('safarExpenseTaka', 'soforBbay'),
+      transport: str(json['transport']),
+      transportTaka: pick('transportTaka', 'jatayat'),
+      communication: str(json['communication']),
+      communicationTaka: pick('communicationTaka', 'jogajog'),
+      prochar: str(json['prochar']),
+      procharTaka: pick('procharTaka'),
+      prokashnaExpense: str(json['prokashnaExpense']),
+      prokashnaExpenseTaka: pick('prokashnaExpenseTaka', 'prokashonaBbay'),
+      dibosPalan: pick('dibosPalan', 'diboshNam'),
+      dibosPatanTaka: pick('dibosPatanTaka', 'dibosPalanTaka', 'diboshPalon'),
+      appayan: str(json['appayan']),
+      appayanTaka: pick('appayanTaka', 'appayon'),
+      sova: str(json['sova']),
+      sovaTaka: pick('sovaTaka', 'shobhaShomabesh'),
+      kothayBbay: str(json['kothayBbay']),
+      remarks: str(json['remarks']),
+      reportDate: str(json['reportDate']),
+      baytulmalSecretary: pick('baytulmalSecretary', 'baytulmalSompodokShakkhor'),
+      president: pick('president', 'sobhapotiShakkhor'),
     );
   }
 
@@ -227,6 +285,7 @@ class BaytulmalReportEntry {
     String? onetimeIncome,
     String? onetimeIncomeTaka,
     String? previousBalance,
+    String? kothayAay,
     String? upwardAyanat,
     String? upwardAyanatTaka,
     String? officeRent,
@@ -249,7 +308,11 @@ class BaytulmalReportEntry {
     String? appayanTaka,
     String? sova,
     String? sovaTaka,
+    String? kothayBbay,
     String? remarks,
+    String? reportDate,
+    String? baytulmalSecretary,
+    String? president,
   }) {
     return BaytulmalReportEntry(
       month: month ?? this.month,
@@ -268,6 +331,7 @@ class BaytulmalReportEntry {
       onetimeIncome: onetimeIncome ?? this.onetimeIncome,
       onetimeIncomeTaka: onetimeIncomeTaka ?? this.onetimeIncomeTaka,
       previousBalance: previousBalance ?? this.previousBalance,
+      kothayAay: kothayAay ?? this.kothayAay,
       upwardAyanat: upwardAyanat ?? this.upwardAyanat,
       upwardAyanatTaka: upwardAyanatTaka ?? this.upwardAyanatTaka,
       officeRent: officeRent ?? this.officeRent,
@@ -290,7 +354,12 @@ class BaytulmalReportEntry {
       appayanTaka: appayanTaka ?? this.appayanTaka,
       sova: sova ?? this.sova,
       sovaTaka: sovaTaka ?? this.sovaTaka,
+      kothayBbay: kothayBbay ?? this.kothayBbay,
       remarks: remarks ?? this.remarks,
+      reportDate: reportDate ?? this.reportDate,
+      baytulmalSecretary: baytulmalSecretary ?? this.baytulmalSecretary,
+      president: president ?? this.president,
     );
   }
 }
+

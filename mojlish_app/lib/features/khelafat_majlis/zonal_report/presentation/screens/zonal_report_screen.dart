@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../../common/widgets/unsaved_changes_guard.dart';
-import '../../../../common/services/report_storage_service.dart';
+import '../../../../common/reports/data/services/report_storage_service.dart';
+import '../../../../common/reports/data/models/zonal_report_entry.dart';
+import '../../../../common/reports/presentation/screens/pdf_preview_screen.dart';
+import 'package:mojlish_app/features/khelafat_majlis/zonal_report/data/services/khelafat_zonal_pdf_service.dart';
 
 /// খেলাফত মজলিস — জোনাল রিপোর্ট ফরম (Full-width edge-to-edge design)
 class ZonalReportScreen extends StatefulWidget {
@@ -76,6 +79,103 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _loadReport();
+  }
+
+  Future<void> _loadReport() async {
+    setState(() => _isLoading = true);
+    final entry = await ReportStorageService.getZonalEntry(widget.year, widget.month);
+    if (entry != null && mounted) {
+      _zoneNameCtrl.text = entry.zoneName;
+      _sodossoCountCtrl.text = entry.sodossoCount;
+      _sodossoBridhiCtrl.text = entry.sodossoBridhi;
+      _sodossoGhattiCtrl.text = entry.sodossoGhatti;
+      _sodossoPrarthiCountCtrl.text = entry.sodossoPrarthiCount;
+      _sodossoPrarthiBridhiCtrl.text = entry.sodossoPrarthiBridhi;
+      _sodossoPrarthiGhattiCtrl.text = entry.sodossoPrarthiGhatti;
+      _distCountCtrl.text = entry.districtCount;
+      _distOrgCtrl.text = entry.districtOrg;
+      _distReorgCtrl.text = entry.districtReorg;
+      _cityCountCtrl.text = entry.cityCount;
+      _cityOrgCtrl.text = entry.cityOrg;
+      _cityReorgCtrl.text = entry.cityReorg;
+      _upazilaCountCtrl.text = entry.upazilaThanaCount;
+      _upazilaOrgCtrl.text = entry.upazilaThanaOrg;
+      _upazilaReorgCtrl.text = entry.upazilaThanaReorg;
+      _shakhaDaitoshilCountCtrl.text = entry.shakhaDaitoshilCount;
+      _shakhaDaitoshilPresCtrl.text = entry.shakhaDaitoshilPresence;
+      _distExecCountCtrl.text = entry.districtExecCount;
+      _distExecPresCtrl.text = entry.districtExecPresence;
+      _zonalTorbiotCountCtrl.text = entry.zonalTorbiotCount;
+      _zonalTorbiotPresCtrl.text = entry.zonalTorbiotPresence;
+      _travelDetailsCtrl.text = entry.travelDetails;
+      _safarIncomeTakaCtrl.text = entry.safarIncomeTaka;
+      _centralIncomeTakaCtrl.text = entry.centralIncomeTaka;
+      _onetimeIncomeTakaCtrl.text = entry.onetimeIncomeTaka;
+      _safarExpenseTakaCtrl.text = entry.safarExpenseTaka;
+      _communicationExpenseTakaCtrl.text = entry.communicationExpenseTaka;
+      _officeExpenseTakaCtrl.text = entry.officeExpenseTaka;
+      _otherExpenseTakaCtrl.text = entry.otherExpenseTaka;
+      _shakhaReportSubCtrl.text = entry.shakhaReportSubmitted;
+      _shakhaPlanSubCtrl.text = entry.shakhaPlanSubmitted;
+      _shakhaBaytulmalSubCtrl.text = entry.shakhaBaytulmalSubmitted;
+      _remarksCtrl.text = entry.remarks;
+      _suggestionsCtrl.text = entry.suggestions;
+    }
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+        _hasChanges = false;
+      });
+    }
+  }
+
+  ZonalReportEntry _buildCurrentEntry() {
+    return ZonalReportEntry(
+      month: widget.month.toString().padLeft(2, '0'),
+      year: widget.year.toString(),
+      zoneName: _zoneNameCtrl.text,
+      sodossoCount: _sodossoCountCtrl.text,
+      sodossoBridhi: _sodossoBridhiCtrl.text,
+      sodossoGhatti: _sodossoGhattiCtrl.text,
+      sodossoPrarthiCount: _sodossoPrarthiCountCtrl.text,
+      sodossoPrarthiBridhi: _sodossoPrarthiBridhiCtrl.text,
+      sodossoPrarthiGhatti: _sodossoPrarthiGhattiCtrl.text,
+      districtCount: _distCountCtrl.text,
+      districtOrg: _distOrgCtrl.text,
+      districtReorg: _distReorgCtrl.text,
+      cityCount: _cityCountCtrl.text,
+      cityOrg: _cityOrgCtrl.text,
+      cityReorg: _cityReorgCtrl.text,
+      upazilaThanaCount: _upazilaCountCtrl.text,
+      upazilaThanaOrg: _upazilaOrgCtrl.text,
+      upazilaThanaReorg: _upazilaReorgCtrl.text,
+      shakhaDaitoshilCount: _shakhaDaitoshilCountCtrl.text,
+      shakhaDaitoshilPresence: _shakhaDaitoshilPresCtrl.text,
+      districtExecCount: _distExecCountCtrl.text,
+      districtExecPresence: _distExecPresCtrl.text,
+      zonalTorbiotCount: _zonalTorbiotCountCtrl.text,
+      zonalTorbiotPresence: _zonalTorbiotPresCtrl.text,
+      travelDetails: _travelDetailsCtrl.text,
+      safarIncomeTaka: _safarIncomeTakaCtrl.text,
+      centralIncomeTaka: _centralIncomeTakaCtrl.text,
+      onetimeIncomeTaka: _onetimeIncomeTakaCtrl.text,
+      safarExpenseTaka: _safarExpenseTakaCtrl.text,
+      communicationExpenseTaka: _communicationExpenseTakaCtrl.text,
+      officeExpenseTaka: _officeExpenseTakaCtrl.text,
+      otherExpenseTaka: _otherExpenseTakaCtrl.text,
+      shakhaReportSubmitted: _shakhaReportSubCtrl.text,
+      shakhaPlanSubmitted: _shakhaPlanSubCtrl.text,
+      shakhaBaytulmalSubmitted: _shakhaBaytulmalSubCtrl.text,
+      remarks: _remarksCtrl.text,
+      suggestions: _suggestionsCtrl.text,
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
+    );
+  }
+
+  @override
   void dispose() {
     for (var c in [
       _zoneNameCtrl, _sodossoCountCtrl, _sodossoBridhiCtrl, _sodossoGhattiCtrl,
@@ -104,12 +204,8 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
 
   Future<bool> _saveReport() async {
     setState(() => _isSaving = true);
-    await Future.delayed(const Duration(milliseconds: 400));
-    await ReportStorageService.saveZonalReport({
-      'zoneName': _zoneNameCtrl.text,
-      'month': widget.month,
-      'year': widget.year,
-    });
+    final entry = _buildCurrentEntry();
+    await ReportStorageService.saveZonalEntry(entry);
     if (mounted) {
       setState(() {
         _isSaving = false;
@@ -126,13 +222,16 @@ class _ZonalReportScreenState extends State<ZonalReportScreen> {
     return true;
   }
 
-  void _openPdfViewer() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('PDF ডাউনলোড প্রস্তুত করা হচ্ছে...'),
-        backgroundColor: Color(0xFF0284C7),
-      ),
-    );
+  void _openPdfViewer() async {
+    final entry = _buildCurrentEntry();
+    final pdfBytes = await KhelafatZonalPdfService.generatePdfBytes(entry: entry);
+    if (mounted) {
+      await PdfPreviewScreen.open(
+        context,
+        pdfBytes,
+        'জোনাল রিপোর্ট — ${_monthNames[widget.month - 1]} ${_bn(widget.year)}',
+      );
+    }
   }
 
   @override

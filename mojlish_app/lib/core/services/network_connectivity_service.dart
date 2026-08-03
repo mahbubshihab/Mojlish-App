@@ -37,8 +37,11 @@ class NetworkConnectivityService {
     isOnlineNotifier.value = isOnline;
 
     if (isOnline) {
-      // When online or when transitioning from offline -> sync pending queue!
-      OfflineSyncManager.syncPendingQueue();
+      if (_wasOffline) {
+        OfflineSyncManager.syncPendingQueue();
+      } else {
+        OfflineSyncManager.syncPendingQueue();
+      }
     }
     _wasOffline = !isOnline;
   }

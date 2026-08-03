@@ -4,6 +4,7 @@ import 'package:mojlish_app/core/services/user_storage_service.dart';
 import 'package:mojlish_app/core/constants/majlis_assets.dart';
 import '../../../reports/presentation/screens/report_selection_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
+import 'package:mojlish_app/core/services/notification_service.dart';
 import 'social_media/social_media_screen.dart';
 import 'books/books_screen.dart';
 import 'package:mojlish_app/features/common/reports/data/models/majlis_personal_report_config.dart';
@@ -152,10 +153,47 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
                   themeManager.toggleTheme();
                 },
               ),
-              IconButton(
-                icon: Icon(Icons.notifications, color: isDark ? const Color(0xFFE2E8F0) : Colors.black87),
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
+              StreamBuilder<int>(
+                stream: NotificationService.getUnreadCountStream(),
+                builder: (context, snapshot) {
+                  final unreadCount = snapshot.data ?? 0;
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.notifications, color: isDark ? const Color(0xFFE2E8F0) : Colors.black87),
+                        onPressed: () async {
+                          await Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
+                          setState(() {});
+                        },
+                      ),
+                      if (unreadCount > 0)
+                        Positioned(
+                          right: 6,
+                          top: 6,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFEF4444),
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 18,
+                              minHeight: 18,
+                            ),
+                            child: Text(
+                              unreadCount > 99 ? '99+' : '$unreadCount',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
                 },
               ),
               GestureDetector(

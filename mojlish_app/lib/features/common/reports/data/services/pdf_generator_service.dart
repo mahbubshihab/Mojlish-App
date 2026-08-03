@@ -73,7 +73,6 @@ class PdfGeneratorService {
     int orgTotalWorkers = 0;
     int miscNewspaper = 0;
     int miscExercise = 0;
-    int miscWelfare = 0;
 
     for (final entry in entries) {
       if (entry.isEmpty) continue;
@@ -168,11 +167,6 @@ class PdfGeneratorService {
       if (entry.physicalExerciseTime.isNotEmpty) {
         try {
           miscExercise += int.parse(entry.physicalExerciseTime.replaceAll(RegExp(r'[^0-9]'), ''));
-        } catch (_) {}
-      }
-      if (entry.familyWelfareTime.isNotEmpty) {
-        try {
-          miscWelfare += int.parse(entry.familyWelfareTime.replaceAll(RegExp(r'[^0-9]'), ''));
         } catch (_) {}
       }
     }
@@ -357,7 +351,6 @@ class PdfGeneratorService {
           final targetQuran = plan?.quranAyahCount ?? '-';
           final targetHadith = plan?.hadithCount ?? '-';
           final targetLit = plan?.litPages ?? '-';
-          final targetAcademic = plan?.academicHours ?? '-';
           final targetPrayer = plan?.jamaatPrayerWaqt ?? '-';
           final targetSelf = plan?.selfAnalysisDays ?? '-';
           final targetFriend = plan?.friendTargetCount ?? '-';
@@ -508,37 +501,6 @@ class PdfGeneratorService {
     );
   }
 
-  static pw.Widget _headerCell(String text, pw.Font font) {
-    return pw.Padding(
-      padding: const pw.EdgeInsets.all(5),
-      child: pw.Text(b(text), style: pw.TextStyle(font: font, fontSize: 10)),
-    );
-  }
-
-  static pw.Widget _sectionTitle(String title, pw.Font boldFont) {
-    return pw.Container(
-      width: double.infinity,
-      color: PdfColors.blue100,
-      padding: const pw.EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      child: pw.Text(b(title), style: pw.TextStyle(font: boldFont, fontSize: 11)),
-    );
-  }
-
-  static pw.TableRow _incomeRow(String label, String amount, pw.Font font) {
-    return pw.TableRow(children: [
-      pw.Padding(
-        padding: const pw.EdgeInsets.all(3),
-        child: pw.Text(b(label), style: pw.TextStyle(font: font, fontSize: 8)),
-      ),
-      pw.Padding(
-        padding: const pw.EdgeInsets.all(3),
-        child: pw.Text(b(amount), style: pw.TextStyle(font: font, fontSize: 8), textAlign: pw.TextAlign.right),
-      ),
-      pw.Padding(padding: const pw.EdgeInsets.all(3), child: pw.Text('', style: pw.TextStyle(font: font, fontSize: 8))),
-    ]);
-  }
-
-  static String _formatDate(DateTime d) => '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
   static String _formatDateFile(DateTime d) => '${d.year}${d.month.toString().padLeft(2, '0')}${d.day.toString().padLeft(2, '0')}';
 
   /// প্রাথমিক সদস্য ফরম PDF তৈরি করা (Same to Same printed brochure layout)

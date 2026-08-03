@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../../common/widgets/unsaved_changes_guard.dart';
-import '../../../../common/services/report_storage_service.dart';
+import '../../../../common/reports/data/services/report_storage_service.dart';
+import '../../../../common/reports/data/models/baytulmal_report_entry.dart';
+import '../../../../common/reports/presentation/screens/pdf_preview_screen.dart';
+import 'package:mojlish_app/features/khelafat_majlis/baytulmal_report/data/services/khelafat_baytulmal_pdf_service.dart';
 
 class BaytulmalReportPage extends StatefulWidget {
   const BaytulmalReportPage({super.key});
@@ -12,6 +15,9 @@ class BaytulmalReportPage extends StatefulWidget {
 class _BaytulmalReportPageState extends State<BaytulmalReportPage> {
   final _formKey = GlobalKey<FormState>();
   bool _hasChanges = false;
+  bool _isSubmitting = false;
+  bool _isLocked = false;
+  bool _isLoading = false;
 
   final _branchController = TextEditingController();
   final _monthController = TextEditingController();
@@ -53,6 +59,129 @@ class _BaytulmalReportPageState extends State<BaytulmalReportPage> {
   final _sobhapotiShakkhorController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _yearController.text = now.year.toString();
+    _monthController.text = now.month.toString().padLeft(2, '0');
+    _loadCurrentReport();
+  }
+
+  Future<void> _loadCurrentReport() async {
+    setState(() => _isLoading = true);
+    final year = _yearController.text.trim().isEmpty ? DateTime.now().year.toString() : _yearController.text.trim();
+    final month = _monthController.text.trim().isEmpty ? DateTime.now().month.toString().padLeft(2, '0') : _monthController.text.trim();
+    final entry = await ReportStorageService.getBaytulmalReportEntry(year, month);
+    if (entry != null && mounted) {
+      _branchController.text = entry.branchName;
+      _monthController.text = entry.month;
+      _yearController.text = entry.year;
+      _nirbahiSodossoSonkkhaController.text = entry.executiveMemberAyanat;
+      _nirbahiSodossoIyanatController.text = entry.executiveMemberAyanatTaka;
+      _shakhaSonkkhaController.text = entry.subBranchAyanat;
+      _odhostonShakhaIyanatController.text = entry.subBranchAyanatTaka;
+      _shudhiSonkkhaController.text = entry.suhridAyanat;
+      _shudhiIyanatController.text = entry.suhridAyanatTaka;
+      _soforAayController.text = entry.safarIncomeTaka;
+      _prokashonaAayController.text = entry.prokashnaIncomeTaka;
+      _ekkalinAayController.text = entry.onetimeIncomeTaka;
+      _bigotoMashUdbrittoController.text = entry.previousBalance;
+      _kothayAayController.text = entry.kothayAay;
+      _urdhotonIyanatPorishodhController.text = entry.upwardAyanatTaka;
+      _mashikDharjokritoController.text = entry.upwardAyanat;
+      _officeVaraOBillController.text = entry.officeRentTaka;
+      _officeKhorochController.text = entry.officeCostTaka;
+      _soforBbayController.text = entry.safarExpenseTaka;
+      _jatayatController.text = entry.transportTaka;
+      _jogajogController.text = entry.communicationTaka;
+      _procharController.text = entry.procharTaka;
+      _prokashonaBbayController.text = entry.prokashnaExpenseTaka;
+      _diboshPalonController.text = entry.dibosPatanTaka;
+      _diboshNamController.text = entry.dibosPalan;
+      _appayonController.text = entry.appayanTaka;
+      _shobhaShomabeshController.text = entry.sovaTaka;
+      _kothayBbayController.text = entry.kothayBbay;
+      _reportDateController.text = entry.reportDate;
+      _baytulmalSompodokShakkhorController.text = entry.baytulmalSecretary;
+      _sobhapotiShakkhorController.text = entry.president;
+      _recalculateTotals();
+    }
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+        _hasChanges = false;
+      });
+    }
+  }
+
+  void _recalculateTotals() {
+    double parse(String s) => double.tryParse(s.replaceAll(',', '')) ?? 0.0;
+    double directIncome = parse(_nirbahiSodossoIyanatController.text) +
+        parse(_odhostonShakhaIyanatController.text) +
+        parse(_shudhiIyanatController.text) +
+        parse(_soforAayController.text) +
+        parse(_prokashonaAayController.text) +
+        parse(_ekkalinAayController.text);
+    double prevBal = parse(_bigotoMashUdbrittoController.text);
+    double grandIncome = directIncome + prevBal;
+
+    double totalExp = parse(_urdhotonIyanatPorishodhController.text) +
+        parse(_officeVaraOBillController.text) +
+        parse(_officeKhorochController.text) +
+        parse(_soforBbayController.text) +
+        parse(_jatayatController.text) +
+        parse(_jogajogController.text) +
+        parse(_procharController.text) +
+        parse(_prokashonaBbayController.text) +
+        parse(_diboshPalonController.text) +
+        parse(_appayonController.text) +
+        parse(_shobhaShomabeshController.text);
+
+    double bal = grandIncome - totalExp;
+
+    _motAayController.text = directIncome > 0 ? directIncome.toStringAsFixed(0) : '';
+    _sorbomotAayController.text = grandIncome > 0 ? grandIncome.toStringAsFixed(0) : '';
+    _motBbayController.text = totalExp > 0 ? totalExp.toStringAsFixed(0) : '';
+    _udbrittoGhattiController.text = bal != 0 ? bal.toStringAsFixed(0) : '';
+  }
+
+  BaytulmalReportEntry _buildCurrentEntry() {
+    return BaytulmalReportEntry(
+      month: _monthController.text.trim(),
+      year: _yearController.text.trim(),
+      branchName: _branchController.text,
+      executiveMemberAyanat: _nirbahiSodossoSonkkhaController.text,
+      executiveMemberAyanatTaka: _nirbahiSodossoIyanatController.text,
+      subBranchAyanat: _shakhaSonkkhaController.text,
+      subBranchAyanatTaka: _odhostonShakhaIyanatController.text,
+      suhridAyanat: _shudhiSonkkhaController.text,
+      suhridAyanatTaka: _shudhiIyanatController.text,
+      safarIncomeTaka: _soforAayController.text,
+      prokashnaIncomeTaka: _prokashonaAayController.text,
+      onetimeIncomeTaka: _ekkalinAayController.text,
+      previousBalance: _bigotoMashUdbrittoController.text,
+      kothayAay: _kothayAayController.text,
+      upwardAyanatTaka: _urdhotonIyanatPorishodhController.text,
+      upwardAyanat: _mashikDharjokritoController.text,
+      officeRentTaka: _officeVaraOBillController.text,
+      officeCostTaka: _officeKhorochController.text,
+      safarExpenseTaka: _soforBbayController.text,
+      transportTaka: _jatayatController.text,
+      communicationTaka: _jogajogController.text,
+      procharTaka: _procharController.text,
+      prokashnaExpenseTaka: _prokashonaBbayController.text,
+      dibosPatanTaka: _diboshPalonController.text,
+      dibosPalan: _diboshNamController.text,
+      appayanTaka: _appayonController.text,
+      sovaTaka: _shobhaShomabeshController.text,
+      kothayBbay: _kothayBbayController.text,
+      reportDate: _reportDateController.text,
+      baytulmalSecretary: _baytulmalSompodokShakkhorController.text,
+      president: _sobhapotiShakkhorController.text,
+    );
+  }
+
+  @override
   void dispose() {
     _branchController.dispose();
     _monthController.dispose();
@@ -92,27 +221,29 @@ class _BaytulmalReportPageState extends State<BaytulmalReportPage> {
     super.dispose();
   }
 
-  bool _isSubmitting = false;
-  bool _isLocked = false;
-
-  void _openPdfViewer() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('PDF ডাউনলোড প্রস্তুত করা হচ্ছে...'),
-        backgroundColor: Color(0xFF0284C7),
-      ),
+  void _openPdfViewer() async {
+    _recalculateTotals();
+    final entry = _buildCurrentEntry();
+    final pdfBytes = await KhelafatBaytulmalPdfService.generatePdfBytes(
+      entry: entry,
+      incomeInWords: _kothayAayController.text,
+      expenseInWords: _kothayBbayController.text,
     );
+    if (mounted) {
+      await PdfPreviewScreen.open(
+        context,
+        pdfBytes,
+        'বায়তুলমাল রিপোর্ট — ${_monthController.text} ${_yearController.text}',
+      );
+    }
   }
 
   Future<bool> _saveReport() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isSubmitting = true);
-      await Future.delayed(const Duration(milliseconds: 500));
-      await ReportStorageService.saveBaytulmalReport({
-        'branch': _branchController.text,
-        'month': _monthController.text,
-        'year': _yearController.text,
-      });
+      _recalculateTotals();
+      final entry = _buildCurrentEntry();
+      await ReportStorageService.saveBaytulmalReportEntry(entry);
       if (mounted) {
         setState(() {
           _isSubmitting = false;
@@ -150,7 +281,9 @@ class _BaytulmalReportPageState extends State<BaytulmalReportPage> {
           foregroundColor: Colors.white,
           elevation: 0,
         ),
-        body: Column(
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator(color: Color(0xFF1B5E20)))
+            : Column(
           children: [
             // 📌 Sticky Top Action Bar (Does NOT scroll!)
             Container(

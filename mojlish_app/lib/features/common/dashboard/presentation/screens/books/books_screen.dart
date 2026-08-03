@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mojlish_app/core/services/user_storage_service.dart';
-import 'package:mojlish_app/features/khelafat_majlis/syllabi/khelafot_syllabus/presentation/pages/khelafot_syllabus_page.dart';
 
 class BookItem {
   final String id;
@@ -98,76 +97,6 @@ class _BooksScreenState extends State<BooksScreen> {
     'নীতিমালা ও নির্দেশিকা',
   ];
 
-  late final List<BookItem> _defaultBooks = [
-    BookItem(
-      id: 'def_1',
-      title: 'খেলাফত মজলিস পরিচিতি ও কর্মসূচি',
-      author: 'কেন্দ্রীয় প্রচার ও প্রকাশনা বিভাগ',
-      category: 'সাংগঠনিক সাহিত্য',
-      majlis: 'খেলাফত মজলিস',
-      description: 'খেলাফত মজলিসের লক্ষ্য, উদ্দেশ্য, ৫ দফা কর্মসূচি ও সাংগঠনিক কাঠামোর পূর্ণাঙ্গ পরিচিতি বই।',
-      pages: '৪৮ পৃষ্ঠা',
-      icon: Icons.menu_book_rounded,
-      coverColor: const Color(0xFF059669),
-    ),
-    BookItem(
-      id: 'def_2',
-      title: 'দাওয়াত ও তরবিয়াত গাইড ও সিলেবাস',
-      author: 'কেন্দ্রীয় তরবিয়াত পরিষদ',
-      category: 'সিলেবাস ও পাঠ্যক্রম',
-      majlis: 'খেলাফত মজলিস',
-      description: 'কর্মী ও রুকনদের অধ্যয়ন পাঠ্যক্রম, সিলেবাস এবং আত্মগঠনের নিয়মিত দিকনির্দেশনা।',
-      pages: '১১২ পৃষ্ঠা',
-      icon: Icons.auto_stories_rounded,
-      coverColor: const Color(0xFF2563EB),
-      targetScreen: const KhelafotSyllabusPage(),
-    ),
-    BookItem(
-      id: 'def_3',
-      title: 'খেলাফত মজলিস গঠনতন্ত্র ও পরিচালনা বিধি',
-      author: 'কেন্দ্রীয় নির্বাহী পরিষদ',
-      category: 'নীতিমালা ও নির্দেশিকা',
-      majlis: 'খেলাফত মজলিস',
-      description: 'সংগঠনের শাখা পরিচালনা, বায়তুলমাল ও সদস্য পদের প্রশাসনিক নিয়মাবলী।',
-      pages: '৬৪ পৃষ্ঠা',
-      icon: Icons.gavel_rounded,
-      coverColor: const Color(0xFFD97706),
-    ),
-    BookItem(
-      id: 'def_4',
-      title: 'খেলাফত ব্যবস্থা ও আধুনিক বিশ্ব',
-      author: 'চিন্তাবিদ ও গবেষণা পরিষদ',
-      category: 'ইসলামী দাওয়াত',
-      majlis: 'সকল',
-      description: 'ইসলামী রাষ্ট্রব্যবস্থার সৌন্দর্য এবং বিশ্বশান্তিতে খেলাফতের তাৎপর্য শীর্ষক বই।',
-      pages: '১৬০ পৃষ্ঠা',
-      icon: Icons.public_rounded,
-      coverColor: const Color(0xFF7C3AED),
-    ),
-    BookItem(
-      id: 'def_5',
-      title: 'বাংলাদেশ ইসলামী ছাত্র মজলিস পরিচিতি',
-      author: 'ছাত্র মজলিস প্রকাশনা',
-      category: 'সাংগঠনিক সাহিত্য',
-      majlis: 'ছাত্র মজলিস',
-      description: 'ছাত্রসমাজের আত্মগঠন ও বিপ্লবপ্রীতি প্রতিষ্ঠার জন্য ছাত্র মজলিসের রূপরেখা।',
-      pages: '৪০ পৃষ্ঠা',
-      icon: Icons.school_rounded,
-      coverColor: const Color(0xFF0284C7),
-    ),
-    BookItem(
-      id: 'def_6',
-      title: 'বায়তুলমাল নির্দেশিকা ও হিসাব সংরক্ষণ',
-      author: 'কেন্দ্রীয় বায়তুলমাল বিভাগ',
-      category: 'নীতিমালা ও নির্দেশিকা',
-      majlis: 'সকল',
-      description: 'আমদানি, খরচ, ইয়ানত সংগ্রহ এবং শাখা বায়তুলমালের সঠিক হিসাব রাখার নির্দেশিকা।',
-      pages: '৩২ পৃষ্ঠা',
-      icon: Icons.account_balance_wallet_rounded,
-      coverColor: const Color(0xFF0D9488),
-    ),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -215,14 +144,11 @@ class _BooksScreenState extends State<BooksScreen> {
           List<BookItem> combinedBooks = [];
 
           if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-            final dynamicBooks = snapshot.data!.docs.map((doc) {
+            combinedBooks = snapshot.data!.docs.map((doc) {
               return BookItem.fromFirestore(doc.data() as Map<String, dynamic>, doc.id);
             }).toList();
-
-            // Merge dynamic books from Firestore first, followed by default books
-            combinedBooks = [...dynamicBooks, ..._defaultBooks];
           } else {
-            combinedBooks = _defaultBooks;
+            combinedBooks = [];
           }
 
           final filteredBooks = combinedBooks.where((b) {
@@ -306,11 +232,17 @@ class _BooksScreenState extends State<BooksScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.search_off_rounded, size: 54, color: textMuted),
+                            Icon(Icons.folder_off_rounded, size: 54, color: textMuted),
                             const SizedBox(height: 12),
                             Text(
-                              'কোনো বই পাওয়া যায়নি',
-                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: textTitle),
+                              'কোনো বই বা প্রকাশনা পাওয়া যায়নি',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textTitle),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'এডমিন প্যানেল থেকে নতুন বই বা পিডিএফ আপলোড করা হলে রিয়েল-টাইমে এখানে যুক্ত হয়ে যাবে।',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 13, color: textMuted),
                             ),
                           ],
                         ),

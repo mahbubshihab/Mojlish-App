@@ -95,6 +95,24 @@ class OfflineSyncManager {
               .collection('baytulmal_reports')
               .doc(yearMonth)
               .set(data, SetOptions(merge: true));
+        } else if (type == 'branch_report') {
+          final yearMonth = task['yearMonth'] as String;
+          final data = task['data'] as Map<String, dynamic>;
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('branch_reports')
+              .doc(yearMonth)
+              .set(data, SetOptions(merge: true));
+        } else if (type == 'branch_plan') {
+          final yearMonth = task['yearMonth'] as String;
+          final data = task['data'] as Map<String, dynamic>;
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('branch_plans')
+              .doc(yearMonth)
+              .set(data, SetOptions(merge: true));
         }
       } catch (e) {
         print('Offline sync error: $e');
