@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mojlish_app/core/services/network_connectivity_service.dart';
 import 'package:mojlish_app/core/services/offline_sync_manager.dart';
+import 'package:mojlish_app/core/services/secure_local_backup_storage.dart';
 import '../models/baytulmal_report_entry.dart';
 import '../models/daily_personal_entry.dart';
 import '../models/monthly_comment.dart';
@@ -28,7 +29,9 @@ class ReportStorageService {
     final allData = await getAllPersonalEntries();
     allData[entry.date] = entry;
     final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
-    await prefs.setString(_personalReportKey, jsonEncode(encoded));
+    final jsonStr = jsonEncode(encoded);
+    await prefs.setString(_personalReportKey, jsonStr);
+    await SecureLocalBackupStorage.backupKeyData(_personalReportKey, encoded);
 
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -74,9 +77,18 @@ class ReportStorageService {
 
   static Future<Map<String, DailyPersonalEntry>> getAllPersonalEntries() async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_personalReportKey);
-    if (raw == null) return {};
-    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    var raw = prefs.getString(_personalReportKey);
+    Map<String, dynamic>? decoded;
+    if (raw != null) {
+      decoded = jsonDecode(raw) as Map<String, dynamic>;
+    } else {
+      final recovered = await SecureLocalBackupStorage.recoverKeyData(_personalReportKey);
+      if (recovered is Map<String, dynamic>) {
+        decoded = recovered;
+        await prefs.setString(_personalReportKey, jsonEncode(recovered));
+      }
+    }
+    if (decoded == null) return {};
     return decoded.map(
       (k, v) => MapEntry(k, DailyPersonalEntry.fromJson(v as Map<String, dynamic>)),
     );
@@ -226,6 +238,7 @@ class ReportStorageService {
     allData[key] = entry;
     final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
     await prefs.setString(_zonalReportKey, jsonEncode(encoded));
+    await SecureLocalBackupStorage.backupKeyData(_zonalReportKey, encoded);
 
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -260,9 +273,18 @@ class ReportStorageService {
 
   static Future<Map<String, ZonalReportEntry>> getAllZonalEntries() async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_zonalReportKey);
-    if (raw == null) return {};
-    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    var raw = prefs.getString(_zonalReportKey);
+    Map<String, dynamic>? decoded;
+    if (raw != null) {
+      decoded = jsonDecode(raw) as Map<String, dynamic>;
+    } else {
+      final recovered = await SecureLocalBackupStorage.recoverKeyData(_zonalReportKey);
+      if (recovered is Map<String, dynamic>) {
+        decoded = recovered;
+        await prefs.setString(_zonalReportKey, jsonEncode(recovered));
+      }
+    }
+    if (decoded == null) return {};
     return decoded.map(
       (k, v) => MapEntry(k, ZonalReportEntry.fromJson(v as Map<String, dynamic>)),
     );
@@ -292,6 +314,7 @@ class ReportStorageService {
           final prefs = await SharedPreferences.getInstance();
           final encoded = all.map((k, v) => MapEntry(k, v.toJson()));
           await prefs.setString(_zonalReportKey, jsonEncode(encoded));
+          await SecureLocalBackupStorage.backupKeyData(_zonalReportKey, encoded);
           return entry;
         }
       } catch (e) {
@@ -318,6 +341,7 @@ class ReportStorageService {
     allData[key] = entry;
     final encoded = allData.map((k, v) => MapEntry(k, v.toJson()));
     await prefs.setString(_baytulmalReportKey, jsonEncode(encoded));
+    await SecureLocalBackupStorage.backupKeyData(_baytulmalReportKey, encoded);
 
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -352,9 +376,18 @@ class ReportStorageService {
 
   static Future<Map<String, BaytulmalReportEntry>> getAllBaytulmalEntries() async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_baytulmalReportKey);
-    if (raw == null) return {};
-    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    var raw = prefs.getString(_baytulmalReportKey);
+    Map<String, dynamic>? decoded;
+    if (raw != null) {
+      decoded = jsonDecode(raw) as Map<String, dynamic>;
+    } else {
+      final recovered = await SecureLocalBackupStorage.recoverKeyData(_baytulmalReportKey);
+      if (recovered is Map<String, dynamic>) {
+        decoded = recovered;
+        await prefs.setString(_baytulmalReportKey, jsonEncode(recovered));
+      }
+    }
+    if (decoded == null) return {};
     return decoded.map(
       (k, v) => MapEntry(k, BaytulmalReportEntry.fromJson(v as Map<String, dynamic>)),
     );
@@ -385,6 +418,7 @@ class ReportStorageService {
           final prefs = await SharedPreferences.getInstance();
           final encoded = all.map((k, v) => MapEntry(k, v.toJson()));
           await prefs.setString(_baytulmalReportKey, jsonEncode(encoded));
+          await SecureLocalBackupStorage.backupKeyData(_baytulmalReportKey, encoded);
           return entry;
         }
       } catch (e) {
@@ -409,6 +443,7 @@ class ReportStorageService {
     final key = '$year-${month.toString().padLeft(2, '0')}';
     all[key] = data;
     await prefs.setString(_branchReportKey, jsonEncode(all));
+    await SecureLocalBackupStorage.backupKeyData(_branchReportKey, all);
 
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -440,9 +475,18 @@ class ReportStorageService {
 
   static Future<Map<String, dynamic>?> getBranchReport(int year, int month) async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_branchReportKey);
-    if (raw == null) return null;
-    final Map<String, dynamic> all = jsonDecode(raw) as Map<String, dynamic>;
+    var raw = prefs.getString(_branchReportKey);
+    Map<String, dynamic>? all;
+    if (raw != null) {
+      all = jsonDecode(raw) as Map<String, dynamic>;
+    } else {
+      final recovered = await SecureLocalBackupStorage.recoverKeyData(_branchReportKey);
+      if (recovered is Map<String, dynamic>) {
+        all = recovered;
+        await prefs.setString(_branchReportKey, jsonEncode(recovered));
+      }
+    }
+    if (all == null) return null;
     final key = '$year-${month.toString().padLeft(2, '0')}';
     return all[key] as Map<String, dynamic>?;
   }
@@ -454,6 +498,7 @@ class ReportStorageService {
     final key = '$year-${month.toString().padLeft(2, '0')}';
     all[key] = data;
     await prefs.setString(_branchPlanKey, jsonEncode(all));
+    await SecureLocalBackupStorage.backupKeyData(_branchPlanKey, all);
 
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -485,9 +530,18 @@ class ReportStorageService {
 
   static Future<Map<String, dynamic>?> getBranchPlan(int year, int month) async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_branchPlanKey);
-    if (raw == null) return null;
-    final Map<String, dynamic> all = jsonDecode(raw) as Map<String, dynamic>;
+    var raw = prefs.getString(_branchPlanKey);
+    Map<String, dynamic>? all;
+    if (raw != null) {
+      all = jsonDecode(raw) as Map<String, dynamic>;
+    } else {
+      final recovered = await SecureLocalBackupStorage.recoverKeyData(_branchPlanKey);
+      if (recovered is Map<String, dynamic>) {
+        all = recovered;
+        await prefs.setString(_branchPlanKey, jsonEncode(recovered));
+      }
+    }
+    if (all == null) return null;
     final key = '$year-${month.toString().padLeft(2, '0')}';
     return all[key] as Map<String, dynamic>?;
   }
