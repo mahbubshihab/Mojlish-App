@@ -258,12 +258,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-
-                      // Real-time Network Connectivity & Offline Auto-Sync Banner
-                      _buildConnectivityBanner(context, isDark: isDark),
-
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
 
                       // Section 1: Top Organizational Menus Grid
                       Text(

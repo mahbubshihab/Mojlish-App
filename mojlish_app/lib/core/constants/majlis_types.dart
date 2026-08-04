@@ -2,7 +2,7 @@ class MajlisTypes {
   static const String khelafat = 'খেলাফত মজলিস';
   static const String jubo = 'ইসলামী যুব মজলিস';
   static const String chatro = 'বাংলাদেশ ইসলামী ছাত্র মজলিস';
-  static const String labor = 'বাংলাদেশ ইসলামী শ্রমিক মজলিস';
+  static const String labor = 'ইসলামী শ্রমিক মজলিস';
   static const String women = 'বাংলাদেশ ইসলামী মহিলা মজলিস';
 
   /// শর্ট বা ডিসপ্লে নেম
