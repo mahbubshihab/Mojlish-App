@@ -210,9 +210,9 @@ class PdfGeneratorService {
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text(b('কর্মীর নাম: $userName'), style: pw.TextStyle(font: font, fontSize: 8)),
-                pw.Text(b('শাখা: $branchName'), style: pw.TextStyle(font: font, fontSize: 8)),
-                pw.Text(b('রিপোর্ট মাস: ${_formatDateMonth(fromDate)}'), style: pw.TextStyle(font: font, fontSize: 8)),
+                PdfExportService.bWidget('কর্মীর নাম: $userName', fontSize: 8),
+                PdfExportService.bWidget('শাখা: $branchName', fontSize: 8),
+                PdfExportService.bWidget('রিপোর্ট মাস: ${_formatDateMonth(fromDate)}', fontSize: 8),
               ],
             ),
             pw.SizedBox(height: 6),
@@ -489,13 +489,10 @@ class PdfGeneratorService {
   static pw.Widget _cell(String text, pw.Font font, double fontSize, {bool isMissing = false, pw.TextAlign align = pw.TextAlign.left}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.all(3),
-      child: pw.Text(
-        b(text),
-        style: pw.TextStyle(
-          font: font,
-          fontSize: fontSize,
-          color: isMissing ? PdfColors.red : PdfColors.black,
-        ),
+      child: PdfExportService.bWidget(
+        text,
+        fontSize: fontSize,
+        color: isMissing ? PdfColors.red : PdfColors.black,
         textAlign: align,
       ),
     );
